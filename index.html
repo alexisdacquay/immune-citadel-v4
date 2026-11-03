@@ -125,7 +125,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 #pausePill small{color:var(--dim);letter-spacing:.04em;font-weight:400}
 /* overlays */
 .ov{position:absolute;inset:0;z-index:10;display:flex;background:rgba(2,5,9,.72);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);overflow:auto;padding:20px}
-.tin{width:min(960px,100%);margin:auto;zoom:var(--u,1)}
+.tin{width:min(960px,100%);margin:auto;zoom:var(--ut,1)}
+.hd{display:flex;align-items:flex-end;gap:40px;margin-bottom:20px}
+.hd h1{flex:none}.hd .lede{margin:0 0 14px!important}
 .tin .kick{font:600 11px var(--mono);letter-spacing:.24em;color:var(--cyan)}
 .tin h1{font:700 64px/0.95 var(--sans);letter-spacing:-.03em;margin:10px 0 12px;color:#fff;text-shadow:0 0 40px rgba(91,140,255,.45)}
 .tin h1 span{color:var(--cyan)}
@@ -166,7 +168,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* below ~1700px a centred info bar would run into the bottom-left cluster (hero + 3 skills) */
 @media (max-width:1700px){#info{left:calc(330px * var(--u,1));transform:scale(var(--u,1));transform-origin:bottom left;max-width:calc(100% / var(--u,1) - 346px)}#info:not([hidden]) ~ #spec{opacity:0}}
 @media (max-width:1100px){#info .perk:not(.wide),#info .meta span{display:none}#info .perk.wide{flex-basis:240px;font-size:11px}}
-@media (max-width:700px){.slides{grid-template-columns:1fr}.slide .body{grid-template-columns:1fr 1fr}.tin h1{font-size:44px}}
+@media (max-width:700px){.hd{display:block}.slides{grid-template-columns:1fr}.slide .body{grid-template-columns:1fr 1fr}.tin h1{font-size:44px}}
 </style>
 </head>
 <body>
@@ -199,9 +201,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 
   <div class="ov" id="titleOv">
     <div class="tin">
-      <div class="kick">IMMUNOFLUORESCENCE FIELD STUDY · 4 SPECIMENS</div>
-      <h1>IMMUNE<br><span>CITADEL</span></h1>
-      <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p>
+      <div class="kick">IMMUNOFLUORESCENCE FIELD STUDY · 6 SPECIMENS</div>
+      <div class="hd"><h1>IMMUNE<br><span>CITADEL</span></h1>
+      <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p></div>
       <div class="slides" id="slides"></div>
       <div class="keys"><span><b>Click a ring</b> grow a cell</span><span><b>Click a cell</b> upgrade / recycle</span><span><b>Red marker</b> call the next wave</span><span><b>Q W</b> abilities</span><span><b>H E</b> hero · burst</span><span><b>Space</b> pause</span><span><b>F</b> speed</span></div>
     </div>
@@ -373,6 +375,10 @@ const ENEMIES = {
   flu: { name: 'Influenza', kind: 'Airborne virus', hp: 50, speed: 42, armor: 0, mr: .15, gold: 11, lives: 1, atk: 0, r: 10, flying: true, desc: 'Drifts over blockers. Antibody clouds can’t reach it.' },
   worm: { name: 'Helminth', kind: 'Parasitic worm', hp: 430, speed: 19, armor: .35, mr: .55, gold: 45, lives: 3, atk: 16, r: 13, desc: 'Huge parasite. Resists magic. Grind it down with blockers and antibodies.' },
   boss: { name: 'MRSA Superbug', kind: 'Boss · drug-resistant', hp: 2300, speed: 14, armor: .5, mr: .35, gold: 300, lives: 10, atk: 34, r: 30, boss: true, desc: 'Grows a biofilm shield over nearby allies and buds fresh bacteria.' },
+  salmon: { name: 'Salmonella', kind: 'Flagellated bacterium', hp: 60, speed: 64, armor: .1, mr: 0, gold: 9, lives: 1, atk: 5, r: 10, regen: .16, desc: 'Whips along on dozens of flagella. Heals itself when left unhit for 2 s, so focus it down.' },
+  toxo: { name: 'Toxoplasma', kind: 'Parasite · stealth', hp: 130, speed: 34, armor: .2, mr: .25, gold: 15, lives: 2, atk: 8, r: 12, stealth: 85, desc: 'Towers can’t see it unless an immune cell, unit or the hero is within 85. Fever spike reveals it for 6 s.' },
+  rabies: { name: 'Rabies Lyssavirus', kind: 'Boss · neurotropic virus', hp: 2600, speed: 13, armor: .3, mr: .45, gold: 400, lives: 10, atk: 40, r: 30, boss: true, desc: 'Every 9 s it hijacks the nearest immune cell, silencing it for 4 s. Sheds virions as it marches.' },
+  virion: { name: 'Lyssa virion', kind: 'Shed virion', hp: 30, speed: 56, armor: 0, mr: .3, gold: 2, lives: 1, atk: 2, r: 7, desc: 'Bullet-shaped offspring shed by the Rabies Lyssavirus.' },
 };
 const g_ = (t, n, gap, d = 0, p = 0) => ({ t, n, gap, d, p });
 const LEVELS = [
@@ -414,7 +420,29 @@ const LEVELS = [
       [g_('candida', 8, 1.6, 0, -1), g_('staph', 10, .9, 4, -1), g_('flu', 12, .7, 8, -1)], [g_('boss', 1, 1, 0, 0), g_('bact', 20, .7, 2, -1), g_('flu', 8, 1.2, 12, -1)]],
   },
 ];
-const LVLMULT = [1, 1.55, 2.0, 1.38];
+LEVELS.push(
+  {
+    place: 'Gut Lining', name: 'The Villi Maze', sub: 'Two tainted meals, two routes through the villi. They cross, then merge.', seed: 67, gold: 480, style: 'villi', edge: '#ff9a3c', tint: '#ff9a3c',
+    paths: [[[-40, 120], [200, 120], [330, 250], [470, 420], [620, 470], [760, 380], [860, 300], [1040, 300]], [[-40, 470], [190, 470], [330, 380], [470, 250], [600, 180], [760, 220], [860, 300], [1040, 300]]],
+    slots: [[160, 190], [240, 360], [300, 310], [390, 230], [380, 410], [490, 340], [560, 310], [570, 390], [650, 380], [690, 270], [760, 300], [850, 210], [850, 390], [920, 240], [170, 400], [460, 190]],
+    waves: [[g_('bact', 12, .9, 0, -1)], [g_('salmon', 8, 1.2, 0, -1)], [g_('virus', 18, .4, 0, -1), g_('staph', 4, 1.8, 3, -1)], [g_('toxo', 4, 2.5, 0, -1), g_('bact', 10, .8, 2, -1)],
+      [g_('salmon', 12, .8, 0, -1), g_('flu', 6, 1.2, 4, -1)], [g_('candida', 4, 2.5, 0, -1), g_('toxo', 6, 1.8, 3, -1)], [g_('staph', 10, 1.1, 0, -1), g_('salmon', 10, .7, 4, -1)],
+      [g_('worm', 3, 4, 0, -1), g_('toxo', 8, 1.5, 3, -1)], [g_('virus', 36, .25, 0, -1), g_('salmon', 12, .6, 5, -1)], [g_('flu', 12, .8, 0, -1), g_('toxo', 10, 1.3, 3, -1), g_('staph', 8, 1, 6, -1)],
+      [g_('candida', 6, 2, 0, -1), g_('salmon', 16, .5, 3, -1), g_('worm', 3, 4, 6, -1)], [g_('toxo', 14, 1, 0, -1), g_('salmon', 20, .45, 4, -1), g_('worm', 4, 3.5, 8, -1), g_('flu', 10, .8, 12, -1)]],
+  },
+  {
+    place: 'Brain Barrier', name: 'The Last Wall', sub: 'Behind this barrier lies the brain. One long road, one fork, nothing left behind it.', seed: 79, gold: 520, style: 'bbb', edge: '#d46bff', tint: '#d46bff',
+    paths: [[[-40, 90], [230, 90], [330, 160], [300, 270], [160, 330], [150, 440], [260, 520], [440, 510], [520, 380], [600, 280], [720, 250], [830, 330], [900, 380], [1040, 380]],
+      [[-40, 90], [230, 90], [330, 160], [300, 270], [160, 330], [150, 440], [260, 520], [440, 510], [600, 560], [760, 560], [850, 450], [900, 380], [1040, 380]]],
+    slots: [[180, 180], [330, 90], [380, 200], [180, 260], [290, 340], [100, 360], [280, 420], [350, 450], [110, 460], [430, 580], [540, 480], [420, 420], [580, 410], [680, 320], [810, 400], [920, 460], [920, 310], [850, 270]],
+    waves: [[g_('salmon', 10, 1, 0, -1)], [g_('toxo', 6, 2, 0, -1), g_('bact', 12, .8, 3, -1)], [g_('virus', 24, .35, 0, -1)], [g_('staph', 10, 1.2, 0, -1), g_('flu', 8, 1, 4, -1)],
+      [g_('worm', 3, 4, 0, -1), g_('salmon', 12, .7, 3, -1)], [g_('toxo', 10, 1.5, 0, -1), g_('candida', 4, 2.5, 4, -1)], [g_('flu', 16, .7, 0, -1), g_('salmon', 10, .7, 4, -1)],
+      [g_('staph', 12, 1, 0, -1), g_('worm', 3, 4, 4, -1)], [g_('toxo', 14, 1.1, 0, -1), g_('virus', 30, .3, 4, -1)], [g_('candida', 8, 1.8, 0, -1), g_('salmon', 16, .5, 4, -1)],
+      [g_('worm', 5, 3, 0, -1), g_('flu', 14, .7, 4, -1)], [g_('toxo', 16, 1, 0, -1), g_('staph', 12, .9, 4, -1)], [g_('salmon', 24, .4, 0, -1), g_('worm', 4, 3.5, 4, -1), g_('flu', 12, .7, 8, -1)],
+      [g_('rabies', 1, 1, 0, 0), g_('toxo', 10, 1.4, 3, -1), g_('salmon', 16, .6, 8, -1)]],
+  },
+);
+const LVLMULT = [1, 1.55, 2.0, 1.38, 1.85, 1.8];
 // hero: lv = stats per level 1-5, xp = XP to reach the next level, gz = Granzyme Burst (damage = dmg × k)
 const HERO = { name: 'NK Sentinel', rate: .7, range: 95, speed: 105, resp: 14,
   lv: [{ hp: 200, dmg: 11, regen: 5 }, { hp: 250, dmg: 15, regen: 7 }, { hp: 310, dmg: 20, regen: 9 }, { hp: 380, dmg: 26, regen: 12 }, { hp: 460, dmg: 33, regen: 15 }],
@@ -430,6 +458,10 @@ const NOTES = [
   'Antibodies tagging a pathogen for destruction is called opsonization.',
   'Lymph nodes swell when they are busy training immune cells.',
   'Flattened out, your lungs’ alveoli would cover about half a tennis court.',
+  'Salmonella swims with dozens of whip-like flagella spread over its whole surface.',
+  'Toxoplasma hides inside our own cells. Roughly a third of people carry it without knowing.',
+  'The blood–brain barrier is sealed by tight junctions between endothelial cells, helped by star-shaped astrocytes.',
+  'Rabies virus climbs nerves to reach the brain, hiding from the immune system on the way.',
 ];
 
 
@@ -449,7 +481,7 @@ LEVELS.forEach((L, i) => Object.assign(L, SPEC[i]));
 const HEXC = {};
 function rgba(h, a) { let c = HEXC[h]; if (!c) { const n = parseInt(h.slice(1), 16); c = HEXC[h] = [n >> 16 & 255, n >> 8 & 255, n & 255]; } return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
 const COL = { neutro: '#b49cff', macro: '#3fe0d0', bcell: '#5fb4ff', killer: '#e8f6ff',
-  net: '#c9b8ff', degran: '#a98bff', m1: '#3fe0d0', m2: '#8ff0ff', plasma: '#5fb4ff', memory: '#9fd4ff', ctl: '#e8f6ff', th1: '#7fc4ff', hero: '#9ff0ff', bact: '#a6ff4d', virus: '#ff4d5e', staph: '#ffb02e', candida: '#ff4fd8', spore: '#ff7fe3', flu: '#ff8a3d', worm: '#ffae7a', boss: '#ff6a3d' };
+  net: '#c9b8ff', degran: '#a98bff', m1: '#3fe0d0', m2: '#8ff0ff', plasma: '#5fb4ff', memory: '#9fd4ff', ctl: '#e8f6ff', th1: '#7fc4ff', hero: '#9ff0ff', bact: '#a6ff4d', virus: '#ff4d5e', staph: '#ffb02e', candida: '#ff4fd8', spore: '#ff7fe3', flu: '#ff8a3d', worm: '#ffae7a', boss: '#ff6a3d', salmon: '#f4ff5a', toxo: '#ff7ab8', rabies: '#ff3355', virion: '#ff3355' };
 function halo(g, r, c, a) {
   const gr = g.createRadialGradient(0, 0, 0, 0, 0, r); gr.addColorStop(0, rgba(c, a)); gr.addColorStop(1, rgba(c, 0));
   const o = g.globalCompositeOperation; g.globalCompositeOperation = 'lighter'; g.fillStyle = gr; circ(g, 0, 0, r); g.fill(); g.globalCompositeOperation = o;
@@ -569,6 +601,29 @@ function drawEnemyArt(g, type, t, a = 0) {
   } else if (type === 'worm') {
     halo(g, 30, C, .14);
     for (let i = 5; i >= 0; i--) { const x = -i * 7, y = Math.sin(t * 4 + i) * 3, r = 9 - i * .6; g.save(); g.translate(x, y); circ(g, 0, 0, r); membrane(g, C, .14, 1.3, 0); g.restore(); }
+  } else if (type === 'salmon') { // peritrichous rod: flagella trailing from the whole surface
+    halo(g, 22, C, .16); g.save(); g.rotate(a); g.strokeStyle = rgba(C, .45); g.lineWidth = .9;
+    for (const sd of [-1, 1]) for (let k = 0; k < 4; k++) { g.beginPath(); for (let j = 0; j <= 9; j++) { const x = -8 + k * 5 - j * 1.7, y = sd * (5 + j * 1.3) + Math.sin(t * 16 + j * .9 + k * 1.7) * 1.6; j ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); }
+    g.beginPath(); g.roundRect(-11, -5, 22, 10, 5); membrane(g, C, .16, 1.5, 0);
+    g.fillStyle = rgba(C, .55); [[-5, -1], [1, 1.5], [5, -1.2]].forEach(([x, y]) => { circ(g, x, y, 1.3); g.fill(); });
+    g.restore();
+  } else if (type === 'toxo') { // crescent tachyzoite, apical conoid leading
+    halo(g, 24, C, .16); g.save(); g.rotate(a); const b = 2 * Math.sin(t * 3);
+    g.beginPath(); g.moveTo(-14, 4); g.quadraticCurveTo(0, -16 + b, 14, 4); g.quadraticCurveTo(0, -5 + b, -14, 4); g.closePath(); membrane(g, C, .16, 1.5, 0);
+    nucleus(g, -1, -4.5 + b * .5, 3, 2.2, 0);
+    g.fillStyle = rgba(C, .85); circ(g, 12.5, 2.6, 1.6); g.fill(); g.fillStyle = rgba(C, .5); [[-8, 0], [6, -1.5]].forEach(([x, y]) => { circ(g, x, y, 1.1); g.fill(); });
+    g.restore();
+  } else if (type === 'rabies' || type === 'virion') { // bullet-shaped rhabdovirus: flat base, rounded tip, glycoprotein spikes, coiled core
+    const bs = type === 'rabies', s = bs ? 2.5 : .55;
+    halo(g, bs ? 46 : 12, C, bs ? .26 : .2);
+    if (bs) { g.strokeStyle = rgba(C, .35 + .2 * Math.sin(t * 3)); g.lineWidth = 1.2; g.setLineDash([3, 5]); g.lineDashOffset = -t * 10; circ(g, 0, 0, 40 + Math.sin(t * 2) * 2); g.stroke(); g.setLineDash([]); }
+    g.save(); g.rotate(a); g.scale(s, s);
+    const body = () => { g.beginPath(); g.moveTo(-12, -5.5); g.lineTo(6.5, -5.5); g.arc(6.5, 0, 5.5, -Math.PI / 2, Math.PI / 2); g.lineTo(-12, 5.5); g.closePath(); };
+    if (bs) { g.strokeStyle = rgba(C, .6); g.lineWidth = .5; for (let x = -11; x <= 6; x += 2.4) for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(x, sd * 5.5); g.lineTo(x, sd * 7.3); g.stroke(); } for (let i = 0; i < 5; i++) { const q = -Math.PI / 2 + i / 4 * Math.PI; g.beginPath(); g.moveTo(6.5 + Math.cos(q) * 5.5, Math.sin(q) * 5.5); g.lineTo(6.5 + Math.cos(q) * 7.3, Math.sin(q) * 7.3); g.stroke(); } }
+    body(); membrane(g, C, .18, bs ? .7 : 1.6, 0);
+    if (bs) { halo(g, 6, '#ffc24a', .35); g.strokeStyle = rgba('#ffc24a', .7); g.lineWidth = .45; for (let x = -9.5; x <= 5; x += 1.6) { ell(g, x + Math.sin(t * 2 + x) * .2, 0, .9, 3.2); g.stroke(); } } // coiled ribonucleoprotein
+    else { g.fillStyle = rgba(C, .6); g.fillRect(-8, -1.5, 13, 3); }
+    g.restore();
   }
 }
 function drawUnitArt(g, kind, t, hit, spec) {
@@ -612,7 +667,7 @@ function portrait(kind, lvl = 0, sz = 96) {
     for (let i = 0; i < 10; i++) { const a = i / 10 * TAU; g.beginPath(); g.moveTo(Math.cos(a) * 8, Math.sin(a) * 8); g.lineTo(Math.cos(a) * 13, Math.sin(a) * 13); g.stroke(); g.save(); g.translate(Math.cos(a) * 16, Math.sin(a) * 16); halo(g, 5, '#8ff0ff', .8); g.fillStyle = '#f2fbff'; circ(g, 0, 0, 1.8); g.fill(); g.restore(); }
     circ(g, 0, 0, 6.5); membrane(g, COL.hero, .2, 1.5, 8); nucleus(g, -.5, -.3, 3.2, 2.6, .5);
   } else if (ENEMIES[kind]) {
-    const big = kind === 'boss' ? 78 : kind === 'candida' || kind === 'worm' ? 46 : 36, s = sz / big; g.scale(s, s);
+    const big = kind === 'boss' || kind === 'rabies' ? 80 : kind === 'candida' || kind === 'worm' ? 46 : kind === 'virion' ? 24 : 36, s = sz / big; g.scale(s, s);
     if (kind === 'worm') g.translate(9, 0);
     drawEnemyArt(g, kind, .5, 0);
   }
@@ -621,7 +676,7 @@ function portrait(kind, lvl = 0, sz = 96) {
 
 // ============================================================ state
 const S = { screen: 'title', speed: 1, paused: false, mouse: { x: -99, y: -99 }, time: 0 };
-let save = { stars: [0, 0, 0, 0], seen: [] };
+let save = { stars: [0, 0, 0, 0, 0, 0], seen: [] };
 try { Object.assign(save, JSON.parse(localStorage.getItem('immune-citadel-v4') || '{}')); muted = !!save.muted; } catch (e) {}
 function persist() { try { localStorage.setItem('immune-citadel-v4', JSON.stringify({ ...save, muted })); } catch (e) {} }
 function startLevel(i) {
@@ -670,7 +725,7 @@ function sendWave() {
 function spawnEnemy(type, p, mult, d = 0, lat) {
   const D = ENEMIES[type];
   const e = { type, D, hp: D.hp * mult, max: D.hp * mult, mult, p, path: S.paths[p], d, lat: lat ?? (D.boss ? 0 : rand(-9, 9)),
-    x: 0, y: 0, a: 0, slowT: 0, slowF: 1, opsT: 0, ops: 1.25, shred: 0, rootT: 0, stunT: 0, heroT: -99, shieldT: 0, flash: 0, blocker: null, atkCd: .5, t: rand(0, 10), abT: D.boss ? 5 : 0, dead: false };
+    x: 0, y: 0, a: 0, slowT: 0, slowF: 1, opsT: 0, ops: 1.25, shred: 0, rootT: 0, stunT: 0, heroT: -99, shieldT: 0, flash: 0, blocker: null, atkCd: .5, t: rand(0, 10), abT: D.boss ? 5 : 0, shedT: 4, hitT: S.time, revealT: 0, seen: !D.stealth, dead: false };
   place(e); S.enemies.push(e); return e;
 }
 function place(e) { const p = posAt(e.path, e.d); e.a = p.a; e.x = p.x - Math.sin(p.a) * e.lat; e.y = p.y + Math.cos(p.a) * e.lat; }
@@ -681,7 +736,7 @@ function damage(e, amt, type, src) {
   if (e.opsT > 0) amt *= e.ops;
   if (e.shieldT > 0) amt *= .5;
   if (src && src.mem) amt *= 1 + Math.min(SPECS.memory.st.memCap, (src.mem[e.type] || 0) * SPECS.memory.st.mem);
-  e.hp -= amt; e.flash = .09; if (src && src === S.hero) e.heroT = S.time;
+  e.hp -= amt; e.flash = .09; e.hitT = S.time; if (src && src === S.hero) e.heroT = S.time;
   if (e.hp <= 0) kill(e, src);
 }
 function kill(e, src) {
@@ -692,8 +747,7 @@ function kill(e, src) {
   if (H && (src === H || S.time - e.heroT < 4)) heroXp(src === H ? e.D.gold : Math.ceil(e.D.gold / 2)); // kill or assist
   const ef = src && src.owner && src.owner.spec === 'm2' && skill(src.owner);
   if (ef) { S.gold += ef.atp; floatText(e.x, e.y - 32, `+${ef.atp} efferocytosis`, '#8ff0ff', 1.1); }
-  const col = { bact: '#a6ff4d', virus: '#ff4d5e', staph: '#ffb02e', candida: '#ff4fd8', spore: '#ff7fe3', flu: '#ff8a3d', worm: '#ffae7a', boss: '#ff6a3d' }[e.type];
-  burst(e.x, e.y, col, e.D.boss ? 60 : e.D.r > 12 ? 18 : 10, e.D.boss ? 4 : 2.4);
+  burst(e.x, e.y, COL[e.type], e.D.boss ? 60 : e.D.r > 12 ? 18 : 10, e.D.boss ? 4 : 2.4);
   sfx(e.D.boss ? 'boom' : 'pop'); if (e.D.boss) S.shake = 14;
   if (e.D.split) for (let k = 0; k < e.D.split; k++) spawnEnemy('spore', e.p, e.mult, Math.max(0, e.d - k * 9), rand(-10, 10));
   if (e.blocker) e.blocker = null;
@@ -833,7 +887,7 @@ function heroStep(dt) {
     if (!t) {
       let bd = 1e9;
       for (const e of S.enemies) {
-        if (e.dead || e.D.flying || Math.hypot(e.x - h.hx, e.y - h.hy) > 70) continue;
+        if (e.dead || e.D.flying || !e.seen || Math.hypot(e.x - h.hx, e.y - h.hy) > 70) continue;
         const sc = Math.hypot(e.x - h.x, e.y - h.y) + (e.blocker ? 80 : 0); if (sc < bd) { bd = sc; t = e; }
       }
       h.tgt = t;
@@ -842,7 +896,7 @@ function heroStep(dt) {
     else walk(h.hx, h.hy, HERO.speed * .8);
     if ((h.cd -= dt) <= 0) {
       let tg = t && t.blocker === h ? t : null, bd = HERO.range;
-      if (!tg) for (const e of S.enemies) { const d = Math.hypot(e.x - h.x, e.y - (e.D.flying ? 12 : 0) - h.y) - e.D.r; if (!e.dead && d < bd) { bd = d; tg = e; } }
+      if (!tg) for (const e of S.enemies) { const d = Math.hypot(e.x - h.x, e.y - (e.D.flying ? 12 : 0) - h.y) - e.D.r; if (!e.dead && e.seen && d < bd) { bd = d; tg = e; } }
       h.cd = tg ? HERO.rate : .1;
       if (tg) { S.proj.push({ k: 'acid', c: COL.hero, x: h.x, y: h.y - 6, tgt: tg, sp: 420, dmg: L.dmg, dt: 'phys', src: h }); sfx('shoot'); }
     }
@@ -871,6 +925,11 @@ function step(dt) {
     e.t += dt; e.flash = Math.max(0, e.flash - dt); e.opsT -= dt; e.shieldT -= dt;
     if (e.slowT > 0) e.slowT -= dt; else e.slowF = 1;
     if (e.blocker && (e.blocker.dead || e.blocker.gone || e.blocker.tgt !== e)) e.blocker = null;
+    if (e.D.regen && S.time - e.hitT > 2) e.hp = Math.min(e.max, e.hp + e.max * e.D.regen * dt);
+    if (e.D.stealth) { // towers only see it near an immune cell, unit or the hero, or after a fever reveal
+      const near = o => o && !o.dead && Math.hypot(o.x - e.x, o.y - e.y) < e.D.stealth; e.revealT -= dt;
+      e.seen = e.revealT > 0 || S.towers.some(near) || S.units.some(near) || near(S.hero) || S.fx.some(f => f.k === 'reveal' && Math.hypot(f.x - e.x, f.y - e.y) < f.r);
+    }
     if (e.stunT > 0) { e.stunT -= dt; continue; } // stunned: no moving, no biting, no boss tricks
     if (e.blocker) {
       e.atkCd -= dt;
@@ -881,7 +940,14 @@ function step(dt) {
       if (e.d >= e.path.len) { leak(e); continue; }
     }
     place(e);
-    if (e.D.boss) {
+    if (e.type === 'rabies') {
+      if ((e.abT -= dt) <= 0) { // hijack the nearest unhijacked tower in reach
+        let tw = null, bd = 330; for (const t of S.towers) { const d = Math.hypot(t.x - e.x, t.y - e.y); if (!(t.hij > 0) && d < bd) { bd = d; tw = t; } }
+        e.abT = tw ? 9 : 1;
+        if (tw) { tw.hij = 4; tw.hijE = e; ring(tw.x, tw.y, '#ff3355'); floatText(tw.x, tw.y - 44, 'Hijacked!', '#ff3355', 1.4); sfx('zap'); }
+      }
+      if ((e.shedT -= dt) <= 0) { e.shedT = 4.5; for (let k = 0; k < 3; k++) spawnEnemy('virion', e.p, e.mult * .7, Math.max(0, e.d - 18 - k * 10), rand(-12, 12)); }
+    } else if (e.D.boss) {
       e.abT -= dt;
       if (e.abT <= 0) {
         e.abT = 7; S.fx.push({ k: 'biofilm', x: e.x, y: e.y, t: 0, T: .8 });
@@ -906,7 +972,7 @@ function step(dt) {
     const ac = sp === 'm1' && skill(ow);
     if (ac && (u.spit -= dt) <= 0) {
       let best = null, bd = ac.r;
-      for (const e of S.enemies) { const d = Math.hypot(e.x - u.x, e.y - u.y); if (!e.dead && d < bd) { bd = d; best = e; } }
+      for (const e of S.enemies) { const d = Math.hypot(e.x - u.x, e.y - u.y); if (!e.dead && e.seen && d < bd) { bd = d; best = e; } }
       u.spit = best ? ac.cd : .2;
       if (best) S.proj.push({ k: 'acid', x: u.x, y: u.y - 4, tgt: best, sp: 360, dmg: ac.dmg, dt: 'phys', src: u });
     }
@@ -915,7 +981,7 @@ function step(dt) {
     if (!u.tgt) {
       let best = null, bd = 1e9;
       for (const e of S.enemies) {
-        if (e.dead || e.D.flying) continue;
+        if (e.dead || e.D.flying || !e.seen) continue;
         const dh = Math.hypot(e.x - u.hx, e.y - u.hy); if (dh > 62) continue;
         const score = Math.hypot(e.x - u.x, e.y - u.y) + (e.blocker ? 80 : 0);
         if (score < bd) { bd = score; best = e; }
@@ -929,7 +995,7 @@ function step(dt) {
       else {
         if (!e.blocker) e.blocker = u;
         u.cd -= dt * (1 + (ow && ow.haste || 0));
-        if (u.cd <= 0) { u.cd = u.rate; damage(e, u.dmg, 'phys', u); sfx('bite'); S.parts.push({ x: e.x + rand(-4, 4), y: e.y + rand(-4, 4), vx: 0, vy: -20, life: .25, max: .25, c: '#fff', r: 2.4 }); }
+        if (u.cd <= 0 && !(ow && ow.hij > 0)) { u.cd = u.rate; damage(e, u.dmg, 'phys', u); sfx('bite'); S.parts.push({ x: e.x + rand(-4, 4), y: e.y + rand(-4, 4), vx: 0, vy: -20, life: .25, max: .25, c: '#fff', r: 2.4 }); }
       }
     } else {
       const dx = u.hx - u.x, dy = u.hy - u.y, d = Math.hypot(dx, dy);
@@ -953,13 +1019,14 @@ function step(dt) {
   // towers
   for (const t of S.towers) {
     t.t += dt; t.fire = Math.max(0, t.fire - dt * 5); t.built += dt;
+    if (t.hij > 0) { t.hij -= dt; continue; } // hijacked by Rabies: silent
     const sk = skill(t); if (sk && t.spec !== 'th1') t.sk -= dt;
     if (t.type === 'macro') continue;
     t.cd -= dt * (1 + t.haste); if (t.cd > 0) continue;
     const L = stat(t), inR = e => Math.hypot(e.x - t.x, e.y - t.y) <= L.range + e.D.r;
     let best = null, bl = 1e9;
     for (const e of S.enemies) {
-      if (e.dead || (t.type === 'bcell' && e.D.flying) || !inR(e)) continue;
+      if (e.dead || !e.seen || (t.type === 'bcell' && e.D.flying) || !inR(e)) continue;
       const left = e.path.len - e.d; if (left < bl) { bl = left; best = e; }
     }
     if (!best) { t.cd = .1; continue; }
@@ -971,11 +1038,11 @@ function step(dt) {
         for (const e of S.enemies) if (!e.dead && !e.D.flying && Math.hypot(e.x - best.x, e.y - best.y) < sk.r) e.rootT = Math.max(e.rootT, e.D.boss ? sk.root / 2 : sk.root);
         S.fx.push({ k: 'snare', x: best.x, y: best.y, r: sk.r, t: 0, T: .8 }); sfx('ab');
       } else if (t.spec === 'plasma') {
-        const gs = S.enemies.filter(e => !e.dead && !e.D.flying && inR(e));
+        const gs = S.enemies.filter(e => !e.dead && e.seen && !e.D.flying && inR(e));
         for (let i = 0; i < sk.n && gs.length; i++) { const e = gs[(Math.random() * gs.length) | 0]; S.proj.push({ k: 'ab', sx: ox, sy: oy, x: ox, y: oy, tx: e.x + rand(-14, 14), ty: e.y + rand(-14, 14), t: 0, T: .55 + i * .09, dmg: sk.dmg, splash: 50, rot: 0, ops: L.ops, src: t }); }
         floatText(t.x, t.y - 44, 'Antibody rain', '#ffd166', 1.2);
       } else if (t.spec === 'memory') {
-        let st = best; for (const e of S.enemies) if (!e.dead && !e.D.flying && inR(e) && e.hp > st.hp) st = e;
+        let st = best; for (const e of S.enemies) if (!e.dead && e.seen && !e.D.flying && inR(e) && e.hp > st.hp) st = e;
         damage(st, sk.dmg, 'true', t); S.fx.push({ k: 'recall', x: st.x, y: st.y, t: 0, T: .55 }); S.shake = Math.max(S.shake, 4); sfx('zap');
       }
     }
@@ -1020,7 +1087,7 @@ function step(dt) {
           for (let i = 0; i < 5; i++) S.parts.push({ x: p.lx, y: p.ly, vx: rand(-60, 60), vy: rand(-60, 60), life: .3, max: .3, c: '#ff7fb0', r: 2 });
           if (p.chain) {
             let nb = null, nd = 120;
-            for (const o of S.enemies) { if (o === e || o.dead) continue; const q = Math.hypot(o.x - e.x, o.y - e.y); if (q < nd) { nd = q; nb = o; } }
+            for (const o of S.enemies) { if (o === e || o.dead || !o.seen) continue; const q = Math.hypot(o.x - e.x, o.y - e.y); if (q < nd) { nd = q; nb = o; } }
             if (nb) S.proj.push({ k: 'bolt', x: p.lx, y: p.ly, tgt: nb, sp: 520, dmg: p.dmg * .6, dt: 'magic', trail: [], src: p.src });
           }
         } else S.parts.push({ x: p.lx, y: p.ly, vx: 0, vy: 0, life: .15, max: .15, c: '#fff', r: 3 });
@@ -1034,7 +1101,8 @@ function step(dt) {
     f.t += dt;
     if (f.k === 'fever' && !f.hit && f.t >= .4) {
       f.hit = true; S.shake = Math.max(S.shake, 8); sfx('boom');
-      for (const e of S.enemies) if (!e.dead && Math.hypot(e.x - f.x, e.y - f.y) < 90) { damage(e, 95 * LVLMULT[S.lvl], 'magic'); e.slowF = .6; e.slowT = 2.5; }
+      for (const e of S.enemies) if (!e.dead && Math.hypot(e.x - f.x, e.y - f.y) < 90) { damage(e, 95 * LVLMULT[S.lvl], 'magic'); e.slowF = .6; e.slowT = 2.5; e.revealT = 6; }
+      S.fx.push({ k: 'reveal', x: f.x, y: f.y, r: 90, t: 0, T: 6 });
       for (let i = 0; i < 40; i++) { const a = rand(0, TAU), v = rand(40, 200); S.parts.push({ x: f.x, y: f.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, life: rand(.4, .9), max: .9, c: i % 3 ? '#f59a3c' : '#ffe08a', r: rand(2, 4.5) }); }
     }
   }
@@ -1085,7 +1153,8 @@ function resize() {
   st.style.borderRadius = (w < vw - 4 || h < vh - 4) ? '10px' : '0';
   DPR = Math.min(2, window.devicePixelRatio || 1);
   cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR); viewK = w / W;
-  st.style.setProperty('--u', clamp(viewK * 1.05, .62, 1.25).toFixed(3));
+  const u = clamp(viewK * 1.05, .62, 1.25); st.style.setProperty('--u', u.toFixed(3));
+  st.style.setProperty('--ut', Math.max(.62, Math.min(u, (h - 40) / 790)).toFixed(3)); // tray: three rows of slides fit the stage height
   bgCache = null; layoutWaveMarkers(); if (S.sel && S.sel.slot) openRadial(S.sel.slot);
 }
 function makeBg(L, pw, ph) {
@@ -1103,6 +1172,28 @@ function makeBg(L, pw, ph) {
   } else if (L.style === 'blood') {
     for (let i = 0; i < 110; i++) { const x = R() * W, y = R() * H, r = 9 + R() * 6; g.save(); g.translate(x, y); g.rotate(R() * 3); g.scale(1, .55 + R() * .45); g.strokeStyle = rgba(E, .2 + R() * .12); g.lineWidth = 3; circ(g, 0, 0, r * .7); g.stroke(); g.restore(); }
     for (let i = 0; i < 14; i++) nuc(R() * W, R() * H, 7, .45);
+  } else if (L.style === 'villi') { // finger-like villi, epithelial nuclei lining each one, a lacteal down the middle
+    for (let i = 0; i < 44; i++) {
+      const x = R() * W, y = R() * H, len = 70 + R() * 80, w = 13 + R() * 6; g.save(); g.translate(x, y); g.rotate(-Math.PI / 2 + (R() - .5) * 1.1);
+      g.beginPath(); g.roundRect(-len / 2, -w, len, w * 2, w); g.fillStyle = rgba(E, .03); g.fill(); g.strokeStyle = rgba(E, .15 + R() * .1); g.lineWidth = 1.3; g.stroke();
+      g.strokeStyle = rgba(E, .07); g.lineWidth = 3; g.beginPath(); g.moveTo(-len / 2 + w, 0); g.lineTo(len / 2 - w * .6, 0); g.stroke();
+      for (let q = -len / 2 + 6; q < len / 2 - 4; q += 8) for (const sd of [-1, 1]) nuc(q, sd * (w - 3.5), 2.8, .3);
+      g.restore();
+    }
+  } else if (L.style === 'bbb') { // tight hexagonal endothelial junctions, then astrocyte end-feet
+    const hs = 44, hw = hs * Math.sqrt(3);
+    for (let row = -1; row * hs * 1.5 < H + hs; row++) for (let col = -1; col * hw < W + hw; col++) {
+      const cx = col * hw + (row & 1 ? hw / 2 : 0), cy = row * hs * 1.5, V = [];
+      for (let k = 0; k < 6; k++) { const q = k / 6 * TAU + Math.PI / 6; V.push([cx + Math.cos(q) * hs * .97, cy + Math.sin(q) * hs * .97]); }
+      g.strokeStyle = rgba(E, .1 + R() * .1); g.lineWidth = 1.2; g.beginPath(); V.forEach(([x, y], k) => k ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.stroke();
+      g.fillStyle = rgba(E, .35); for (const [x, y] of V) if (R() > .5) { circ(g, x, y, 1.4); g.fill(); }
+      if (R() > .45) { g.save(); g.translate(cx + R() * 10 - 5, cy + R() * 10 - 5); g.scale(1.7, 1); nuc(0, 0, 6, .3); g.restore(); }
+    }
+    for (let i = 0; i < 10; i++) {
+      const x = R() * W, y = R() * H, n = 6 + (R() * 4 | 0); g.strokeStyle = rgba('#ffc24a', .16); g.lineWidth = 1.6;
+      for (let k = 0; k < n; k++) { let a = k / n * TAU + R(), px = x, py = y; g.beginPath(); g.moveTo(px, py); for (let j = 0; j < 6; j++) { a += (R() - .5) * .7; px += Math.cos(a) * 10; py += Math.sin(a) * 10; g.lineTo(px, py); } g.stroke(); }
+      nuc(x, y, 8, .45);
+    }
   } else {
     for (let i = 0; i < 14; i++) { const x = R() * W, y = R() * H, r = 55 + R() * 60; g.strokeStyle = rgba(E, .16); g.lineWidth = 1.2; g.setLineDash([3, 6]); circ(g, x, y, r); g.stroke(); g.setLineDash([]); for (let k = 0; k < 40; k++) { const a = R() * TAU, q = Math.sqrt(R()) * r * .95; nuc(x + Math.cos(a) * q, y + Math.sin(a) * q, 4 + R() * 3, .35); } }
     for (let i = 0; i < 90; i++) nuc(R() * W, R() * H, 3 + R() * 2, .2);
@@ -1148,7 +1239,13 @@ function drawTower(g, t, T) {
   if (t.spec) { g.strokeStyle = rgba(COL[t.spec], .25); g.lineWidth = 1; circ(g, 0, 0, R0 + 4); g.stroke(); }
   for (let i = 0; i < np; i++) { const a = Math.PI / 2 + (i - (np - 1) / 2) * .28, c = i > t.lvl ? '#7fd8ff' : '#ffc24a'; g.save(); g.translate(Math.cos(a) * R0, Math.sin(a) * R0); halo(g, 6, c, .6); g.fillStyle = i > t.lvl ? '#e8f6ff' : '#ffe3a3'; circ(g, 0, 0, 2.2); g.fill(); g.restore(); }
   const pop = t.built < .3 ? 1 - Math.pow(1 - t.built / .3, 3) : 1;
-  g.save(); g.scale(pop, pop); drawTowerArt(g, t.type, t.lvl, t.t, t.fire, t.spec); g.restore();
+  const hj = t.hij > 0;
+  g.save(); g.scale(pop, pop); if (hj) { g.globalAlpha = .4; g.filter = 'grayscale(1)'; } drawTowerArt(g, t.type, t.lvl, t.t, t.fire, t.spec); g.restore();
+  if (hj) {
+    g.strokeStyle = rgba('#ff3355', .85); g.lineWidth = 1.6; g.setLineDash([4, 4]); g.lineDashOffset = T * 12; circ(g, 0, 0, R0 + 2); g.stroke(); g.setLineDash([]);
+    g.font = '700 15px "JetBrains Mono", ui-monospace, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffd6dc'; g.shadowColor = '#ff3355'; g.shadowBlur = 10;
+    g.fillText(Math.ceil(t.hij), 0, 1); g.shadowBlur = 0; g.textBaseline = 'alphabetic';
+  }
   if (t.mem) { let n = 0; for (const k in t.mem) n += t.mem[k]; if (n) { g.font = '700 10px "JetBrains Mono", ui-monospace, monospace'; g.textAlign = 'center'; g.fillStyle = '#e8f6ff'; g.shadowColor = '#5fb4ff'; g.shadowBlur = 6; g.fillText('MEM ' + n, 0, -R0 - 8); g.shadowBlur = 0; } }
   g.restore();
   if (t.type === 'macro') { g.save(); g.translate(t.rally.x, t.rally.y); g.strokeStyle = 'rgba(63,224,208,.35)'; g.setLineDash([3, 4]); g.lineWidth = 1.2; circ(g, 0, 0, 24); g.stroke(); g.restore(); }
@@ -1166,7 +1263,17 @@ function drawEnemy(g, e) {
       g.save(); g.translate(x, y); circ(g, 0, 0, r); membrane(g, COL.worm, .14, 1.3, 0); g.restore();
     }
     nucleus(g, Math.cos(e.a) * 3, Math.sin(e.a) * 3, 3, 2.5, e.a);
-  } else drawEnemyArt(g, e.type, e.t, e.a);
+  } else {
+    if (!e.seen) g.globalAlpha = .14 + .08 * Math.sin(e.t * 5);
+    drawEnemyArt(g, e.type, e.t, e.a);
+  }
+  if (!e.seen) { // stealth: only a refractive shimmer gives it away
+    g.globalAlpha = 1; g.strokeStyle = rgba('#e8f6ff', .22); g.lineWidth = 1; g.beginPath();
+    for (let i = 0; i <= 24; i++) { const q = i / 24 * TAU, rr = e.D.r + 3 + Math.sin(q * 5 + e.t * 7) * 1.6; g.lineTo(Math.cos(q) * rr, Math.sin(q) * rr * .7); }
+    g.stroke(); g.restore(); return;
+  }
+  if (e.D.stealth && e.revealT > 0) { g.strokeStyle = rgba('#ff8a3d', .7); g.lineWidth = 1.2; g.setLineDash([2, 3]); circ(g, 0, 0, e.D.r + 6); g.stroke(); g.setLineDash([]); }
+  if (e.D.regen && S.time - e.hitT > 2 && e.hp < e.max) { halo(g, e.D.r + 12, COL[e.type], .2 + .12 * Math.sin(e.t * 8)); g.fillStyle = COL[e.type]; g.font = '700 9px "JetBrains Mono", ui-monospace, monospace'; g.textAlign = 'center'; g.fillText('+', e.D.r + 4, -e.D.r - 2 - (e.t * 12) % 8); }
   if (e.flash > 0) halo(g, e.D.r + 8, '#ffffff', e.flash * 6);
   if (e.shieldT > 0) { g.fillStyle = 'rgba(166,255,77,.08)'; g.strokeStyle = 'rgba(166,255,77,.7)'; g.lineWidth = 1.3; circ(g, 0, 0, e.D.r + 7); g.fill(); g.stroke(); }
   if (e.rootT > 0) { g.strokeStyle = rgba('#8fb0ff', .85); g.lineWidth = 1.2; g.shadowColor = '#5b8cff'; g.shadowBlur = 6; const q = e.D.r + 5; for (let i = 0; i < 5; i++) { const a = i * 1.26 + e.t * .3; g.beginPath(); g.moveTo(Math.cos(a) * q, Math.sin(a) * q); g.quadraticCurveTo(0, 0, Math.cos(a + 2.3) * q, Math.sin(a + 2.3) * q); g.stroke(); } g.shadowBlur = 0; }
@@ -1174,7 +1281,7 @@ function drawEnemy(g, e) {
   if (e.shred > 0) { g.strokeStyle = rgba('#a98bff', .3 + e.shred); g.lineWidth = 1; g.setLineDash([1.5, 3]); circ(g, 0, 0, e.D.r + 3); g.stroke(); g.setLineDash([]); }
   if (e.slowT > 0 && e.slowF < 1) { g.strokeStyle = 'rgba(220,235,255,.7)'; g.lineWidth = 1; for (let i = 0; i < 4; i++) { const a = i * .8 + .3; g.beginPath(); g.moveTo(Math.cos(a) * (e.D.r + 4), Math.sin(a) * (e.D.r + 4)); g.lineTo(-Math.cos(a) * (e.D.r + 4), -Math.sin(a) * (e.D.r + 4)); g.stroke(); } }
   if (e.opsT > 0) { g.strokeStyle = '#ffd166'; g.lineWidth = 1.3; for (let i = 0; i < 3; i++) { const a = e.t * 2 + i * 2.1, x = Math.cos(a) * (e.D.r + 6), y = Math.sin(a) * (e.D.r + 6); g.beginPath(); g.moveTo(x, y + 3); g.lineTo(x, y); g.lineTo(x - 2.5, y - 3); g.moveTo(x, y); g.lineTo(x + 2.5, y - 3); g.stroke(); } }
-  if (e.hp < e.max) hpBar(g, 0, -e.D.r - 10, Math.max(18, e.D.r * 2), Math.max(0, e.hp / e.max), e.D.boss ? '#ff6a3d' : '#a6ff4d');
+  if (e.hp < e.max) hpBar(g, 0, -e.D.r - 10, Math.max(18, e.D.r * 2), Math.max(0, e.hp / e.max), e.D.boss ? COL[e.type] : '#a6ff4d');
   g.restore();
 }
 function drawUnit(g, u) {
@@ -1237,6 +1344,12 @@ function render() {
   drawHero(g, T);
   for (const e of S.enemies) if (!e.D.flying) drawEnemy(g, e);
   for (const e of S.enemies) if (e.D.flying) drawEnemy(g, e);
+  for (const t of S.towers) if (t.hij > 0 && t.hijE && !t.hijE.dead) { // Rabies hijack tether
+    const e = t.hijE, dx = t.x - e.x, dy = t.y - e.y, L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L;
+    g.globalCompositeOperation = 'lighter'; g.strokeStyle = rgba('#ff3355', .75); g.lineWidth = 2; g.shadowColor = '#ff3355'; g.shadowBlur = 10; g.beginPath();
+    for (let i = 0; i <= 30; i++) { const k = i / 30, w = Math.sin(k * 18 - T * 14) * 5 * Math.sin(k * Math.PI); g.lineTo(e.x + dx * k + nx * w, e.y + dy * k + ny * w); }
+    g.stroke(); g.shadowBlur = 0; g.globalCompositeOperation = 'source-over';
+  }
   for (const p of S.proj) {
     if (p.k === 'gran') { g.save(); g.translate(p.x, p.y); halo(g, p.net ? 12 : 8, p.slow ? '#8fb0ff' : '#b49cff', .7); g.fillStyle = p.net ? '#fff' : '#e3d6ff'; circ(g, 0, 0, p.net ? 3.4 : 2.2); g.fill(); g.restore(); }
     else if (p.k === 'acid') { g.save(); g.translate(p.x, p.y); halo(g, 9, p.c || '#3fe0d0', .8); g.fillStyle = p.c ? '#f2fbff' : '#d8fff8'; circ(g, 0, 0, 2); g.fill(); g.restore(); }
@@ -1270,6 +1383,7 @@ function render() {
       g.restore();
     }
     else if (f.k === 'lvl') { const h = S.hero, a0 = 1 - k2; g.save(); g.translate(h.x, h.y); halo(g, 40 + k2 * 50, '#e8f6ff', .55 * a0); g.strokeStyle = rgba('#8ff0ff', a0); g.lineWidth = 2; circ(g, 0, 0, 16 + k2 * 44); g.stroke(); g.restore(); }
+    else if (f.k === 'reveal') { g.strokeStyle = rgba('#ff8a3d', .35 * (1 - k2)); g.lineWidth = 1; g.setLineDash([2, 6]); g.lineDashOffset = T * 6; circ(g, f.x, f.y, f.r); g.stroke(); g.setLineDash([]); }
     else if (f.k === 'biofilm') { g.strokeStyle = `rgba(166,255,77,${1 - k2})`; g.lineWidth = 3; circ(g, f.x, f.y, 20 + k2 * 110); g.stroke(); }
     else if (f.k === 'fever') {
       g.save(); g.translate(f.x, f.y);
@@ -1466,11 +1580,12 @@ function layoutWaveMarkers() {
   if (!S.paths) return;
   S.paths.forEach(p => {
     let d = 70, q = posAt(p, d); while (q.x < 320 && q.y > 500 && d < p.len / 3) q = posAt(p, d += 15); // keep clear of the bottom-left cluster
+    if (wm.some(b => Math.hypot(b.qx - q.x, b.qy - q.y) < 40)) return; // forked routes share one entry: one marker
     const b = document.createElement('button');
     b.className = 'wcall'; b.style.left = clamp(q.x, 36, W - 36) * viewK + 'px'; b.style.top = clamp(q.y, 36, H - 36) * viewK + 'px';
     b.innerHTML = '<i class="cd"></i><svg viewBox="0 0 24 24"><path d="M6 6l6 6-6 6M12 6l6 6-6 6"/></svg><div class="tip"></div>';
     b.onpointerdown = e => e.stopPropagation(); b.onclick = e => { e.stopPropagation(); sendWave(); };
-    box.appendChild(b); wm.push(b);
+    b.qx = q.x; b.qy = q.y; box.appendChild(b); wm.push(b);
   });
   updateChips();
 }
@@ -1529,7 +1644,7 @@ function endLevel(win) {
   if (S.over) return; S.over = true; closeRadial(); S.ability = null; S.sel = null; showInfo(null); const run = S.run;
   wm.forEach(b => b.hidden = true);
   const stars = win ? (S.lives >= 18 ? 3 : S.lives >= 10 ? 2 : 1) : 0;
-  if (win && stars > save.stars[S.lvl]) { save.stars[S.lvl] = stars; persist(); }
+  if (win && stars > (save.stars[S.lvl] || 0)) { save.stars[S.lvl] = stars; persist(); }
   setTimeout(() => {
     if (S.run !== run) return;
     const nxt = win && S.lvl < LEVELS.length - 1;

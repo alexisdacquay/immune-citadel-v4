@@ -9,7 +9,8 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   const geo = await p.evaluate(() => IC.LEVELS.map((L, li) => { const ps = L.paths.map(IC.makePath); return L.slots.map(([x, y], i) => { const d = Math.min(...ps.map(q => IC.nearestOnPath(q, x, y).dd)); const near = Math.min(...L.slots.filter((_, j) => j !== i).map(([a, c]) => Math.hypot(a - x, c - y))); const hud = (x < 320 && y < 92) || (x < 300 && y > 525) || (x > 780 && y < 88); return (d < 50 || d > 115 || near < 62 || hud) ? `L${li} slot${i} [${x},${y}] path=${d|0} neighbour=${near|0}` : null; }).filter(Boolean); }).flat());
   console.log('slot problems:', geo.length ? geo : 'none');
   const results = [];
-  for (let li = 0; li < 4; li++) {
+  const nLv = await p.evaluate(() => IC.LEVELS.length);
+  for (let li = 0; li < nLv; li++) {
     const r = await p.evaluate(li => {
       IC.startLevel(li); const S = IC.S; S.screen = 'play';
       const order = ['neutro', 'macro', 'killer', 'bcell', 'neutro', 'killer', 'bcell', 'macro'];
@@ -43,7 +44,7 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
           break;
         }
         if (S.wave === 0) IC.sendWave();
-        if (S.cds.fever <= 0) { let best = null, bn = 3; for (const e of S.enemies) { const n = S.enemies.filter(o => Math.hypot(o.x - e.x, o.y - e.y) < 80).length; if (n > bn) { bn = n; best = e; } } if (best) { S.ability = 'fever'; IC.castAbility(best.x, best.y); } }
+        if (S.cds.fever <= 0) { let best = null, bn = 3; for (const e of S.enemies) { const n = S.enemies.filter(o => Math.hypot(o.x - e.x, o.y - e.y) < 80).reduce((s, o) => s + (o.D.stealth && !o.seen ? 3 : 1), 0); /* hidden stealth counts triple: fever reveals it */ if (n > bn) { bn = n; best = e; } } if (best) { S.ability = 'fever'; IC.castAbility(best.x, best.y); } }
         if (S.cds.swarm <= 0 && S.enemies.length) { const e = S.enemies.filter(e => !e.D.flying).sort((a, b) => (a.path.len - a.d) - (b.path.len - b.d))[0]; if (e) { const q = e.path; S.ability = 'swarm'; IC.castAbility(e.x, e.y); } }
         const H = S.hero;
         if (!H.dead && !H.mv && Math.hypot(H.hx - park.x, H.hy - park.y) > 5) IC.heroMove(park.x, park.y);
@@ -56,7 +57,12 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   }
   console.log(results);
   // visual: start level 1 for real, build, play 25s with rAF, screenshot
-  await p.reload(); await p.waitForTimeout(600); await p.evaluate(() => { IC.startLevel(0); });
+  await p.reload(); await p.waitForTimeout(600); await p.screenshot({ path: `${out}/0-tray.png` });
+  // the last specimen slide must open its level with a real click (unlocked by the bot's wins)
+  const sl = await p.evaluate(n => { const r = document.querySelector(`.slide[data-i="${n - 1}"]`).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, nLv);
+  await p.mouse.click(sl.x, sl.y); await p.waitForTimeout(200);
+  if (!(await p.evaluate(n => IC.S.lvl === n - 1 && IC.S.screen === 'play', nLv))) errs.push('tray: click on the last slide did not start it');
+  await p.evaluate(() => { IC.startLevel(0); });
   await p.waitForTimeout(400);
   await p.evaluate(() => { IC.build(0, 'neutro'); IC.build(2, 'macro'); IC.build(3, 'killer'); IC.build(5, 'bcell'); IC.S.gold = 600; IC.upgrade(0); IC.upgrade(3); IC.sendWave(); IC.S.speed = 2; });
   await p.waitForTimeout(9000); await p.screenshot({ path: `${out}/1-play.png` });
@@ -91,7 +97,7 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   await p.evaluate(() => IC.hurt(IC.S.hero, 1e4)); await p.waitForTimeout(1200);
   must(await p.evaluate(() => IC.S.hero.dead && document.querySelector('#ab-hero .cd').textContent !== ''), 'respawn countdown missing');
   await p.screenshot({ path: `${out}/11-hero-dead.png` });
-  for (const li of [1, 2, 3]) { await p.evaluate(li => { IC.startLevel(li); IC.S.gold = 3000; for (let i = 0; i < IC.S.slots.length; i += 2) IC.build(i, ['neutro','macro','bcell','killer'][i/2%4]); IC.S.wave = IC.LEVELS[li].waves.length - 1; IC.sendWave(); IC.S.speed = 2; }, li); await p.waitForTimeout(7000); await p.screenshot({ path: `${out}/${li + 2}-level${li + 1}.png` }); }
+  for (let li = 1; li < nLv; li++) { await p.evaluate(li => { IC.startLevel(li); IC.S.gold = 3000; for (let i = 0; i < IC.S.slots.length; i += 2) IC.build(i, ['neutro','macro','bcell','killer'][i/2%4]); IC.S.wave = IC.LEVELS[li].waves.length - 1; IC.sendWave(); IC.S.speed = 2; }, li); await p.waitForTimeout(7000); await p.screenshot({ path: `${out}/${li + 2}-level${li + 1}.png` }); }
   // specialists: one of each, max rank, mid-fight; then a real click on a level-3 tower to show the branch choice
   await p.evaluate(() => { IC.startLevel(3); const S = IC.S; S.gold = 99999; const ids = Object.keys(IC.SPECS);
     ids.forEach((id, i) => { const k = [0, 2, 4, 5, 6, 10, 11, 12][i]; IC.build(k, IC.SPECS[id].base); IC.upgrade(k); IC.upgrade(k); IC.specialize(k, id); IC.skillUp(k); IC.skillUp(k); });
