@@ -375,9 +375,9 @@ const ENEMIES = {
   flu: { name: 'Influenza', kind: 'Airborne virus', hp: 50, speed: 42, armor: 0, mr: .15, gold: 11, lives: 1, atk: 0, r: 10, flying: true, desc: 'Drifts over blockers. Antibody clouds can’t reach it.' },
   worm: { name: 'Helminth', kind: 'Parasitic worm', hp: 430, speed: 19, armor: .35, mr: .55, gold: 45, lives: 3, atk: 16, r: 13, desc: 'Huge parasite. Resists magic. Grind it down with blockers and antibodies.' },
   boss: { name: 'MRSA Superbug', kind: 'Boss · drug-resistant', hp: 2300, speed: 14, armor: .5, mr: .35, gold: 300, lives: 10, atk: 34, r: 30, boss: true, desc: 'Grows a biofilm shield over nearby allies and buds fresh bacteria.' },
-  salmon: { name: 'Salmonella', kind: 'Flagellated bacterium', hp: 60, speed: 64, armor: .1, mr: 0, gold: 9, lives: 1, atk: 5, r: 10, regen: .16, desc: 'Whips along on dozens of flagella. Heals itself when left unhit for 2 s, so focus it down.' },
-  toxo: { name: 'Toxoplasma', kind: 'Parasite · stealth', hp: 130, speed: 34, armor: .2, mr: .25, gold: 15, lives: 2, atk: 8, r: 12, stealth: 85, desc: 'Towers can’t see it unless an immune cell, unit or the hero is within 85. Fever spike reveals it for 6 s.' },
-  rabies: { name: 'Rabies Lyssavirus', kind: 'Boss · neurotropic virus', hp: 2600, speed: 13, armor: .3, mr: .45, gold: 400, lives: 10, atk: 40, r: 30, boss: true, desc: 'Every 9 s it hijacks the nearest immune cell, silencing it for 4 s. Sheds virions as it marches.' },
+  salmon: { name: 'Salmonella', kind: 'Flagellated bacterium', hp: 60, speed: 64, armor: .1, mr: 0, gold: 9, lives: 1, atk: 5, r: 10, regen: .16, desc: 'Fast, flagellated. Heals itself when left unhit for 2 s.' },
+  toxo: { name: 'Toxoplasma', kind: 'Parasite · stealth', hp: 130, speed: 34, armor: .2, mr: .25, gold: 15, lives: 2, atk: 8, r: 12, stealth: 85, desc: 'Hidden unless a cell is within 85. Fever reveals it for 6 s.' },
+  rabies: { name: 'Rabies Lyssavirus', kind: 'Boss · neurotropic virus', hp: 2600, speed: 13, armor: .3, mr: .45, gold: 400, lives: 10, atk: 40, r: 30, boss: true, desc: 'Silences the nearest immune cell for 4 s every 9 s. Sheds virions.' },
   virion: { name: 'Lyssa virion', kind: 'Shed virion', hp: 30, speed: 56, armor: 0, mr: .3, gold: 2, lives: 1, atk: 2, r: 7, desc: 'Bullet-shaped offspring shed by the Rabies Lyssavirus.' },
 };
 const g_ = (t, n, gap, d = 0, p = 0) => ({ t, n, gap, d, p });
@@ -442,7 +442,7 @@ LEVELS.push(
       [g_('rabies', 1, 1, 0, 0), g_('toxo', 10, 1.4, 3, -1), g_('salmon', 16, .6, 8, -1)]],
   },
 );
-const LVLMULT = [1, 1.55, 2.0, 1.38, 1.85, 1.8];
+const LVLMULT = [1, 1.55, 2.0, 1.38, 1.92, 1.8]; // 05: bot wins 18/18 at ~14 lives (04: 20); 1.97+ starts losing
 // hero: lv = stats per level 1-5, xp = XP to reach the next level, gz = Granzyme Burst (damage = dmg × k)
 const HERO = { name: 'NK Sentinel', rate: .7, range: 95, speed: 105, resp: 14,
   lv: [{ hp: 200, dmg: 11, regen: 5 }, { hp: 250, dmg: 15, regen: 7 }, { hp: 310, dmg: 20, regen: 9 }, { hp: 380, dmg: 26, regen: 12 }, { hp: 460, dmg: 33, regen: 15 }],
@@ -690,7 +690,7 @@ function startLevel(i) {
   S.hero = mkHero(); bgCache = null; closeRadial(); lastHud = '';
   $('#titleOv').hidden = true; $('#endOv').hidden = true;
   $('#specId').textContent = `SPEC-0${i + 1} · ${L.place.toUpperCase()}`; $('#specName').textContent = L.name;
-  showInfo(null); layoutWaveMarkers(); nextNote();
+  showInfo(null); layoutWaveMarkers(); nextNote(); $('#banner').innerHTML = '';
   banner(`<div><small>Specimen 0${i + 1} · ${L.place}</small><b>${L.name}</b><p>${L.sub}</p></div>`, 4200);
 }
 
@@ -969,7 +969,7 @@ function step(dt) {
     }
     const ow = u.owner, sp = ow && ow.spec;
     if (sp === 'm2') for (const o of S.units) if (o !== u && !o.dead && Math.hypot(o.x - u.x, o.y - u.y) < 70) o.hp = Math.min(o.max, o.hp + SPECS.m2.st.heal * dt);
-    const ac = sp === 'm1' && skill(ow);
+    const ac = sp === 'm1' && !(ow.hij > 0) && skill(ow);
     if (ac && (u.spit -= dt) <= 0) {
       let best = null, bd = ac.r;
       for (const e of S.enemies) { const d = Math.hypot(e.x - u.x, e.y - u.y); if (!e.dead && e.seen && d < bd) { bd = d; best = e; } }
@@ -1010,7 +1010,7 @@ function step(dt) {
   // Th1 cytokine auras
   for (const t of S.towers) t.haste = 0;
   for (const a of S.towers) {
-    if (a.spec !== 'th1') continue;
+    if (a.spec !== 'th1' || a.hij > 0) continue; // hijacked: no aura
     const L = SPECS.th1.st, R = skill(a); a.surge = Math.max(0, a.surge - dt);
     if (R && (a.sk -= dt) <= 0 && S.enemies.length) { a.sk = R.cd; a.surge = R.dur; ring(a.x, a.y, '#5fb4ff'); floatText(a.x, a.y - 44, 'Cytokine surge', '#7fc4ff', 1.4); sfx('ab'); }
     const h = a.surge > 0 && R ? R.haste : L.haste;
@@ -1690,7 +1690,7 @@ addEventListener('resize', resize);
 startLevel(0); S.screen = 'title'; showTitle(); resize();
 requestAnimationFrame(frame);
 
-window.IC = { S, LEVELS, TOWERS, ENEMIES, SPECS, startLevel, sendWave, build: (i, k) => build(S.slots[i], k), upgrade: i => upgrade(S.slots[i].tower), sell: i => sell(S.slots[i].tower),
+window.IC = { S, LEVELS, LVLMULT, TOWERS, ENEMIES, SPECS, startLevel, sendWave, build: (i, k) => build(S.slots[i], k), upgrade: i => upgrade(S.slots[i].tower), sell: i => sell(S.slots[i].tower),
   specialize: (i, id) => specialize(S.slots[i].tower, id), skillUp: i => skillUp(S.slots[i].tower), refund: i => refund(S.slots[i].tower), step, makePath, nearestOnPath, posAt, castAbility, armAbility,
   HERO, heroMove, selectHero, granzyme, heroXp, hurt: (u, a) => hurtUnit(u, a) };
 </script>
