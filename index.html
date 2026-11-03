@@ -165,10 +165,64 @@ button{font:inherit;color:inherit;cursor:pointer}
 .btn:hover{background:rgba(140,205,255,.14)}
 .btn.pri{background:var(--cyan);border-color:var(--cyan);color:#04121c;box-shadow:0 0 22px rgba(127,216,255,.35)}
 [hidden]{display:none!important}
+/* immune memory */
+#titleOv .tin{position:relative}
+.mbtn{position:absolute;right:0;top:-8px;display:flex;align-items:center;gap:10px;padding:7px 14px 7px 9px;border-radius:12px;border:1px solid var(--rim2);background:var(--glass2);font:600 12px var(--mono);letter-spacing:.14em;color:var(--txt);box-shadow:0 0 22px -6px rgba(91,140,255,.5)}
+.mbtn:hover{border-color:#fff;box-shadow:0 0 26px rgba(127,216,255,.4)}
+.mbtn i,.mdot{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#d6e2ff,#6f98ff 45%,rgba(40,70,210,.75));box-shadow:0 0 10px rgba(91,140,255,.8)}
+.mbtn b,.mlink b{color:var(--amber);text-shadow:0 0 10px rgba(255,194,74,.6);letter-spacing:.04em}
+.mlink{display:flex;width:100%;align-items:center;gap:10px;margin:0 0 10px;padding:9px 12px;border-radius:10px;border:1px solid var(--rim);background:rgba(91,140,255,.08);font:600 12px var(--mono);letter-spacing:.12em;text-align:left}
+.mlink span{flex:1}.mlink:hover{background:rgba(91,140,255,.16);border-color:var(--rim2)}
+.mhd{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+.mem h1{font-size:52px!important}
+.mem .lede{margin:0!important;font-size:14px!important}
+.bank{flex:none;padding:12px 18px;text-align:right}
+.bank b{font:700 40px/1 var(--mono);color:var(--amber);text-shadow:0 0 18px rgba(255,194,74,.6)}
+.bank b span{font-size:18px;color:var(--dim);text-shadow:none}
+.bank small{display:block;font:600 9px var(--mono);letter-spacing:.2em;color:var(--dim);margin-top:5px}
+.mroot{position:relative;height:58px;margin-top:14px}
+.mroot svg{position:absolute;left:0;top:14px;width:100%;height:44px;overflow:visible}
+.mroot path{fill:none;stroke:rgba(140,205,255,.16);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.mroot path.on{stroke:var(--c);filter:drop-shadow(0 0 4px var(--c))}
+.mroot .mdot{position:absolute;left:50%;top:0;margin-left:-14px;width:28px;height:28px}
+.mroot label{position:absolute;left:50%;top:5px;margin-left:24px;font:600 9px var(--mono);letter-spacing:.2em;color:var(--dim);white-space:nowrap}
+.mgrid{display:grid;grid-template-columns:repeat(6,1fr)}
+.mcol{margin:0 6px;padding:12px 10px 10px;text-align:center;border-color:color-mix(in srgb,var(--c) 30%,transparent)}
+.mcol.has{box-shadow:0 0 26px -10px var(--c),0 10px 30px -14px #000}
+.mpor{width:70px;height:70px;margin:0 auto 6px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--c) 55%,transparent);background:radial-gradient(circle,rgba(30,50,75,.9),rgba(5,10,16,.95));display:grid;place-items:center;position:relative}
+.mpor img{width:62px;height:62px}
+.mpor img+img{position:absolute;width:40px;height:40px;right:-8px;bottom:-6px}
+.mcol>b{display:block;font:600 15px/1.15 var(--sans);color:#fff}
+.mcol>small{display:block;font:600 8.5px var(--mono);letter-spacing:.16em;color:var(--c);text-transform:uppercase;margin:3px 0 4px}
+.mnode{display:flex;align-items:flex-start;gap:9px;width:100%;margin-top:16px;padding:0;border:0;background:none;text-align:left;position:relative;cursor:default}
+/* lineage links: tier I hangs from the portrait, each tier links down to the next; lit when the lower tier is trained */
+.mnode[data-t="0"]::before,.mnode:not([data-t="2"])::after{content:'';position:absolute;left:14px;width:2px;background:rgba(140,205,255,.14)}
+.mnode[data-t="0"]::before{top:-16px;height:16px}
+.mnode:not([data-t="2"])::after{top:30px;bottom:-16px}
+.mnode.own[data-t="0"]::before,.mnode.lk::after{background:var(--c);box-shadow:0 0 6px var(--c)}
+.mnode .dot{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 10px var(--mono);border:1.5px solid rgba(140,205,255,.2);color:var(--dim);background:rgba(5,10,16,.8)}
+.mnode .tx{font:500 12px/1.3 var(--sans);color:var(--dim)}
+.mnode .tx em{display:block;font:700 10px var(--mono);font-style:normal;letter-spacing:.1em;color:rgba(255,194,74,.55)}
+.mnode.own .dot{border-color:var(--c);color:#fff;background:radial-gradient(circle at 38% 35%,#d6e2ff,#6f98ff 45%,rgba(40,70,210,.75));box-shadow:0 0 14px var(--c),0 0 4px var(--c) inset}
+.mnode.own .tx{color:#e8f3ff}.mnode.own .tx em{color:var(--c)}
+.mnode.next{cursor:pointer}
+.mnode.next .dot{border:1.5px dashed var(--c);color:var(--c);animation:mnext 1.8s ease-in-out infinite}
+.mnode.next .tx{color:var(--txt)}.mnode.next .tx em{color:var(--amber)}
+.mnode.next:hover .dot{background:color-mix(in srgb,var(--c) 22%,transparent);color:#fff}
+.mnode.poor .dot{animation:none;opacity:.6}.mnode.poor .tx em{color:#ff8a8f}
+.mnode.lock{opacity:.5}
+.mnode.fresh .dot{animation:star .5s cubic-bezier(.3,1.6,.6,1) both}
+@keyframes mnext{50%{box-shadow:0 0 14px color-mix(in srgb,var(--c) 70%,transparent)}}
+.mfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap}
+.mfoot .btn{flex:none;min-width:150px}
+#memReset{display:flex;align-items:center;gap:8px;font:500 12px var(--mono);color:var(--dim)}
+#memReset .btn{min-width:0}
+.btn.warn{border-color:#ff8a8f;color:#ffd6dc;background:rgba(255,77,94,.14)}
+.btn:disabled{opacity:.4;cursor:default}
 /* below ~1700px a centred info bar would run into the bottom-left cluster (hero + 3 skills) */
 @media (max-width:1700px){#info{left:calc(330px * var(--u,1));transform:scale(var(--u,1));transform-origin:bottom left;max-width:calc(100% / var(--u,1) - 346px)}#info:not([hidden]) ~ #spec{opacity:0}}
 @media (max-width:1100px){#info .perk:not(.wide),#info .meta span{display:none}#info .perk.wide{flex-basis:240px;font-size:11px}}
-@media (max-width:700px){.hd{display:block}.slides{grid-template-columns:1fr}.slide .body{grid-template-columns:1fr 1fr}.tin h1{font-size:44px}}
+@media (max-width:700px){.mgrid{grid-template-columns:repeat(3,1fr);row-gap:12px}.mroot{display:none}.mhd{display:block}.bank{display:inline-block;margin-top:10px}.mbtn{position:static;margin-top:8px}.hd{display:block}.slides{grid-template-columns:1fr}.slide .body{grid-template-columns:1fr 1fr}.tin h1{font-size:44px}}
 </style>
 </head>
 <body>
@@ -191,7 +245,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   <div id="hudBL" class="ui">
     <button class="ab" id="ab-hero"><i class="hp"></i><img id="ic-hero" alt="NK Sentinel"><div class="cd"></div><span class="lv">1</span><kbd>H</kbd><div class="tip"><small>HERO · NATURAL KILLER CELL</small><b>NK Sentinel</b>Click it (or press H), then click near the path to send it there. Right-click or Esc cancels.</div></button>
     <button class="ab" id="ab-fever"><img id="ic-fever" alt="Fever"><div class="cd"></div><kbd>Q</kbd><div class="tip"><small>ABILITY · 32 s</small><b>Fever spike</b>Heat burns everything in an area and slows survivors. Click the map.</div></button>
-    <button class="ab" id="ab-swarm"><img id="ic-swarm" alt="Swarm"><div class="cd"></div><kbd>W</kbd><div class="tip"><small>ABILITY · 22 s</small><b>Neutrophil swarm</b>Drop three short-lived neutrophils that block the path. Click the path.</div></button>
+    <button class="ab" id="ab-swarm"><img id="ic-swarm" alt="Swarm"><div class="cd"></div><kbd>W</kbd><div class="tip"><small>ABILITY · 22 s</small><b>Neutrophil swarm</b>Drop <span id="swN">three</span> short-lived neutrophils that block the path. Click the path.</div></button>
     <button class="ab" id="ab-gz"><img id="ic-gz" alt="Granzyme"><div class="cd"></div><kbd>E</kbd><div class="tip"><small>HERO SKILL · 20 s</small><b>Granzyme Burst</b>The NK Sentinel sprays granzyme, damaging and stunning every pathogen around it.</div></button>
   </div>
   <div id="info" class="ui glass" hidden></div>
@@ -202,6 +256,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   <div class="ov" id="titleOv">
     <div class="tin">
       <div class="kick">IMMUNOFLUORESCENCE FIELD STUDY · 6 SPECIMENS</div>
+      <button class="mbtn" id="memBtn"><i></i>IMMUNE MEMORY <b id="memBtnN"></b></button>
       <div class="hd"><h1>IMMUNE<br><span>CITADEL</span></h1>
       <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p></div>
       <div class="slides" id="slides"></div>
@@ -210,6 +265,16 @@ button{font:inherit;color:inherit;cursor:pointer}
   </div>
   <div class="ov" id="endOv" hidden>
     <div class="rep glass" id="rep"></div>
+  </div>
+  <div class="ov" id="memOv" hidden>
+    <div class="tin mem">
+      <div class="mhd"><div><div class="kick">LINEAGE ARCHIVE · PERMANENT TRAINING</div><h1>IMMUNE <span>MEMORY</span></h1>
+        <p class="lede">Every star from a specimen trains a cell lineage for good. Clones are bought in order and apply when a specimen starts.</p></div>
+        <div class="bank glass"><b id="memAvail">0</b><small>STARS TO SPEND</small></div></div>
+      <div class="mroot"><i class="mdot"></i><label>STEM CELL</label><svg id="memTree" viewBox="0 0 600 44" preserveAspectRatio="none"></svg></div>
+      <div class="mgrid" id="memGrid"></div>
+      <div class="mfoot"><div id="memReset"></div><button class="btn pri" id="memBack">Back</button></div>
+    </div>
   </div>
 </div>
 
@@ -320,6 +385,7 @@ const TOWERS = {
   },
 };
 TOWERS.macro.lv.forEach((L, i) => Object.assign(L, { rate: .9, regen: i >= 2 ? .12 : .03 }));
+TOWERS.macro.resp = 9; // seconds before a fallen macrophage cell returns
 const TORDER = ['neutro', 'macro', 'bcell', 'killer'];
 // tier IV specialists: st = stats, sk = signature skill ranks (bought after specializing)
 const SPECS = {
@@ -444,9 +510,30 @@ LEVELS.push(
 );
 const LVLMULT = [1, 1.55, 2.0, 1.38, 1.92, 1.8]; // 05: bot wins 18/18 at ~14 lives (04: 20); 1.97+ starts losing
 // hero: lv = stats per level 1-5, xp = XP to reach the next level, gz = Granzyme Burst (damage = dmg × k)
-const HERO = { name: 'NK Sentinel', rate: .7, range: 95, speed: 105, resp: 14,
+const HERO = { name: 'NK Sentinel', rate: .7, range: 95, speed: 105, resp: 14, start: 1,
   lv: [{ hp: 200, dmg: 11, regen: 5 }, { hp: 250, dmg: 15, regen: 7 }, { hp: 310, dmg: 20, regen: 9 }, { hp: 380, dmg: 26, regen: 12 }, { hp: 460, dmg: 33, regen: 15 }],
   xp: [45, 100, 170, 260], gz: { cd: 20, r: 85, k: 3.5, stun: 1.8 } };
+const AB = { fever: { cd: 32, dmg: 95 }, swarm: { cd: 22, n: 3 } };
+// Immune Memory: permanent upgrades bought with stars. Tier k (1-3) costs k stars; tiers are bought in order.
+// Buffs mutate the live tables above, which applyMemory() first resets to BASE, so every reader (stats, info panel, bot) sees them.
+const each = (b, f) => { TOWERS[b].lv.forEach(f); for (const id in SPECS) if (SPECS[id].base === b) f(SPECS[id].st); };
+const mul = (k, m, round = true) => L => { if (L[k] != null) L[k] = round ? Math.round(L[k] * m) : L[k] * m; };
+const MEMORY = [
+  { id: 'neutro', name: 'Neutrophil', sub: 'Rapid responder', por: ['neutro'], tiers: [
+    ['+10% range', () => each('neutro', mul('range', 1.1))], ['+15% damage', () => each('neutro', mul('dmg', 1.15))], ['Shoots 15% faster', () => each('neutro', mul('rate', 1 / 1.15, false))]] },
+  { id: 'macro', name: 'Macrophage', sub: 'Big eater', por: ['macro'], tiers: [
+    ['+20% cell health', () => each('macro', mul('hp', 1.2))], ['Cells respawn 3 s faster', () => TOWERS.macro.resp -= 3], ['+25% bite damage', () => each('macro', mul('dmg', 1.25))]] },
+  { id: 'bcell', name: 'B Cell', sub: 'Antibody factory', por: ['bcell'], tiers: [
+    ['+10% range', () => each('bcell', mul('range', 1.1))], ['+20% splash radius', () => each('bcell', mul('splash', 1.2))], ['+15% damage', () => each('bcell', mul('dmg', 1.15))]] },
+  { id: 'killer', name: 'Killer T', sub: 'Assassin', por: ['killer'], tiers: [
+    ['+15% damage', () => each('killer', mul('dmg', 1.15))], ['+10% range', () => each('killer', mul('range', 1.1))], ['Fires 15% faster', () => each('killer', mul('rate', 1 / 1.15, false))]] },
+  { id: 'ab', name: 'Abilities', sub: 'Fever · swarm', por: ['fever', 'swarm'], c: '#8fb0ff', tiers: [
+    ['Fever cooldown −6 s', () => AB.fever.cd -= 6], ['Swarm drops 4 neutrophils, not 3', () => AB.swarm.n = 4], ['Fever burns 30% hotter', () => AB.fever.dmg = Math.round(AB.fever.dmg * 1.3)]] },
+  { id: 'hero', name: 'NK Sentinel', sub: 'Hero', por: ['hero'], tiers: [
+    ['Hero starts at level 2', () => HERO.start = 2], ['Hero respawns 5 s faster', () => HERO.resp -= 5], ['Granzyme Burst cooldown −5 s', () => HERO.gz.cd -= 5]] },
+];
+const LIVE = { TOWERS, SPECS, HERO, AB }, BASE = JSON.parse(JSON.stringify(LIVE)); // functions (SPECS.skd) are not data: JSON drops them and reset skips them
+function resetData(d, s) { for (const k in s) if (s[k] && typeof s[k] === 'object') resetData(d[k], s[k]); else d[k] = s[k]; }
 const NOTES = [
   'Neutrophils make up about 60% of your white blood cells, and most live less than a day.',
   'Macrophage means “big eater”. One can swallow around 100 bacteria before it dies.',
@@ -676,11 +763,23 @@ function portrait(kind, lvl = 0, sz = 96) {
 
 // ============================================================ state
 const S = { screen: 'title', speed: 1, paused: false, mouse: { x: -99, y: -99 }, time: 0 };
-let save = { stars: [0, 0, 0, 0, 0, 0], seen: [] };
+let save = { stars: [0, 0, 0, 0, 0, 0], seen: [], mem: {} };
 try { Object.assign(save, JSON.parse(localStorage.getItem('immune-citadel-v4') || '{}')); muted = !!save.muted; } catch (e) {}
+if (!save.mem || typeof save.mem !== 'object') save.mem = {}; // saves from before Immune Memory
 function persist() { try { localStorage.setItem('immune-citadel-v4', JSON.stringify({ ...save, muted })); } catch (e) {} }
+const memTier = id => clamp(save.mem[id] | 0, 0, 3);
+function memStars() {
+  const total = save.stars.reduce((a, b) => a + (b | 0), 0), spent = MEMORY.reduce((s, M) => { const t = memTier(M.id); return s + t * (t + 1) / 2; }, 0);
+  return { total, spent, avail: total - spent };
+}
+function applyMemory() {
+  resetData(LIVE, BASE);
+  for (const M of MEMORY) M.tiers.slice(0, memTier(M.id)).forEach(t => t[1]());
+  $('#ab-fever .tip small').textContent = `ABILITY · ${AB.fever.cd} s`; $('#ab-swarm .tip small').textContent = `ABILITY · ${AB.swarm.cd} s`;
+  $('#ab-gz .tip small').textContent = `HERO SKILL · ${HERO.gz.cd} s`; $('#swN').textContent = AB.swarm.n === 4 ? 'four' : 'three';
+}
 function startLevel(i) {
-  const L = LEVELS[i];
+  const L = LEVELS[i]; applyMemory();
   Object.assign(S, {
     lvl: i, L, paths: L.paths.map(makePath), slots: L.slots.map(([x, y], k) => ({ x, y, k, tower: null })),
     towers: [], enemies: [], units: [], proj: [], parts: [], floats: [], fx: [], spawnQ: [],
@@ -688,7 +787,7 @@ function startLevel(i) {
     ability: null, sel: null, armed: null, preview: null, over: false, run: (S.run || 0) + 1, paused: false, shake: 0, hurt: 0, screen: 'play', noteI: i * 3, pinned: null,
   });
   S.hero = mkHero(); bgCache = null; closeRadial(); lastHud = '';
-  $('#titleOv').hidden = true; $('#endOv').hidden = true;
+  $('#titleOv').hidden = true; $('#endOv').hidden = true; $('#memOv').hidden = true;
   $('#specId').textContent = `SPEC-0${i + 1} · ${L.place.toUpperCase()}`; $('#specName').textContent = L.name;
   showInfo(null); layoutWaveMarkers(); nextNote(); $('#banner').innerHTML = '';
   banner(`<div><small>Specimen 0${i + 1} · ${L.place}</small><b>${L.name}</b><p>${L.sub}</p></div>`, 4200);
@@ -824,7 +923,7 @@ function mkUnit(kind, x, y, owner, ttl = 0) {
 function hurtUnit(u, amt) {
   u.hp -= amt; u.hit = .12;
   if (u.hp <= 0) {
-    u.dead = true; u.resp = 9; burst(u.x, u.y, u.kind === 'macro' ? '#3fe0d0' : u.kind === 'hero' ? COL.hero : '#b49cff', 8, 1.8);
+    u.dead = true; u.resp = TOWERS.macro.resp; burst(u.x, u.y, u.kind === 'macro' ? '#3fe0d0' : u.kind === 'hero' ? COL.hero : '#b49cff', 8, 1.8);
     if (u.kind === 'hero') { u.resp = HERO.resp; burst(u.x, u.y, '#e8f6ff', 18, 2.4); floatText(u.x, u.y - 30, 'NK Sentinel down', '#ff6b78', 1.4); if (S.sel && S.sel.hero) { S.sel = null; showInfo(null); } }
     if (u.tgt && u.tgt.blocker === u) u.tgt.blocker = null; u.tgt = null;
     if (u.kind === 'swarm') u.gone = true;
@@ -839,8 +938,8 @@ function heroHome() {
   return { x: q.x, y: q.y };
 }
 function mkHero() {
-  const p = heroHome(), L = HERO.lv[0];
-  return { kind: 'hero', x: p.x, y: p.y, hx: p.x, hy: p.y, hp: L.hp, max: L.hp, lvl: 1, xp: 0, kills: 0, cd: 0, tgt: null, dead: false, resp: 0, mv: false, t: 0, hit: 0, glow: 0 };
+  const p = heroHome(), L = HERO.lv[HERO.start - 1];
+  return { kind: 'hero', x: p.x, y: p.y, hx: p.x, hy: p.y, hp: L.hp, max: L.hp, lvl: HERO.start, xp: 0, kills: 0, cd: 0, tgt: null, dead: false, resp: 0, mv: false, t: 0, hit: 0, glow: 0 };
 }
 function heroXp(n) {
   const h = S.hero; if (h.lvl >= 5) return; h.xp += n;
@@ -1101,7 +1200,7 @@ function step(dt) {
     f.t += dt;
     if (f.k === 'fever' && !f.hit && f.t >= .4) {
       f.hit = true; S.shake = Math.max(S.shake, 8); sfx('boom');
-      for (const e of S.enemies) if (!e.dead && Math.hypot(e.x - f.x, e.y - f.y) < 90) { damage(e, 95 * LVLMULT[S.lvl], 'magic'); e.slowF = .6; e.slowT = 2.5; e.revealT = 6; }
+      for (const e of S.enemies) if (!e.dead && Math.hypot(e.x - f.x, e.y - f.y) < 90) { damage(e, AB.fever.dmg * LVLMULT[S.lvl], 'magic'); e.slowF = .6; e.slowT = 2.5; e.revealT = 6; }
       S.fx.push({ k: 'reveal', x: f.x, y: f.y, r: 90, t: 0, T: 6 });
       for (let i = 0; i < 40; i++) { const a = rand(0, TAU), v = rand(40, 200); S.parts.push({ x: f.x, y: f.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, life: rand(.4, .9), max: .9, c: i % 3 ? '#f59a3c' : '#ffe08a', r: rand(2, 4.5) }); }
     }
@@ -1126,16 +1225,16 @@ function armAbility(k) {
 function castAbility(x, y) {
   const k = S.ability;
   if (k === 'fever') {
-    S.fx.push({ k: 'fever', x, y, t: 0, T: 1.1 }); S.cds.fever = 32; S.ability = null; return true;
+    S.fx.push({ k: 'fever', x, y, t: 0, T: 1.1 }); S.cds.fever = AB.fever.cd; S.ability = null; return true;
   }
   if (k === 'swarm') {
     let best = null; for (const p of S.paths) { const n = nearestOnPath(p, x, y); if (!best || n.dd < best.dd) best = n; }
     if (!best || best.dd > 45) { floatText(x, y - 10, 'Place on the path', '#ff6b78', 1); return false; }
-    for (let i = 0; i < 3; i++) {
-      const off = (i - 1) * 16, u = mkUnit('swarm', best.x + Math.cos(best.a) * off, best.y + Math.sin(best.a) * off - 30, null, 13);
+    for (let i = 0, n = AB.swarm.n; i < n; i++) {
+      const off = (i - (n - 1) / 2) * 16, u = mkUnit('swarm', best.x + Math.cos(best.a) * off, best.y + Math.sin(best.a) * off - 30, null, 13);
       u.hx = best.x + Math.cos(best.a) * off; u.hy = best.y + Math.sin(best.a) * off; S.units.push(u);
     }
-    ring(best.x, best.y, '#c39bdc'); sfx('build'); S.cds.swarm = 22; S.ability = null; return true;
+    ring(best.x, best.y, '#c39bdc'); sfx('build'); S.cds.swarm = AB.swarm.cd; S.ability = null; return true;
   }
   return false;
 }
@@ -1617,7 +1716,7 @@ function hud() {
     const bn = b.querySelector('.bonus'); if (bn) bn.textContent = `+${earlyBonus()} ATP if called now`;
   });
   for (const k of ['fever', 'swarm', 'granzyme']) {
-    const b = $(k === 'granzyme' ? '#ab-gz' : '#ab-' + k), cd = S.cds[k], max = { fever: 32, swarm: 22, granzyme: HERO.gz.cd }[k];
+    const b = $(k === 'granzyme' ? '#ab-gz' : '#ab-' + k), cd = S.cds[k], max = { fever: AB.fever.cd, swarm: AB.swarm.cd, granzyme: HERO.gz.cd }[k];
     b.querySelector('.cd').style.setProperty('--p', cd > 0 ? (cd / max * 100) + '%' : '0%');
     b.querySelector('.cd').textContent = cd > 0 ? Math.ceil(cd) : '';
     b.classList.toggle('armed', S.ability === k); b.classList.toggle('ready', cd <= 0 && S.ability !== k && S.wave > 0 && !(k === 'granzyme' && Hr.dead));
@@ -1653,14 +1752,16 @@ function endLevel(win) {
       ${win ? `<div class="bigstars">${[0, 1, 2].map(i => `<span class="${i < stars ? 'on' : ''}" style="animation-delay:${.15 + i * .2}s">★</span>`).join('')}</div>` : ''}
       <div class="rows"><div><span>Vitality remaining</span><b>${S.lives} / 20</b></div><div><span>Waves survived</span><b>${win ? S.wave : Math.max(0, S.wave - 1)} / ${S.L.waves.length}</b></div><div><span>ATP unspent</span><b>${S.gold}</b></div></div>
       <p class="fact">${S.note || NOTES[0]}</p>
+      <button class="mlink" id="eMem"><i class="mdot"></i><span>IMMUNE MEMORY</span><b>★ ${memStars().avail} to spend</b></button>
       <div class="btns"><button class="btn" id="eMap">Specimen tray</button><button class="btn ${nxt ? '' : 'pri'}" id="eRetry">${win ? 'Replay' : 'Try again'}</button>${nxt ? '<button class="btn pri" id="eNext">Next specimen</button>' : ''}</div>`;
-    $('#eMap').onclick = showTitle; $('#eRetry').onclick = () => startLevel(S.lvl); if (nxt) $('#eNext').onclick = () => startLevel(S.lvl + 1);
+    $('#eMap').onclick = showTitle; $('#eMem').onclick = () => showMemory('end'); $('#eRetry').onclick = () => startLevel(S.lvl); if (nxt) $('#eNext').onclick = () => startLevel(S.lvl + 1);
     $('#endOv').hidden = false; S.screen = 'end';
   }, win ? 900 : 1200);
 }
 const thumbs = [];
 function showTitle() {
-  S.screen = 'title'; $('#endOv').hidden = true; $('#titleOv').hidden = false; closeRadial(); showInfo(null); wm.forEach(b => b.hidden = true);
+  S.screen = 'title'; $('#endOv').hidden = true; $('#memOv').hidden = true; $('#titleOv').hidden = false; closeRadial(); showInfo(null); wm.forEach(b => b.hidden = true);
+  $('#memBtnN').textContent = '★ ' + memStars().avail;
   $('#slides').innerHTML = LEVELS.map((L, i) => {
     thumbs[i] = thumbs[i] || makeBg(L, 400, 248).toDataURL();
     const locked = i > 0 && !save.stars[i - 1];
@@ -1668,6 +1769,44 @@ function showTitle() {
   }).join('');
   $('#slides').querySelectorAll('.slide').forEach(b => b.onclick = () => { if (!b.classList.contains('locked')) { sfx('click'); startLevel(+b.dataset.i); } });
 }
+// Immune Memory screen: from = 'title' | 'end' (where Back returns)
+let memFrom = 'title', memConfirm = false, memFresh = '';
+function showMemory(from) {
+  if (from) { memFrom = from; memConfirm = false; }
+  S.screen = 'memory'; $('#titleOv').hidden = true; $('#endOv').hidden = true; $('#memOv').hidden = false;
+  const st = memStars(), roman = ['I', 'II', 'III'];
+  $('#memAvail').innerHTML = `${st.avail}<span> / ${st.total}</span>`;
+  $('#memTree').innerHTML = MEMORY.map((M, i) => { const x = 50 + i * 100; return `<path class="${memTier(M.id) ? 'on' : ''}" style="--c:${M.c || COL[M.id]}" d="M300 0C300 26 ${x} 18 ${x} 44"/>`; }).join('');
+  $('#memGrid').innerHTML = MEMORY.map((M, ci) => {
+    const own = memTier(M.id);
+    return `<div class="mcol glass ${own ? 'has' : ''}" style="--c:${M.c || COL[M.id]}"><div class="mpor">${M.por.map(k => `<img src="${portrait(k, k === M.id ? 2 : 0, 100)}" alt="">`).join('')}</div><b>${M.name}</b><small>${M.sub}</small>` +
+      M.tiers.map(([txt], t) => {
+        const cls = t < own ? 'own' : t > own ? 'lock' : 'next' + (t + 1 > st.avail ? ' poor' : '');
+        return `<button class="mnode ${cls} ${t + 1 < own ? 'lk' : ''} ${memFresh === M.id + t ? 'fresh' : ''}" data-c="${ci}" data-t="${t}"><i class="dot">${roman[t]}</i><span class="tx"><em>${t < own ? 'TRAINED' : '★ ' + (t + 1)}</em>${txt}</span></button>`;
+      }).join('') + '</div>';
+  }).join('');
+  memFresh = '';
+  $('#memReset').innerHTML = memConfirm
+    ? `<span>Refund all ${st.spent} stars?</span><button class="btn warn" id="memYes">Refund</button><button class="btn" id="memNo">Cancel</button>`
+    : `<button class="btn" id="memClear" ${st.spent ? '' : 'disabled'}>Reset · refund ${st.spent} ★</button>`;
+  $('#memBack').textContent = memFrom === 'end' ? 'Back to lab report' : 'Back to specimen tray';
+}
+$('#memGrid').onclick = ev => {
+  const b = ev.target.closest('.mnode'); if (!b || !b.classList.contains('next')) return;
+  const M = MEMORY[+b.dataset.c], t = +b.dataset.t;
+  if (t + 1 > memStars().avail) { sfx('click'); $('#memAvail').animate([{ color: '#ff4d5e', transform: 'scale(1.15)' }, { color: '', transform: 'none' }], { duration: 400 }); return; }
+  save.mem[M.id] = t + 1; persist(); memFresh = M.id + t; memConfirm = false; sfx('build'); showMemory();
+};
+$('#memReset').onclick = ev => {
+  const id = ev.target.id;
+  if (id === 'memClear') memConfirm = true;
+  else if (id === 'memNo') memConfirm = false;
+  else if (id === 'memYes') { save.mem = {}; persist(); memConfirm = false; sfx('sell'); }
+  else return;
+  showMemory();
+};
+$('#memBack').onclick = () => { if (memFrom === 'end') { $('#memOv').hidden = true; $('#endOv').hidden = false; S.screen = 'end'; $('#eMem b').textContent = `★ ${memStars().avail} to spend`; } else showTitle(); };
+$('#memBtn').onclick = () => { sfx('click'); showMemory('title'); };
 $('#mapBtn').onclick = showTitle;
 $('#restartBtn').onclick = () => { if (S.L) startLevel(S.lvl); };
 $('#muteBtn').onclick = () => { muted = !muted; persist(); $('#muteWave').style.display = muted ? 'none' : ''; $('#muteBtn').classList.toggle('on', muted); };
@@ -1692,7 +1831,7 @@ requestAnimationFrame(frame);
 
 window.IC = { S, LEVELS, LVLMULT, TOWERS, ENEMIES, SPECS, startLevel, sendWave, build: (i, k) => build(S.slots[i], k), upgrade: i => upgrade(S.slots[i].tower), sell: i => sell(S.slots[i].tower),
   specialize: (i, id) => specialize(S.slots[i].tower, id), skillUp: i => skillUp(S.slots[i].tower), refund: i => refund(S.slots[i].tower), step, makePath, nearestOnPath, posAt, castAbility, armAbility,
-  HERO, heroMove, selectHero, granzyme, heroXp, hurt: (u, a) => hurtUnit(u, a) };
+  HERO, heroMove, selectHero, granzyme, heroXp, hurt: (u, a) => hurtUnit(u, a), save, persist, MEMORY, AB, memStars, showMemory, endLevel };
 </script>
 </body>
 </html>

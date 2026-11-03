@@ -10,9 +10,12 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   console.log('slot problems:', geo.length ? geo : 'none');
   const results = [];
   const nLv = await p.evaluate(() => IC.LEVELS.length);
-  for (let li = 0; li < nLv; li++) {
-    const r = await p.evaluate(li => {
+  // every level twice: no Immune Memory upgrades, then all 18 tiers
+  for (const mem of ['none', 'all']) for (let li = 0; li < nLv; li++) {
+    const r = await p.evaluate(([li, mem]) => {
+      IC.save.mem = mem === 'all' ? Object.fromEntries(IC.MEMORY.map(M => [M.id, 3])) : {};
       IC.startLevel(li); const S = IC.S; S.screen = 'play';
+      const memOk = mem === 'none' ? S.hero.lvl === 1 && IC.AB.fever.cd === 32 : S.hero.lvl === 2 && IC.AB.fever.cd === 26 && IC.AB.swarm.n === 4 && IC.TOWERS.neutro.lv[0].range === 154;
       const order = ['neutro', 'macro', 'killer', 'bcell', 'neutro', 'killer', 'bcell', 'macro'];
       // rank slots by path coverage
       const cover = s => { let c = 0; for (const p of S.paths) for (let d = 0; d < p.len; d += 10) { const q = (function(){ return null })(); } return 0; };
@@ -51,11 +54,15 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
         if (!H.dead && S.cds.granzyme <= 0) { const n = S.enemies.filter(e => Math.hypot(e.x - H.x, e.y - H.y) < IC.HERO.gz.r).length; if (n >= 3 || (n && H.hp < H.max * .35)) IC.granzyme(); }
         lowest = Math.min(lowest, S.lives);
       }
-      return { level: li, won: S.over && S.lives > 0, lives: S.lives, wave: S.wave, secs: t, towers: S.towers.map(x => x.spec ? x.spec + x.rank : x.type[0] + x.lvl).join(' '), gold: S.gold, leaks: JSON.stringify(leaks), hero: `L${S.hero.lvl} kills ${S.hero.kills} park ${park.x | 0},${park.y | 0}` };
-    }, li);
+      return { mem, memOk, level: li, won: S.over && S.lives > 0, lives: S.lives, wave: S.wave, secs: t, towers: S.towers.map(x => x.spec ? x.spec + x.rank : x.type[0] + x.lvl).join(' '), gold: S.gold, leaks: JSON.stringify(leaks), hero: `L${S.hero.lvl} kills ${S.hero.kills} park ${park.x | 0},${park.y | 0}` };
+    }, [li, mem]);
     results.push(r);
+    if (!r.won) errs.push(`bot lost level ${li + 1} with memory ${mem}`);
+    if (!r.memOk) errs.push(`memory ${mem} not applied on level ${li + 1}`);
   }
   console.log(results);
+  for (const mem of ['none', 'all']) console.log(`bot, memory ${mem}:`, results.filter(r => r.mem === mem).map(r => `L${r.level + 1} ${r.won ? 'won' : 'LOST'} lives ${r.lives}`).join(' | '));
+  await p.evaluate(() => { IC.save.mem = {}; IC.persist(); });
   // visual: start level 1 for real, build, play 25s with rAF, screenshot
   await p.reload(); await p.waitForTimeout(600); await p.screenshot({ path: `${out}/0-tray.png` });
   // the last specimen slide must open its level with a real click (unlocked by the bot's wins)
@@ -106,5 +113,33 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   const sb = await p.evaluate(() => { const r = document.getElementById('cv').getBoundingClientRect(); const s = IC.S.slots[13]; return { x: r.left + s.x / 1000 * r.width, y: r.top + s.y / 620 * r.height, k: r.width / 1000 }; });
   await p.mouse.click(sb.x, sb.y); await p.waitForTimeout(300); await p.mouse.move(sb.x - 66 * sb.k * 1.1, sb.y); await p.waitForTimeout(300);
   await p.screenshot({ path: `${out}/7-spec-choice.png` });
+  // Immune Memory: real clicks — tray button, buy tiers in order, refused out-of-order, reset with built-in confirm, effect on start, lab-report route
+  const mm = (ok, msg) => { if (!ok) errs.push('memory: ' + msg); };
+  const at = sel => p.evaluate(s => { const r = document.querySelector(s).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, sel);
+  const clickSel = async sel => { const q = await at(sel); await p.mouse.click(q.x, q.y); await p.waitForTimeout(120); };
+  await p.evaluate(() => { IC.save.mem = {}; IC.persist(); }); await p.reload(); await p.waitForTimeout(600);
+  await clickSel('#memBtn');
+  mm(await p.evaluate(() => !document.getElementById('memOv').hidden && IC.S.screen === 'memory'), 'tray button did not open the screen');
+  const avail0 = await p.evaluate(() => IC.memStars().avail);
+  await p.screenshot({ path: `${out}/12-memory-empty.png` });
+  await clickSel('.mnode[data-c="0"][data-t="1"]'); // tier II before tier I: refused
+  mm(await p.evaluate(() => !IC.save.mem.neutro), 'tier II bought before tier I');
+  for (const [c, t] of [[0, 0], [0, 1], [5, 0], [4, 0], [1, 0], [3, 0], [2, 0], [5, 1]]) await clickSel(`.mnode[data-c="${c}"][data-t="${t}"]`);
+  mm(await p.evaluate(a => IC.save.mem.neutro === 2 && IC.save.mem.hero === 2 && IC.memStars().avail === a - 10, avail0), 'purchases not recorded / wrong cost');
+  mm(await p.evaluate(() => JSON.parse(localStorage.getItem('immune-citadel-v4')).mem.hero === 2), 'not persisted');
+  await p.mouse.move(10, 10); await p.waitForTimeout(600); await p.screenshot({ path: `${out}/13-memory-bought.png` });
+  await clickSel('#memClear'); await p.screenshot({ path: `${out}/14-memory-confirm.png` });
+  await clickSel('#memNo'); mm(await p.evaluate(() => IC.save.mem.hero === 2), 'cancel refunded');
+  await clickSel('#memClear'); await clickSel('#memYes');
+  mm(await p.evaluate(a => Object.keys(IC.save.mem).length === 0 && IC.memStars().avail === a, avail0), 'reset did not refund everything');
+  for (const [c, t] of [[5, 0], [0, 0]]) await clickSel(`.mnode[data-c="${c}"][data-t="${t}"]`);
+  await clickSel('#memBack'); mm(await p.evaluate(() => !document.getElementById('titleOv').hidden), 'back did not return to the tray');
+  await clickSel('.slide[data-i="0"]');
+  mm(await p.evaluate(() => IC.S.hero.lvl === 2 && IC.TOWERS.neutro.lv[0].range === 154), 'upgrades not applied on specimen start');
+  await p.evaluate(() => IC.endLevel(true)); await p.waitForTimeout(1200);
+  await p.screenshot({ path: `${out}/15-report-memory.png` });
+  await clickSel('#eMem'); mm(await p.evaluate(() => !document.getElementById('memOv').hidden), 'lab report link did not open the screen');
+  await clickSel('#memBack'); mm(await p.evaluate(() => !document.getElementById('endOv').hidden && IC.S.screen === 'end'), 'back did not return to the lab report');
+  await p.evaluate(() => { IC.save.mem = {}; IC.persist(); });
   console.log('errors:', errs.length ? errs : 'none'); await b.close();
 })();
