@@ -108,12 +108,28 @@ button{font:inherit;color:inherit;cursor:pointer}
 .rb.no{filter:saturate(.2) brightness(.6)}
 .rb .pr{position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);background:#06101a;border:1px solid var(--rim);color:var(--amber);font:700 11px var(--mono);border-radius:7px;padding:1px 6px;white-space:nowrap}
 .rb.no .pr{color:#ff8a8f}
-.rb .lbl{font:700 11px var(--mono);letter-spacing:.06em;color:var(--txt)}
+.rb .ico{width:24px;height:24px;stroke:var(--amber);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px rgba(255,194,74,.55))}
+.rb.max{cursor:default}.rb.max img{opacity:.5;filter:saturate(.5)}
+.rb .mx{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#06101a;border:1px solid var(--amber);color:var(--amber);font:700 10px/16px var(--mono);letter-spacing:.1em;border-radius:6px;padding:0 5px;box-shadow:0 0 8px rgba(255,194,74,.45)}
 .rb .rk{position:absolute;top:-5px;right:-5px;min-width:20px;height:20px;border-radius:10px;background:#06101a;border:1px solid var(--cyan);color:var(--cyan);font:700 10px/18px var(--mono);text-align:center;padding:0 3px;box-shadow:0 0 8px rgba(127,216,255,.5)}
 @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 /* banner */
-#banner{position:absolute;left:50%;top:14px;transform:translateX(-50%) scale(var(--u,1));transform-origin:top center;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:3}
-.bn{background:var(--glass2);border:1px solid var(--rim);border-radius:12px;padding:9px 16px;display:flex;gap:12px;align-items:center;box-shadow:0 14px 30px -14px #000;animation:drop .35s ease-out both;max-width:470px}
+/* #topc sits centred in the gap between the meters and the controls; layoutTop() sets left and --bw (gap width) */
+#topc{position:absolute;left:50%;top:14px;transform:translateX(-50%) scale(var(--u,1));transform-origin:top center;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:3}
+#banner{display:flex;flex-direction:column;align-items:center;gap:8px}
+.bn{background:var(--glass2);border:1px solid var(--rim);border-radius:12px;padding:9px 16px;display:flex;gap:12px;align-items:center;box-shadow:0 14px 30px -14px #000;animation:drop .35s ease-out both;max-width:min(470px,calc(var(--bw,470px) / var(--u,1)))}
+#boss{display:flex;align-items:center;gap:10px;padding:6px 14px 8px 6px;width:min(360px,calc(var(--bw,360px) / var(--u,1)));border-color:rgba(255,77,94,.45);box-shadow:0 0 24px -8px rgba(255,51,85,.6),0 10px 30px -14px #000;animation:drop .35s ease-out both}
+#boss img{width:38px;height:38px;flex:none}
+#boss div{flex:1;min-width:0}
+#boss small{display:flex;justify-content:space-between;font:600 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#ff8a8f}
+#boss small span{color:var(--txt);letter-spacing:.04em}
+#boss b{display:block;font:600 15px/1.2 var(--sans);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#boss .bar{height:7px;margin-top:4px;border-radius:4px;background:rgba(255,77,94,.14);overflow:hidden}
+#boss .bar i{display:block;height:100%;width:var(--hp,100%);background:linear-gradient(90deg,var(--bc,#ff3355),#ffb0bc);box-shadow:0 0 10px var(--bc,#ff3355);transition:width .2s}
+/* purchase flash on the info card */
+#info.flash{animation:iflash 1.3s ease-out}
+#info.flash::before{content:attr(data-flash);position:absolute;left:14px;top:-11px;background:#06101a;border:1px solid var(--amber);color:var(--amber);font:700 10px/18px var(--mono);letter-spacing:.16em;border-radius:7px;padding:0 8px;box-shadow:0 0 12px rgba(255,194,74,.6);animation:fade 1.3s ease-in forwards}
+@keyframes iflash{0%,30%{border-color:var(--amber);box-shadow:0 0 0 1px rgba(255,194,74,.6),0 0 30px rgba(255,194,74,.45)}}
 .bn.out{animation:fade .4s ease-in forwards}
 .bn img{width:44px;height:44px;border-radius:9px;background:rgba(0,0,0,.4)}
 .bn small{display:block;font:600 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#ff8a8f}
@@ -138,14 +154,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 .slide .lab{background:repeating-linear-gradient(45deg,rgba(255,255,255,.16) 0 2px,rgba(255,255,255,.07) 2px 5px);writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font:700 11px var(--mono);letter-spacing:.24em;color:#eef6ff}
 .slide .body{display:grid;grid-template-columns:1.25fr 1fr;gap:12px;padding:10px}
 .slide img{width:100%;aspect-ratio:1000/620;object-fit:cover;border-radius:4px;display:block}
-.slide .n{font:600 9px var(--mono);letter-spacing:.16em;color:var(--cyan);text-transform:uppercase}
+.slide .n{font:600 max(9px,calc(8px / var(--ut,1))) var(--mono);letter-spacing:.16em;color:var(--cyan);text-transform:uppercase}
 .slide b{display:block;font:600 18px/1.15 var(--sans);color:#fff;margin:4px 0}
-.slide p{margin:0 0 6px;font-size:12px;color:var(--dim)}
+.slide p{margin:0 0 6px;font-size:max(12px,calc(9px / var(--ut,1)));color:var(--dim)}
 .stars{font-size:16px;letter-spacing:3px;color:rgba(140,205,255,.2)}
 .stars .on{color:var(--amber);text-shadow:0 0 10px rgba(255,194,74,.7)}
 .slide.locked{opacity:.45;cursor:default}
 .slide.locked img{filter:grayscale(1) brightness(.6)}
-.keys{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;font:500 12px var(--mono);color:var(--dim)}
+.keys{display:flex;gap:6px 22px;flex-wrap:wrap;margin-top:16px;font:500 max(12px,calc(10px / var(--ut,1))) var(--mono);color:var(--dim)}
 .keys b{color:var(--txt)}
 .rep{width:min(440px,100%);padding:24px 26px;margin:auto;zoom:var(--u,1)}
 .rep .kick{font:600 10px var(--mono);letter-spacing:.2em;color:var(--dim);display:flex;justify-content:space-between}
@@ -161,7 +177,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .rows b{color:var(--txt)}
 .rep .fact{font-size:13px;color:var(--dim);margin:0 0 16px;padding-left:10px;border-left:2px solid var(--dapi)}
 .btns{display:flex;gap:8px}
-.btn{flex:1;border:1px solid var(--rim2);border-radius:10px;padding:11px 14px;font:600 13px var(--sans);background:rgba(140,205,255,.06)}
+.btn{flex:1 1 auto;white-space:nowrap;border:1px solid var(--rim2);border-radius:10px;padding:11px 12px;font:600 13px var(--sans);background:rgba(140,205,255,.06)}
 .btn:hover{background:rgba(140,205,255,.14)}
 .btn.pri{background:var(--cyan);border-color:var(--cyan);color:#04121c;box-shadow:0 0 22px rgba(127,216,255,.35)}
 [hidden]{display:none!important}
@@ -201,8 +217,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 .mnode:not([data-t="2"])::after{top:30px;bottom:-16px}
 .mnode.own[data-t="0"]::before,.mnode.lk::after{background:var(--c);box-shadow:0 0 6px var(--c)}
 .mnode .dot{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 10px var(--mono);border:1.5px solid rgba(140,205,255,.2);color:var(--dim);background:rgba(5,10,16,.8)}
-.mnode .tx{font:500 12px/1.3 var(--sans);color:var(--dim)}
-.mnode .tx em{display:block;font:700 10px var(--mono);font-style:normal;letter-spacing:.1em;color:rgba(255,194,74,.55)}
+.mnode .tx{font:500 max(12px,calc(10px / var(--ut,1)))/1.3 var(--sans);color:var(--dim)}
+.mnode .tx em{display:block;font:700 max(10px,calc(9px / var(--ut,1))) var(--mono);font-style:normal;letter-spacing:.1em;color:rgba(255,194,74,.55)}
 .mnode.own .dot{border-color:var(--c);color:#fff;background:radial-gradient(circle at 38% 35%,#d6e2ff,#6f98ff 45%,rgba(40,70,210,.75));box-shadow:0 0 14px var(--c),0 0 4px var(--c) inset}
 .mnode.own .tx{color:#e8f3ff}.mnode.own .tx em{color:var(--c)}
 .mnode.next{cursor:pointer}
@@ -221,7 +237,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 .btn:disabled{opacity:.4;cursor:default}
 /* below ~1700px a centred info bar would run into the bottom-left cluster (hero + 3 skills) */
 @media (max-width:1700px){#info{left:calc(330px * var(--u,1));transform:scale(var(--u,1));transform-origin:bottom left;max-width:calc(100% / var(--u,1) - 346px)}#info:not([hidden]) ~ #spec{opacity:0}}
-@media (max-width:1100px){#info .perk:not(.wide),#info .meta span{display:none}#info .perk.wide{flex-basis:240px;font-size:11px}}
+@media (max-width:1100px){#info .perk:not(.wide),#info .meta span:not(.xp){display:none}#info .perk.wide{flex:0 1 210px;font-size:11px}#info .skt:not(.nx) .skd{display:none}#info .s b em{display:block;margin:0}#info .meta b{font-size:16px}}
+@media (max-height:600px){.ov{padding:10px 20px}}
 @media (max-width:700px){.mgrid{grid-template-columns:repeat(3,1fr);row-gap:12px}.mroot{display:none}.mhd{display:block}.bank{display:inline-block;margin-top:10px}.mbtn{position:static;margin-top:8px}.hd{display:block}.slides{grid-template-columns:1fr}.slide .body{grid-template-columns:1fr 1fr}.tin h1{font-size:44px}}
 </style>
 </head>
@@ -250,7 +267,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   </div>
   <div id="info" class="ui glass" hidden></div>
   <div id="spec" class="ui"><span id="specId">SPEC-01 · DERMIS</span><b id="specName">The Splinter</b><span class="bar"><i></i>50 µm · ×400</span></div>
-  <div id="banner"></div>
+  <div id="topc"><div id="boss" class="glass" hidden><img alt=""><div><small>Boss <span></span></small><b></b><div class="bar"><i></i></div></div></div><div id="banner"></div></div>
   <div id="pausePill" class="ui glass" hidden>PAUSED <small>space to resume</small></div>
 
   <div class="ov" id="titleOv">
@@ -390,8 +407,8 @@ const TORDER = ['neutro', 'macro', 'bcell', 'killer'];
 // tier IV specialists: st = stats, sk = signature skill ranks (bought after specializing)
 const SPECS = {
   net: { base: 'neutro', name: 'NET Trapper', role: 'Tier IV · Controller', kind: 'Physical · every shot slows', cost: 270,
-    st: { dmg: 20, rate: .33, range: 175, slow: .6 }, tag: ['SLOW', '40%'],
-    perk: 'Casts DNA nets: every granule slows its target by 40%.',
+    st: { dmg: 20, rate: .33, range: 175, slow: .5 }, tag: ['SLOW', '50%'],
+    perk: 'Casts DNA nets: every granule slows its target by 50%.',
     skn: 'Chromatin Snare', sk: [{ cost: 150, cd: 9, r: 65, root: 1.6 }, { cost: 190, cd: 8, r: 85, root: 2.6 }],
     skd: r => `Every ${r.cd} s roots all ground pathogens within ${r.r} of its target for ${r.root} s (bosses half).` },
   degran: { base: 'neutro', name: 'Degranulator', role: 'Tier IV · Shredder', kind: 'Physical · 3-shot bursts', cost: 300,
@@ -460,7 +477,7 @@ const LEVELS = [
   {
     place: 'The Lungs', name: 'Storm in the Alveoli', sub: 'Airborne invaders arrive on two breaths at once.', seed: 23, gold: 330, style: 'lung',
     th: { bg: '#f2d9dc', cell: '#f8e8ea', edge: '#e2b6bd', nuc: '#dca5ae', out: '#9c4456', path: '#c86f80', hi: '#eaa2ae' },
-    paths: [[[-40, 110], [240, 110], [340, 190], [460, 300], [620, 300], [760, 220], [1040, 220]], [[-40, 520], [220, 520], [340, 420], [460, 300], [620, 300], [760, 220], [1040, 220]]],
+    paths: [[[-40, 110], [240, 110], [340, 190], [460, 300], [620, 300], [760, 220], [1040, 220]], [[-40, 505], [220, 505], [340, 420], [460, 300], [620, 300], [760, 220], [1040, 220]]], // route 2 clears the ability cluster
     slots: [[120, 45], [140, 180], [320, 88], [432, 182], [140, 450], [140, 588], [332, 512], [312, 305], [540, 230], [540, 370], [700, 360], [680, 190], [860, 150], [880, 290]],
     waves: [[g_('bact', 8, 1.1, 0, -1)], [g_('virus', 12, .5, 0, -1)], [g_('flu', 5, 1.6, 0, 0), g_('bact', 8, 1, 1, 1)], [g_('staph', 4, 2, 0, 0), g_('staph', 4, 2, 1, 1), g_('bact', 6, 1, 4, -1)],
       [g_('candida', 3, 3, 0, -1), g_('virus', 10, .5, 4, -1)], [g_('flu', 10, 1, 0, -1)], [g_('staph', 8, 1.2, 0, -1), g_('bact', 14, .6, 3, -1)],
@@ -469,8 +486,9 @@ const LEVELS = [
   {
     place: 'The Bloodstream', name: 'Rapids of the Aorta', sub: 'The current carries parasites deep into the body.', seed: 37, gold: 380, style: 'blood',
     th: { bg: '#f0d2c8', cell: '#e9a59a', edge: '#d1857a', nuc: '#d98f84', out: '#8e2f2f', path: '#bb4f4a', hi: '#e08679' },
-    paths: [[[-40, 90], [820, 90], [900, 170], [820, 250], [180, 250], [100, 330], [180, 410], [820, 410], [900, 490], [820, 560], [-40, 560]]],
-    slots: [[250, 170], [480, 170], [700, 170], [300, 330], [520, 330], [740, 330], [260, 485], [480, 485], [700, 485], [975, 170], [38, 330], [975, 488], [110, 170]],
+    // rows end at y 490: the exit and the core stay above the bottom-left ability cluster
+    paths: [[[-40, 90], [820, 90], [900, 157], [820, 225], [180, 225], [100, 292], [180, 360], [820, 360], [900, 425], [820, 490], [-40, 490]]],
+    slots: [[250, 157], [480, 157], [700, 157], [300, 292], [520, 292], [740, 292], [260, 425], [480, 425], [700, 425], [975, 157], [30, 292], [975, 425], [110, 157]],
     waves: [[g_('bact', 12, .9)], [g_('virus', 20, .45)], [g_('worm', 1, 1), g_('bact', 10, .8, 3)], [g_('flu', 12, .9)], [g_('staph', 10, 1.2)],
       [g_('worm', 2, 5), g_('virus', 16, .4, 2)], [g_('candida', 6, 2.2), g_('flu', 8, 1, 4)], [g_('worm', 3, 4), g_('staph', 8, 1.1, 3)],
       [g_('bact', 20, .4), g_('virus', 20, .35, 4), g_('flu', 10, .8, 8)], [g_('worm', 5, 3.5), g_('candida', 6, 2.5, 4), g_('flu', 12, .8, 8)]],
@@ -478,8 +496,8 @@ const LEVELS = [
   {
     place: 'The Lymph Node', name: 'Siege of the Citadel', sub: 'The superbug marches on the body’s training ground.', seed: 51, gold: 440, style: 'lymph',
     th: { bg: '#ebe3cc', cell: '#f3edd9', edge: '#d6c9a3', nuc: '#c8b98d', out: '#6f6a3c', path: '#a59a5c', hi: '#cfc58c' },
-    paths: [[[500, -40], [500, 120], [300, 200], [260, 340], [400, 440], [620, 440], [760, 330], [1040, 330]], [[-40, 540], [180, 560], [400, 440], [620, 440], [760, 330], [1040, 330]]],
-    slots: [[420, 60], [580, 90], [400, 232], [330, 108], [200, 260], [370, 330], [510, 370], [510, 520], [300, 590], [100, 480], [700, 280], [720, 450], [880, 262], [900, 400]],
+    paths: [[[500, -40], [500, 120], [300, 200], [260, 340], [400, 440], [620, 440], [760, 330], [1040, 330]], [[-40, 420], [140, 490], [300, 500], [400, 440], [620, 440], [760, 330], [1040, 330]]], // route 2 enters above the ability cluster, same length as before
+    slots: [[420, 60], [580, 90], [400, 232], [330, 108], [200, 260], [370, 330], [510, 370], [510, 520], [380, 570], [150, 400], [700, 280], [720, 450], [880, 262], [900, 400]],
     waves: [[g_('bact', 10, 1, 0, -1)], [g_('virus', 16, .45, 0, -1)], [g_('staph', 6, 1.6, 0, -1), g_('flu', 6, 1.2, 3, 0)], [g_('candida', 4, 2.5, 0, -1), g_('bact', 12, .7, 3, -1)],
       [g_('worm', 2, 5, 0, 0), g_('virus', 20, .35, 2, 1)], [g_('flu', 14, .8, 0, -1)], [g_('staph', 12, 1, 0, -1), g_('spore', 12, .4, 4, -1)],
       [g_('worm', 3, 4, 0, -1), g_('candida', 4, 2.5, 3, -1)], [g_('virus', 40, .25, 0, -1)], [g_('staph', 10, 1, 0, -1), g_('worm', 3, 4, 3, -1), g_('flu', 10, .8, 6, -1)],
@@ -488,7 +506,8 @@ const LEVELS = [
 ];
 LEVELS.push(
   {
-    place: 'Gut Lining', name: 'The Villi Maze', sub: 'Two tainted meals, two routes through the villi. They cross, then merge.', seed: 67, gold: 480, style: 'villi', edge: '#ff9a3c', tint: '#ff9a3c',
+    place: 'Gut Lining', name: 'The Villi Maze', sub: 'Two tainted meals, two routes through the villi. They cross, then merge.', seed: 67, gold: 480, style: 'villi', edge: '#b47dff', // PAS-stained mucin lilac: clear of orange flu, magenta candida, pink toxo
+   
     paths: [[[-40, 120], [200, 120], [330, 250], [470, 420], [620, 470], [760, 380], [860, 300], [1040, 300]], [[-40, 470], [190, 470], [330, 380], [470, 250], [600, 180], [760, 220], [860, 300], [1040, 300]]],
     slots: [[160, 190], [240, 360], [300, 310], [390, 230], [380, 410], [490, 340], [560, 310], [570, 390], [650, 380], [690, 270], [760, 300], [850, 210], [850, 390], [920, 240], [170, 400], [460, 190]],
     waves: [[g_('bact', 12, .9, 0, -1)], [g_('salmon', 8, 1.2, 0, -1)], [g_('virus', 18, .4, 0, -1), g_('staph', 4, 1.8, 3, -1)], [g_('toxo', 4, 2.5, 0, -1), g_('bact', 10, .8, 2, -1)],
@@ -497,18 +516,19 @@ LEVELS.push(
       [g_('candida', 6, 2, 0, -1), g_('salmon', 16, .5, 3, -1), g_('worm', 3, 4, 6, -1)], [g_('toxo', 14, 1, 0, -1), g_('salmon', 20, .45, 4, -1), g_('worm', 4, 3.5, 8, -1), g_('flu', 10, .8, 12, -1)]],
   },
   {
-    place: 'Brain Barrier', name: 'The Last Wall', sub: 'Behind this barrier lies the brain. One long road, one fork, nothing left behind it.', seed: 79, gold: 520, style: 'bbb', edge: '#d46bff', tint: '#d46bff',
-    paths: [[[-40, 90], [230, 90], [330, 160], [300, 270], [160, 330], [150, 440], [260, 520], [440, 510], [520, 380], [600, 280], [720, 250], [830, 330], [900, 380], [1040, 380]],
-      [[-40, 90], [230, 90], [330, 160], [300, 270], [160, 330], [150, 440], [260, 520], [440, 510], [600, 560], [760, 560], [850, 450], [900, 380], [1040, 380]]],
+    place: 'Brain Barrier', name: 'The Last Wall', sub: 'Behind this barrier lies the brain. One long road, one fork, nothing left behind it.', seed: 79, gold: 520, style: 'bbb', edge: '#6df0a6', // GFAP green: clear of pink toxo, magenta candida, lime E. coli
+   
+    paths: [[[-40, 90], [230, 90], [330, 160], [300, 270], [160, 330], [150, 440], [260, 505], [440, 510], [520, 380], [600, 280], [720, 250], [830, 330], [900, 380], [1040, 380]],
+      [[-40, 90], [230, 90], [330, 160], [300, 270], [160, 330], [150, 440], [260, 505], [440, 510], [600, 560], [760, 560], [850, 450], [900, 380], [1040, 380]]],
     slots: [[180, 180], [330, 90], [380, 200], [180, 260], [290, 340], [100, 360], [280, 420], [350, 450], [110, 460], [430, 580], [540, 480], [420, 420], [580, 410], [680, 320], [810, 400], [920, 460], [920, 310], [850, 270]],
     waves: [[g_('salmon', 10, 1, 0, -1)], [g_('toxo', 6, 2, 0, -1), g_('bact', 12, .8, 3, -1)], [g_('virus', 24, .35, 0, -1)], [g_('staph', 10, 1.2, 0, -1), g_('flu', 8, 1, 4, -1)],
-      [g_('worm', 3, 4, 0, -1), g_('salmon', 12, .7, 3, -1)], [g_('toxo', 10, 1.5, 0, -1), g_('candida', 4, 2.5, 4, -1)], [g_('flu', 16, .7, 0, -1), g_('salmon', 10, .7, 4, -1)],
-      [g_('staph', 12, 1, 0, -1), g_('worm', 3, 4, 4, -1)], [g_('toxo', 14, 1.1, 0, -1), g_('virus', 30, .3, 4, -1)], [g_('candida', 8, 1.8, 0, -1), g_('salmon', 16, .5, 4, -1)],
+      [g_('worm', 3, 4, 0, -1), g_('salmon', 12, .7, 3, -1)], [g_('toxo', 10, 1.5, 0, -1), g_('candida', 4, 2.5, 4, -1)], [g_('flu', 14, .75, 0, -1), g_('salmon', 10, .7, 4, -1)],
+      [g_('staph', 12, 1, 0, -1), g_('worm', 3, 4, 4, -1)], [g_('toxo', 12, 1.2, 0, -1), g_('virus', 26, .3, 4, -1)], [g_('candida', 8, 1.8, 0, -1), g_('salmon', 16, .5, 4, -1)],
       [g_('worm', 5, 3, 0, -1), g_('flu', 14, .7, 4, -1)], [g_('toxo', 16, 1, 0, -1), g_('staph', 12, .9, 4, -1)], [g_('salmon', 24, .4, 0, -1), g_('worm', 4, 3.5, 4, -1), g_('flu', 12, .7, 8, -1)],
       [g_('rabies', 1, 1, 0, 0), g_('toxo', 10, 1.4, 3, -1), g_('salmon', 16, .6, 8, -1)]],
   },
 );
-const LVLMULT = [1, 1.55, 2.0, 1.38, 1.92, 1.8]; // 05: bot wins 18/18 at ~14 lives (04: 20); 1.97+ starts losing
+const LVLMULT = [1.15, 1.8, 2.25, 1.7, 2.03, 2.52]; // bot curve: 01-02 ~20 lives, 03-04 ~14, 05 no-memory wins ~65% narrowly, 06 needs full memory (~11 lives)
 // hero: lv = stats per level 1-5, xp = XP to reach the next level, gz = Granzyme Burst (damage = dmg × k)
 const HERO = { name: 'NK Sentinel', rate: .7, range: 95, speed: 105, resp: 14, start: 1,
   lv: [{ hp: 200, dmg: 11, regen: 5 }, { hp: 250, dmg: 15, regen: 7 }, { hp: 310, dmg: 20, regen: 9 }, { hp: 380, dmg: 26, regen: 12 }, { hp: 460, dmg: 33, regen: 15 }],
@@ -555,12 +575,12 @@ const NOTES = [
 
 // ============================================================ specimen identity (v4)
 const SPEC = [
-  { place: 'Dermis', name: 'The Splinter', sub: 'A splinter broke the skin barrier. Bacteria flood the wound channel.', edge: '#ff6b5a', tint: '#ff6b5a',
+  { place: 'Dermis', name: 'The Splinter', sub: 'A splinter broke the skin barrier. Bacteria flood the wound channel.', edge: '#ff7f50',
     slots: [[130, 225], [250, 100], [225, 300], [395, 300], [355, 525], [510, 400], [520, 545], [600, 330], [765, 300], [760, 92], [900, 232], [960, 90]] },
-  { place: 'Alveoli', name: 'Two Breaths', sub: 'Every inhale brings a new wave down two airways at once.', edge: '#4dffb0', tint: '#4dffb0',
-    slots: [[230, 195], [140, 180], [320, 88], [432, 182], [140, 450], [240, 400], [332, 512], [312, 305], [540, 230], [540, 370], [700, 360], [680, 190], [860, 150], [880, 290]] },
-  { place: 'Aorta', name: 'The Current', sub: 'A long, fast artery. Parasites ride it toward the heart.', edge: '#ff3d55', tint: '#ff3d55' },
-  { place: 'Lymph Node', name: 'The Superbug', sub: 'A drug-resistant colony marches on the immune system’s own school.', edge: '#ffd166', tint: '#ffd166' },
+  { place: 'Alveoli', name: 'Two Breaths', sub: 'Every inhale brings a new wave down two airways at once.', edge: '#4dffb0',
+    slots: [[230, 195], [140, 180], [320, 88], [432, 182], [140, 440], [240, 400], [332, 512], [312, 305], [540, 230], [540, 370], [700, 360], [680, 190], [860, 150], [880, 290]] },
+  { place: 'Aorta', name: 'The Current', sub: 'A long, fast artery. Parasites ride it toward the heart.', edge: '#7cf08c' }, // elastin autofluorescence: clear of red rhinovirus
+  { place: 'Lymph Node', name: 'The Superbug', sub: 'A drug-resistant colony marches on the immune system’s own school.', edge: '#e6ef6a' }, // lemon: clear of amber staph and lime E. coli
 ];
 LEVELS.forEach((L, i) => Object.assign(L, SPEC[i]));
 
@@ -756,7 +776,8 @@ function portrait(kind, lvl = 0, sz = 96) {
   } else if (ENEMIES[kind]) {
     const big = kind === 'boss' || kind === 'rabies' ? 80 : kind === 'candida' || kind === 'worm' ? 46 : kind === 'virion' ? 24 : 36, s = sz / big; g.scale(s, s);
     if (kind === 'worm') g.translate(9, 0);
-    drawEnemyArt(g, kind, .5, 0);
+    if (kind === 'rabies') halo(g, 40, COL.rabies, .35);
+    drawEnemyArt(g, kind, .5, kind === 'rabies' || kind === 'virion' ? -.6 : 0);
   }
   return portraitCache[key] = c.toDataURL();
 }
@@ -782,7 +803,7 @@ function startLevel(i) {
   const L = LEVELS[i]; applyMemory();
   Object.assign(S, {
     lvl: i, L, paths: L.paths.map(makePath), slots: L.slots.map(([x, y], k) => ({ x, y, k, tower: null })),
-    towers: [], enemies: [], units: [], proj: [], parts: [], floats: [], fx: [], spawnQ: [],
+    towers: [], enemies: [], units: [], proj: [], parts: [], floats: [], fx: [], spawnQ: [], home: null,
     gold: L.gold, lives: 20, wave: 0, waveTimer: -1, waveTimerMax: 1, time: 0, cds: { fever: 0, swarm: 0, granzyme: 0 },
     ability: null, sel: null, armed: null, preview: null, over: false, run: (S.run || 0) + 1, paused: false, shake: 0, hurt: 0, screen: 'play', noteI: i * 3, pinned: null,
   });
@@ -814,7 +835,6 @@ function sendWave() {
     fresh.forEach(t => { save.seen.push(t); if (t === 'candida' && !save.seen.includes('spore')) save.seen.push('spore'); });
     persist(); buildCodex();
     fresh.forEach((t, i) => setTimeout(() => banner(`<img src="${portrait(t, 0, 88)}"><div><small>New threat</small><b>${ENEMIES[t].name}</b><p>${ENEMIES[t].desc}</p></div>`, 5200), i * 600));
-    showInfo({ kind: 'enemy', type: fresh[0] });
   } else banner(`<div><small>Incoming</small><b>Wave ${S.wave} of ${S.L.waves.length}</b></div>`, 1800);
   if (S.wave % 2 === 0) nextNote();
   updateChips();
@@ -846,7 +866,7 @@ function kill(e, src) {
   if (H && (src === H || S.time - e.heroT < 4)) heroXp(src === H ? e.D.gold : Math.ceil(e.D.gold / 2)); // kill or assist
   const ef = src && src.owner && src.owner.spec === 'm2' && skill(src.owner);
   if (ef) { S.gold += ef.atp; floatText(e.x, e.y - 32, `+${ef.atp} efferocytosis`, '#8ff0ff', 1.1); }
-  burst(e.x, e.y, COL[e.type], e.D.boss ? 60 : e.D.r > 12 ? 18 : 10, e.D.boss ? 4 : 2.4);
+  burst(e.x, e.y, COL[e.type], e.D.boss ? 60 : e.D.r > 12 ? 18 : 10, e.D.boss ? 4 : 2.4); S.fx.push({ k: 'rupture', x: e.x, y: e.y - (e.D.flying ? 12 : 0), r: e.D.r, c: COL[e.type], t: 0, T: e.D.boss ? .8 : .4 });
   sfx(e.D.boss ? 'boom' : 'pop'); if (e.D.boss) S.shake = 14;
   if (e.D.split) for (let k = 0; k < e.D.split; k++) spawnEnemy('spore', e.p, e.mult, Math.max(0, e.d - k * 9), rand(-10, 10));
   if (e.blocker) e.blocker = null;
@@ -857,6 +877,7 @@ function leak(e) {
   if (S.lives <= 0) endLevel(false);
 }
 function towerAt(slot) { return slot.tower; }
+function rallyOf(s) { let best = null; for (const p of S.paths) { const n = nearestOnPath(p, s.x, s.y); if (!best || n.dd < best.dd) best = n; } return best; }
 function invested(t) {
   let s = 0; for (let i = 0; i <= t.lvl; i++) s += TOWERS[t.type].lv[i].cost;
   if (t.spec) { const P = SPECS[t.spec]; s += P.cost; for (let i = 0; i < t.rank; i++) s += P.sk[i].cost; }
@@ -869,8 +890,7 @@ function build(slot, type) {
   S.gold -= c;
   const t = { type, slot, x: slot.x, y: slot.y, lvl: 0, cd: .2, t: rand(0, 5), fire: 0, shots: 0, units: [], built: 0 };
   if (type === 'macro') {
-    let best = null; for (const p of S.paths) { const n = nearestOnPath(p, slot.x, slot.y); if (!best || n.dd < best.dd) best = n; }
-    t.rally = best; syncUnits(t);
+    t.rally = rallyOf(slot); syncUnits(t);
   }
   slot.tower = t; S.towers.push(t); sfx('build'); ring(slot.x, slot.y, '#fff');
   burst(slot.x, slot.y, '#7fd8ff', 12, 2);
@@ -890,14 +910,14 @@ function specialize(t, id) {
   S.gold -= P.cost; Object.assign(t, { spec: id, rank: 0, sk: 1.5, surge: 0, bn: 0, built: 0, mem: id === 'memory' ? {} : null });
   if (t.type === 'macro') syncUnits(t, true);
   sfx('build'); ring(t.x, t.y, COL[id]); ring(t.x, t.y - 12, '#ffd27a'); burst(t.x, t.y, COL[id], 26, 3);
-  floatText(t.x, t.y - 44, P.name, COL[id], 1.6); return true;
+  floatText(t.x, t.y - 44, P.name, COL[id], 1.6); flashInfo('SPECIALIZED'); return true;
 }
 function skillUp(t) {
   if (!t || !t.spec || t.rank >= 2 || S.over) return false;
   const c = SPECS[t.spec].sk[t.rank].cost; if (S.gold < c) { flashGold(); return false; }
   S.gold -= c; t.rank++; t.sk = Math.min(t.sk, 1);
   sfx('build'); ring(t.x, t.y, '#7fd8ff'); burst(t.x, t.y - 12, '#7fd8ff', 16, 2.5);
-  floatText(t.x, t.y - 44, `${SPECS[t.spec].skn} ${['I', 'II'][t.rank - 1]}`, '#7fd8ff', 1.4); return true;
+  floatText(t.x, t.y - 44, `${SPECS[t.spec].skn} ${['I', 'II'][t.rank - 1]}`, '#7fd8ff', 1.4); flashInfo(`SKILL RANK ${['I', 'II'][t.rank - 1]}`); return true;
 }
 function sell(t) {
   if (!t) return;
@@ -931,11 +951,17 @@ function hurtUnit(u, amt) {
 }
 
 // ============================================================ hero
-// home: on the main path a little before the core, walked back until it clears the bottom-left HUD cluster
+// home: the busiest choke in the front-middle of the routes (most path within 90, most build sites within 150), clear of the HUD
 function heroHome() {
-  const p = S.paths[0]; let q;
-  for (let d = p.len - 110; d > 0; d -= 20) { q = posAt(p, d); if (q.x > 20 && q.x < W - 20 && q.y > 20 && q.y < H - 20 && !(q.x < 300 && q.y > 525)) break; }
-  return { x: q.x, y: q.y };
+  if (S.home) return S.home;
+  let best = null, bs = -1;
+  for (const p of S.paths) for (let d = p.len * .25; d < p.len * .6; d += 15) {
+    const q = posAt(p, d); if (q.x < 330 && q.y > 500 || q.x < 20 || q.x > W - 20) continue;
+    let sc = 3 * S.slots.filter(s => Math.hypot(s.x - q.x, s.y - q.y) < 150).length;
+    for (const o of S.paths) for (const [x, y] of o.pts) if (Math.hypot(x - q.x, y - q.y) < 90) sc++;
+    if (sc > bs) { bs = sc; best = { x: q.x, y: q.y }; }
+  }
+  return S.home = best;
 }
 function mkHero() {
   const p = heroHome(), L = HERO.lv[HERO.start - 1];
@@ -1254,28 +1280,30 @@ function resize() {
   cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR); viewK = w / W;
   const u = clamp(viewK * 1.05, .62, 1.25); st.style.setProperty('--u', u.toFixed(3));
   st.style.setProperty('--ut', Math.max(.62, Math.min(u, (h - 40) / 790)).toFixed(3)); // tray: three rows of slides fit the stage height
-  bgCache = null; layoutWaveMarkers(); if (S.sel && S.sel.slot) openRadial(S.sel.slot);
+  bgCache = null; layoutWaveMarkers(); layoutTop(); if (S.sel && S.sel.slot) openRadial(S.sel.slot);
 }
+// mix a hex colour toward its own grey by k (0..1)
+function desat(h, k) { const n = parseInt(h.slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255], m = (c[0] + c[1] + c[2]) / 3; return '#' + c.map(v => Math.round(v + (m - v) * k).toString(16).padStart(2, '0')).join(''); }
 function makeBg(L, pw, ph) {
   const c = document.createElement('canvas'); c.width = pw; c.height = ph; const g = c.getContext('2d'); g.scale(pw / W, ph / H);
-  const R = rng(L.seed), paths = L.paths.map(makePath), E = L.edge;
+  const R = rng(L.seed), paths = L.paths.map(makePath), E = L.edge, T = desat(E, .55); // T: tissue counterstain, E: only the path wall carries the specimen hue
   g.fillStyle = '#05090f'; g.fillRect(0, 0, W, H);
   // out-of-focus depth layer
   g.globalCompositeOperation = 'lighter';
-  for (let i = 0; i < 26; i++) { const x = R() * W, y = R() * H, r = 60 + R() * 160, col = R() > .55 ? '#5b8cff' : E, gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, rgba(col, .06 + R() * .05)); gr.addColorStop(1, rgba(col, 0)); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); }
+  for (let i = 0; i < 26; i++) { const x = R() * W, y = R() * H, r = 60 + R() * 160, col = R() > .55 ? '#5b8cff' : T, gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, rgba(col, .06 + R() * .05)); gr.addColorStop(1, rgba(col, 0)); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); }
   const nuc = (x, y, r, a) => { const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, rgba('#8fb0ff', a)); gr.addColorStop(.7, rgba('#5b8cff', a * .6)); gr.addColorStop(1, rgba('#5b8cff', 0)); g.fillStyle = gr; circ(g, x, y, r); g.fill(); };
   if (L.style === 'skin') {
-    for (let i = 0; i < 130; i++) { const x = R() * W, y = R() * H, r = 18 + R() * 20; g.save(); g.translate(x, y); g.rotate(R() * 6); blob(g, r, 7, R() * 9, .14, R() * 9); g.fillStyle = rgba(E, .025); g.fill(); g.strokeStyle = rgba(E, .16 + R() * .1); g.lineWidth = 1.1; g.stroke(); g.restore(); nuc(x + R() * 4 - 2, y + R() * 4 - 2, r * .32, .32); }
+    for (let i = 0; i < 130; i++) { const x = R() * W, y = R() * H, r = 18 + R() * 20; g.save(); g.translate(x, y); g.rotate(R() * 6); blob(g, r, 7, R() * 9, .14, R() * 9); g.fillStyle = rgba(T, .025); g.fill(); g.strokeStyle = rgba(T, .1 + R() * .06); g.lineWidth = 1.1; g.stroke(); g.restore(); nuc(x + R() * 4 - 2, y + R() * 4 - 2, r * .32, .32); }
   } else if (L.style === 'lung') {
-    for (let i = 0; i < 70; i++) { const x = R() * W, y = R() * H, r = 26 + R() * 34; g.strokeStyle = rgba(E, .08 + R() * .06); g.lineWidth = 2; circ(g, x, y, r); g.stroke(); g.strokeStyle = rgba(E, .03); g.lineWidth = 7; g.stroke(); if (R() > .4) nuc(x + r * .7, y - r * .3, 6, .4); }
+    for (let i = 0; i < 70; i++) { const x = R() * W, y = R() * H, r = 26 + R() * 34; g.strokeStyle = rgba(T, .08 + R() * .06); g.lineWidth = 2; circ(g, x, y, r); g.stroke(); g.strokeStyle = rgba(T, .03); g.lineWidth = 7; g.stroke(); if (R() > .4) nuc(x + r * .7, y - r * .3, 6, .4); }
   } else if (L.style === 'blood') {
-    for (let i = 0; i < 110; i++) { const x = R() * W, y = R() * H, r = 9 + R() * 6; g.save(); g.translate(x, y); g.rotate(R() * 3); g.scale(1, .55 + R() * .45); g.strokeStyle = rgba(E, .2 + R() * .12); g.lineWidth = 3; circ(g, 0, 0, r * .7); g.stroke(); g.restore(); }
+    for (let i = 0; i < 110; i++) { const x = R() * W, y = R() * H, r = 9 + R() * 6; g.save(); g.translate(x, y); g.rotate(R() * 3); g.scale(1, .55 + R() * .45); g.strokeStyle = rgba(T, .12 + R() * .08); g.lineWidth = 3; circ(g, 0, 0, r * .7); g.stroke(); g.restore(); }
     for (let i = 0; i < 14; i++) nuc(R() * W, R() * H, 7, .45);
   } else if (L.style === 'villi') { // finger-like villi, epithelial nuclei lining each one, a lacteal down the middle
     for (let i = 0; i < 44; i++) {
       const x = R() * W, y = R() * H, len = 70 + R() * 80, w = 13 + R() * 6; g.save(); g.translate(x, y); g.rotate(-Math.PI / 2 + (R() - .5) * 1.1);
-      g.beginPath(); g.roundRect(-len / 2, -w, len, w * 2, w); g.fillStyle = rgba(E, .03); g.fill(); g.strokeStyle = rgba(E, .15 + R() * .1); g.lineWidth = 1.3; g.stroke();
-      g.strokeStyle = rgba(E, .07); g.lineWidth = 3; g.beginPath(); g.moveTo(-len / 2 + w, 0); g.lineTo(len / 2 - w * .6, 0); g.stroke();
+      g.beginPath(); g.roundRect(-len / 2, -w, len, w * 2, w); g.fillStyle = rgba(T, .03); g.fill(); g.strokeStyle = rgba(T, .09 + R() * .06); g.lineWidth = 1.3; g.stroke();
+      g.strokeStyle = rgba(T, .07); g.lineWidth = 3; g.beginPath(); g.moveTo(-len / 2 + w, 0); g.lineTo(len / 2 - w * .6, 0); g.stroke();
       for (let q = -len / 2 + 6; q < len / 2 - 4; q += 8) for (const sd of [-1, 1]) nuc(q, sd * (w - 3.5), 2.8, .3);
       g.restore();
     }
@@ -1284,17 +1312,17 @@ function makeBg(L, pw, ph) {
     for (let row = -1; row * hs * 1.5 < H + hs; row++) for (let col = -1; col * hw < W + hw; col++) {
       const cx = col * hw + (row & 1 ? hw / 2 : 0), cy = row * hs * 1.5, V = [];
       for (let k = 0; k < 6; k++) { const q = k / 6 * TAU + Math.PI / 6; V.push([cx + Math.cos(q) * hs * .97, cy + Math.sin(q) * hs * .97]); }
-      g.strokeStyle = rgba(E, .1 + R() * .1); g.lineWidth = 1.2; g.beginPath(); V.forEach(([x, y], k) => k ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.stroke();
-      g.fillStyle = rgba(E, .35); for (const [x, y] of V) if (R() > .5) { circ(g, x, y, 1.4); g.fill(); }
+      g.strokeStyle = rgba(T, .08 + R() * .07); g.lineWidth = 1.2; g.beginPath(); V.forEach(([x, y], k) => k ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.stroke();
+      g.fillStyle = rgba(T, .25); for (const [x, y] of V) if (R() > .5) { circ(g, x, y, 1.4); g.fill(); }
       if (R() > .45) { g.save(); g.translate(cx + R() * 10 - 5, cy + R() * 10 - 5); g.scale(1.7, 1); nuc(0, 0, 6, .3); g.restore(); }
     }
     for (let i = 0; i < 10; i++) {
-      const x = R() * W, y = R() * H, n = 6 + (R() * 4 | 0); g.strokeStyle = rgba('#ffc24a', .16); g.lineWidth = 1.6;
+      const x = R() * W, y = R() * H, n = 6 + (R() * 4 | 0); g.strokeStyle = rgba(T, .14); g.lineWidth = 1.6;
       for (let k = 0; k < n; k++) { let a = k / n * TAU + R(), px = x, py = y; g.beginPath(); g.moveTo(px, py); for (let j = 0; j < 6; j++) { a += (R() - .5) * .7; px += Math.cos(a) * 10; py += Math.sin(a) * 10; g.lineTo(px, py); } g.stroke(); }
       nuc(x, y, 8, .45);
     }
   } else {
-    for (let i = 0; i < 14; i++) { const x = R() * W, y = R() * H, r = 55 + R() * 60; g.strokeStyle = rgba(E, .16); g.lineWidth = 1.2; g.setLineDash([3, 6]); circ(g, x, y, r); g.stroke(); g.setLineDash([]); for (let k = 0; k < 40; k++) { const a = R() * TAU, q = Math.sqrt(R()) * r * .95; nuc(x + Math.cos(a) * q, y + Math.sin(a) * q, 4 + R() * 3, .35); } }
+    for (let i = 0; i < 14; i++) { const x = R() * W, y = R() * H, r = 55 + R() * 60; g.strokeStyle = rgba(T, .12); g.lineWidth = 1.2; g.setLineDash([3, 6]); circ(g, x, y, r); g.stroke(); g.setLineDash([]); for (let k = 0; k < 40; k++) { const a = R() * TAU, q = Math.sqrt(R()) * r * .95; nuc(x + Math.cos(a) * q, y + Math.sin(a) * q, 4 + R() * 3, .35); } }
     for (let i = 0; i < 90; i++) nuc(R() * W, R() * H, 3 + R() * 2, .2);
   }
   g.globalCompositeOperation = 'source-over';
@@ -1336,7 +1364,9 @@ function drawTower(g, t, T) {
   const R0 = t.spec ? 31 : 27, np = t.lvl + 1 + (t.spec ? t.rank : 0);
   g.strokeStyle = rgba(C, hov || sel ? .9 : .35); g.lineWidth = hov || sel ? 2 : 1.2; circ(g, 0, 0, R0); g.stroke();
   if (t.spec) { g.strokeStyle = rgba(COL[t.spec], .25); g.lineWidth = 1; circ(g, 0, 0, R0 + 4); g.stroke(); }
-  for (let i = 0; i < np; i++) { const a = Math.PI / 2 + (i - (np - 1) / 2) * .28, c = i > t.lvl ? '#7fd8ff' : '#ffc24a'; g.save(); g.translate(Math.cos(a) * R0, Math.sin(a) * R0); halo(g, 6, c, .6); g.fillStyle = i > t.lvl ? '#e8f6ff' : '#ffe3a3'; circ(g, 0, 0, 2.2); g.fill(); g.restore(); }
+  const sp = .3, a0 = Math.PI / 2 - (np - 1) / 2 * sp;
+  g.strokeStyle = 'rgba(2,5,9,.8)'; g.lineWidth = 11; g.lineCap = 'round'; g.beginPath(); g.arc(0, 0, R0, a0 - .02, a0 + (np - 1) * sp + .02); g.stroke(); g.lineCap = 'butt';
+  for (let i = 0; i < np; i++) { const a = a0 + i * sp, c = i > t.lvl ? '#7fd8ff' : '#ffc24a'; g.save(); g.translate(Math.cos(a) * R0, Math.sin(a) * R0); halo(g, 8, c, .6); g.fillStyle = i > t.lvl ? '#e8f6ff' : '#ffe3a3'; circ(g, 0, 0, 3.5); g.fill(); g.restore(); }
   const pop = t.built < .3 ? 1 - Math.pow(1 - t.built / .3, 3) : 1;
   const hj = t.hij > 0;
   g.save(); g.scale(pop, pop); if (hj) { g.globalAlpha = .4; g.filter = 'grayscale(1)'; } drawTowerArt(g, t.type, t.lvl, t.t, t.fire, t.spec); g.restore();
@@ -1436,8 +1466,13 @@ function render() {
   g.lineWidth = 2.6; g.beginPath(); g.moveTo(0, -7); g.lineTo(0, 7); g.moveTo(-7, 0); g.lineTo(7, 0); g.stroke(); g.shadowBlur = 0;
   g.restore();
   for (const s of S.slots) if (!s.tower) drawSlot(g, s, (S.hover && S.hover.k === 'slot' && S.hover.s === s) || (S.sel && S.sel.slot === s), T);
-  const pv = S.preview || (S.hover && S.hover.k === 'slot' && S.hover.s.tower && !S.sel ? { x: S.hover.s.x, y: S.hover.s.y, r: rangeOf(S.hover.s.tower) } : null) || (S.sel && S.sel.slot && S.sel.slot.tower && !S.preview ? { x: S.sel.slot.x, y: S.sel.slot.y, r: rangeOf(S.sel.slot.tower) } : null);
+  const pv = S.preview || (S.hover && S.hover.k === 'slot' && S.hover.s.tower && !S.sel ? { x: S.hover.s.x, y: S.hover.s.y, r: rangeOf(S.hover.s.tower), rally: S.hover.s.tower.rally } : null) || (S.sel && S.sel.slot && S.sel.slot.tower && !S.preview ? { x: S.sel.slot.x, y: S.sel.slot.y, r: rangeOf(S.sel.slot.tower), rally: S.sel.slot.tower.rally } : null);
   if (pv && pv.r) { g.fillStyle = 'rgba(127,216,255,.06)'; g.strokeStyle = 'rgba(127,216,255,.7)'; g.lineWidth = 1.5; g.setLineDash([6, 5]); g.lineDashOffset = -T * 10; circ(g, pv.x, pv.y, pv.r); g.fill(); g.stroke(); g.setLineDash([]); }
+  if (pv && pv.rally) { // macrophage: where its cells stand (24) and how far from there they engage (62)
+    const q = pv.rally; g.strokeStyle = 'rgba(63,224,208,.35)'; g.lineWidth = 1; g.setLineDash([2, 4]); g.beginPath(); g.moveTo(pv.x, pv.y); g.lineTo(q.x, q.y); g.stroke();
+    g.fillStyle = 'rgba(63,224,208,.07)'; g.strokeStyle = 'rgba(63,224,208,.6)'; g.lineWidth = 1.4; g.setLineDash([6, 5]); g.lineDashOffset = -T * 10; circ(g, q.x, q.y, 62); g.fill(); g.stroke();
+    g.strokeStyle = 'rgba(63,224,208,.95)'; g.lineWidth = 1.8; g.setLineDash([3, 4]); circ(g, q.x, q.y, 24); g.stroke(); g.setLineDash([]);
+  }
   for (const t of S.towers) drawTower(g, t, T);
   for (const u of S.units) drawUnit(g, u);
   drawHero(g, T);
@@ -1483,6 +1518,7 @@ function render() {
     }
     else if (f.k === 'lvl') { const h = S.hero, a0 = 1 - k2; g.save(); g.translate(h.x, h.y); halo(g, 40 + k2 * 50, '#e8f6ff', .55 * a0); g.strokeStyle = rgba('#8ff0ff', a0); g.lineWidth = 2; circ(g, 0, 0, 16 + k2 * 44); g.stroke(); g.restore(); }
     else if (f.k === 'reveal') { g.strokeStyle = rgba('#ff8a3d', .35 * (1 - k2)); g.lineWidth = 1; g.setLineDash([2, 6]); g.lineDashOffset = T * 6; circ(g, f.x, f.y, f.r); g.stroke(); g.setLineDash([]); }
+    else if (f.k === 'rupture') { const a0 = 1 - k2, q = f.r * (1 + k2 * 1.6); g.save(); g.translate(f.x, f.y); halo(g, q + 8, f.c, .35 * a0); g.strokeStyle = rgba(f.c, .9 * a0); g.lineWidth = 2 * a0 + .5; g.shadowColor = f.c; g.shadowBlur = 8; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU + f.r; g.beginPath(); g.arc(0, 0, q, a, a + .7); g.stroke(); } g.shadowBlur = 0; g.restore(); }
     else if (f.k === 'biofilm') { g.strokeStyle = `rgba(166,255,77,${1 - k2})`; g.lineWidth = 3; circ(g, f.x, f.y, 20 + k2 * 110); g.stroke(); }
     else if (f.k === 'fever') {
       g.save(); g.translate(f.x, f.y);
@@ -1494,8 +1530,8 @@ function render() {
   g.globalCompositeOperation = 'lighter';
   for (const p of S.parts) { g.globalAlpha = clamp(p.life / p.max, 0, 1); g.fillStyle = p.c; circ(g, p.x, p.y, p.r); g.fill(); }
   g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
-  g.textAlign = 'center'; g.font = '700 12px "JetBrains Mono", ui-monospace, monospace';
-  for (const f of S.floats) { g.globalAlpha = 1 - Math.pow(f.t / f.T, 3); g.shadowColor = f.c; g.shadowBlur = 8; g.fillStyle = f.c; g.fillText(f.txt, f.x, f.y); }
+  g.textAlign = 'center';
+  for (const f of S.floats) { const atp = f.c === '#ffc24a'; g.font = `700 ${atp ? 14 : 12}px "JetBrains Mono", ui-monospace, monospace`; g.globalAlpha = 1 - Math.pow(f.t / f.T, 3); g.shadowColor = atp ? '#ffb02e' : f.c; g.shadowBlur = atp ? 14 : 8; g.fillStyle = atp ? '#ffe3a3' : f.c; g.fillText(f.txt, f.x, f.y); }
   g.shadowBlur = 0; g.globalAlpha = 1;
   if (S.ability && S.mouse.x > 0) {
     const m = S.mouse;
@@ -1516,7 +1552,7 @@ function hitTest(m) {
   const H = S.hero; if (H && !H.dead && Math.hypot(m.x - H.x, m.y - H.y) < 20) return { k: 'hero' };
   for (const s of S.slots) if (Math.hypot(m.x - s.x, m.y - s.y) < 28) return { k: 'slot', s };
   let best = null, bd = 1e9;
-  for (const e of S.enemies) { const ey = e.y - (e.D.flying ? 12 : 0), d = Math.hypot(m.x - e.x, m.y - ey); if (d < e.D.r + 8 && d < bd) { bd = d; best = e; } }
+  for (const e of S.enemies) { if (!e.seen) continue; const ey = e.y - (e.D.flying ? 12 : 0), d = Math.hypot(m.x - e.x, m.y - ey); if (d < e.D.r + 8 && d < bd) { bd = d; best = e; } }
   return best ? { k: 'enemy', e: best } : null;
 }
 cv.addEventListener('pointermove', ev => {
@@ -1554,6 +1590,9 @@ addEventListener('keydown', ev => {
 });
 
 // ============================================================ radial & info
+const RECYCLE = '<svg class="ico" viewBox="0 0 24 24" aria-label="Recycle"><path d="M19.5 13.5A7.6 7.6 0 0 1 6 17.4"/><path d="M4.5 10.5A7.6 7.6 0 0 1 18 6.6"/><path d="M18.6 3v4h-4M5.4 21v-4h4"/></svg>';
+// spec / skill rank bought: close the radial like a build does and pin the card on the tower, with a gold flash
+function bought(t) { closeRadial(); S.pinned = { kind: 'tower', t }; showInfo(S.pinned); }
 function closeRadial() { $('#radial').innerHTML = ''; if (S.sel && S.sel.slot) S.sel = null; S.preview = null; }
 function openRadial(slot) {
   S.sel = { slot }; S.preview = null;
@@ -1575,7 +1614,7 @@ function openRadial(slot) {
       const c = TOWERS[k].lv[0].cost;
       add(pos[k], `<img src="${portrait(k, 0)}" alt="${TOWERS[k].name}">`, c, c,
         () => { if (build(slot, k)) { closeRadial(); S.pinned = null; showInfo({ kind: 'tower', t: slot.tower }); } },
-        () => { S.preview = { x: slot.x, y: slot.y, r: k === 'macro' ? 0 : TOWERS[k].lv[0].range }; showInfo({ kind: 'type', type: k, lvl: 0 }); }, i);
+        () => { S.preview = { x: slot.x, y: slot.y, r: k === 'macro' ? 0 : TOWERS[k].lv[0].range, rally: k === 'macro' && rallyOf(slot) }; showInfo({ kind: 'type', type: k, lvl: 0 }); }, i);
     });
     showInfo({ kind: 'slot' });
   } else {
@@ -1584,20 +1623,20 @@ function openRadial(slot) {
       const c = TOWERS[t.type].lv[t.lvl + 1].cost;
       add(270, `<img src="${portrait(t.type, t.lvl + 1)}" alt="Upgrade">`, '▲ ' + c, c,
         () => { if (upgrade(t)) openRadial(slot); },
-        () => { S.preview = { x: t.x, y: t.y, r: t.type === 'macro' ? 0 : TOWERS[t.type].lv[t.lvl + 1].range }; showInfo({ kind: 'tower', t, next: true }); }, 0);
+        () => { S.preview = { x: t.x, y: t.y, r: t.type === 'macro' ? 0 : TOWERS[t.type].lv[t.lvl + 1].range, rally: t.rally }; showInfo({ kind: 'tower', t, next: true }); }, 0);
     } else if (!t.spec) {
       Object.keys(SPECS).filter(id => SPECS[id].base === t.type).forEach((id, i) => {
         const P = SPECS[id];
         add(i ? 0 : 180, `<img src="${portrait(id)}" alt="${P.name}">`, '▲ ' + P.cost, P.cost,
-          () => { if (specialize(t, id)) openRadial(slot); },
-          () => { S.preview = { x: t.x, y: t.y, r: P.st.range || 0 }; showInfo({ kind: 'spec', id, t }); }, i);
+          () => { if (specialize(t, id)) bought(t); },
+          () => { S.preview = { x: t.x, y: t.y, r: P.st.range || 0, rally: t.rally }; showInfo({ kind: 'spec', id, t }); }, i);
       });
     } else if (t.rank < 2) {
       const c = SPECS[t.spec].sk[t.rank].cost;
       add(270, `<img src="${portrait(t.spec)}" alt="${SPECS[t.spec].skn}"><span class="rk">${['I', 'II'][t.rank]}</span>`, '★ ' + c, c,
-        () => { if (skillUp(t)) openRadial(slot); }, () => showInfo({ kind: 'tower', t, next: true }), 0);
-    } else add(270, '<span class="lbl">MAX</span>', null, Infinity, () => {}, null, 0);
-    add(90, '<span class="lbl">↺</span>', '+' + refund(t), 0, () => { sell(t); closeRadial(); showInfo(null); }, () => showInfo({ kind: 'recycle', t }), 1);
+        () => { if (skillUp(t)) bought(t); }, () => showInfo({ kind: 'tower', t, next: true }), 0);
+    } else { add(270, `<img src="${portrait(t.spec)}" alt=""><span class="mx">MAX</span>`, null, 0, () => {}, null, 0); items[0][0].classList.add('max'); }
+    add(90, RECYCLE, '+' + refund(t), 0, () => { sell(t); closeRadial(); showInfo(null); }, () => showInfo({ kind: 'recycle', t }), 1);
     showInfo({ kind: 'tower', t });
   }
   placeRadial(items, slot, sc);
@@ -1632,7 +1671,7 @@ function towerStats(type, L, N) {
 function skillHtml(P, rank, next) {
   const r = next ? rank + 1 : Math.max(1, rank), pips = [1, 2].map(i => `<i class="${i <= (next ? r : rank) ? 'on' : ''}"></i>`).join('');
   const pre = next ? `Rank ${['I', 'II'][r - 1]} · ` : rank ? '' : `Learn for ${P.sk[0].cost} ATP · `;
-  return `<span class="skn">★ ${P.skn}</span><span class="pips sk">${pips}</span><br>${pre}${P.skd(P.sk[r - 1])}`;
+  return `<span class="skn">★ ${P.skn}</span><span class="pips sk">${pips}</span><span class="skd"><br>${pre}${P.skd(P.sk[r - 1])}</span>`;
 }
 let infoKey = '', curInfo = null;
 function showInfo(o) {
@@ -1646,19 +1685,19 @@ function showInfo(o) {
     const mem = o.t.mem ? Object.entries(o.t.mem).map(([k, n]) => `<span class="chip"><img src="${portrait(k, 0, 48)}">+${Math.round(Math.min(P.st.memCap, n * P.st.mem) * 100)}%</span>`).join('') : '';
     html = `<div class="por"><img src="${portrait(id)}"></div><div class="meta"><small>${cur ? 'Specialize · ' + P.role.split('· ')[1] : P.role}</small><b>${P.name}</b><span>${P.kind}</span><div class="pips">${[0, 1, 2, 3].map(i => `<i class="on"></i>`).join('')}</div></div>
       <div class="sv g2">${cur ? towerStats(o.t.type, stat(o.t), P.st) : towerStats(o.t.type, P.st)}${sv(P.tag[0], P.tag[1])}</div>
-      <div class="perk on wide">${P.perk}${mem ? `<div class="chips">${mem}</div>` : ''}<div class="skt">${skillHtml(P, cur ? 0 : o.t.rank, !cur && o.next)}</div></div>`;
+      <div class="perk on wide">${P.perk}${mem ? `<div class="chips">${mem}</div>` : ''}<div class="skt ${!cur && o.next ? 'nx' : ''}">${skillHtml(P, cur ? 0 : o.t.rank, !cur && o.next)}</div></div>`;
   } else if (o.kind === 'type' || o.kind === 'tower') {
     const type = o.kind === 'type' ? o.type : o.t.type, lvl = o.kind === 'type' ? o.lvl : o.t.lvl, T = TOWERS[type], nl = o.next && lvl < 2 ? lvl + 1 : null, show = nl ?? lvl;
     html = `<div class="por"><img src="${portrait(type, show)}"></div><div class="meta"><small>${T.role}</small><b>${T.name}</b><span>${T.kind}</span><div class="pips">${[0, 1, 2].map(i => `<i class="${i <= show ? 'on' : ''}"></i>`).join('')}</div></div>
       <div class="sv">${towerStats(type, T.lv[lvl], nl != null ? T.lv[nl] : null)}</div><div class="perk ${show >= T.perkLv ? 'on' : ''}">${T.perk}${o.kind === 'tower' && lvl === 2 ? '<br><span class="skn">Max level · choose a specialization</span>' : ''}</div>`;
   } else if (o.kind === 'hero') {
     const h = S.hero, L = HERO.lv[h.lvl - 1], N = HERO.lv[h.lvl], need = HERO.xp[h.lvl - 1], G = HERO.gz;
-    html = `<div class="por"><img src="${portrait('hero')}"></div><div class="meta"><small>Hero · Natural Killer cell</small><b>${HERO.name}</b><span>${h.dead ? `Respawning in ${Math.ceil(h.resp)} s` : need ? `Level ${h.lvl} · ${h.xp} / ${need} XP` : `Level ${h.lvl} · max`}</span><div class="pips">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= h.lvl ? 'on' : ''}"></i>`).join('')}</div></div>
+    html = `<div class="por"><img src="${portrait('hero')}"></div><div class="meta"><small>Hero · Natural Killer cell</small><b>${HERO.name}</b><span class="xp">${h.dead ? `Respawning in ${Math.ceil(h.resp)} s` : need ? `Level ${h.lvl} · ${h.xp} / ${need} XP` : `Level ${h.lvl} · max`}</span><div class="pips">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= h.lvl ? 'on' : ''}"></i>`).join('')}</div></div>
       <div class="sv g2">${sv('HEALTH', `${Math.ceil(Math.max(0, h.hp))}<i>/${h.max}</i>`)}${sv('DMG', L.dmg, N && N.dmg)}${sv('REGEN', L.regen + '/s', N && N.regen + '/s')}${sv('KILLS', h.kills)}</div>
-      <div class="perk wide">Holds one pathogen and stings flyers too. Click near the path to send it.<div class="skt"><span class="skn">★ Granzyme Burst · E</span><br>${Math.round(L.dmg * G.k)} damage and a ${G.stun} s stun to everything within ${G.r}. Every ${G.cd} s.</div></div>`;
+      <div class="perk wide">Holds one pathogen and stings flyers too. Click near the path to send it.<div class="skt"><span class="skn">★ Granzyme Burst · E</span><span class="skd"><br>${Math.round(L.dmg * G.k)} damage and a ${G.stun} s stun to everything within ${G.r}. Every ${G.cd} s.</span></div></div>`;
   } else if (o.kind === 'enemy') {
     const D = ENEMIES[o.type], e = o.e;
-    const hp = e ? Math.ceil(Math.max(0, e.hp)) : Math.round(D.hp * LVLMULT[S.lvl || 0]);
+    const hp = e ? Math.ceil(Math.max(0, e.hp)) : Math.round(D.hp * LVLMULT[S.lvl || 0] * (1 + Math.max(0, S.wave - 1) * .045));
     html = `<div class="por"><img src="${portrait(o.type)}"></div><div class="meta"><small>${D.kind}${D.flying ? ' · flying' : ''}</small><b>${D.name}</b><span>${D.desc}</span></div>
       <div class="sv">${sv('HP', hp)}${sv('ARMOR', Math.round(Math.max(0, D.armor - (e ? e.shred : 0)) * 100) + '%')}${sv('RESIST', Math.round(D.mr * 100) + '%')}${sv('LEAK', '−' + D.lives)}</div>`;
   }
@@ -1667,8 +1706,14 @@ function showInfo(o) {
 }
 function nextNote() { S.note = NOTES[(S.noteI = (S.noteI || 0) + 1) % NOTES.length]; }
 function banner(html, ms) {
-  const b = document.createElement('div'); b.className = 'bn'; b.innerHTML = html; $('#banner').appendChild(b);
+  layoutTop(); const b = document.createElement('div'); b.className = 'bn'; b.innerHTML = html; $('#banner').appendChild(b);
   setTimeout(() => { b.classList.add('out'); setTimeout(() => b.remove(), 450); }, ms);
+}
+function flashInfo(label) { const el = $('#info'); el.dataset.flash = label; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); clearTimeout(flashInfo.t); flashInfo.t = setTimeout(() => el.classList.remove('flash'), 1400); }
+// centre the banner / boss bar in the gap between the meters and the controls, and cap its width to that gap
+function layoutTop() {
+  const st = $('#stage').getBoundingClientRect(), l = $('#hudTL').getBoundingClientRect().right - st.left + 10, r = $('#hudTR').getBoundingClientRect().left - st.left - 10, tc = $('#topc');
+  tc.style.left = (l + r) / 2 + 'px'; tc.style.setProperty('--bw', Math.max(160, r - l) + 'px');
 }
 function flashGold() { $('#gold').animate([{ color: '#ff4d5e', transform: 'scale(1.18)' }, { color: '', transform: 'none' }], { duration: 400 }); }
 
@@ -1705,8 +1750,8 @@ let lastHud = '';
 function hud() {
   if (!S.L) return;
   const total = S.L.waves.length, can = canCallWave();
-  const Hr = S.hero, hsel = !!(S.sel && S.sel.hero);
-  const key = [S.lives, S.gold, S.wave, Math.ceil(S.waveTimer * 4), can, Math.ceil(S.cds.fever), Math.ceil(S.cds.swarm), Math.ceil(S.cds.granzyme), S.ability, S.speed, S.paused, Math.ceil(Hr.hp), Hr.lvl, Hr.dead, Math.ceil(Hr.resp), hsel].join('|');
+  const Hr = S.hero, hsel = !!(S.sel && S.sel.hero), bo = S.enemies.find(e => e.D.boss && !e.dead);
+  const key = [S.lives, S.gold, S.wave, Math.ceil(S.waveTimer * 4), can, Math.ceil(S.cds.fever), Math.ceil(S.cds.swarm), Math.ceil(S.cds.granzyme), S.ability, S.speed, S.paused, Math.ceil(Hr.hp), Hr.lvl, Hr.dead, Math.ceil(Hr.resp), hsel, bo ? Math.ceil(bo.hp) : -1].join('|');
   if (key === lastHud) return; lastHud = key;
   $('#lives').textContent = S.lives; $('#lives').classList.toggle('low', S.lives <= 6);
   $('#gold').textContent = S.gold; $('#wave').innerHTML = `${S.wave}<span>/${total}</span>`;
@@ -1725,12 +1770,17 @@ function hud() {
   hb.style.setProperty('--hp', (Hr.dead ? 0 : Hr.hp / Hr.max * 100) + '%'); hb.classList.toggle('low', !Hr.dead && Hr.hp < Hr.max * .35); hb.classList.toggle('armed', hsel);
   hb.querySelector('.lv').textContent = Hr.lvl; hc.style.setProperty('--p', Hr.dead ? Hr.resp / HERO.resp * 100 + '%' : '0%'); hc.textContent = Hr.dead ? Math.ceil(Hr.resp) : '';
   $('#ab-gz').classList.toggle('off', Hr.dead);
+  const bb = $('#boss'); bb.hidden = !bo; // boss bar while a boss is alive
+  if (bo) {
+    if (bb.dataset.t !== bo.type) { bb.dataset.t = bo.type; bb.querySelector('img').src = portrait(bo.type, 0, 76); bb.querySelector('b').textContent = bo.D.name; bb.style.setProperty('--bc', COL[bo.type]); layoutTop(); }
+    bb.querySelector('small span').textContent = `${Math.ceil(Math.max(0, bo.hp))} / ${Math.round(bo.max)}`; bb.querySelector('.bar i').style.setProperty('--hp', Math.max(0, bo.hp / bo.max * 100) + '%');
+  }
   if (hsel) showInfo({ kind: 'hero' });
   $('#speedBtn').textContent = S.speed + '×'; $('#speedBtn').classList.toggle('on', S.speed > 1);
   $('#pauseBtn').classList.toggle('on', S.paused); $('#pausePill').hidden = !S.paused;
   if (S.sel && S.sel.slot) refreshRadialAfford();
   if (curInfo && curInfo.kind === 'tower' && curInfo.t.slot.tower === curInfo.t) showInfo(curInfo); // live memory counters
-  if (S.sel && S.sel.e) { if (S.sel.e.dead) { S.sel = null; showInfo(null); } else showInfo({ kind: 'enemy', type: S.sel.e.type, e: S.sel.e }); }
+  if (S.sel && S.sel.e) { if (S.sel.e.dead || !S.sel.e.seen) { S.sel = null; showInfo(null); } else showInfo({ kind: 'enemy', type: S.sel.e.type, e: S.sel.e }); }
 }
 function refreshRadialAfford() {
   document.querySelectorAll('#radial .rb').forEach(b => b.classList.toggle('no', S.gold < +b.dataset.need));

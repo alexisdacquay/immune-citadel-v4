@@ -8,6 +8,10 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   await p.screenshot({ path: `${out}/0-title.png` });
   const geo = await p.evaluate(() => IC.LEVELS.map((L, li) => { const ps = L.paths.map(IC.makePath); return L.slots.map(([x, y], i) => { const d = Math.min(...ps.map(q => IC.nearestOnPath(q, x, y).dd)); const near = Math.min(...L.slots.filter((_, j) => j !== i).map(([a, c]) => Math.hypot(a - x, c - y))); const hud = (x < 320 && y < 92) || (x < 300 && y > 525) || (x > 780 && y < 88); return (d < 50 || d > 115 || near < 62 || hud) ? `L${li} slot${i} [${x},${y}] path=${d|0} neighbour=${near|0}` : null; }).filter(Boolean); }).flat());
   console.log('slot problems:', geo.length ? geo : 'none');
+  // routes must not run under the bottom-left ability cluster (enemies would walk under the HUD). Cluster, worst case (HUD scale 1.05 of the map):
+  // x < 335, y > 531; a pathogen reaches ~21 below the route centre (lane offset 9 + body), so the centre must stay above y 510
+  const route = await p.evaluate(() => IC.LEVELS.map((L, li) => L.paths.map((raw, pi) => { const q = IC.makePath(raw); for (let d = 0; d < q.len; d += 8) { const r = IC.posAt(q, d); if (r.x > -10 && r.x < 335 && r.y > 510) return `L${li + 1} route${pi + 1} under the ability cluster at [${r.x | 0},${r.y | 0}]`; } return null; }).filter(Boolean)).flat());
+  console.log('route problems:', route.length ? route : 'none'); errs.push(...route);
   const results = [];
   const nLv = await p.evaluate(() => IC.LEVELS.length);
   // every level twice: no Immune Memory upgrades, then all 18 tiers
@@ -113,6 +117,9 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   const sb = await p.evaluate(() => { const r = document.getElementById('cv').getBoundingClientRect(); const s = IC.S.slots[13]; return { x: r.left + s.x / 1000 * r.width, y: r.top + s.y / 620 * r.height, k: r.width / 1000 }; });
   await p.mouse.click(sb.x, sb.y); await p.waitForTimeout(300); await p.mouse.move(sb.x - 66 * sb.k * 1.1, sb.y); await p.waitForTimeout(300);
   await p.screenshot({ path: `${out}/7-spec-choice.png` });
+  // buying the specialization with a real click closes the radial and flashes the card
+  await p.mouse.click(sb.x - 66 * sb.k * 1.1, sb.y); await p.waitForTimeout(150);
+  if (!(await p.evaluate(() => !!IC.S.slots[13].tower.spec && !document.querySelector('#radial .rb') && document.getElementById('info').classList.contains('flash')))) errs.push('spec: click did not specialize, close the radial and flash the card');
   // Immune Memory: real clicks — tray button, buy tiers in order, refused out-of-order, reset with built-in confirm, effect on start, lab-report route
   const mm = (ok, msg) => { if (!ok) errs.push('memory: ' + msg); };
   const at = sel => p.evaluate(s => { const r = document.querySelector(s).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, sel);
