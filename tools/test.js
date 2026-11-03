@@ -23,11 +23,12 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
         for (let guard = 0; guard < 5; guard++) {
           const free = ranked.filter(i => !S.slots[i].tower);
           // tier 0-2 = levels, 3 = specialist, 4-5 = skill ranks. The first 4 towers are the core and go all the way;
+          // a specialist buys its skill ranks before the next core tower specializes, so real runs reach skill ranks;
           // same-type core towers alternate between the two specializations so every branch gets played.
           const specOf = u => { const o = Object.keys(IC.SPECS).filter(k => IC.SPECS[k].base === u.type); return o[S.towers.filter(x => x.type === u.type).indexOf(u) % 2]; };
-          const tier = u => u.lvl + (u.spec ? 1 + u.rank : 0), core = S.towers.slice(0, 4);
+          const tier = u => u.lvl + (u.spec ? 1 + u.rank : 0), core = S.towers.slice(0, 4), key = u => u.spec ? -1 : tier(u);
           const cost = u => u.lvl < 2 ? IC.TOWERS[u.type].lv[u.lvl + 1].cost : !u.spec ? IC.SPECS[specOf(u)].cost : IC.SPECS[u.spec].sk[u.rank].cost;
-          const ups = S.towers.filter(x => tier(x) < (core.includes(x) ? 5 : 2)).sort((a, b) => (core.includes(b) - core.includes(a)) || tier(a) - tier(b));
+          const ups = S.towers.filter(x => tier(x) < (core.includes(x) ? 5 : 2)).sort((a, b) => (core.includes(b) - core.includes(a)) || key(a) - key(b));
           const wantUp = ups.length && (free.length === 0 || S.towers.length >= 6 && bi % 2 === 1);
           if (wantUp) { const u = ups[0], i = S.slots.indexOf(u.slot); if (S.gold >= cost(u)) { u.lvl < 2 ? IC.upgrade(i) : !u.spec ? IC.specialize(i, specOf(u)) : IC.skillUp(i); bi++; continue; } break; }
           if (free.length) { const k = order[bi % order.length]; if (S.gold >= IC.TOWERS[k].lv[0].cost) { IC.build(free[0], k); bi++; continue; } }

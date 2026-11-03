@@ -57,7 +57,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 #spec .bar{display:inline-flex;align-items:center;gap:8px;margin-top:4px}
 #spec .bar i{display:inline-block;width:64px;height:4px;background:#e8f3ff;box-shadow:0 0 8px rgba(200,230,255,.6)}
 /* info bar */
-#info{left:50%;bottom:14px;transform:translateX(-50%) scale(var(--u,1));transform-origin:bottom center;display:flex;align-items:center;gap:14px;padding:10px 16px 10px 10px;max-width:780px}
+#info{pointer-events:none;left:50%;bottom:14px;transform:translateX(-50%) scale(var(--u,1));transform-origin:bottom center;display:flex;align-items:center;gap:14px;padding:10px 16px 10px 10px;max-width:780px}
 #info .por{width:58px;height:58px;border-radius:12px;background:radial-gradient(circle,rgba(30,50,75,.9),rgba(5,10,16,.9));border:1px solid var(--rim);display:grid;place-items:center;flex:none}
 #info .por img{width:54px;height:54px}
 #info .meta small{display:block;font:600 9px var(--mono);letter-spacing:.16em;color:var(--cyan);text-transform:uppercase}
@@ -95,7 +95,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .chip{display:flex;align-items:center;gap:2px;background:rgba(140,205,255,.08);border-radius:20px;padding:1px 7px 1px 1px;font:700 11px var(--mono)}
 .chip img{width:22px;height:22px}
 /* radial */
-#radial{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}
+#radial{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;z-index:2}
 #radial .ring{position:absolute;left:-76px;top:-76px;width:152px;height:152px;border-radius:50%;border:1.5px solid rgba(127,216,255,.55);box-shadow:inset 0 0 30px rgba(127,216,255,.18),0 0 24px rgba(127,216,255,.15);animation:pop .16s ease-out}
 .rb{position:absolute;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;border:1.5px solid var(--rim2);background:radial-gradient(circle at 45% 40%,rgba(36,56,80,.97),rgba(6,11,18,.97));box-shadow:0 8px 18px -8px #000;pointer-events:auto;display:grid;place-items:center;padding:0;animation:pop .18s ease-out both}
 .rb img{width:48px;height:48px}
@@ -158,7 +158,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .btn:hover{background:rgba(140,205,255,.14)}
 .btn.pri{background:var(--cyan);border-color:var(--cyan);color:#04121c;box-shadow:0 0 22px rgba(127,216,255,.35)}
 [hidden]{display:none!important}
-@media (max-width:1100px){#info{left:calc(172px * var(--u,1));transform:scale(var(--u,1));transform-origin:bottom left;max-width:none}#info .perk,#info .meta span{display:none}#info:not([hidden]) ~ #spec{opacity:0}}
+@media (max-width:1100px){#info{left:calc(172px * var(--u,1));transform:scale(var(--u,1));transform-origin:bottom left;max-width:none}#info .perk:not(.wide),#info .meta span{display:none}#info .perk.wide{flex-basis:240px;font-size:11px}#info:not([hidden]) ~ #spec{opacity:0}}
 @media (max-width:700px){.slides{grid-template-columns:1fr}.slide .body{grid-template-columns:1fr 1fr}.tin h1{font-size:44px}}
 </style>
 </head>
@@ -321,7 +321,7 @@ const SPECS = {
     st: { dmg: 15, rate: .55, range: 165, burst: 3 }, tag: ['BURST', '×3'],
     perk: 'Empties its granules in rapid bursts of three.',
     skn: 'Myeloperoxidase', sk: [{ cost: 160, shred: .03, cap: .25 }, { cost: 200, shred: .05, cap: .4 }],
-    skd: r => `Bleach-laced hits strip ${r.shred * 100}% armor each, stacking up to ${r.cap * 100}%.` },
+    skd: r => `Bleach-laced hits strip ${Math.round(r.shred * 100)}% armor each, stacking up to ${Math.round(r.cap * 100)}%.` },
   m1: { base: 'macro', name: 'M1 Inflammatory', role: 'Tier IV · Brawler', kind: 'Three hard-hitting cells', cost: 280,
     st: { units: 3, hp: 240, dmg: 30, rate: .75, regen: .12 }, tag: ['RATE', (1 / .75).toFixed(1) + '/s'],
     perk: 'Activated by danger signals: cells bite twice as hard.',
@@ -346,12 +346,12 @@ const SPECS = {
     st: { dmg: 92, rate: .85, range: 170 }, tag: ['CHAIN', '60%'],
     perk: 'A seasoned killer: heavy perforin bolts that still leap to a second target.',
     skn: 'Perforin Verdict', sk: [{ cost: 170, cd: 5, th: .3 }, { cost: 220, cd: 3.5, th: .45 }],
-    skd: r => `Every ${r.cd} s a bolt executes a non-boss pathogen below ${r.th * 100}% health.` },
+    skd: r => `Every ${r.cd} s a bolt executes a non-boss pathogen below ${Math.round(r.th * 100)}% health.` },
   th1: { base: 'killer', name: 'Th1 Helper', role: 'Tier IV · Commander', kind: 'Magic · attack-speed aura', cost: 250,
     st: { dmg: 24, rate: .9, range: 160, aura: 150, haste: .2 }, tag: ['AURA', '+20%'],
     perk: 'Weak bolt, but its cytokines give every tower within 150 +20% attack speed.',
     skn: 'Cytokine Surge', sk: [{ cost: 140, cd: 20, dur: 6, haste: .55 }, { cost: 180, cd: 16, dur: 8, haste: .8 }],
-    skd: r => `Every ${r.cd} s the aura surges to +${r.haste * 100}% attack speed for ${r.dur} s.` },
+    skd: r => `Every ${r.cd} s the aura surges to +${Math.round(r.haste * 100)}% attack speed for ${r.dur} s.` },
 };
 const stat = t => t.spec ? SPECS[t.spec].st : TOWERS[t.type].lv[t.lvl];
 const skill = t => t.spec && t.rank ? SPECS[t.spec].sk[t.rank - 1] : null;
@@ -885,7 +885,7 @@ function step(dt) {
       p.x = lerp(p.sx, p.tx, k); p.y = lerp(p.sy, p.ty, k) - Math.sin(Math.PI * k) * 70; p.rot += dt * 9;
       if (k >= 1) {
         p.done = true;
-        for (const e of S.enemies) if (!e.dead && !e.D.flying && Math.hypot(e.x - p.tx, e.y - p.ty) < p.splash + e.D.r * .5) { e.opsT = 3; e.ops = p.ops || 1.25; damage(e, p.dmg, 'phys', p.src); }
+        for (const e of S.enemies) if (!e.dead && !e.D.flying && Math.hypot(e.x - p.tx, e.y - p.ty) < p.splash + e.D.r * .5) { e.ops = e.opsT > 0 ? Math.max(e.ops, p.ops || 1.25) : p.ops || 1.25; e.opsT = 3; damage(e, p.dmg, 'phys', p.src); }
         S.fx.push({ k: 'splash', x: p.tx, y: p.ty, r: p.splash, t: 0, T: .45 });
         for (let i = 0; i < 10; i++) { const a = rand(0, TAU), v = rand(30, 90); S.parts.push({ x: p.tx, y: p.ty, vx: Math.cos(a) * v, vy: Math.sin(a) * v * .5, life: .5, max: .5, c: '#ffd166', r: 2, y_: 1 }); }
       }
@@ -901,7 +901,7 @@ function step(dt) {
         damage(e, p.dmg, p.dt, p.src);
         if (p.net) { e.slowF = .55; e.slowT = 2.2; S.fx.push({ k: 'net', x: e.x, y: e.y, t: 0, T: .5 }); }
         if (p.slow) { e.slowF = Math.min(e.slowF, p.slow); e.slowT = Math.max(e.slowT, 1.4); }
-        if (p.shred) e.shred = Math.min(p.shred.cap, e.shred + p.shred.shred);
+        if (p.shred) e.shred = Math.max(e.shred, Math.min(p.shred.cap, e.shred + p.shred.shred)); // a weaker Degranulator never lowers shred
         const vd = p.src && p.src.spec === 'ctl' && skill(p.src);
         if (vd && p.src.sk <= 0 && !e.dead && !e.D.boss && e.hp < e.max * vd.th) {
           p.src.sk = vd.cd; S.fx.push({ k: 'verdict', x: e.x, y: e.y, t: 0, T: .6 }); floatText(e.x, e.y - 30, 'Verdict', '#ff7a8f', 1.1); kill(e, p.src);
@@ -1197,10 +1197,10 @@ function openRadial(slot) {
   S.sel = { slot }; S.preview = null;
   const R = $('#radial'); R.innerHTML = '<div class="ring"></div>';
   R.style.left = slot.x * viewK + 'px'; R.style.top = slot.y * viewK + 'px';
-  R.style.transform = `scale(${clamp(viewK * 1.1, .62, 1.15)})`;
-  // need = ATP the button costs (Infinity = never affordable); refreshRadialAfford re-checks it
-  const add = (dx, dy, html, cost, need, onClick, onHover, i) => {
-    const b = document.createElement('button'); b.className = 'rb' + (S.gold >= need ? '' : ' no'); b.dataset.need = need; b.style.left = dx + 'px'; b.style.top = dy + 'px'; b.style.animationDelay = i * 30 + 'ms';
+  const sc = clamp(viewK * 1.1, .62, 1.15), items = []; R.style.transform = `scale(${sc})`;
+  // ang = preferred direction in degrees (0 = right, 90 = down); need = ATP the button costs (Infinity = never affordable); refreshRadialAfford re-checks it
+  const add = (ang, html, cost, need, onClick, onHover, i) => {
+    const b = document.createElement('button'); b.className = 'rb' + (S.gold >= need ? '' : ' no'); b.dataset.need = need; b.style.animationDelay = i * 30 + 'ms'; items.push([b, ang]);
     b.innerHTML = html + (cost != null ? `<span class="pr">${cost}</span>` : '');
     b.onpointerdown = e => e.stopPropagation();
     b.onclick = e => { e.stopPropagation(); onClick(); };
@@ -1208,10 +1208,10 @@ function openRadial(slot) {
     R.appendChild(b);
   };
   if (!slot.tower) {
-    const pos = { neutro: [-50, -50], macro: [50, -50], killer: [-50, 50], bcell: [50, 50] };
+    const pos = { neutro: 225, macro: 315, killer: 135, bcell: 45 };
     TORDER.forEach((k, i) => {
       const c = TOWERS[k].lv[0].cost;
-      add(pos[k][0], pos[k][1], `<img src="${portrait(k, 0)}" alt="${TOWERS[k].name}">`, c, c,
+      add(pos[k], `<img src="${portrait(k, 0)}" alt="${TOWERS[k].name}">`, c, c,
         () => { if (build(slot, k)) { closeRadial(); S.pinned = null; showInfo({ kind: 'tower', t: slot.tower }); } },
         () => { S.preview = { x: slot.x, y: slot.y, r: k === 'macro' ? 0 : TOWERS[k].lv[0].range }; showInfo({ kind: 'type', type: k, lvl: 0 }); }, i);
     });
@@ -1220,23 +1220,43 @@ function openRadial(slot) {
     const t = slot.tower;
     if (t.lvl < 2) {
       const c = TOWERS[t.type].lv[t.lvl + 1].cost;
-      add(0, -66, `<img src="${portrait(t.type, t.lvl + 1)}" alt="Upgrade">`, '▲ ' + c, c,
+      add(270, `<img src="${portrait(t.type, t.lvl + 1)}" alt="Upgrade">`, '▲ ' + c, c,
         () => { if (upgrade(t)) openRadial(slot); },
         () => { S.preview = { x: t.x, y: t.y, r: t.type === 'macro' ? 0 : TOWERS[t.type].lv[t.lvl + 1].range }; showInfo({ kind: 'tower', t, next: true }); }, 0);
     } else if (!t.spec) {
       Object.keys(SPECS).filter(id => SPECS[id].base === t.type).forEach((id, i) => {
         const P = SPECS[id];
-        add(i ? 66 : -66, 0, `<img src="${portrait(id)}" alt="${P.name}">`, '▲ ' + P.cost, P.cost,
+        add(i ? 0 : 180, `<img src="${portrait(id)}" alt="${P.name}">`, '▲ ' + P.cost, P.cost,
           () => { if (specialize(t, id)) openRadial(slot); },
           () => { S.preview = { x: t.x, y: t.y, r: P.st.range || 0 }; showInfo({ kind: 'spec', id, t }); }, i);
       });
     } else if (t.rank < 2) {
       const c = SPECS[t.spec].sk[t.rank].cost;
-      add(0, -66, `<img src="${portrait(t.spec)}" alt="${SPECS[t.spec].skn}"><span class="rk">${['I', 'II'][t.rank]}</span>`, '★ ' + c, c,
+      add(270, `<img src="${portrait(t.spec)}" alt="${SPECS[t.spec].skn}"><span class="rk">${['I', 'II'][t.rank]}</span>`, '★ ' + c, c,
         () => { if (skillUp(t)) openRadial(slot); }, () => showInfo({ kind: 'tower', t, next: true }), 0);
-    } else add(0, -66, '<span class="lbl">MAX</span>', null, Infinity, () => {}, null, 0);
-    add(0, 66, '<span class="lbl">↺</span>', '+' + refund(t), 0, () => { sell(t); closeRadial(); showInfo(null); }, () => showInfo({ kind: 'recycle', t }), 1);
+    } else add(270, '<span class="lbl">MAX</span>', null, Infinity, () => {}, null, 0);
+    add(90, '<span class="lbl">↺</span>', '+' + refund(t), 0, () => { sell(t); closeRadial(); showInfo(null); }, () => showInfo({ kind: 'recycle', t }), 1);
     showInfo({ kind: 'tower', t });
+  }
+  placeRadial(items, slot, sc);
+}
+// put each button on the 66px ring at its preferred angle, or the nearest angle (30° steps) that stays on the stage,
+// clears the HUD panels and keeps clear of buttons already placed; in a tight corner it moves out to a 124px ring.
+// Spec buttons are added first, so they win the good spots.
+function placeRadial(items, slot, sc) {
+  const st = $('#stage').getBoundingClientRect(), cx = st.left + slot.x * viewK, cy = st.top + slot.y * viewK, br = 31 * sc, pr = 14 * sc;
+  const obs = [...document.querySelectorAll('#hudTL,#hudTR,#hudBL,#spec,#info,.wcall')].filter(e => !e.hidden && getComputedStyle(e).opacity !== '0')
+    .map(e => { const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top - (e.id === 'info' ? 30 : 0), b: r.bottom }; }); // info grows on hover
+  const fits = (x, y, hud) => x - br > st.left && x + br < st.right && y - br > st.top && y + br + pr < st.bottom && !(hud && obs.some(o => x + br > o.l && x - br < o.r && y + br + pr > o.t && y - br < o.b));
+  const used = [];
+  for (const [b, a0] of items) {
+    let pick = null;
+    for (const hud of [true, false]) for (const rr of [66, 124]) for (let k = 0; k <= 12 && !pick; k++) { // 2nd pass: site sits under a panel, the radial (z 2) stays on top
+      const q = (a0 + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 30) * Math.PI / 180, x = Math.cos(q) * rr, y = Math.sin(q) * rr;
+      if (used.every(u => Math.hypot(u[0] - x, u[1] - y) >= 62) && fits(cx + x * sc, cy + y * sc, hud)) pick = [x, y];
+    }
+    if (!pick) pick = [Math.cos(a0 * Math.PI / 180) * 66, Math.sin(a0 * Math.PI / 180) * 66];
+    used.push(pick); b.style.left = Math.round(pick[0]) + 'px'; b.style.top = Math.round(pick[1]) + 'px';
   }
 }
 function sv(label, val, nxt) { return `<div class="s"><small>${label}</small><b>${val}${nxt != null && nxt !== val ? `<em>→${nxt}</em>` : ''}</b></div>`; }
@@ -1385,7 +1405,7 @@ let acc = 0, last = performance.now();
 function frame(now) {
   const real = Math.min(.1, (now - last) / 1000); last = now;
   if (S.screen === 'play' && !S.paused && !S.over) { acc += real * S.speed; let n = 0; while (acc >= DT && n < 8) { step(DT); acc -= DT; n++; } if (n === 8) acc = 0; }
-  else if (S.L) { S.time += real * .3; for (const p of S.parts) { p.life -= real; p.x += p.vx * real; p.y += p.vy * real; } S.parts = S.parts.filter(p => p.life > 0); }
+  else if (S.L) { S.time += real * .3; for (const t of S.towers) t.built += real; for (const p of S.parts) { p.life -= real; p.x += p.vx * real; p.y += p.vy * real; } S.parts = S.parts.filter(p => p.life > 0); }
   render(); hud();
   requestAnimationFrame(frame);
 }
