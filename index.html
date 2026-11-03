@@ -44,6 +44,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 .ab .cd{position:absolute;inset:0;border-radius:50%;background:conic-gradient(rgba(2,5,9,.78) var(--p,0%),transparent 0);display:grid;place-items:center;font:700 16px var(--mono);color:#fff}
 .ab kbd{position:absolute;right:-2px;bottom:-2px;width:22px;height:22px;border-radius:50%;background:#0d1724;border:1px solid var(--rim2);font:700 11px/20px var(--mono);text-align:center;color:var(--cyan)}
 .ab.ready{animation:ready 2.2s ease-in-out infinite}
+.ab.off{filter:saturate(.25) brightness(.6)}
+.ab .hp{position:absolute;inset:-5px;border-radius:50%;background:conic-gradient(var(--hc,#8ff0ff) var(--hp,100%),rgba(140,205,255,.14) 0);-webkit-mask:radial-gradient(circle,transparent 33px,#000 34px);mask:radial-gradient(circle,transparent 33px,#000 34px);filter:drop-shadow(0 0 4px rgba(143,240,255,.55))}
+.ab.low .hp{--hc:#ff4d5e}
+.ab .lv{position:absolute;left:-5px;top:-5px;min-width:22px;height:22px;border-radius:11px;background:#0d1724;border:1px solid #8ff0ff;font:700 11px/20px var(--mono);text-align:center;color:#e8f6ff;box-shadow:0 0 8px rgba(143,240,255,.5)}
 .ab.armed{border-color:#fff;box-shadow:0 0 0 3px rgba(127,216,255,.35),0 0 24px rgba(127,216,255,.5)}
 @keyframes ready{50%{box-shadow:0 0 18px rgba(127,216,255,.45),0 8px 20px -8px #000}}
 .tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .12s;background:var(--glass2);border:1px solid var(--rim);border-radius:10px;padding:8px 11px;width:max-content;max-width:230px;text-align:left;font:400 12px/1.4 var(--sans);color:var(--txt)}
@@ -67,6 +71,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 #info .s{background:rgba(140,205,255,.07);border:1px solid rgba(140,205,255,.12);border-radius:9px;padding:4px 9px;min-width:54px}
 #info .s small{display:block;font:600 8px var(--mono);letter-spacing:.14em;color:var(--dim)}
 #info .s b{font:700 14px var(--mono);white-space:nowrap}
+#info .s b i{font-style:normal;color:var(--dim);font-size:10px}
 #info .s b em{font-style:normal;color:var(--lime);font-size:11px;margin-left:3px}
 #info .perk{font-size:11.5px;color:var(--dim);max-width:200px;line-height:1.35}
 #info .perk.on{color:#ffe3a3}
@@ -158,7 +163,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .btn:hover{background:rgba(140,205,255,.14)}
 .btn.pri{background:var(--cyan);border-color:var(--cyan);color:#04121c;box-shadow:0 0 22px rgba(127,216,255,.35)}
 [hidden]{display:none!important}
-@media (max-width:1100px){#info{left:calc(172px * var(--u,1));transform:scale(var(--u,1));transform-origin:bottom left;max-width:none}#info .perk:not(.wide),#info .meta span{display:none}#info .perk.wide{flex-basis:240px;font-size:11px}#info:not([hidden]) ~ #spec{opacity:0}}
+/* below ~1700px a centred info bar would run into the bottom-left cluster (hero + 3 skills) */
+@media (max-width:1700px){#info{left:calc(330px * var(--u,1));transform:scale(var(--u,1));transform-origin:bottom left;max-width:calc(100% / var(--u,1) - 346px)}#info:not([hidden]) ~ #spec{opacity:0}}
+@media (max-width:1100px){#info .perk:not(.wide),#info .meta span{display:none}#info .perk.wide{flex-basis:240px;font-size:11px}}
 @media (max-width:700px){.slides{grid-template-columns:1fr}.slide .body{grid-template-columns:1fr 1fr}.tin h1{font-size:44px}}
 </style>
 </head>
@@ -180,8 +187,10 @@ button{font:inherit;color:inherit;cursor:pointer}
     <button class="ib" id="mapBtn" title="Specimen tray"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="1.5"/><path d="M8 7v10"/></svg></button>
   </div>
   <div id="hudBL" class="ui">
+    <button class="ab" id="ab-hero"><i class="hp"></i><img id="ic-hero" alt="NK Sentinel"><div class="cd"></div><span class="lv">1</span><kbd>H</kbd><div class="tip"><small>HERO · NATURAL KILLER CELL</small><b>NK Sentinel</b>Click it (or press H), then click near the path to send it there. Right-click or Esc cancels.</div></button>
     <button class="ab" id="ab-fever"><img id="ic-fever" alt="Fever"><div class="cd"></div><kbd>Q</kbd><div class="tip"><small>ABILITY · 32 s</small><b>Fever spike</b>Heat burns everything in an area and slows survivors. Click the map.</div></button>
     <button class="ab" id="ab-swarm"><img id="ic-swarm" alt="Swarm"><div class="cd"></div><kbd>W</kbd><div class="tip"><small>ABILITY · 22 s</small><b>Neutrophil swarm</b>Drop three short-lived neutrophils that block the path. Click the path.</div></button>
+    <button class="ab" id="ab-gz"><img id="ic-gz" alt="Granzyme"><div class="cd"></div><kbd>E</kbd><div class="tip"><small>HERO SKILL · 20 s</small><b>Granzyme Burst</b>The NK Sentinel sprays granzyme, damaging and stunning every pathogen around it.</div></button>
   </div>
   <div id="info" class="ui glass" hidden></div>
   <div id="spec" class="ui"><span id="specId">SPEC-01 · DERMIS</span><b id="specName">The Splinter</b><span class="bar"><i></i>50 µm · ×400</span></div>
@@ -194,7 +203,7 @@ button{font:inherit;color:inherit;cursor:pointer}
       <h1>IMMUNE<br><span>CITADEL</span></h1>
       <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p>
       <div class="slides" id="slides"></div>
-      <div class="keys"><span><b>Click a ring</b> grow a cell</span><span><b>Click a cell</b> upgrade / recycle</span><span><b>Red marker</b> call the next wave</span><span><b>Q W</b> abilities</span><span><b>Space</b> pause</span><span><b>F</b> speed</span></div>
+      <div class="keys"><span><b>Click a ring</b> grow a cell</span><span><b>Click a cell</b> upgrade / recycle</span><span><b>Red marker</b> call the next wave</span><span><b>Q W</b> abilities</span><span><b>H E</b> hero · burst</span><span><b>Space</b> pause</span><span><b>F</b> speed</span></div>
     </div>
   </div>
   <div class="ov" id="endOv" hidden>
@@ -406,6 +415,10 @@ const LEVELS = [
   },
 ];
 const LVLMULT = [1, 1.55, 2.0, 1.38];
+// hero: lv = stats per level 1-5, xp = XP to reach the next level, gz = Granzyme Burst (damage = dmg × k)
+const HERO = { name: 'NK Sentinel', rate: .7, range: 95, speed: 105, resp: 14,
+  lv: [{ hp: 200, dmg: 11, regen: 5 }, { hp: 250, dmg: 15, regen: 7 }, { hp: 310, dmg: 20, regen: 9 }, { hp: 380, dmg: 26, regen: 12 }, { hp: 460, dmg: 33, regen: 15 }],
+  xp: [45, 100, 170, 260], gz: { cd: 20, r: 85, k: 3.5, stun: 1.8 } };
 const NOTES = [
   'Neutrophils make up about 60% of your white blood cells, and most live less than a day.',
   'Macrophage means “big eater”. One can swallow around 100 bacteria before it dies.',
@@ -426,7 +439,7 @@ const SPEC = [
   { place: 'Dermis', name: 'The Splinter', sub: 'A splinter broke the skin barrier. Bacteria flood the wound channel.', edge: '#ff6b5a', tint: '#ff6b5a',
     slots: [[130, 225], [250, 100], [225, 300], [395, 300], [355, 525], [510, 400], [520, 545], [600, 330], [765, 300], [760, 92], [900, 232], [960, 90]] },
   { place: 'Alveoli', name: 'Two Breaths', sub: 'Every inhale brings a new wave down two airways at once.', edge: '#4dffb0', tint: '#4dffb0',
-    slots: [[230, 195], [140, 180], [320, 88], [432, 182], [140, 450], [250, 590], [332, 512], [312, 305], [540, 230], [540, 370], [700, 360], [680, 190], [860, 150], [880, 290]] },
+    slots: [[230, 195], [140, 180], [320, 88], [432, 182], [140, 450], [240, 400], [332, 512], [312, 305], [540, 230], [540, 370], [700, 360], [680, 190], [860, 150], [880, 290]] },
   { place: 'Aorta', name: 'The Current', sub: 'A long, fast artery. Parasites ride it toward the heart.', edge: '#ff3d55', tint: '#ff3d55' },
   { place: 'Lymph Node', name: 'The Superbug', sub: 'A drug-resistant colony marches on the immune system’s own school.', edge: '#ffd166', tint: '#ffd166' },
 ];
@@ -436,7 +449,7 @@ LEVELS.forEach((L, i) => Object.assign(L, SPEC[i]));
 const HEXC = {};
 function rgba(h, a) { let c = HEXC[h]; if (!c) { const n = parseInt(h.slice(1), 16); c = HEXC[h] = [n >> 16 & 255, n >> 8 & 255, n & 255]; } return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
 const COL = { neutro: '#b49cff', macro: '#3fe0d0', bcell: '#5fb4ff', killer: '#e8f6ff',
-  net: '#c9b8ff', degran: '#a98bff', m1: '#3fe0d0', m2: '#8ff0ff', plasma: '#5fb4ff', memory: '#9fd4ff', ctl: '#e8f6ff', th1: '#7fc4ff', bact: '#a6ff4d', virus: '#ff4d5e', staph: '#ffb02e', candida: '#ff4fd8', spore: '#ff7fe3', flu: '#ff8a3d', worm: '#ffae7a', boss: '#ff6a3d' };
+  net: '#c9b8ff', degran: '#a98bff', m1: '#3fe0d0', m2: '#8ff0ff', plasma: '#5fb4ff', memory: '#9fd4ff', ctl: '#e8f6ff', th1: '#7fc4ff', hero: '#9ff0ff', bact: '#a6ff4d', virus: '#ff4d5e', staph: '#ffb02e', candida: '#ff4fd8', spore: '#ff7fe3', flu: '#ff8a3d', worm: '#ffae7a', boss: '#ff6a3d' };
 function halo(g, r, c, a) {
   const gr = g.createRadialGradient(0, 0, 0, 0, 0, r); gr.addColorStop(0, rgba(c, a)); gr.addColorStop(1, rgba(c, 0));
   const o = g.globalCompositeOperation; g.globalCompositeOperation = 'lighter'; g.fillStyle = gr; circ(g, 0, 0, r); g.fill(); g.globalCompositeOperation = o;
@@ -565,6 +578,20 @@ function drawUnitArt(g, kind, t, hit, spec) {
   blob(g, spec ? 9.5 : kind === 'macro' ? 8 : 7, 8, t * 2, spec === 'm1' ? .24 : kind === 'macro' ? .14 : .1, kind === 'macro' ? 5 : 2); membrane(g, C, .12, 1.5, spec ? 5 : 0);
   if (kind === 'macro') nucleus(g, -1, -1, 3, 2.4); else [[-2, 0], [1, 2], [3, -1]].forEach(([x, y]) => nucleus(g, x, y, 1.6, 1.5));
 }
+// NK cell: big granular lymphocyte, kidney nucleus, crown of granules with small points
+function drawHeroArt(g, t, hit = 0, glow = 0) {
+  const C = COL.hero, r = 12.5, q = r * 1.55;
+  halo(g, 36, '#3fe0d0', .2 + hit * 2 + glow * .5);
+  g.strokeStyle = rgba('#e8f6ff', .25); g.lineWidth = 1; circ(g, 0, 0, q); g.stroke();
+  for (let i = 0; i < 8; i++) {
+    const a = i / 8 * TAU + t * .35; g.save(); g.translate(Math.cos(a) * q, Math.sin(a) * q); g.rotate(a);
+    g.fillStyle = rgba('#e8f6ff', .5); g.beginPath(); g.moveTo(1.5, -2.2); g.lineTo(6, 0); g.lineTo(1.5, 2.2); g.fill();
+    halo(g, 5.5, '#8ff0ff', .75); g.fillStyle = '#f2fbff'; circ(g, 0, 0, i % 2 ? 1.3 : 2); g.fill(); g.restore();
+  }
+  blob(g, r, 11, t * 1.4, .05, 7); membrane(g, C, .14, 1.9, 10);
+  nucleus(g, -r * .2, -r * .08, r * .42, r * .32, .5);
+  for (let i = 0; i < 7; i++) { const a = i * 2.4 + .5, d = r * (.5 + (i % 3) * .12); g.save(); g.translate(Math.cos(a) * d, Math.sin(a) * d); halo(g, 4, '#5fb4ff', .7); g.fillStyle = '#e8f6ff'; circ(g, 0, 0, 1.2); g.fill(); g.restore(); }
+}
 const portraitCache = {};
 function portrait(kind, lvl = 0, sz = 96) {
   const key = kind + lvl + sz; if (portraitCache[key]) return portraitCache[key];
@@ -579,6 +606,11 @@ function portrait(kind, lvl = 0, sz = 96) {
   } else if (kind === 'swarm') {
     const s = sz / 44; g.scale(s, s);
     [[-7, 5], [7, 5], [0, -6]].forEach(([x, y]) => { g.save(); g.translate(x, y); drawUnitArt(g, 'swarm', 1, 0); g.restore(); });
+  } else if (kind === 'hero') { const s = sz / 50; g.scale(s, s); drawHeroArt(g, .6);
+  } else if (kind === 'granzyme') {
+    const s = sz / 44; g.scale(s, s); halo(g, 20, '#3fe0d0', .4); g.strokeStyle = rgba('#e8f6ff', .7); g.lineWidth = 1.4; g.lineCap = 'round';
+    for (let i = 0; i < 10; i++) { const a = i / 10 * TAU; g.beginPath(); g.moveTo(Math.cos(a) * 8, Math.sin(a) * 8); g.lineTo(Math.cos(a) * 13, Math.sin(a) * 13); g.stroke(); g.save(); g.translate(Math.cos(a) * 16, Math.sin(a) * 16); halo(g, 5, '#8ff0ff', .8); g.fillStyle = '#f2fbff'; circ(g, 0, 0, 1.8); g.fill(); g.restore(); }
+    circ(g, 0, 0, 6.5); membrane(g, COL.hero, .2, 1.5, 8); nucleus(g, -.5, -.3, 3.2, 2.6, .5);
   } else if (ENEMIES[kind]) {
     const big = kind === 'boss' ? 78 : kind === 'candida' || kind === 'worm' ? 46 : 36, s = sz / big; g.scale(s, s);
     if (kind === 'worm') g.translate(9, 0);
@@ -597,10 +629,10 @@ function startLevel(i) {
   Object.assign(S, {
     lvl: i, L, paths: L.paths.map(makePath), slots: L.slots.map(([x, y], k) => ({ x, y, k, tower: null })),
     towers: [], enemies: [], units: [], proj: [], parts: [], floats: [], fx: [], spawnQ: [],
-    gold: L.gold, lives: 20, wave: 0, waveTimer: -1, waveTimerMax: 1, time: 0, cds: { fever: 0, swarm: 0 },
+    gold: L.gold, lives: 20, wave: 0, waveTimer: -1, waveTimerMax: 1, time: 0, cds: { fever: 0, swarm: 0, granzyme: 0 },
     ability: null, sel: null, armed: null, preview: null, over: false, run: (S.run || 0) + 1, paused: false, shake: 0, hurt: 0, screen: 'play', noteI: i * 3, pinned: null,
   });
-  bgCache = null; closeRadial(); lastHud = '';
+  S.hero = mkHero(); bgCache = null; closeRadial(); lastHud = '';
   $('#titleOv').hidden = true; $('#endOv').hidden = true;
   $('#specId').textContent = `SPEC-0${i + 1} · ${L.place.toUpperCase()}`; $('#specName').textContent = L.name;
   showInfo(null); layoutWaveMarkers(); nextNote();
@@ -638,7 +670,7 @@ function sendWave() {
 function spawnEnemy(type, p, mult, d = 0, lat) {
   const D = ENEMIES[type];
   const e = { type, D, hp: D.hp * mult, max: D.hp * mult, mult, p, path: S.paths[p], d, lat: lat ?? (D.boss ? 0 : rand(-9, 9)),
-    x: 0, y: 0, a: 0, slowT: 0, slowF: 1, opsT: 0, ops: 1.25, shred: 0, rootT: 0, shieldT: 0, flash: 0, blocker: null, atkCd: .5, t: rand(0, 10), abT: D.boss ? 5 : 0, dead: false };
+    x: 0, y: 0, a: 0, slowT: 0, slowF: 1, opsT: 0, ops: 1.25, shred: 0, rootT: 0, stunT: 0, heroT: -99, shieldT: 0, flash: 0, blocker: null, atkCd: .5, t: rand(0, 10), abT: D.boss ? 5 : 0, dead: false };
   place(e); S.enemies.push(e); return e;
 }
 function place(e) { const p = posAt(e.path, e.d); e.a = p.a; e.x = p.x - Math.sin(p.a) * e.lat; e.y = p.y + Math.cos(p.a) * e.lat; }
@@ -649,13 +681,15 @@ function damage(e, amt, type, src) {
   if (e.opsT > 0) amt *= e.ops;
   if (e.shieldT > 0) amt *= .5;
   if (src && src.mem) amt *= 1 + Math.min(SPECS.memory.st.memCap, (src.mem[e.type] || 0) * SPECS.memory.st.mem);
-  e.hp -= amt; e.flash = .09;
+  e.hp -= amt; e.flash = .09; if (src && src === S.hero) e.heroT = S.time;
   if (e.hp <= 0) kill(e, src);
 }
 function kill(e, src) {
   if (e.dead) return; e.dead = true;
   S.gold += e.D.gold; floatText(e.x, e.y - 18, `+${e.D.gold}`, '#ffc24a');
   if (src && src.mem) src.mem[e.type] = (src.mem[e.type] || 0) + 1;
+  const H = S.hero; if (H && src === H) H.kills++;
+  if (H && (src === H || S.time - e.heroT < 4)) heroXp(src === H ? e.D.gold : Math.ceil(e.D.gold / 2)); // kill or assist
   const ef = src && src.owner && src.owner.spec === 'm2' && skill(src.owner);
   if (ef) { S.gold += ef.atp; floatText(e.x, e.y - 32, `+${ef.atp} efferocytosis`, '#8ff0ff', 1.1); }
   const col = { bact: '#a6ff4d', virus: '#ff4d5e', staph: '#ffb02e', candida: '#ff4fd8', spore: '#ff7fe3', flu: '#ff8a3d', worm: '#ffae7a', boss: '#ff6a3d' }[e.type];
@@ -736,10 +770,84 @@ function mkUnit(kind, x, y, owner, ttl = 0) {
 function hurtUnit(u, amt) {
   u.hp -= amt; u.hit = .12;
   if (u.hp <= 0) {
-    u.dead = true; u.resp = 9; burst(u.x, u.y, u.kind === 'macro' ? '#3fe0d0' : '#b49cff', 8, 1.8);
+    u.dead = true; u.resp = 9; burst(u.x, u.y, u.kind === 'macro' ? '#3fe0d0' : u.kind === 'hero' ? COL.hero : '#b49cff', 8, 1.8);
+    if (u.kind === 'hero') { u.resp = HERO.resp; burst(u.x, u.y, '#e8f6ff', 18, 2.4); floatText(u.x, u.y - 30, 'NK Sentinel down', '#ff6b78', 1.4); if (S.sel && S.sel.hero) { S.sel = null; showInfo(null); } }
     if (u.tgt && u.tgt.blocker === u) u.tgt.blocker = null; u.tgt = null;
     if (u.kind === 'swarm') u.gone = true;
   }
+}
+
+// ============================================================ hero
+// home: on the main path a little before the core, walked back until it clears the bottom-left HUD cluster
+function heroHome() {
+  const p = S.paths[0]; let q;
+  for (let d = p.len - 110; d > 0; d -= 20) { q = posAt(p, d); if (q.x > 20 && q.x < W - 20 && q.y > 20 && q.y < H - 20 && !(q.x < 300 && q.y > 525)) break; }
+  return { x: q.x, y: q.y };
+}
+function mkHero() {
+  const p = heroHome(), L = HERO.lv[0];
+  return { kind: 'hero', x: p.x, y: p.y, hx: p.x, hy: p.y, hp: L.hp, max: L.hp, lvl: 1, xp: 0, kills: 0, cd: 0, tgt: null, dead: false, resp: 0, mv: false, t: 0, hit: 0, glow: 0 };
+}
+function heroXp(n) {
+  const h = S.hero; if (h.lvl >= 5) return; h.xp += n;
+  while (h.lvl < 5 && h.xp >= HERO.xp[h.lvl - 1]) {
+    h.xp -= HERO.xp[h.lvl - 1]; h.lvl++; h.max = HERO.lv[h.lvl - 1].hp; if (!h.dead) h.hp = h.max; h.glow = 1.2;
+    S.fx.push({ k: 'lvl', t: 0, T: 1.1 }); burst(h.x, h.y, '#e8f6ff', 24, 2.6); floatText(h.x, h.y - 42, `LEVEL ${h.lvl}`, '#e8f6ff', 1.8); sfx('build');
+  }
+  if (h.lvl >= 5) h.xp = 0;
+}
+function heroDest(x, y) {
+  let dd = 1e9; for (const p of S.paths) dd = Math.min(dd, nearestOnPath(p, x, y).dd);
+  return { x: clamp(x, 16, W - 16), y: clamp(y, 16, H - 16), ok: dd <= 55 };
+}
+function heroMove(x, y) {
+  const h = S.hero; if (!h || h.dead || S.over) return false;
+  const d = heroDest(x, y); if (!d.ok) { floatText(x, y - 10, 'Too far from the path', '#ff6b78', 1); return false; }
+  Object.assign(h, { hx: d.x, hy: d.y, mv: true }); sfx('click'); return true;
+}
+function selectHero(on = !(S.sel && S.sel.hero)) {
+  if (S.screen !== 'play' || S.over || !S.hero || S.hero.dead) on = false;
+  closeRadial(); S.ability = null; S.pinned = null; S.sel = on ? { hero: true } : null; showInfo(on ? { kind: 'hero' } : null); if (on) sfx('click');
+}
+function granzyme() {
+  const h = S.hero, G = HERO.gz; if (S.screen !== 'play' || S.over || !h || h.dead || S.cds.granzyme > 0) return false;
+  const dmg = HERO.lv[h.lvl - 1].dmg * G.k;
+  for (const e of S.enemies) if (!e.dead && Math.hypot(e.x - h.x, e.y - h.y) < G.r + e.D.r) { damage(e, dmg, 'magic', h); e.stunT = Math.max(e.stunT, e.D.boss ? G.stun / 2 : G.stun); }
+  S.fx.push({ k: 'gz', x: h.x, y: h.y, r: G.r, t: 0, T: .7 }); burst(h.x, h.y, '#e8f6ff', 20, 3);
+  S.cds.granzyme = G.cd; S.shake = Math.max(S.shake, 5); h.glow = .6; sfx('zap'); return true;
+}
+// like a macrophage cell: holds one ground pathogen near its post; also shoots anything (flyers too) in short range
+function heroStep(dt) {
+  const h = S.hero; if (!h) return;
+  h.t += dt; h.hit = Math.max(0, h.hit - dt); h.glow = Math.max(0, h.glow - dt);
+  if (h.dead) {
+    if ((h.resp -= dt) <= 0) { const p = heroHome(); Object.assign(h, { dead: false, hp: h.max, x: p.x, y: p.y, hx: p.x, hy: p.y, mv: false, tgt: null }); ring(p.x, p.y, COL.hero); burst(p.x, p.y, COL.hero, 14, 2); }
+    return;
+  }
+  const L = HERO.lv[h.lvl - 1];
+  const walk = (x, y, v, stop = 0) => { const dx = x - h.x, dy = y - h.y, d = Math.hypot(dx, dy); if (d > stop + .5) { const s = Math.min(v * dt, d - stop); h.x += dx / d * s; h.y += dy / d * s; } return d; };
+  let t = h.tgt;
+  if (t && (h.mv || t.dead || Math.hypot(t.x - h.hx, t.y - h.hy) > 100 || (t.blocker && t.blocker !== h && Math.hypot(t.x - h.x, t.y - h.y) > 30))) { if (t.blocker === h) t.blocker = null; h.tgt = t = null; }
+  if (h.mv) { if (walk(h.hx, h.hy, HERO.speed) <= 1) h.mv = false; }
+  else {
+    if (!t) {
+      let bd = 1e9;
+      for (const e of S.enemies) {
+        if (e.dead || e.D.flying || Math.hypot(e.x - h.hx, e.y - h.hy) > 70) continue;
+        const sc = Math.hypot(e.x - h.x, e.y - h.y) + (e.blocker ? 80 : 0); if (sc < bd) { bd = sc; t = e; }
+      }
+      h.tgt = t;
+    }
+    if (t) { if (walk(t.x, t.y, HERO.speed, t.D.r + 12) <= t.D.r + 13 && !t.blocker) t.blocker = h; }
+    else walk(h.hx, h.hy, HERO.speed * .8);
+    if ((h.cd -= dt) <= 0) {
+      let tg = t && t.blocker === h ? t : null, bd = HERO.range;
+      if (!tg) for (const e of S.enemies) { const d = Math.hypot(e.x - h.x, e.y - (e.D.flying ? 12 : 0) - h.y) - e.D.r; if (!e.dead && d < bd) { bd = d; tg = e; } }
+      h.cd = tg ? HERO.rate : .1;
+      if (tg) { S.proj.push({ k: 'acid', c: COL.hero, x: h.x, y: h.y - 6, tgt: tg, sp: 420, dmg: L.dmg, dt: 'phys', src: h }); sfx('shoot'); }
+    }
+  }
+  if (!(t && t.blocker === h)) h.hp = Math.min(h.max, h.hp + L.regen * dt);
 }
 
 // ============================================================ fx helpers
@@ -763,6 +871,7 @@ function step(dt) {
     e.t += dt; e.flash = Math.max(0, e.flash - dt); e.opsT -= dt; e.shieldT -= dt;
     if (e.slowT > 0) e.slowT -= dt; else e.slowF = 1;
     if (e.blocker && (e.blocker.dead || e.blocker.gone || e.blocker.tgt !== e)) e.blocker = null;
+    if (e.stunT > 0) { e.stunT -= dt; continue; } // stunned: no moving, no biting, no boss tricks
     if (e.blocker) {
       e.atkCd -= dt;
       if (e.atkCd <= 0) { e.atkCd = 1; hurtUnit(e.blocker, e.D.atk * Math.sqrt(e.mult)); }
@@ -830,6 +939,7 @@ function step(dt) {
     }
   }
   S.units = S.units.filter(u => !u.gone);
+  heroStep(dt);
 
   // Th1 cytokine auras
   for (const t of S.towers) t.haste = 0;
@@ -943,7 +1053,7 @@ function step(dt) {
 function armAbility(k) {
   if (S.screen !== 'play' || S.over) return;
   if (S.cds[k] > 0) return;
-  S.ability = S.ability === k ? null : k; closeRadial(); S.armed = null; renderArsenal();
+  S.ability = S.ability === k ? null : k; closeRadial(); if (S.sel && S.sel.hero) S.sel = null; S.armed = null; renderArsenal();
 }
 function castAbility(x, y) {
   const k = S.ability;
@@ -1060,6 +1170,7 @@ function drawEnemy(g, e) {
   if (e.flash > 0) halo(g, e.D.r + 8, '#ffffff', e.flash * 6);
   if (e.shieldT > 0) { g.fillStyle = 'rgba(166,255,77,.08)'; g.strokeStyle = 'rgba(166,255,77,.7)'; g.lineWidth = 1.3; circ(g, 0, 0, e.D.r + 7); g.fill(); g.stroke(); }
   if (e.rootT > 0) { g.strokeStyle = rgba('#8fb0ff', .85); g.lineWidth = 1.2; g.shadowColor = '#5b8cff'; g.shadowBlur = 6; const q = e.D.r + 5; for (let i = 0; i < 5; i++) { const a = i * 1.26 + e.t * .3; g.beginPath(); g.moveTo(Math.cos(a) * q, Math.sin(a) * q); g.quadraticCurveTo(0, 0, Math.cos(a + 2.3) * q, Math.sin(a + 2.3) * q); g.stroke(); } g.shadowBlur = 0; }
+  if (e.stunT > 0) for (let i = 0; i < 3; i++) { const a = e.t * 4 + i * TAU / 3; g.save(); g.translate(Math.cos(a) * (e.D.r + 4), -e.D.r - 4 + Math.sin(a) * 3); halo(g, 5, '#8ff0ff', .8); g.fillStyle = '#f2fbff'; circ(g, 0, 0, 1.5); g.fill(); g.restore(); }
   if (e.shred > 0) { g.strokeStyle = rgba('#a98bff', .3 + e.shred); g.lineWidth = 1; g.setLineDash([1.5, 3]); circ(g, 0, 0, e.D.r + 3); g.stroke(); g.setLineDash([]); }
   if (e.slowT > 0 && e.slowF < 1) { g.strokeStyle = 'rgba(220,235,255,.7)'; g.lineWidth = 1; for (let i = 0; i < 4; i++) { const a = i * .8 + .3; g.beginPath(); g.moveTo(Math.cos(a) * (e.D.r + 4), Math.sin(a) * (e.D.r + 4)); g.lineTo(-Math.cos(a) * (e.D.r + 4), -Math.sin(a) * (e.D.r + 4)); g.stroke(); } }
   if (e.opsT > 0) { g.strokeStyle = '#ffd166'; g.lineWidth = 1.3; for (let i = 0; i < 3; i++) { const a = e.t * 2 + i * 2.1, x = Math.cos(a) * (e.D.r + 6), y = Math.sin(a) * (e.D.r + 6); g.beginPath(); g.moveTo(x, y + 3); g.lineTo(x, y); g.lineTo(x - 2.5, y - 3); g.moveTo(x, y); g.lineTo(x + 2.5, y - 3); g.stroke(); } }
@@ -1072,6 +1183,29 @@ function drawUnit(g, u) {
   drawUnitArt(g, u.kind, u.t, u.hit, u.owner && u.owner.spec);
   if (u.hp < u.max) hpBar(g, 0, -13, 14, u.hp / u.max, '#7fd8ff');
   if (u.kind === 'swarm') { g.fillStyle = 'rgba(180,156,255,.9)'; g.fillRect(-7, -16, 14 * Math.max(0, u.ttl / 13), 1.5); }
+  g.restore();
+}
+function drawHero(g, T) {
+  const h = S.hero; if (!h || h.dead) return;
+  const sel = S.sel && S.sel.hero, m = S.mouse, pv = sel && m.x > 0 ? heroDest(m.x, m.y) : null;
+  // committed order, then the live preview under the mouse while selected
+  for (const [tx, ty, ok] of [h.mv ? [h.hx, h.hy, true] : [], pv ? [pv.x, pv.y, pv.ok] : []]) {
+    if (tx == null) continue;
+    g.strokeStyle = ok ? 'rgba(191,234,255,.55)' : 'rgba(255,77,94,.7)'; g.lineWidth = 1.4; g.setLineDash([5, 5]); g.lineDashOffset = -T * 14;
+    g.beginPath(); g.moveTo(h.x, h.y); g.lineTo(tx, ty); g.stroke(); g.setLineDash([]);
+    g.save(); g.translate(tx, ty);
+    if (ok) {
+      halo(g, 18, '#8ff0ff', .3); g.strokeStyle = '#e8f6ff'; g.lineWidth = 1.6; circ(g, 0, 0, 9 + Math.sin(T * 6) * 1.5); g.stroke();
+      for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + T; g.beginPath(); g.moveTo(Math.cos(a) * 13, Math.sin(a) * 13); g.lineTo(Math.cos(a) * 17, Math.sin(a) * 17); g.stroke(); }
+    } else { g.strokeStyle = '#ff4d5e'; g.lineWidth = 2; g.beginPath(); g.moveTo(-6, -6); g.lineTo(6, 6); g.moveTo(6, -6); g.lineTo(-6, 6); g.stroke(); }
+    g.restore();
+  }
+  g.save(); g.translate(h.x, h.y + Math.sin(h.t * 3) * .8);
+  if (sel) { g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.setLineDash([4, 3]); g.lineDashOffset = -T * 8; circ(g, 0, 0, 28); g.stroke(); g.setLineDash([]); }
+  drawHeroArt(g, h.t, h.hit, h.glow);
+  hpBar(g, 4, -31, 26, Math.max(0, h.hp / h.max), '#8ff0ff');
+  g.fillStyle = '#0d1724'; g.strokeStyle = '#8ff0ff'; g.lineWidth = 1; circ(g, -14, -30, 6); g.fill(); g.stroke();
+  g.font = '700 9px "JetBrains Mono", ui-monospace, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#e8f6ff'; g.fillText(h.lvl, -14, -29.5); g.textBaseline = 'alphabetic';
   g.restore();
 }
 function render() {
@@ -1100,11 +1234,12 @@ function render() {
   if (pv && pv.r) { g.fillStyle = 'rgba(127,216,255,.06)'; g.strokeStyle = 'rgba(127,216,255,.7)'; g.lineWidth = 1.5; g.setLineDash([6, 5]); g.lineDashOffset = -T * 10; circ(g, pv.x, pv.y, pv.r); g.fill(); g.stroke(); g.setLineDash([]); }
   for (const t of S.towers) drawTower(g, t, T);
   for (const u of S.units) drawUnit(g, u);
+  drawHero(g, T);
   for (const e of S.enemies) if (!e.D.flying) drawEnemy(g, e);
   for (const e of S.enemies) if (e.D.flying) drawEnemy(g, e);
   for (const p of S.proj) {
     if (p.k === 'gran') { g.save(); g.translate(p.x, p.y); halo(g, p.net ? 12 : 8, p.slow ? '#8fb0ff' : '#b49cff', .7); g.fillStyle = p.net ? '#fff' : '#e3d6ff'; circ(g, 0, 0, p.net ? 3.4 : 2.2); g.fill(); g.restore(); }
-    else if (p.k === 'acid') { g.save(); g.translate(p.x, p.y); halo(g, 9, '#3fe0d0', .8); g.fillStyle = '#d8fff8'; circ(g, 0, 0, 2); g.fill(); g.restore(); }
+    else if (p.k === 'acid') { g.save(); g.translate(p.x, p.y); halo(g, 9, p.c || '#3fe0d0', .8); g.fillStyle = p.c ? '#f2fbff' : '#d8fff8'; circ(g, 0, 0, 2); g.fill(); g.restore(); }
     else if (p.k === 'bolt') {
       g.globalCompositeOperation = 'lighter'; g.strokeStyle = 'rgba(255,77,109,.6)'; g.lineWidth = 4; g.lineCap = 'round'; g.beginPath(); p.trail.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.lineTo(p.x, p.y); g.stroke();
       g.globalCompositeOperation = 'source-over'; g.fillStyle = '#fff'; circ(g, p.x, p.y, 2.6); g.fill();
@@ -1128,6 +1263,13 @@ function render() {
     }
     else if (f.k === 'recall') { const a0 = 1 - k2; g.save(); g.translate(f.x, f.y); g.globalCompositeOperation = 'lighter'; const gr = g.createLinearGradient(0, -260, 0, 0); gr.addColorStop(0, rgba('#9fd4ff', 0)); gr.addColorStop(1, rgba('#e8f6ff', .9 * a0)); g.fillStyle = gr; g.fillRect(-6 * a0 - 1, -260, 12 * a0 + 2, 260); g.globalCompositeOperation = 'source-over'; halo(g, 40, '#9fd4ff', .7 * a0); g.strokeStyle = rgba('#e8f6ff', a0); g.lineWidth = 2; circ(g, 0, 0, 10 + k2 * 34); g.stroke(); g.restore(); }
     else if (f.k === 'verdict') { const a0 = 1 - k2, q = 30 * (1 - k2 * .6); g.save(); g.translate(f.x, f.y); halo(g, 30, '#ff4d6d', .6 * a0); g.strokeStyle = rgba('#ff7a8f', a0); g.lineWidth = 2; circ(g, 0, 0, q); g.stroke(); g.beginPath(); for (const s of [-1, 1]) { g.moveTo(-q * .6, -q * .6 * s); g.lineTo(q * .6, q * .6 * s); } g.stroke(); g.restore(); }
+    else if (f.k === 'gz') {
+      const a0 = 1 - k2, q = f.r * (.25 + .75 * Math.min(1, k2 * 2.2)); g.save(); g.translate(f.x, f.y);
+      halo(g, f.r * 1.1, '#3fe0d0', .4 * a0); g.strokeStyle = rgba('#e8f6ff', .9 * a0); g.lineWidth = 2; g.shadowColor = '#8ff0ff'; g.shadowBlur = 10; circ(g, 0, 0, q); g.stroke(); g.shadowBlur = 0;
+      for (let i = 0; i < 14; i++) { const a = i / 14 * TAU + .2; g.save(); g.translate(Math.cos(a) * q * .9, Math.sin(a) * q * .9); halo(g, 7, '#8ff0ff', .8 * a0); g.fillStyle = rgba('#f2fbff', a0); circ(g, 0, 0, 1.8); g.fill(); g.restore(); }
+      g.restore();
+    }
+    else if (f.k === 'lvl') { const h = S.hero, a0 = 1 - k2; g.save(); g.translate(h.x, h.y); halo(g, 40 + k2 * 50, '#e8f6ff', .55 * a0); g.strokeStyle = rgba('#8ff0ff', a0); g.lineWidth = 2; circ(g, 0, 0, 16 + k2 * 44); g.stroke(); g.restore(); }
     else if (f.k === 'biofilm') { g.strokeStyle = `rgba(166,255,77,${1 - k2})`; g.lineWidth = 3; circ(g, f.x, f.y, 20 + k2 * 110); g.stroke(); }
     else if (f.k === 'fever') {
       g.save(); g.translate(f.x, f.y);
@@ -1158,6 +1300,7 @@ function buildCodex() {}
 // ============================================================ input
 function toLogical(ev) { const r = cv.getBoundingClientRect(); return { x: (ev.clientX - r.left) / r.width * W, y: (ev.clientY - r.top) / r.height * H }; }
 function hitTest(m) {
+  const H = S.hero; if (H && !H.dead && Math.hypot(m.x - H.x, m.y - H.y) < 20) return { k: 'hero' };
   for (const s of S.slots) if (Math.hypot(m.x - s.x, m.y - s.y) < 28) return { k: 'slot', s };
   let best = null, bd = 1e9;
   for (const e of S.enemies) { const ey = e.y - (e.D.flying ? 12 : 0), d = Math.hypot(m.x - e.x, m.y - ey); if (d < e.D.r + 8 && d < bd) { bd = d; best = e; } }
@@ -1166,15 +1309,19 @@ function hitTest(m) {
 cv.addEventListener('pointermove', ev => {
   if (S.screen !== 'play') return;
   S.mouse = toLogical(ev); S.hover = hitTest(S.mouse);
-  cv.style.cursor = S.ability ? 'crosshair' : S.hover ? 'pointer' : 'default';
-  if (!S.sel) { if (S.hover && S.hover.k === 'enemy') showInfo({ kind: 'enemy', type: S.hover.e.type, e: S.hover.e }); else if (S.hover && S.hover.s && S.hover.s.tower) showInfo({ kind: 'tower', t: S.hover.s.tower }); else showInfo(S.pinned); }
+  cv.style.cursor = S.ability || (S.sel && S.sel.hero) ? 'crosshair' : S.hover ? 'pointer' : 'default';
+  if (!S.sel) { if (S.hover && S.hover.k === 'hero') showInfo({ kind: 'hero' }); else if (S.hover && S.hover.k === 'enemy') showInfo({ kind: 'enemy', type: S.hover.e.type, e: S.hover.e }); else if (S.hover && S.hover.s && S.hover.s.tower) showInfo({ kind: 'tower', t: S.hover.s.tower }); else showInfo(S.pinned); }
 });
+cv.addEventListener('contextmenu', ev => ev.preventDefault());
 cv.addEventListener('pointerleave', () => { S.mouse = { x: -99, y: -99 }; S.hover = null; });
 cv.addEventListener('pointerdown', ev => {
   if (S.screen !== 'play' || S.over) return;
   const m = toLogical(ev); S.mouse = m;
+  if (ev.button === 2) { S.ability = null; if (S.sel && S.sel.hero) selectHero(false); return; }
   if (S.ability) { castAbility(m.x, m.y); return; }
   const h = hitTest(m);
+  if (h && h.k === 'hero') { selectHero(); return; }
+  if (S.sel && S.sel.hero && !(h && h.k === 'slot')) { if (heroMove(m.x, m.y)) selectHero(false); return; } // a miss keeps it selected
   if (h && h.k === 'slot') { if (S.sel && S.sel.slot === h.s) { closeRadial(); showInfo(null); return; } sfx('click'); openRadial(h.s); return; }
   closeRadial(); S.pinned = null;
   if (h && h.k === 'enemy') { S.sel = { e: h.e }; showInfo({ kind: 'enemy', type: h.e.type, e: h.e }); }
@@ -1187,8 +1334,10 @@ addEventListener('keydown', ev => {
   else if (k === 'f') toggleSpeed();
   else if (k === 'q') armAbility('fever');
   else if (k === 'w') armAbility('swarm');
+  else if (k === 'e') granzyme();
+  else if (k === 'h') selectHero();
   else if (k === 'n') sendWave();
-  else if (k === 'escape') { S.ability = null; closeRadial(); showInfo(null); }
+  else if (k === 'escape') { S.ability = null; closeRadial(); S.sel = null; showInfo(null); }
 });
 
 // ============================================================ radial & info
@@ -1289,6 +1438,11 @@ function showInfo(o) {
     const type = o.kind === 'type' ? o.type : o.t.type, lvl = o.kind === 'type' ? o.lvl : o.t.lvl, T = TOWERS[type], nl = o.next && lvl < 2 ? lvl + 1 : null, show = nl ?? lvl;
     html = `<div class="por"><img src="${portrait(type, show)}"></div><div class="meta"><small>${T.role}</small><b>${T.name}</b><span>${T.kind}</span><div class="pips">${[0, 1, 2].map(i => `<i class="${i <= show ? 'on' : ''}"></i>`).join('')}</div></div>
       <div class="sv">${towerStats(type, T.lv[lvl], nl != null ? T.lv[nl] : null)}</div><div class="perk ${show >= T.perkLv ? 'on' : ''}">${T.perk}${o.kind === 'tower' && lvl === 2 ? '<br><span class="skn">Max level · choose a specialization</span>' : ''}</div>`;
+  } else if (o.kind === 'hero') {
+    const h = S.hero, L = HERO.lv[h.lvl - 1], N = HERO.lv[h.lvl], need = HERO.xp[h.lvl - 1], G = HERO.gz;
+    html = `<div class="por"><img src="${portrait('hero')}"></div><div class="meta"><small>Hero · Natural Killer cell</small><b>${HERO.name}</b><span>${h.dead ? `Respawning in ${Math.ceil(h.resp)} s` : need ? `Level ${h.lvl} · ${h.xp} / ${need} XP` : `Level ${h.lvl} · max`}</span><div class="pips">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= h.lvl ? 'on' : ''}"></i>`).join('')}</div></div>
+      <div class="sv g2">${sv('HEALTH', `${Math.ceil(Math.max(0, h.hp))}<i>/${h.max}</i>`)}${sv('DMG', L.dmg, N && N.dmg)}${sv('REGEN', L.regen + '/s', N && N.regen + '/s')}${sv('KILLS', h.kills)}</div>
+      <div class="perk wide">Holds one pathogen and stings flyers too. Click near the path to send it.<div class="skt"><span class="skn">★ Granzyme Burst · E</span><br>${Math.round(L.dmg * G.k)} damage and a ${G.stun} s stun to everything within ${G.r}. Every ${G.cd} s.</div></div>`;
   } else if (o.kind === 'enemy') {
     const D = ENEMIES[o.type], e = o.e;
     const hp = e ? Math.ceil(Math.max(0, e.hp)) : Math.round(D.hp * LVLMULT[S.lvl || 0]);
@@ -1311,7 +1465,8 @@ function layoutWaveMarkers() {
   const box = $('#wcalls'); box.innerHTML = ''; wm.length = 0;
   if (!S.paths) return;
   S.paths.forEach(p => {
-    const q = posAt(p, 70), b = document.createElement('button');
+    let d = 70, q = posAt(p, d); while (q.x < 320 && q.y > 500 && d < p.len / 3) q = posAt(p, d += 15); // keep clear of the bottom-left cluster
+    const b = document.createElement('button');
     b.className = 'wcall'; b.style.left = clamp(q.x, 36, W - 36) * viewK + 'px'; b.style.top = clamp(q.y, 36, H - 36) * viewK + 'px';
     b.innerHTML = '<i class="cd"></i><svg viewBox="0 0 24 24"><path d="M6 6l6 6-6 6M12 6l6 6-6 6"/></svg><div class="tip"></div>';
     b.onpointerdown = e => e.stopPropagation(); b.onclick = e => { e.stopPropagation(); sendWave(); };
@@ -1336,7 +1491,8 @@ let lastHud = '';
 function hud() {
   if (!S.L) return;
   const total = S.L.waves.length, can = canCallWave();
-  const key = [S.lives, S.gold, S.wave, Math.ceil(S.waveTimer * 4), can, Math.ceil(S.cds.fever), Math.ceil(S.cds.swarm), S.ability, S.speed, S.paused].join('|');
+  const Hr = S.hero, hsel = !!(S.sel && S.sel.hero);
+  const key = [S.lives, S.gold, S.wave, Math.ceil(S.waveTimer * 4), can, Math.ceil(S.cds.fever), Math.ceil(S.cds.swarm), Math.ceil(S.cds.granzyme), S.ability, S.speed, S.paused, Math.ceil(Hr.hp), Hr.lvl, Hr.dead, Math.ceil(Hr.resp), hsel].join('|');
   if (key === lastHud) return; lastHud = key;
   $('#lives').textContent = S.lives; $('#lives').classList.toggle('low', S.lives <= 6);
   $('#gold').textContent = S.gold; $('#wave').innerHTML = `${S.wave}<span>/${total}</span>`;
@@ -1345,12 +1501,17 @@ function hud() {
     b.style.setProperty('--p', S.waveTimer > 0 ? (S.waveTimer / S.waveTimerMax * 100) + '%' : '100%');
     const bn = b.querySelector('.bonus'); if (bn) bn.textContent = `+${earlyBonus()} ATP if called now`;
   });
-  for (const k of ['fever', 'swarm']) {
-    const b = $('#ab-' + k), cd = S.cds[k], max = k === 'fever' ? 32 : 22;
+  for (const k of ['fever', 'swarm', 'granzyme']) {
+    const b = $(k === 'granzyme' ? '#ab-gz' : '#ab-' + k), cd = S.cds[k], max = { fever: 32, swarm: 22, granzyme: HERO.gz.cd }[k];
     b.querySelector('.cd').style.setProperty('--p', cd > 0 ? (cd / max * 100) + '%' : '0%');
     b.querySelector('.cd').textContent = cd > 0 ? Math.ceil(cd) : '';
-    b.classList.toggle('armed', S.ability === k); b.classList.toggle('ready', cd <= 0 && S.ability !== k && S.wave > 0);
+    b.classList.toggle('armed', S.ability === k); b.classList.toggle('ready', cd <= 0 && S.ability !== k && S.wave > 0 && !(k === 'granzyme' && Hr.dead));
   }
+  const hb = $('#ab-hero'), hc = hb.querySelector('.cd');
+  hb.style.setProperty('--hp', (Hr.dead ? 0 : Hr.hp / Hr.max * 100) + '%'); hb.classList.toggle('low', !Hr.dead && Hr.hp < Hr.max * .35); hb.classList.toggle('armed', hsel);
+  hb.querySelector('.lv').textContent = Hr.lvl; hc.style.setProperty('--p', Hr.dead ? Hr.resp / HERO.resp * 100 + '%' : '0%'); hc.textContent = Hr.dead ? Math.ceil(Hr.resp) : '';
+  $('#ab-gz').classList.toggle('off', Hr.dead);
+  if (hsel) showInfo({ kind: 'hero' });
   $('#speedBtn').textContent = S.speed + '×'; $('#speedBtn').classList.toggle('on', S.speed > 1);
   $('#pauseBtn').classList.toggle('on', S.paused); $('#pausePill').hidden = !S.paused;
   if (S.sel && S.sel.slot) refreshRadialAfford();
@@ -1365,7 +1526,7 @@ function toggleSpeed() { S.speed = S.speed === 1 ? 2 : 1; }
 
 // ============================================================ screens
 function endLevel(win) {
-  if (S.over) return; S.over = true; closeRadial(); S.ability = null; showInfo(null); const run = S.run;
+  if (S.over) return; S.over = true; closeRadial(); S.ability = null; S.sel = null; showInfo(null); const run = S.run;
   wm.forEach(b => b.hidden = true);
   const stars = win ? (S.lives >= 18 ? 3 : S.lives >= 10 ? 2 : 1) : 0;
   if (win && stars > save.stars[S.lvl]) { save.stars[S.lvl] = stars; persist(); }
@@ -1397,7 +1558,8 @@ $('#restartBtn').onclick = () => { if (S.L) startLevel(S.lvl); };
 $('#muteBtn').onclick = () => { muted = !muted; persist(); $('#muteWave').style.display = muted ? 'none' : ''; $('#muteBtn').classList.toggle('on', muted); };
 $('#speedBtn').onclick = toggleSpeed; $('#pauseBtn').onclick = togglePause;
 $('#ab-fever').onclick = () => armAbility('fever'); $('#ab-swarm').onclick = () => armAbility('swarm');
-$('#ic-fever').src = portrait('fever', 0, 100); $('#ic-swarm').src = portrait('swarm', 0, 100);
+$('#ab-hero').onclick = () => selectHero(); $('#ab-gz').onclick = () => granzyme();
+$('#ic-fever').src = portrait('fever', 0, 100); $('#ic-swarm').src = portrait('swarm', 0, 100); $('#ic-hero').src = portrait('hero', 0, 100); $('#ic-gz').src = portrait('granzyme', 0, 100);
 if (muted) { $('#muteWave').style.display = 'none'; $('#muteBtn').classList.add('on'); }
 
 // ============================================================ loop
@@ -1414,7 +1576,8 @@ startLevel(0); S.screen = 'title'; showTitle(); resize();
 requestAnimationFrame(frame);
 
 window.IC = { S, LEVELS, TOWERS, ENEMIES, SPECS, startLevel, sendWave, build: (i, k) => build(S.slots[i], k), upgrade: i => upgrade(S.slots[i].tower), sell: i => sell(S.slots[i].tower),
-  specialize: (i, id) => specialize(S.slots[i].tower, id), skillUp: i => skillUp(S.slots[i].tower), refund: i => refund(S.slots[i].tower), step, makePath, nearestOnPath, castAbility, armAbility };
+  specialize: (i, id) => specialize(S.slots[i].tower, id), skillUp: i => skillUp(S.slots[i].tower), refund: i => refund(S.slots[i].tower), step, makePath, nearestOnPath, posAt, castAbility, armAbility,
+  HERO, heroMove, selectHero, granzyme, heroXp, hurt: (u, a) => hurtUnit(u, a) };
 </script>
 </body>
 </html>
