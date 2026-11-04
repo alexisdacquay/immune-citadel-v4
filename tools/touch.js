@@ -11,7 +11,8 @@ const VIEWS = [
   { n: 'phone-xl', w: 932, h: 430, touch: true },
   { n: 'tablet', w: 1024, h: 768, touch: true },
 ];
-const SAVE = JSON.stringify({ stars: [3, 2, 0, 0, 0, 0], hints: ['build', 'wave', 'upgrade', 'fever', 'hero'], seen: ['bact', 'virus', 'staph', 'candida', 'spore', 'flu', 'worm', 'boss', 'salmon', 'toxo', 'rabies', 'virion'], viewed: [] }); // every pathogen met: no intro card covers the layout checks
+const z18 = () => Array(18).fill(0), ST = z18(); ST[0] = 3; ST[1] = 2;
+const SAVE = JSON.stringify({ st: ST, hc: z18(), ic: z18(), rch: 17, hints: ['build', 'wave', 'upgrade', 'hero'], seen: ['bact', 'virus', 'staph', 'candida', 'spore', 'flu', 'worm', 'boss', 'salmon', 'toxo', 'rabies', 'virion'], viewed: [] }); // full kit (rch 17), every pathogen met: no intro or unlock card covers the layout checks
 
 module.exports = async function touch(browser, out, errs) {
   fs.mkdirSync(out, { recursive: true });

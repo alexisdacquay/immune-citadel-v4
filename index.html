@@ -173,6 +173,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 .icard dd{margin:3px 0 0;font-size:14px;line-height:1.45;color:#e8f0f8}
 .icard dd.real{color:#ffd27a}
 .icard .btn{display:block;margin-top:14px;width:100%;flex:none}
+@media (max-height:450px){.icard{width:min(760px,100%);padding:12px 18px}.icard .ih img{width:44px;height:44px}.icard dl{margin-top:6px;background:linear-gradient(rgba(10,18,28,1),rgba(10,18,28,1)) bottom/100% 14px no-repeat local,radial-gradient(farthest-side at 50% 100%,rgba(127,216,255,.35),transparent) bottom/100% 14px no-repeat scroll}.icard dt{margin-top:6px}.icard dd{font-size:13px;line-height:1.35}.icard .btn{margin-top:8px;padding:8px}} /* phone landscape: the honest note stays reachable; the glow shows only while more text waits below */
 /* overlays */
 .ov{position:absolute;inset:0;z-index:10;display:flex;background:rgba(2,5,9,.72);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);overflow:auto;padding:20px}
 .tin{width:min(960px,100%);margin:auto;zoom:var(--ut,1)}
@@ -183,6 +184,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 .tin h1 span{color:var(--cyan)}
 .tin .lede{color:var(--dim);font-size:15px;max-width:560px;margin:0 0 24px}
 .slides{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pager{display:flex;gap:8px;margin:0 0 10px}.pg{flex:1;padding:5px 10px;border-radius:8px;border:1px solid rgba(180,220,255,.22);background:rgba(200,230,255,.04);color:var(--dim);font:600 max(10px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.12em;text-transform:uppercase;text-align:left}.pg b{color:var(--txt);margin-right:8px}.pg.on{border-color:var(--cyan);color:var(--txt);background:rgba(127,216,255,.1)}.pg:hover:not(.on){border-color:rgba(180,220,255,.5)}
 .slide{display:grid;grid-template-columns:44px 1fr;text-align:left;padding:0;border-radius:6px;overflow:hidden;border:1px solid rgba(180,220,255,.22);background:linear-gradient(135deg,rgba(200,230,255,.09),rgba(200,230,255,.02));box-shadow:0 18px 36px -20px #000;transition:transform .15s,border-color .15s}
 .slide:hover:not(.locked):not(:has(.chb:hover)){transform:translateY(-3px);border-color:rgba(180,220,255,.55)}
 .slide .lab{background:repeating-linear-gradient(45deg,rgba(255,255,255,.16) 0 2px,rgba(255,255,255,.07) 2px 5px);writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font:700 11px var(--mono);letter-spacing:.24em;color:#eef6ff}
@@ -197,7 +199,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 .slide.locked{opacity:.45;cursor:default}
 /* challenges: shield = Heroic, anvil = Iron; amber once won */
 .chs{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
-@media (max-height:600px){.chs{flex-wrap:nowrap;gap:4px}.chb{padding-right:7px;gap:4px;letter-spacing:.08em}} /* one row: a second chip row pushes the third slide row off a short screen */
+.short .chs{flex-wrap:nowrap;gap:4px}.short .chb{padding-right:7px;gap:4px;letter-spacing:.08em} /* one row: a second chip row pushes the third slide row off a short stage */
 .chb{display:flex;align-items:center;gap:6px;padding:2px 9px 2px 2px;border-radius:14px;border:1px solid var(--rim);background:rgba(140,205,255,.06);font:700 max(9px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--txt)}
 .chb:hover{border-color:#fff;background:rgba(140,205,255,.16);box-shadow:0 0 14px rgba(127,216,255,.35)}
 .chn{font:600 max(9px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
@@ -383,8 +385,9 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 @media (max-width:1700px){#info{left:calc(330px * var(--u,1));transform:scale(var(--u,1));transform-origin:bottom left;max-width:calc(100% / var(--u,1) - 346px)}#info.up{transform-origin:top left}#info:not([hidden]) ~ #spec{opacity:0}}
 /* narrow: the mechanic line (pathogen desc, base perk) stays, clamped to 2 lines; the RESIST and LEAK chips make room */
 @media (max-width:1100px){#info .perk:not(.wide),#info .meta span:not(.xp){display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;white-space:normal;font-size:11px;line-height:1.3;max-width:230px}#info .s.opt{display:none}#info .perk.wide{flex:0 1 210px;font-size:11px}#info .skt:not(.nx) .skd{display:none}#info .s b em{display:block;margin:0}#info .meta b{font-size:16px}}
-@media (max-height:600px){.ov{padding:10px 20px}.kick .kx{display:none} /* the kick must clear the tray's top-right buttons */
-  .tin h1{font-size:44px;margin:6px 0 8px}.hd{margin-bottom:10px}.slides{gap:8px}.slide .body{grid-template-columns:1fr 1.2fr;padding:7px 8px}.slide b{margin:2px 0}.slide p{margin-bottom:3px}.chs{margin-top:4px}.keys{margin-top:6px;gap:2px 16px}} /* the tray's third row and keys fit 540 px with challenge badges */
+/* stage under 710 px (resize sets .short): the kick must clear the tray's top-right buttons; the pager, three slide rows and keys fit 540 px with challenge badges */
+.short .ov{padding:10px 20px}.short .kick .kx{display:none}
+.short .tin h1{font-size:44px;margin:6px 0 8px}.short .hd{margin-bottom:10px}.short .slides{gap:8px}.short .slide .body{grid-template-columns:1fr 1.2fr;padding:7px 8px}.short .slide b{margin:2px 0}.short .slide p{margin-bottom:3px}.short .chs{margin-top:4px}.short .keys{margin-top:6px;gap:2px 16px}.short .pager{margin-bottom:8px}
 /* touch: every target at least 40 px on screen (sizes are divided by the scale the element is drawn at), no keyboard hints */
 .touch .ab kbd{display:none}
 .touch .ib{width:max(38px,calc(42px / var(--u,1)));height:max(38px,calc(42px / var(--u,1)))}
@@ -468,13 +471,13 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 
   <div class="ov" id="titleOv">
     <div class="tin">
-      <div class="kick"><span class="kx">IMMUNOFLUORESCENCE FIELD STUDY · </span>6 SPECIMENS · <span id="starN"></span></div>
+      <div class="kick"><span class="kx">IMMUNOFLUORESCENCE FIELD STUDY · </span>18 SPECIMENS · <span id="starN"></span></div>
       <div class="tbtns"><button class="mbtn" id="guideBtn"><svg viewBox="0 0 24 24"><path d="M4 5.5c3-1.2 5.8-1 8 1 2.2-2 5-2.2 8-1v13c-3-1.2-5.8-1-8 1-2.2-2-5-2.2-8-1z"/><path d="M12 6.5v13"/></svg>FIELD GUIDE<em class="ndot" hidden></em></button>
       <button class="mbtn" id="memBtn"><i></i>IMMUNE MEMORY <b id="memBtnN"></b></button></div>
       <div class="hd"><h1>IMMUNE<br><span>CITADEL</span></h1>
       <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p><div class="mbtn seg" id="diffSeg" role="radiogroup" aria-label="Difficulty"><button data-d="easy" role="radio">EASY</button><button data-d="normal" role="radio">NORMAL</button><button data-d="hard" role="radio">HARD</button></div><button class="mbtn" id="sndBtn" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="sw" d="M16 9c1.5 1.5 1.5 4.5 0 6"/><path class="sw sw2" d="M18.5 6.5c3 3 3 8 0 11"/><path class="sx" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button><button class="mbtn" id="cloudBtn" title="Cloud save" aria-label="Cloud save" hidden><svg viewBox="0 0 24 24"><path d="M7 18.5h10.5a4 4 0 0 0 .4-8 6 6 0 0 0-11.6-1A4.6 4.6 0 0 0 7 18.5z"/></svg></button></div>
-      <div class="slides" id="slides"></div>
-      <div class="keys"><span><b>Click a ring</b> grow a cell</span><span><b>Click a cell</b> upgrade / recycle</span><span><b>Red marker</b> call the next wave</span><span id="keyAb"><b>Q W</b> abilities</span><span><b>H E</b> hero · burst</span><span><b>Space</b> pause</span><span><b>F</b> speed</span></div>
+      <div class="pager" id="pager" role="group" aria-label="Specimen pages"></div><div class="slides" id="slides"></div>
+      <div class="keys"><span><b>Click a ring</b> grow a cell</span><span><b>Click a cell</b> upgrade / recycle</span><span><b>Red marker</b> call the next wave</span><span id="keyAb"><b>Q W</b> abilities</span><span id="keyHero"><b>H E</b> hero · burst</span><span><b>Space</b> pause</span><span><b>F</b> speed</span></div>
     </div>
   </div>
   <div class="ov" id="endOv" hidden>
@@ -483,7 +486,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
   <div class="ov" id="memOv" hidden>
     <div class="tin mem">
       <div class="mhd"><div><div class="kick">LINEAGE ARCHIVE · PERMANENT TRAINING</div><h1>IMMUNE <span>MEMORY</span></h1>
-        <p class="lede">Every star trains a cell lineage for good: 3 per specimen, plus 1 each for its Heroic and Iron challenges. 30 stars train every lineage. Each lineage trains its tiers in order; training applies when a specimen starts.</p></div>
+        <p class="lede">Every star trains a cell lineage for good: 3 per specimen, plus 1 each for the Heroic and Iron challenges of the six full maps. 66 stars train every lineage. Each lineage trains its tiers in order; training applies when a specimen starts.</p></div>
         <div class="bank glass"><b id="memAvail">0</b><small>STARS TO SPEND</small></div></div>
       <div class="mroot"><i class="mdot"></i><label>STEM CELL</label><svg id="memTree" viewBox="0 0 600 44" preserveAspectRatio="none"></svg></div>
       <div class="mgrid" id="memGrid"></div>
@@ -834,11 +837,11 @@ const skill = t => t.spec && t.rank ? SPECS[t.spec].sk[t.rank - 1] : null;
 const ENEMIES = {
   bact: { name: 'E. coli', kind: 'Bacterium', hp: 40, speed: 38, armor: 0, mr: 0, gold: 7, lives: 1, atk: 4, r: 11, desc: 'Common rod bacterium. Weak alone, dangerous in numbers.' },
   virus: { name: 'Rhinovirus', kind: 'Virus', hp: 20, speed: 58, armor: 0, mr: .3, gold: 4, lives: 1, atk: 2, r: 8, desc: 'Tiny and fast. Floods past slow defenders.' },
-  staph: { name: 'Staph aureus', kind: 'Armored bacterium', hp: 100, speed: 29, armor: .55, mr: 0, gold: 16, lives: 1, atk: 7, r: 12, desc: 'A golden pigment shields it from physical damage. Send Killer T cells.' },
+  staph: { name: 'Staph aureus', kind: 'Armored bacterium', hp: 100, speed: 29, armor: .55, mr: 0, gold: 16, lives: 1, atk: 7, r: 12, desc: 'A golden pigment shields it from physical damage. Hit it hard, or with magic.' },
   candida: { name: 'Candida', kind: 'Fungus', hp: 150, speed: 25, armor: .25, mr: .35, gold: 18, lives: 2, atk: 7, r: 15, split: 3, desc: 'Budding yeast. Bursts into 3 fast spores when killed.' },
   spore: { name: 'Spore', kind: 'Fungal spore', hp: 26, speed: 50, armor: 0, mr: .2, gold: 2, lives: 1, atk: 2, r: 7, desc: 'Fast offspring of Candida.' },
-  flu: { name: 'Influenza', kind: 'Airborne virus', hp: 50, speed: 42, armor: 0, mr: .15, gold: 11, lives: 1, atk: 0, r: 10, flying: true, desc: 'Drifts over blockers. Antibody clouds tag it but can’t hurt it: other cells must finish it.' },
-  worm: { name: 'Helminth', kind: 'Parasitic worm', hp: 430, speed: 19, armor: .35, mr: .55, gold: 45, lives: 3, atk: 16, r: 13, desc: 'Huge parasite. Resists magic. Grind it down with blockers and antibodies.' },
+  flu: { name: 'Influenza', kind: 'Airborne virus', hp: 50, speed: 42, armor: 0, mr: .15, gold: 11, lives: 1, atk: 0, r: 10, flying: true, desc: 'Drifts over blockers: only cells that shoot can hit it. Antibody clouds tag it but can’t hurt it.' },
+  worm: { name: 'Helminth', kind: 'Parasitic worm', hp: 430, speed: 19, armor: .35, mr: .55, gold: 45, lives: 3, atk: 16, r: 13, desc: 'Huge parasite. Resists magic. Hold it with blockers and grind it down.' },
   boss: { name: 'MRSA Superbug', kind: 'Boss · drug-resistant', hp: 2300, speed: 14, armor: .5, mr: .35, gold: 300, lives: 10, atk: 34, r: 30, boss: true, desc: 'Grows a biofilm shield over nearby allies and buds fresh bacteria.' },
   salmon: { name: 'Salmonella', kind: 'Flagellated bacterium', hp: 60, speed: 64, armor: .1, mr: 0, gold: 9, lives: 1, atk: 5, r: 10, regen: .12, desc: 'Fast, flagellated. Heals itself when left unhit for 2 s.' },
   toxo: { name: 'Toxoplasma', kind: 'Parasite · stealth', hp: 130, speed: 34, armor: .2, mr: .25, gold: 15, lives: 2, atk: 8, r: 12, stealth: 85, desc: 'Hidden unless a cell is within 85. Fever reveals it for 6 s.' },
@@ -846,7 +849,8 @@ const ENEMIES = {
   virion: { name: 'Lyssa virion', kind: 'Shed virion', hp: 30, speed: 56, armor: 0, mr: .3, gold: 2, lives: 1, atk: 2, r: 7, desc: 'Bullet-shaped offspring shed by the Rabies Lyssavirus.' },
 };
 const g_ = (t, n, gap, d = 0, p = 0) => ({ t, n, gap, d, p });
-const LEVELS = [
+// the six maps (one per body place); the campaign's 18 specimens below are cuts of them
+const MAPS = [
   {
     place: 'The Skin', name: 'Breach at the Barrier', sub: 'A splinter tore the skin. Bacteria are pouring into the wound.', seed: 11, gold: 260, style: 'skin',
     th: { bg: '#f3d7c5', cell: '#f8e6d8', edge: '#e6bfa7', nuc: '#e0b39b', out: '#a94a3a', path: '#cc6f5c', hi: '#ec9f8e' },
@@ -886,7 +890,7 @@ const LEVELS = [
       [g_('candida', 8, 1.6, 0, -1), g_('staph', 10, .9, 4, -1), g_('flu', 12, .7, 8, -1)], [g_('boss', 1, 1, 0, 0), g_('bact', 20, .7, 2, -1), g_('flu', 8, 1.2, 12, -1)]],
   },
 ];
-LEVELS.push(
+MAPS.push(
   {
     place: 'Gut Lining', name: 'The Villi Maze', sub: 'Two tainted meals, two routes through the villi. They cross, then merge.', seed: 67, gold: 480, style: 'villi', edge: '#d8a3b4', // PAS rose-grey counterstain. Walls stay desaturated: saturated cool hues read as immune cells, warm ones as pathogens
    
@@ -910,10 +914,7 @@ LEVELS.push(
       [g_('rabies', 1, 1, 0, 0), g_('toxo', 20, 1.1, 3, -1), g_('salmon', 24, .6, 8, -1), g_('flu', 12, .8, 14, -1)]],
   },
 );
-const LVLMULT = [1.5, 1.8, 3.4, 2.15, 2.35, 2.6]; // no memory, 12-16 runs each (playtest bal.js): wide bot median 20/20/18/15/19/17, focus bot (rushes 2 specialists) 20/14/16/17/18/14; 05 swings most (toxo, salmonella)
-// campaign pathogen health on top of LVLMULT: the first-time kit is smaller on 03-05 (no specialists before 04, no Swarm before 06); LVLMULT also scales the hero and abilities, so it stays
-const CAMPHP = [1, 1, .85, .82, .85, 1]; // first-time-kit bot, 10 runs: 03 .83 → median 20 min 16, .86 → 16/13; 04 .82 → 16/12; 05 .85 → 18/12 (1 → 0/10 won without Swarm)
-// challenges, open on a cleared specimen once the player has reached 06 (they are tuned for the full kit); Heroic 3 vitality, Iron 1 (any leak loses); a win is worth 1 star each.
+// challenges live on the six full maps (the last specimen of each place) and open once the kit is complete (they are tuned for it); Heroic 3 vitality, Iron 1 (any leak loses); a win is worth 1 star each.
 // Heroic: 6 elite waves (tougher and faster than the campaign). Iron: one long wave that starts soft and hardens as it goes (ramp per second of delay), two cell lines only, no Fever or Swarm.
 // player difficulty: pathogen health, spacing inside a wave, and the auto-call timer between waves
 const DIFF = { easy: { hp: .7, space: 1.3, timer: 1.5 }, normal: { hp: 1, space: 1, timer: 1 }, hard: { hp: 1.2, space: .9, timer: .8 } };
@@ -922,10 +923,19 @@ const MODES = {
   heroic: { name: 'Heroic', hp: 1.2, spd: 1.1, gold: 1.15, rule: '6 elite waves · 3 vitality' },
   iron: { name: 'Iron', hp: .9, spd: 1.05, gold: 2, ramp: .006, rule: 'One long wave · 1 vitality · two cell lines · no Fever or Swarm' }, // gold ×2: no wave breaks, no early-call bonus
 };
-// the player's kit grows one step per specimen; a specimen once reached keeps its additions everywhere (replays, challenges)
-const UNLOCK = [{ cells: ['neutro', 'macro', 'killer'] }, { cells: ['bcell'] }, { ab: 'fever' }, { spec: 1 }, {}, { ab: 'swarm' }];
-function kitAt(n) { const k = { cells: [], ab: [], spec: false }; for (const u of UNLOCK.slice(0, n + 1)) { if (u.cells) k.cells.push(...u.cells); if (u.ab) k.ab.push(u.ab); if (u.spec) k.spec = true; } return k; }
-const unlockIds = u => [...(u.cells || []), ...(u.ab ? [u.ab] : []), ...(u.spec ? ['spec'] : [])];
+// the player's kit grows by at most one step per specimen; a specimen once reached keeps its additions everywhere (replays, challenges).
+// spec = the cell line whose two tier IV forms open there
+const UNLOCK = [{ cells: ['neutro'] }, { cells: ['macro'] }, {}, { hero: 1 }, { gz: 1 }, { ab: 'fever' }, { cells: ['killer'] }, {}, { cells: ['bcell'] },
+  { spec: 'killer' }, { spec: 'bcell' }, {}, {}, { ab: 'swarm' }, { spec: 'neutro' }, {}, { spec: 'macro' }, {}];
+function kitAt(n) {
+  const k = { cells: [], ab: [], spec: [], hero: false, gz: false };
+  for (const u of UNLOCK.slice(0, n + 1)) { if (u.cells) k.cells.push(...u.cells); if (u.ab) k.ab.push(u.ab); if (u.spec) k.spec.push(u.spec); if (u.hero) k.hero = true; if (u.gz) k.gz = true; }
+  return k;
+}
+const unlockIds = u => [...(u.cells || []), ...(u.hero ? ['hero'] : []), ...(u.gz ? ['gz'] : []), ...(u.ab ? [u.ab] : []), ...(u.spec ? ['spec-' + u.spec] : [])];
+const unlockAt = id => UNLOCK.findIndex(u => unlockIds(u).includes(id)); // the specimen index where id joins the kit
+const KITFULL = UNLOCK.reduce((m, u, i) => unlockIds(u).length ? i : m, 0); // the last addition: challenges (full kit) open once it is reached
+const sn = i => String(i + 1).padStart(2, '0'); // specimen number as shown: 01 … 18
 // intro cards: the first time a pathogen arrives, or a specimen adds to the kit, the game pauses on one card (real = the honest note on a bend)
 const INTRO = {
   bact: { trick: 'Arrives in crowds. One is easy; thirty at once is not.', beat: 'Neutrophils fire fast. Put them where the route bends, so they shoot for longer.',
@@ -933,13 +943,12 @@ const INTRO = {
   virus: { trick: 'Tiny and fast: it runs straight past slow defenders.', beat: 'Neutrophils near the entrance, and Macrophages on the path to hold it in place.',
     bio: 'Rhinoviruses cause most colds. Each is about 30 nanometres wide, far smaller than a bacterium.',
     real: 'Rhinoviruses infect the lining of your nose, not wounds. The game sends them everywhere.' },
-  staph: { trick: 'A golden pigment shields it, so physical hits from Neutrophils and Macrophages do less than half damage.', beat: 'Killer T cells ignore armour. Build one where Staph will pass.',
-    bio: 'About a third of people carry Staph aureus in their nose. In a cut it can cause boils.',
-    real: 'Killer T cells kill infected body cells, not bacteria. Your neutrophils and antibodies fight Staph. The game bends this.' },
-  flu: { trick: 'It drifts over the route, so Macrophages cannot block it, and antibody clouds cannot hurt it.', beat: 'Neutrophils and Killer T cells hit flyers. B Cell clouds aimed at the ground also tag any flu caught in the splash, so every hit lands harder.',
+  staph: { trick: 'A golden pigment shields it, so physical hits from Neutrophils and Macrophages do less than half damage.', beat: 'Upgraded Neutrophils hit hard enough to get through. Let Macrophages hold it inside their range. Later, a cell that ignores armour joins you.',
+    bio: 'About a third of people carry Staph aureus in their nose. In a cut it can cause boils. Neutrophils are its real killers.' },
+  flu: { trick: 'It drifts over the route, so Macrophages cannot block it.', beat: 'Neutrophils shoot flyers. Line them up along its path, and burn a crowd with Fever.',
     bio: 'Antibodies stick to flu and stop it entering your cells. That is how a flu vaccine protects you.',
-    real: 'Antibodies are your best real weapon against flu. Here they only tag it. That is a game bend.' },
-  worm: { trick: 'Huge and slow, with tough skin that shrugs off most Killer T bolts.', beat: 'Macrophages hold it in place while B Cell clouds and Neutrophils grind it down.',
+    real: 'Flu does not fly through your body; it spreads from cell to cell. Antibodies are your best real weapon against it. In the game they only tag it, and that is a game bend.' },
+  worm: { trick: 'Huge and slow, with tough skin that shrugs off most Killer T bolts.', beat: 'Macrophages hold it in place while upgraded Neutrophils and Fever grind it down. Soon, antibodies will help.',
     bio: 'Worms are too big for any cell to eat. Your body coats them in antibodies and attacks with chemicals.' },
   candida: { trick: 'When it dies, it bursts into three fast spores.', beat: 'B Cell clouds splash the spores the moment they pop.',
     bio: 'Candida is a yeast that lives on most people. It only causes trouble when it overgrows.', real: 'Real yeast buds new cells; it does not burst into spores when it dies.' },
@@ -954,11 +963,31 @@ const INTRO = {
     bio: 'Rabies climbs nerves to reach the brain. A vaccine given soon after a bite stops it.',
     real: 'Rabies infects nerve cells, not immune cells. A real NK cell destroys an infected cell; it does not free it.' },
   bcell: { kick: 'New cell · B Cell', trick: 'Lobs clouds of antibodies at ground pathogens. Everything caught in a cloud, flyers too, takes +25% damage for 3 s.',
-    beat: 'Put it behind your Macrophages, where pathogens bunch up under its clouds.', bio: 'Once a B cell becomes a plasma cell, it releases about 2,000 antibodies every second.' },
+    beat: 'Put it behind your Macrophages, where pathogens bunch up under its clouds. Antibodies are the real answer to worms.', bio: 'Once a B cell becomes a plasma cell, it releases about 2,000 antibodies every second.' },
   fever: { kick: 'New ability · Q', name: 'Fever spike', sub: 'Ability', img: () => $('#ic-fever').src, trick: 'Heat burns every pathogen in a wide circle, slows them, and reveals hidden ones.',
     beat: 'Press Q or tap the flame, then tap a crowd. It recharges, so use it often.', bio: 'Fever is a weapon: heat slows bacteria and speeds up your immune cells.', real: 'A real fever does not burn germs. It slows their growth and speeds up your cells.' },
-  spec: { kick: 'New · Specialists', name: 'Specialists', sub: 'Tier IV', img: () => portrait('plasma', 0, 152), trick: 'Every level 3 cell can now train into one of two tier IV forms, each with a signature skill.',
-    beat: 'Select a level 3 cell and pick a form. Try both forms of a line before you settle.', bio: 'In lymph nodes, B and T cells meet their target and turn into specialists.', real: 'Neutrophils and macrophages change form out in the infected tissue, not in lymph nodes.' },
+  macro: { kick: 'New cell · Macrophage', trick: 'Sends cells onto the route that grab pathogens and hold them in place while they bite.',
+    beat: 'Put it where the route passes your Neutrophils, so held pathogens stay under fire.', bio:'Macrophage means “big eater”. Neutrophils arrive first; a day later, macrophages take over the wound.' },
+  hero: { kick: 'New · Hero', name: 'NK Sentinel', sub: 'Hero · natural killer cell', trick: 'Your NK Sentinel walks wherever you send it and strikes anything close. It levels up as it fights.',
+    beat: 'Select it (H), then tap or click near the route. Park it where fast pathogens slip past your cells.', bio: 'Natural killer cells need no training: they destroy cells that a virus has taken over.',
+    real: 'Real NK cells kill your own infected cells, not bacteria. The game lets the Sentinel strike any pathogen.' },
+  gz: { kick: 'New hero skill · E', name: 'Granzyme Burst', sub: 'Hero skill', img: () => $('#ic-gz').src, trick: 'Your NK Sentinel releases a burst of granzyme that hits and stuns every pathogen around it.',
+    beat: 'Press E or tap the icon when a crowd surrounds your hero. It recharges, so use it often.', bio: 'Granzymes are enzymes that NK cells inject into a target to make it self-destruct.' },
+  killer: { kick: 'New cell · Killer T Cell', trick: 'Fires bolts of magic that ignore armour, and it hits flyers.',
+    beat: 'Build it where armoured Staph walks past. One upgraded Killer T does more against armour than three Neutrophils.', bio: 'Killer T cells check an ID card, MHC-I, on every cell they touch, and destroy the ones that look wrong.',
+    real: 'Killer T cells kill infected body cells, not bacteria. Your neutrophils and antibodies fight Staph. The game bends this.' },
+  'spec-killer': { kick: 'New · Specialists', name: 'Killer T specialists', sub: 'Tier IV', img: () => portrait('ctl', 0, 152), trick: 'A level 3 Killer T Cell can now train into one of two tier IV forms: the CTL Executioner or the Th1 Helper. Each has a signature skill.',
+    beat: 'Select a level 3 Killer T and pick a form. The other cell lines get theirs in later specimens.', bio: 'In lymph nodes, T cells meet their target and turn into specialists.',
+    real: 'Th1 Helpers are a different kind of T cell (CD4), not trained Killer T cells. The game puts both in one line.' },
+  'spec-bcell': { kick: 'New · Specialists', name: 'B Cell specialists', sub: 'Tier IV', img: () => portrait('plasma', 0, 152), trick: 'A level 3 B Cell can now become a Plasma Cell (antibody barrage) or a Memory B Cell (learns each pathogen it kills).',
+    beat: 'Plasma Cells win against crowds; Memory B Cells grow stronger the longer a specimen lasts.', bio: 'Memory B cells can stay in your body for decades. They are why a second infection, or a vaccine, is beaten so fast.',
+    real: 'Real memory B cells do not grow stronger during one infection; they make the next one faster to beat.' },
+  'spec-neutro': { kick: 'New · Specialists', name: 'Neutrophil specialists', sub: 'Tier IV', img: () => portrait('net', 0, 152), trick: 'A level 3 Neutrophil can now become a NET Trapper (sticky nets that slow) or a Degranulator (bursts that strip armour).',
+    beat: 'A NET Trapper at a bend slows a whole crowd under your other cells.', bio: 'Neutrophils can burst on purpose and cast nets of their own DNA to trap bacteria and fungi.',
+    real: 'Neutrophils change behaviour out in the infected tissue, not in a training school.' },
+  'spec-macro': { kick: 'New · Specialists', name: 'Macrophage specialists', sub: 'Tier IV', img: () => portrait('m1', 0, 152), trick: 'A level 3 Macrophage can now become M1 Inflammatory (hard-biting brawlers) or M2 Resolver (tanky healers that turn kills into ATP).',
+    beat: 'M1 holds the line where the route is busiest; M2 keeps a long fight going.', bio: 'In the brain, macrophages are called microglia. They switch between attack (M1) and repair (M2) modes.',
+    real: 'Real macrophages slide between many states; M1 and M2 are the two ends of that range.' },
   swarm: { kick: 'New ability · W', name: 'Neutrophil swarm', sub: 'Ability', img: () => $('#ic-swarm').src, trick: 'Drops neutrophils on the path to hold pathogens back for a few seconds.',
     beat: 'Press W or tap the icon, then tap the route where pathogens slip through.', bio: 'Neutrophils swarm like insects, signalling each other to gather at an infection.' },
 };
@@ -994,9 +1023,9 @@ const HERO = { name: 'NK Sentinel', rate: .7, range: 95, speed: 105, resp: 14, s
   lv: [{ hp: 200, dmg: 11, regen: 5 }, { hp: 250, dmg: 15, regen: 7 }, { hp: 310, dmg: 20, regen: 9 }, { hp: 380, dmg: 26, regen: 12 }, { hp: 460, dmg: 33, regen: 15 }],
   xp: [45, 100, 170, 260], gz: { cd: 20, r: 85, k: 3.5, stun: 1.8 } };
 const AB = { fever: { cd: 32, dmg: 95 }, swarm: { cd: 18, n: 3 } };
-// Immune Memory: permanent upgrades bought with stars, tiers in order. Tier costs MEMCOST: 5 a column, 30 in all = every star
-// (3 campaign + 1 Heroic + 1 Iron per specimen).
-const MEMCOST = [1, 2, 2];
+// Immune Memory: permanent upgrades bought with stars, tiers in order. Tier costs MEMCOST: 11 a column, 66 in all = every star
+// (3 campaign per specimen = 54, + 1 Heroic + 1 Iron on each of the 6 full maps = 12).
+const MEMCOST = [2, 4, 5];
 // Buffs mutate the live tables above, which applyMemory() first resets to BASE, so every reader (stats, info panel, bot) sees them.
 const each = (b, f) => { TOWERS[b].lv.forEach(f); for (const id in SPECS) if (SPECS[id].base === b) f(SPECS[id].st); };
 const mul = (k, m, round = true) => L => { if (L[k] != null) L[k] = round ? Math.round(L[k] * m) : L[k] * m; };
@@ -1010,22 +1039,22 @@ const MEMORY = [
   { id: 'killer', name: 'Killer T', sub: 'Assassin', por: ['killer'], tiers: [
     ['+15% damage', () => each('killer', mul('dmg', 1.15))], ['+10% range', () => each('killer', mul('range', 1.1))], ['Fires 15% faster', () => each('killer', mul('rate', 1 / 1.15, false))]] },
   { id: 'ab', name: 'Abilities', sub: 'Fever · swarm', por: ['fever', 'swarm'], c: '#8fb0ff', tiers: [
-    ['Fever cooldown −6 s', () => AB.fever.cd -= 6], ['Swarm drops 4 neutrophils, not 3', () => AB.swarm.n = 4], ['Fever burns 30% hotter', () => AB.fever.dmg = Math.round(AB.fever.dmg * 1.3)]] },
+    ['Fever cooldown −6 s', () => AB.fever.cd -= 6], ['Fever burns 30% hotter', () => AB.fever.dmg = Math.round(AB.fever.dmg * 1.3)], ['Swarm drops 4 neutrophils, not 3', () => AB.swarm.n = 4]] }, // Swarm comes last: it joins at specimen 14
   { id: 'hero', name: 'NK Sentinel', sub: 'Hero', por: ['hero'], tiers: [
     ['Hero starts at level 2', () => HERO.start = 2], ['Hero respawns 5 s faster', () => HERO.resp -= 5], ['Granzyme Burst cooldown −5 s', () => HERO.gz.cd -= 5]] },
 ];
 const LIVE = { TOWERS, SPECS, HERO, AB }, BASE = JSON.parse(JSON.stringify(LIVE)); // functions (SPECS.skd) are not data: JSON drops them and reset skips them
 function resetData(d, s) { for (const k in s) if (s[k] && typeof s[k] === 'object') resetData(d[k], s[k]); else d[k] = s[k]; }
-// report field notes: plain strings fit anywhere; { at } only on that specimen, { foe } only where that pathogen comes
+// report field notes: plain strings fit anywhere; { at } only on that map (MAPS index), { foe } only where that pathogen comes, { need } only once that cell or ability is in the kit
 const NOTES = [
   'Neutrophils make up about 60% of your white blood cells, and most live less than a day.',
-  'Macrophage means “big eater”. One can swallow around 100 bacteria before it dies.',
-  'Once a B cell becomes a plasma cell, it releases about 2,000 antibodies every second.',
-  'Killer T cells check an ID card called MHC-I on every cell they touch.',
-  'Fever is a weapon: heat slows bacterial growth and speeds up immune cells.',
+  { need: 'macro', t: 'Macrophage means “big eater”. One can swallow around 100 bacteria before it dies.' },
+  { need: 'bcell', t: 'Once a B cell becomes a plasma cell, it releases about 2,000 antibodies every second.' },
+  { need: 'killer', t: 'Killer T cells check an ID card called MHC-I on every cell they touch.' },
+  { need: 'fever', t: 'Fever is a weapon: heat slows bacterial growth and speeds up immune cells.' },
   'Neutrophils can burst on purpose, casting sticky nets of DNA to trap bacteria.',
-  'MRSA is Staph aureus that evolved to shrug off the antibiotic methicillin.',
-  'Antibodies tagging a pathogen for destruction is called opsonization.',
+  { foe: 'boss', t: 'MRSA is Staph aureus that evolved to shrug off the antibiotic methicillin.' },
+  { need: 'bcell', t: 'Antibodies tagging a pathogen for destruction is called opsonization.' },
   { at: 3, t: 'Lymph nodes swell when they are busy training immune cells.' },
   { at: 1, t: 'Flattened out, your lungs’ alveoli would cover about half a tennis court.' },
   { foe: 'salmon', t: 'Salmonella swims with dozens of whip-like flagella spread over its whole surface.' },
@@ -1075,7 +1104,88 @@ const SPEC = [
   { place: 'Aorta', name: 'The Current', sub: 'A long, fast artery. Parasites ride it away from the heart, out to the whole body.', edge: '#7cf08c' }, // elastin autofluorescence: clear of red rhinovirus
   { place: 'Lymph Node', name: 'The Superbug', sub: 'A drug-resistant colony marches on the immune system’s own school.', edge: '#c9b48f' }, // reticulin gold-grey: lemon swallowed lime E. coli
 ];
-LEVELS.forEach((L, i) => Object.assign(L, SPEC[i]));
+MAPS.forEach((L, i) => Object.assign(L, SPEC[i]));
+
+// ============================================================ the campaign: 18 specimens, three per body place
+// Each place opens on two new layouts in its map's theme and ends on the original full map, which hosts that map's challenges
+// (chal = MAPS index). A new pathogen first comes alone, in wave 3 or later. m = map (theme: art style, palette, music); the first two of each place
+// have their own layout (seed, paths, slots, checked with the slot and route rules of tools/test.js); mult = pathogen health (also scales hero, Fever, Swarm);
+// hold = every wave waits for the player's call; timer = seconds between waves once they run on their own.
+const SPECIMENS = [
+  { m: 0, place: 'Dermis', name: 'The Splinter', sub: 'A splinter broke the skin. A few bacteria slip into the wound.', gold: 180, mult: 1, hold: 1,
+    seed: 214, paths: [[[-40,360],[300,360],[460,260],[1040,260]]], slots: [[230,290],[240,440],[400,420],[370,200],[540,340],[580,185],[710,340]],
+    waves: [[g_('bact', 5, 1.4)], [g_('bact', 8, 1.1)], [g_('bact', 10, .9)], [g_('bact', 8, 1), g_('bact', 8, .8, 9)], [g_('bact', 16, .6)]] },
+  { m: 0, place: 'Dermis', name: 'Day Two', sub: 'Neutrophils came first. Now the big eaters arrive to hold the wound.', gold: 230, mult: 1, hold: 1,
+    seed: 274, paths: [[[-40,250],[690,250],[790,280],[830,350],[790,420],[690,450],[520,450],[455,490],[435,560],[435,660]]], slots: [[150,330],[160,160],[420,160],[380,350],[560,350],[700,350],[700,160],[925,350],[630,545],[340,490],[535,590]],
+    waves: [[g_('bact', 8, 1.1)], [g_('bact', 12, .8)], [g_('bact', 16, .6)], [g_('bact', 10, .7), g_('bact', 10, .5, 8)], [g_('bact', 20, .5)], [g_('bact', 14, .5), g_('bact', 14, .45, 10)]] },
+  { m: 0, chal: 0, place: 'Dermis', name: 'Breach at the Barrier', sub: 'A golden, armoured bacterium joins the infection.', gold: 260, mult: 1.5, hpk: 0.67,
+    waves: [[g_('bact', 8, 1.1)], [g_('bact', 12, .8)], [g_('staph', 2, 3)], [g_('bact', 10, .8), g_('staph', 2, 3, 4)], [g_('bact', 16, .55)], [g_('staph', 4, 2.2), g_('bact', 10, .7, 3)],
+      [g_('bact', 18, .5), g_('staph', 5, 2, 4)]] },
+  { m: 1, place: 'Airways', name: 'A Common Cold', sub: 'A cold virus slips down the airway. Something fast is coming.', gold: 300, mult: 1.6, hpk: 1.0,
+    seed: 412, paths: [[[-40,150],[250,130],[520,170],[660,210],[700,280],[620,330],[440,320],[290,340],[200,400],[250,470],[440,480],[640,470],[800,420],[880,330],[1040,300]]], slots: [[900,215],[600,110],[160,210],[330,240],[540,250],[790,230],[420,400],[600,400],[120,400],[480,560],[700,540],[930,410]],
+    waves: [[g_('bact', 10, .9)], [g_('staph', 3, 2.4), g_('bact', 8, .9, 3)], [g_('virus', 8, .7)], [g_('bact', 12, .7), g_('virus', 8, .6, 5)], [g_('staph', 4, 2), g_('virus', 12, .5, 4)],
+      [g_('virus', 18, .4)], [g_('staph', 5, 1.8), g_('bact', 12, .6, 3), g_('virus', 14, .4, 9)]] },
+  { m: 1, place: 'Alveoli', name: 'Two Breaths', sub: 'Every inhale brings a new wave down two airways at once.', gold: 360, mult: 1.7, hpk: 0.95, timer: 22,
+    seed: 417, paths: [[[-40,180],[220,180],[380,260],[520,400],[620,490],[820,490],[1040,490]],[[640,-40],[640,160],[610,290],[520,400],[620,490],[820,490],[1040,490]]], slots: [[110,115],[130,265],[330,170],[300,340],[510,250],[740,180],[720,250],[460,490],[600,575],[720,410],[890,415],[800,572]],
+    waves: [[g_('bact', 8, 1.1, 0, 0)], [g_('bact', 8, 1.1, 0, 1)], [g_('virus', 10, .6, 0, -1)], [g_('staph', 3, 2.2, 0, 0), g_('staph', 3, 2.2, 1, 1)], [g_('bact', 10, .8, 0, -1), g_('virus', 10, .5, 4, -1)],
+      [g_('staph', 6, 1.6, 0, -1), g_('bact', 10, .7, 3, -1)], [g_('virus', 24, .35, 0, -1)], [g_('staph', 6, 1.4, 0, -1), g_('bact', 12, .6, 4, -1), g_('virus', 12, .45, 9, -1)]] },
+  { m: 1, chal: 1, place: 'Alveoli', name: 'Storm in the Alveoli', sub: 'Flu drifts in on the air, and the body turns up the heat.', gold: 400, mult: 1.8, hpk: 1.17, timer: 22,
+    waves: [[g_('bact', 8, 1.1, 0, -1)], [g_('virus', 12, .5, 0, -1)], [g_('flu', 5, 1.6, 0, 0)], [g_('staph', 4, 2, 0, 0), g_('staph', 4, 2, 1, 1), g_('bact', 6, 1, 4, -1)],
+      [g_('bact', 10, .8, 0, -1), g_('virus', 10, .5, 4, -1)], [g_('flu', 7, 1.4, 0, -1)], [g_('staph', 6, 1.4, 0, -1), g_('bact', 12, .7, 3, -1)],
+      [g_('staph', 4, 2.4, 0, -1), g_('flu', 6, 1.3, 5, -1)], [g_('virus', 24, .35, 0, -1)], [g_('staph', 6, 1.4, 0, -1), g_('bact', 12, .6, 4, -1), g_('flu', 6, 1.3, 9, -1)]] },
+  { m: 2, place: 'Aorta', name: 'Into the Current', sub: 'Armoured bacteria ride the blood. Time for an assassin.', gold: 380, mult: 2, hpk: 1.0,
+    seed: 414, paths: [[[-40,220],[520,220],[650,250],[730,340],[750,450],[750,660]]], slots: [[170,300],[350,300],[505,305],[300,140],[480,140],[680,165],[825,300],[840,460],[645,390],[660,530]],
+    waves: [[g_('bact', 12, .9)], [g_('staph', 4, 2)], [g_('staph', 6, 1.6), g_('bact', 10, .8, 4)], [g_('virus', 16, .45)], [g_('staph', 8, 1.3)], [g_('flu', 8, 1), g_('staph', 4, 2, 4)],
+      [g_('staph', 10, 1.1), g_('bact', 14, .6, 4), g_('virus', 12, .4, 10)]] },
+  { m: 2, place: 'Aorta', name: 'Blood Fluke', sub: 'A parasitic worm swims against the current, too big for any cell to eat.', gold: 400, mult: 2.4, hpk: 0.85,
+    seed: 482, paths: [[[440,-40],[440,90],[350,190],[340,370],[420,465],[580,465],[640,390],[640,210],[720,135],[820,170],[850,330],[930,420],[1040,420]]], slots: [[290,130],[260,290],[470,220],[430,330],[480,555],[520,380],[555,240],[740,270],[880,100],[940,290],[920,505],[665,495]],
+    waves: [[g_('bact', 14, .8)], [g_('staph', 6, 1.6), g_('virus', 12, .5, 3)], [g_('worm', 1, 1)], [g_('flu', 10, .9)], [g_('worm', 1, 1), g_('staph', 6, 1.5, 3)], [g_('virus', 20, .4), g_('bact', 12, .6, 4)],
+      [g_('worm', 2, 5), g_('staph', 6, 1.6, 3)], [g_('worm', 2, 4), g_('flu', 10, .9, 3), g_('bact', 16, .5, 8)]] },
+  { m: 2, chal: 2, place: 'Aorta', name: 'The Current', sub: 'A long, fast artery. Parasites ride it away from the heart, out to the whole body.', gold: 380, mult: 3.4, hpk: 0.85, waves: MAPS[2].waves },
+  { m: 3, place: 'Lymph Node', name: 'The Training Ground', sub: 'In the lymph node, Killer T cells train into specialists.', gold: 440, mult: 2, hpk: 1.12,
+    seed: 417, paths: [[[400,-40],[400,380],[440,460],[500,480],[560,460],[600,380],[600,240],[650,190],[760,190],[1040,190]]], slots: [[500,150],[500,245],[500,335],[500,410],[300,170],[300,320],[420,555],[590,540],[700,320],[685,430],[800,100],[880,285]],
+    waves: [[g_('bact', 12, .8)], [g_('staph', 6, 1.5)], [g_('virus', 18, .4), g_('flu', 4, 1.4, 4)], [g_('worm', 2, 4), g_('bact', 10, .7, 3)], [g_('staph', 10, 1.1)], [g_('flu', 12, .8)],
+      [g_('worm', 2, 4), g_('staph', 8, 1.2, 3)], [g_('virus', 28, .3), g_('flu', 8, 1, 5)], [g_('staph', 12, 1), g_('worm', 3, 4, 3), g_('flu', 10, .8, 8)]] },
+  { m: 3, place: 'Lymph Node', name: 'Antibody Forge', sub: 'B cells meet their target here and become antibody factories.', gold: 460, mult: 2.1, hpk: 1.2,
+    seed: 412, paths: [[[-40,250],[760,250],[830,275],[855,312],[830,350],[760,375],[480,375],[420,398],[398,435],[420,472],[480,495],[1040,495]]], slots: [[560,312],[690,312],[620,435],[200,175],[450,175],[700,175],[200,330],[300,450],[935,320],[560,570],[745,575]],
+    waves: [[g_('bact', 14, .7)], [g_('flu', 8, 1.1)], [g_('staph', 8, 1.3), g_('virus', 14, .4, 4)], [g_('worm', 2, 4.5)], [g_('bact', 20, .45), g_('flu', 6, 1.2, 5)], [g_('staph', 12, 1)],
+      [g_('worm', 3, 4), g_('virus', 18, .35, 3)], [g_('flu', 14, .8)], [g_('staph', 10, 1), g_('bact', 18, .5, 4)], [g_('worm', 4, 3.5), g_('staph', 10, 1, 3), g_('flu', 12, .8, 8)]] },
+  { m: 3, chal: 3, place: 'Lymph Node', name: 'The Superbug', sub: 'A drug-resistant colony marches on the immune system’s own school.', gold: 440, mult: 2.15, hpk: 0.9,
+    waves: [[g_('bact', 10, 1, 0, -1)], [g_('virus', 16, .45, 0, -1)], [g_('staph', 6, 1.6, 0, -1), g_('flu', 6, 1.2, 3, 0)], [g_('bact', 14, .7, 0, -1), g_('staph', 4, 2, 3, -1)],
+      [g_('worm', 2, 5, 0, 0), g_('virus', 20, .35, 2, 1)], [g_('flu', 14, .8, 0, -1)], [g_('staph', 12, 1, 0, -1), g_('virus', 16, .35, 4, -1)],
+      [g_('worm', 3, 4, 0, -1), g_('staph', 6, 1.4, 3, -1)], [g_('virus', 40, .25, 0, -1)], [g_('staph', 10, 1, 0, -1), g_('worm', 3, 4, 3, -1), g_('flu', 10, .8, 6, -1)],
+      [g_('worm', 3, 4, 0, -1), g_('staph', 10, .9, 4, -1), g_('flu', 12, .7, 8, -1)], [g_('boss', 1, 1, 0, 0), g_('bact', 20, .7, 2, -1), g_('flu', 8, 1.2, 12, -1)]] },
+  { m: 4, place: 'Gut Lining', name: 'Yeast Bloom', sub: 'A yeast that lives in most guts starts to overgrow.', gold: 460, mult: 2.2, hpk: 1.15,
+    seed: 413, paths: [[[-40,290],[150,290],[240,175],[370,160],[440,270],[390,390],[470,475],[600,440],[650,310],[700,180],[820,150],[900,240],[880,380],[940,500],[1040,520]]], slots: [[120,200],[300,250],[520,200],[330,350],[480,380],[400,540],[560,520],[740,300],[580,300],[810,280],[960,330],[850,500]],
+    waves: [[g_('bact', 14, .8)], [g_('staph', 8, 1.3)], [g_('candida', 2, 3)], [g_('virus', 20, .4), g_('candida', 2, 3, 4)], [g_('flu', 10, .9)], [g_('candida', 4, 2.5), g_('bact', 12, .7, 3)],
+      [g_('worm', 2, 4), g_('staph', 8, 1.2, 3)], [g_('candida', 5, 2.2), g_('flu', 10, .8, 4)], [g_('candida', 6, 2), g_('staph', 10, 1, 4), g_('virus', 20, .35, 9)]] },
+  { m: 4, place: 'Gut Lining', name: 'Tainted Meal', sub: 'An undercooked meal brings a fast swimmer into the gut.', gold: 480, mult: 2.3, hpk: 1.3,
+    seed: 412, paths: [[[620,-40],[620,200],[200,200],[120,270],[140,355],[240,410],[850,410],[930,470],[1040,470]]], slots: [[330,125],[490,125],[710,130],[40,290],[260,305],[420,305],[580,305],[740,305],[360,490],[540,490],[720,490],[890,340],[930,540]],
+    waves: [[g_('bact', 14, .8)], [g_('candida', 3, 2.5)], [g_('salmon', 6, 1.3)], [g_('staph', 8, 1.2), g_('virus', 14, .4, 4)], [g_('salmon', 10, .9)], [g_('worm', 2, 4), g_('salmon', 8, .9, 3)],
+      [g_('flu', 10, .9), g_('candida', 3, 2.5, 3)], [g_('salmon', 14, .7)], [g_('staph', 10, 1), g_('salmon', 10, .7, 4)], [g_('candida', 5, 2.2), g_('salmon', 16, .55, 3), g_('worm', 2, 4, 8)]] },
+  { m: 4, chal: 4, place: 'Gut Lining', name: 'The Villi Maze', sub: 'Two tainted meals, two routes through the villi. They cross, then merge.', gold: 480, mult: 2.35, hpk: 1.1,
+    waves: [[g_('bact', 12, .9, 0, -1)], [g_('salmon', 8, 1.2, 0, -1)], [g_('virus', 18, .4, 0, -1), g_('staph', 4, 1.8, 3, -1)], [g_('candida', 3, 2.5, 0, -1), g_('bact', 10, .8, 2, -1)],
+      [g_('salmon', 12, .8, 0, -1), g_('flu', 6, 1.2, 4, -1)], [g_('candida', 4, 2.5, 0, -1), g_('staph', 6, 1.5, 3, -1)], [g_('staph', 10, 1.1, 0, -1), g_('salmon', 8, .7, 4, -1)],
+      [g_('worm', 3, 4, 0, -1), g_('salmon', 10, .8, 3, -1)], [g_('virus', 28, .3, 0, -1), g_('salmon', 6, .7, 5, -1)], [g_('flu', 12, .8, 0, -1), g_('candida', 4, 2.2, 3, -1), g_('staph', 8, 1, 6, -1)],
+      [g_('candida', 6, 2, 0, -1), g_('salmon', 16, .5, 3, -1), g_('worm', 3, 4, 6, -1)], [g_('candida', 6, 2, 0, -1), g_('salmon', 16, .5, 4, -1), g_('worm', 4, 3.5, 8, -1), g_('flu', 10, .8, 12, -1)]] },
+  { m: 5, place: 'Brain Barrier', name: 'Trojan Horse', sub: 'A parasite hides inside your own cells to reach the brain.', gold: 520, mult: 2.45, hpk: 0.9,
+    seed: 416, paths: [[[-40,300],[170,300],[270,190],[420,170],[520,260],[560,400],[660,470],[800,440],[880,340],[1040,300]]], slots: [[90,235],[110,370],[315,125],[340,250],[580,245],[465,325],[595,510],[770,515],[660,390],[800,330],[930,410],[960,250],[190,355]],
+    waves: [[g_('salmon', 10, 1)], [g_('staph', 8, 1.2), g_('bact', 12, .7, 3)], [g_('toxo', 3, 2.5)], [g_('virus', 22, .35)], [g_('toxo', 5, 2), g_('salmon', 8, .8, 4)], [g_('worm', 3, 4), g_('flu', 8, 1, 3)],
+      [g_('toxo', 8, 1.6), g_('candida', 3, 2.5, 4)], [g_('staph', 10, 1), g_('salmon', 12, .6, 4)], [g_('toxo', 10, 1.4), g_('virus', 18, .35, 4)], [g_('worm', 4, 3.5), g_('toxo', 10, 1.2, 3), g_('flu', 12, .8, 8)]] },
+  { m: 5, place: 'Brain Barrier', name: 'Microglia', sub: 'The brain’s own macrophages, the microglia, join the defence.', gold: 540, mult: 2.5, hpk: 1.0,
+    seed: 517, paths: [[[-40,440],[250,440],[300,390],[300,265],[350,215],[630,215],[680,265],[680,420],[730,470],[1040,470]]], slots: [[385,295],[490,295],[595,295],[385,400],[595,400],[430,142],[580,142],[205,330],[110,370],[770,330],[870,390],[960,385],[760,555]],
+    waves: [[g_('salmon', 12, .9)], [g_('toxo', 6, 1.8), g_('bact', 12, .8, 3)], [g_('virus', 24, .35)], [g_('staph', 10, 1.2), g_('flu', 8, 1, 4)], [g_('worm', 3, 4), g_('salmon', 12, .7, 3)],
+      [g_('toxo', 10, 1.5), g_('candida', 3, 2.5, 4)], [g_('flu', 12, .8), g_('salmon', 8, .8, 4)], [g_('staph', 10, 1), g_('worm', 3, 4, 5)], [g_('toxo', 10, 1.3), g_('virus', 22, .32, 4)],
+      [g_('candida', 6, 2), g_('salmon', 16, .5, 4)], [g_('worm', 5, 3), g_('flu', 14, .7, 4), g_('toxo', 8, 1.2, 8)]] },
+  { m: 5, chal: 5, place: 'Brain Barrier', name: 'The Last Wall', sub: 'Behind this barrier lies the brain. One long road, one fork, nothing left behind it.', gold: 560, mult: 2.6, hpk: .95, waves: MAPS[5].waves },
+];
+const LEVELS = SPECIMENS.map(s => {
+  const M = MAPS[s.m], paths = s.paths || M.paths, slots = s.slots || M.slots; // a specimen with its own layout (seed, paths, slots) shares only the map's theme
+  return { ...M, ...s, mapI: s.m, paths, slots };
+});
+const LVLMULT = LEVELS.map(L => L.mult);
+const CAMPHP = LEVELS.map(L => L.hpk || 1); // campaign-only pathogen health (challenges and the hero keep LVLMULT)
+const LMARK = LEVELS.map((L, i) => L.chal != null ? i : -1).filter(i => i >= 0); // the six full maps, in MAPS order
 
 // ============================================================ palette & art
 const HEXC = {};
@@ -1295,16 +1405,40 @@ function chBadge(m, big, on) { return `<span class="bdg ${m}${big ? ' big' : ''}
 
 // ============================================================ state
 const S = { screen: 'title', speed: 1, paused: false, mouse: { x: -99, y: -99 }, time: 0 };
-let save = { stars: [0, 0, 0, 0, 0, 0], seen: [], mem: {} };
-let firstRun = false; // no save at all: this player gets the specimen 01 field notes
+let save = { seen: [], mem: {} };
+let booted = false, firstRun = false; // no save at all: this player gets the specimen 01 field notes
 try { firstRun = localStorage.getItem('immune-citadel-v4') == null; } catch (e) {}
 try { Object.assign(save, JSON.parse(localStorage.getItem('immune-citadel-v4') || '{}')); } catch (e) {}
 AU.on.music = save.music ?? !save.muted; AU.on.sfx = save.sfx ?? !save.muted; delete save.muted; // saves from before the two toggles had one mute
 if (!DIFF[save.diff]) save.diff = 'normal';
 if (!save.mem || typeof save.mem !== 'object') save.mem = {}; // saves from before Immune Memory
-for (const m of ['heroic', 'iron']) if (!save[m] || !Array.isArray(save[m])) save[m] = [0, 0, 0, 0, 0, 0]; // saves from before challenges: 1 = won
+// Progress over the 18 specimens lives in st / hc / ic (campaign stars, Heroic won, Iron won, per specimen) and rch (furthest specimen started).
+// The 6-specimen keys (stars, heroic, iron, reach) are never written again: they fold in on every load and every merge, so a stale tab
+// still running the 6-specimen game cannot erase anything. Old progress lands on the six full maps (LMARK); the old reach becomes the first
+// new specimen whose kit covers what that reach had (old 01: Neutrophil, Macrophage, Killer T, hero; 02: + B Cell; 03: + Fever; 04-05: specialists; 06: Swarm).
+const OLDREACH = [6, 8, 8, 16, 16, 17];
+const OLDOWE = [['fever'], ['fever'], [], ['swarm'], ['swarm'], []]; // abilities that new reach grants but the old one had not met: their cards are owed
+function fold(o) {
+  const arr = (k, top) => Array.from({ length: LEVELS.length }, (_, i) => k !== 'st' && LEVELS[i].chal == null ? 0 : clamp(Array.isArray(o[k]) ? o[k][i] | 0 : 0, 0, top)); // challenges exist only on the full maps
+  const out = { st: arr('st', 3), hc: arr('hc', 1), ic: arr('ic', 1) }, won = Array.isArray(o.stars) && o.stars.some(v => v > 0);
+  for (const [k, ok, top] of [['st', 'stars', 3], ['hc', 'heroic', 1], ['ic', 'iron', 1]]) if (Array.isArray(o[ok])) o[ok].slice(0, 6).forEach((v, i) => { out[k][LMARK[i]] = Math.max(out[k][LMARK[i]], clamp(v | 0, 0, top)); });
+  const old = typeof o.reach === 'number' ? (o.reach > 0 || won ? OLDREACH[clamp(o.reach | 0, 0, 5)] : 0) : won ? LEVELS.length - 1 : 0; // no reach + stars: a save from before unlocks kept its whole kit
+  out.rch = clamp(Math.max(o.rch | 0, old), 0, LEVELS.length - 1);
+  if (typeof o.rch !== 'number' && typeof o.reach === 'number' && old) out.owe = OLDOWE[clamp(o.reach | 0, 0, 5)]; // first fold of a 6-specimen save
+  return out;
+}
+Object.assign(save, fold(save));
+// progress mirror: a tab still running the 6-specimen game rewrites the main key without st / hc / ic / rch, so they also live under KEY18
+const KEY = 'immune-citadel-v4', KEY18 = 'immune-citadel-v4-p18';
+try { const m = fold(JSON.parse(localStorage.getItem(KEY18) || '{}')); for (const k of ['st', 'hc', 'ic']) save[k] = save[k].map((v, i) => Math.max(v, m[k][i])); save.rch = Math.max(save.rch, m.rch); } catch (e) {}
 const snapshot = () => ({ ...save, music: AU.on.music, sfx: AU.on.sfx });
-function persistLocal() { try { localStorage.setItem('immune-citadel-v4', JSON.stringify(snapshot())); } catch (e) {} }
+function persistLocal() { // merge on write: progress written by another tab since this one loaded is kept (choices follow this, the newer save)
+  try {
+    const m = mergeSave(save, mergeSave(JSON.parse(localStorage.getItem(KEY) || '{}'), JSON.parse(localStorage.getItem(KEY18) || '{}')));
+    for (const k of ['st', 'hc', 'ic', 'rch', 'seen', 'viewed', 'hints']) save[k] = m[k];
+    const s = snapshot(); localStorage.setItem(KEY, JSON.stringify(s)); localStorage.setItem(KEY18, JSON.stringify({ st: s.st, hc: s.hc, ic: s.ic, rch: s.rch }));
+  } catch (e) {}
+}
 function persist() { save.at = Math.max(Date.now(), (save.at || 0) + 1); persistLocal(); cloudQueue(); } // a device with a fast clock must not freeze everyone's later choices
 // Cloud save: the browser keeps the save; the API holds a copy under a 16-character code, so another device can continue it.
 // Hosts without an API (file://) play exactly as before.
@@ -1316,12 +1450,13 @@ try { const c = localStorage.getItem('immune-citadel-v4-code'); if (CODE_RE.test
 function mergeSave(a, b) {
   const arr = (o, k) => Array.isArray(o[k]) ? o[k] : [];
   const out = (a.at || 0) >= (b.at || 0) ? { ...b, ...a } : { ...a, ...b };
-  for (const [k, top] of [['stars', 3], ['heroic', 1], ['iron', 1]]) { const x = arr(a, k), y = arr(b, k); out[k] = Array.from({ length: LEVELS.length }, (_, i) => clamp(Math.max(x[i] | 0, y[i] | 0), 0, top)); } // capped: a bad copy cannot unlock everything everywhere
+  const fa = fold(a), fb = fold(b); // capped: a bad copy cannot unlock everything everywhere; the 6-specimen keys ride along from the newer save
+  for (const k of ['st', 'hc', 'ic']) out[k] = fa[k].map((v, i) => Math.max(v, fb[k][i]));
+  out.rch = Math.max(fa.rch, fb.rch);
+  const owe = [...new Set([...(fa.owe || a.owe || []), ...(fb.owe || b.owe || [])])]; if (owe.length) out.owe = owe; else delete out.owe;
   for (const k of ['seen', 'viewed', 'hints']) out[k] = [...new Set([...arr(a, k), ...arr(b, k)])].filter(v => typeof v === 'string');
   if (!out.mem || typeof out.mem !== 'object' || Array.isArray(out.mem)) out.mem = {};
   if (!DIFF[out.diff]) out.diff = 'normal';
-  const reach = o => typeof o.reach === 'number' ? o.reach : arr(o, 'stars').some(v => v > 0) ? LEVELS.length - 1 : 0; // same rule as the load migration
-  out.reach = clamp(Math.max(reach(a), reach(b)) | 0, 0, LEVELS.length - 1);
   out.at = Math.max(a.at || 0, b.at || 0);
   return out;
 }
@@ -1330,16 +1465,15 @@ const memTier = id => clamp(save.mem[id] | 0, 0, 3);
 const sum = a => a.reduce((s, b) => s + (b | 0), 0);
 // seen = observed in play (pathogen types, and specialists once a line reaches level 3); viewed = Field Guide plates opened
 if (!Array.isArray(save.seen)) save.seen = [];
-if (!Array.isArray(save.viewed)) { save.viewed = []; if (sum(save.stars)) save.seen.push(...Object.keys(SPECS).filter(k => !save.seen.includes(k))); } // saves from before the guide: a cleared specimen means the player has met the specialists
+if (!Array.isArray(save.viewed)) { save.viewed = []; if (sum(save.st)) save.seen.push(...Object.keys(SPECS).filter(k => !save.seen.includes(k))); } // saves from before the guide: a cleared specimen means the player has met the specialists
 const SPAWNS = { candida: 'spore', rabies: 'virion', boss: 'bact' }; // offspring are observed with their parent
 for (const [k, v] of Object.entries(SPAWNS)) if (save.seen.includes(k) && !save.seen.includes(v)) save.seen.push(v); // saves that met a parent before offspring were tracked
-if (typeof save.reach !== 'number') save.reach = sum(save.stars) ? LEVELS.length - 1 : 0; // furthest specimen started; saves from before unlocks keep their whole kit
 function observe(ids) {
   const f = ids.filter(k => !save.seen.includes(k));
   if (f.length) { save.seen.push(...f); persist(); guideDots(); }
 }
 function memStars() { // a save that spent more under the old tier costs keeps its purchases; avail never shows below 0
-  const total = sum(save.stars) + sum(save.heroic) + sum(save.iron), spent = MEMORY.reduce((s, M) => s + sum(MEMCOST.slice(0, memTier(M.id))), 0);
+  const total = sum(save.st) + sum(save.hc) + sum(save.ic), spent = MEMORY.reduce((s, M) => s + sum(MEMCOST.slice(0, memTier(M.id))), 0);
   return { total, spent, avail: Math.max(0, total - spent) };
 }
 function applyMemory() {
@@ -1350,8 +1484,8 @@ function applyMemory() {
 }
 // mode: 'campaign' | 'heroic' | 'iron'
 function startLevel(i, mode = 'campaign') {
-  const L = LEVELS[i], C = CHAL[i], M = { ...MODES[mode], hp: MODES[mode].hp * (mode === 'campaign' ? 1 : C.hp[mode === 'iron' ? 1 : 0]) }; applyMemory();
-  const fresh = mode === 'campaign' && i > (save.reach | 0), kit = kitAt(mode === 'campaign' ? Math.max(i, save.reach | 0) : LEVELS.length - 1); if (fresh) { save.reach = i; persist(); }
+  const L = LEVELS[i], C = CHAL[L.chal], M = { ...MODES[mode], hp: MODES[mode].hp * (mode === 'campaign' ? 1 : C.hp[mode === 'iron' ? 1 : 0]) }; applyMemory();
+  const fresh = mode === 'campaign' && i > save.rch, kit = kitAt(mode === 'campaign' ? Math.max(i, save.rch) : LEVELS.length - 1); if (fresh) { save.rch = i; persist(); }
   Object.assign(S, {
     lvl: i, L, mode, M, waves: mode === 'campaign' ? L.waves : mode === 'heroic' ? C.heroic : [C.iron], lines: mode === 'iron' ? C.lines : TORDER.filter(k => kit.cells.includes(k)), kit,
     paths: L.paths.map(makePath), slots: L.slots.map(([x, y], k) => ({ x, y, k, tower: null })),
@@ -1359,15 +1493,18 @@ function startLevel(i, mode = 'campaign') {
     gold: Math.round(L.gold * (M.gold || 1) / 10) * 10, lives: mode === 'heroic' ? 3 : M.name ? 1 : 20, wave: 0, waveTimer: -1, waveTimerMax: 1, time: 0, cds: { fever: 0, swarm: 0, granzyme: 0 },
     ability: null, sel: null, armed: null, preview: null, over: false, run: (S.run || 0) + 1, paused: false, shake: 0, hurt: 0, screen: 'play', noteI: i * 3, pinned: null,
   });
-  S.hero = mkHero(); bgCache = null; closeRadial(); lastHud = '';
+  S.hero = kit.hero ? mkHero() : null; bgCache = null; hudInert(false); closeRadial(); lastHud = '';
   $('#titleOv').hidden = true; $('#endOv').hidden = true; $('#memOv').hidden = true; $('#guideOv').hidden = true;
-  $('#specId').textContent = `SPEC-0${i + 1} · ${L.place.toUpperCase()}${M.name ? ' · ' + M.name.toUpperCase() : ''}`; $('#specName').textContent = L.name;
+  $('#specId').textContent = `SPEC-${sn(i)} · ${L.place.toUpperCase()}${M.name ? ' · ' + M.name.toUpperCase() : ''}`; $('#specName').textContent = L.name;
+  $('#ab-hero').hidden = !kit.hero; $('#ab-gz').hidden = !kit.gz;
   for (const k of ['fever', 'swarm']) { $('#ab-' + k).hidden = !kit.ab.includes(k); $('#ab-' + k).classList.toggle('off', mode === 'iron'); $('#ab-' + k).classList.toggle('iron', mode === 'iron'); if (mode === 'iron') $(`#ab-${k} .tip small`).textContent = 'DISABLED · IRON CHALLENGE'; }
   $('#wave').nextElementSibling.textContent = mode === 'iron' ? 'RELEASED' : 'WAVE';
   showInfo(null); layoutWaveMarkers(); nextNote(); hintCur = null; bannerCut(); cardClear();
   if (fresh) for (const id of unlockIds(UNLOCK[i])) cardQ(id, 'unlock');
-  cardThen(() => banner(M.name ? `${chBadge(mode, true)}<div><small>${M.name} challenge · Specimen 0${i + 1}</small><b>${L.name}</b><p>${M.rule}${mode === 'iron' ? ': ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ''}.</p></div>`
-    : `<div><small>Specimen 0${i + 1} · ${L.place}</small><b>${L.name}</b><p>${L.sub}</p></div>`, M.name ? 6000 : 4200, 'intro'));
+  const due = booted && mode === 'campaign' && Array.isArray(save.owe) ? save.owe.filter(id => kit.ab.includes(id)) : []; // migrated players meet what they skipped
+  if (due.length) { due.forEach(id => cardQ(id, 'unlock')); save.owe = save.owe.filter(id => !due.includes(id)); persist(); }
+  cardThen(() => banner(M.name ? `${chBadge(mode, true)}<div><small>${M.name} challenge · Specimen ${sn(i)}</small><b>${L.name}</b><p>${M.rule}${mode === 'iron' ? ': ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ''}.</p></div>`
+    : `<div><small>Specimen ${sn(i)} · ${L.place}</small><b>${L.name}</b><p>${L.sub}</p></div>`, M.name ? 6000 : 4200, 'intro'));
 }
 
 // ============================================================ waves
@@ -1465,13 +1602,13 @@ function upgrade(t) {
   if (!t || t.lvl >= 2 || S.over) return false;
   const c = TOWERS[t.type].lv[t.lvl + 1].cost; if (S.gold < c) { flashGold(); return false; }
   S.gold -= c; t.lvl++; t.built = 0; if (t.type === 'macro') syncUnits(t, true);
-  if (t.lvl === 2 && S.kit.spec) observe(Object.keys(SPECS).filter(id => SPECS[id].base === t.type)); // its specialists become available
+  if (t.lvl === 2 && S.kit.spec.includes(t.type)) observe(Object.keys(SPECS).filter(id => SPECS[id].base === t.type)); // its specialists become available
   sfx('up', t.x); ring(t.x, t.y - 12, '#ffd27a'); burst(t.x, t.y - 12, '#ffd27a', 16, 2.5);
   return true;
 }
 function specialize(t, id) {
   const P = SPECS[id];
-  if (!t || !P || t.lvl < 2 || t.spec || P.base !== t.type || S.over || !S.kit.spec) return false;
+  if (!t || !P || t.lvl < 2 || t.spec || P.base !== t.type || S.over || !S.kit.spec.includes(t.type)) return false;
   if (S.gold < P.cost) { flashGold(); return false; }
   S.gold -= P.cost; Object.assign(t, { spec: id, rank: 0, sk: 1.5, surge: 0, bn: 0, built: 0, mem: id === 'memory' ? {} : null });
   if (t.type === 'macro') syncUnits(t, true);
@@ -1529,15 +1666,15 @@ function heroHome() {
   }
   return S.home = best;
 }
-// hero stats on this specimen: damage grows with the specimen's LVLMULT (relative to 01, where the base table is tuned),
+// hero stats on this specimen: damage grows with the specimen's LVLMULT (relative to 1.5, where the base table is tuned),
 // health and regeneration with its square root, like pathogen bites
-function heroLv(n) { const L = HERO.lv[n - 1], k = LVLMULT[S.lvl || 0] / LVLMULT[0], q = Math.sqrt(k); return { hp: Math.round(L.hp * q), dmg: Math.round(L.dmg * k), regen: Math.round(L.regen * q) }; }
+function heroLv(n) { const L = HERO.lv[n - 1], k = LVLMULT[S.lvl || 0] / 1.5, q = Math.sqrt(k); return { hp: Math.round(L.hp * q), dmg: Math.round(L.dmg * k), regen: Math.round(L.regen * q) }; }
 function mkHero() {
   const p = heroHome(), L = heroLv(HERO.start);
   return { kind: 'hero', x: p.x, y: p.y, hx: p.x, hy: p.y, hp: L.hp, max: L.hp, lvl: HERO.start, xp: 0, kills: 0, cd: 0, tgt: null, dead: false, resp: 0, mv: false, t: 0, hit: 0, glow: 0 };
 }
 function heroXp(n) {
-  const h = S.hero; if (h.lvl >= 5) return; h.xp += n;
+  const h = S.hero; if (!h || h.lvl >= 5) return; h.xp += n;
   while (h.lvl < 5 && h.xp >= HERO.xp[h.lvl - 1]) {
     h.xp -= HERO.xp[h.lvl - 1]; h.lvl++; h.max = heroLv(h.lvl).hp; if (!h.dead) h.hp = h.max; h.glow = 1.2;
     S.fx.push({ k: 'lvl', t: 0, T: 1.1 }); burst(h.x, h.y, '#e8f6ff', 24, 2.6); floatText(h.x, h.y - 42, `LEVEL ${h.lvl}`, '#e8f6ff', 1.8); sfx('lvl', h.x);
@@ -1558,7 +1695,7 @@ function selectHero(on = !(S.sel && S.sel.hero)) {
   closeRadial(); S.ability = null; S.pinned = null; S.sel = on ? { hero: true } : null; showInfo(on ? { kind: 'hero' } : null); if (on) sfx('click');
 }
 function granzyme() {
-  const h = S.hero, G = HERO.gz; if (S.screen !== 'play' || S.over || !h || h.dead || S.cds.granzyme > 0) return false;
+  const h = S.hero, G = HERO.gz; if (S.screen !== 'play' || S.over || !h || h.dead || !S.kit.gz || S.cds.granzyme > 0) return false;
   const dmg = heroLv(h.lvl).dmg * G.k;
   for (const e of S.enemies) if (!e.dead && Math.hypot(e.x - h.x, e.y - h.y) < G.r + e.D.r) { damage(e, dmg, 'magic', h); e.stunT = Math.max(e.stunT, e.D.boss ? G.stun / 2 : G.stun); }
   S.fx.push({ k: 'gz', x: h.x, y: h.y, r: G.r, t: 0, T: .7 }); burst(h.x, h.y, '#e8f6ff', 20, 3);
@@ -1610,7 +1747,7 @@ function step(dt) {
   for (const k in S.cds) S.cds[k] = Math.max(0, S.cds[k] - dt);
   // spawning
   while (S.spawnQ.length && S.spawnQ[0].t <= S.time) { const q = S.spawnQ.shift(); spawnEnemy(q.type, q.p, q.mult); }
-  if (S.wave > 0 && S.wave < S.waves.length && !S.spawnQ.length && S.waveTimer < 0) { S.waveTimer = S.waveTimerMax = (S.lvl === 1 ? 22 : 16) * (DIFF[save.diff] || DIFF.normal).timer; } // 02: two airways at once, give new players room // early call pays a bonus for anyone who wants less dead time
+  if (S.wave > 0 && S.wave < S.waves.length && !S.spawnQ.length && S.waveTimer < 0 && !(S.L.hold && S.mode === 'campaign')) { S.waveTimer = S.waveTimerMax = (S.L.timer || 16) * (DIFF[save.diff] || DIFF.normal).timer; } // hold: 01-02 wait for every call; timer 22: two airways at once give new players room // early call pays a bonus for anyone who wants less dead time
   if (S.waveTimer > 0) { S.waveTimer -= dt; if (S.waveTimer <= 0) { S.waveTimer = 0; sendWave(); } }
 
   // enemies
@@ -1858,7 +1995,7 @@ function resize() {
   st.style.setProperty('--ut', Math.max(.62, Math.min(u, (h - 40) / 820)).toFixed(3)); // tray: three rows of slides (with challenge badges) fit the stage height
   // phone landscape: side gutters wide enough for a column of buttons take the controls and abilities off the map
   const gw = (vw - w) / 2, gut = TOUCH && gw >= 60;
-  st.classList.toggle('gut', gut); st.style.setProperty('--gw', gw + 'px');
+  st.classList.toggle('gut', gut); st.classList.toggle('short', h < 710); st.style.setProperty('--gw', gw + 'px');
   // overlays span the gutters too, so on a phone they can zoom to the width and scroll instead of shrinking to the height
   const uo = clamp((vw - 40) / 960, .62, 1).toFixed(3);
   document.querySelectorAll('.ov').forEach(o => { if (gut) { o.style.setProperty('--ut', uo); o.style.setProperty('--u', uo); } else { o.style.removeProperty('--ut'); o.style.removeProperty('--u'); } });
@@ -2228,8 +2365,8 @@ function openRadial(slot) {
       add(270, `<img src="${portrait(t.type, t.lvl + 1)}" alt="Upgrade">`, '▲ ' + c, c,
         () => { if (upgrade(t)) openRadial(slot); },
         () => { S.preview = { x: t.x, y: t.y, r: t.type === 'macro' ? 0 : TOWERS[t.type].lv[t.lvl + 1].range, rally: t.rally }; showInfo({ kind: 'tower', t, next: true }); }, 0);
-    } else if (!t.spec && !S.kit.spec) {
-      add(270, `<img src="${portrait(t.type, 2)}" alt="Specialists locked"><span class="mx">SPEC 04</span>`, null, Infinity, () => sfx('deny'), () => showInfo({ kind: 'speclock' }), 0);
+    } else if (!t.spec && !S.kit.spec.includes(t.type)) {
+      add(270, `<img src="${portrait(t.type, 2)}" alt="Specialists locked"><span class="mx">SPEC ${sn(unlockAt('spec-' + t.type))}</span>`, null, Infinity, () => sfx('deny'), () => showInfo({ kind: 'speclock', type: t.type }), 0);
     } else if (!t.spec) {
       Object.keys(SPECS).filter(id => SPECS[id].base === t.type).forEach((id, i) => {
         const P = SPECS[id];
@@ -2285,7 +2422,7 @@ function showInfo(o) {
   if (!o) { el.hidden = true; infoKey = ''; return; }
   let html = '';
   if (o.kind === 'slot') html = `<div class="meta"><small>Empty site</small><b>Grow a cell here</b><span>${lastPT === 'touch' ? 'Tap a choice to preview it, tap again to grow.' : 'Hover a choice to preview its reach.'}</span></div>`;
-  else if (o.kind === 'speclock') html = `<div class="meta"><small>Specialists · locked</small><b>Unlock at Specimen 04</b><span>Reach Specimen 04 and every level 3 cell can train into one of two tier IV forms.</span></div>`;
+  else if (o.kind === 'speclock') html = `<div class="meta"><small>Specialists · locked</small><b>Unlock at Specimen ${sn(unlockAt('spec-' + o.type))}</b><span>Reach Specimen ${sn(unlockAt('spec-' + o.type))} and a level 3 ${TOWERS[o.type].name} can train into one of two tier IV forms.</span></div>`;
   else if (o.kind === 'recycle') html = `<div class="meta"><small>Recycle</small><b>Break down this cell</b><span>Returns ${refund(o.t)} ATP, 60% of what you spent.</span></div>`;
   else if (o.kind === 'spec' || (o.kind === 'tower' && o.t.spec)) {
     const id = o.id || o.t.spec, P = SPECS[id], cur = o.kind === 'spec';
@@ -2301,7 +2438,7 @@ function showInfo(o) {
     const h = S.hero, L = heroLv(h.lvl), N = h.lvl < 5 && heroLv(h.lvl + 1), need = HERO.xp[h.lvl - 1], G = HERO.gz;
     html = `<div class="por"><img src="${portrait('hero')}"></div><div class="meta"><small>Hero · Natural Killer cell</small><b>${HERO.name}</b><span class="xp">${h.dead ? `Respawning in ${Math.ceil(h.resp)} s` : need ? `Level ${h.lvl} · ${h.xp} / ${need} XP` : `Level ${h.lvl} · max`}</span><div class="pips">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= h.lvl ? 'on' : ''}"></i>`).join('')}</div></div>
       <div class="sv g2">${sv('HEALTH', `${Math.ceil(Math.max(0, h.hp))}<i>/${h.max}</i>`)}${sv('DMG', L.dmg, N && N.dmg)}${sv('REGEN', L.regen + '/s', N && N.regen + '/s')}${sv('KILLS', h.kills)}</div>
-      <div class="perk wide">Holds one pathogen and stings flyers too. Tap or click near the path to send it.<div class="skt"><span class="skn">★ Granzyme Burst · E</span><span class="skd"><br>${Math.round(L.dmg * G.k)} damage and a ${G.stun} s stun to everything within ${G.r}. Every ${G.cd} s.</span></div></div>`;
+      <div class="perk wide">Holds one pathogen and stings flyers too. Tap or click near the path to send it.${S.kit.gz ? `<div class="skt"><span class="skn">★ Granzyme Burst · E</span><span class="skd"><br>${Math.round(L.dmg * G.k)} damage and a ${G.stun} s stun to everything within ${G.r}. Every ${G.cd} s.</span></div>` : ''}</div>`; // Granzyme joins at specimen 05
   } else if (o.kind === 'enemy') {
     const D = ENEMIES[o.type], e = o.e;
     const hp = e ? Math.ceil(Math.max(0, e.hp)) : Math.round(D.hp * LVLMULT[S.lvl || 0] * S.M.hp * (1 + Math.max(0, S.wave - 1) * .045));
@@ -2314,7 +2451,7 @@ function showInfo(o) {
   const f = S.sel && (S.sel.slot || (S.sel.hero && S.hero)); el.classList.remove('up');
   if (f) { const r = el.getBoundingClientRect(), c = cv.getBoundingClientRect(), x = c.left + f.x * viewK, y = c.top + f.y * viewK, pad = 34 * viewK; el.classList.toggle('up', x > r.left - pad && x < r.right + pad && y > r.top - pad); }
 }
-const noteFits = n => typeof n === 'string' || (n.at !== undefined ? n.at === S.lvl : S.waves.some(w => w.some(g => g.t === n.foe)));
+const noteFits = n => typeof n === 'string' || (n.need ? S.kit.cells.includes(n.need) || S.kit.ab.includes(n.need) : n.at !== undefined ? n.at === S.L.mapI : S.waves.some(w => w.some(g => g.t === n.foe)));
 function nextNote() { for (let k = 0; k < NOTES.length; k++) { const n = NOTES[(S.noteI = (S.noteI || 0) + 1) % NOTES.length]; if (noteFits(n)) { S.note = n.t || n; return; } } }
 // top-centre cards, one at a time from a queue. kind: 'intro' (cut when wave 1 is called), 'incoming' (dropped while a
 // New-threat card is up or waiting), 'threat'
@@ -2402,9 +2539,9 @@ function updateChips() {
   let html;
   if (S.wave >= S.waves.length) html = '<small>FINAL WAVE</small><b>Hold the line</b>';
   else {
-    const counts = {}; S.waves[S.wave].forEach(g => counts[g.t] = (counts[g.t] || 0) + g.n);
+    const counts = {}, held = S.L.hold && S.mode === 'campaign'; S.waves[S.wave].forEach(g => counts[g.t] = (counts[g.t] || 0) + g.n);
     const chips = Object.entries(counts).map(([t, n]) => `<span class="chip"><img src="${portrait(t, 0, 48)}">${n}</span>`).join('');
-    html = `<small>${S.mode === 'iron' ? 'ONE LONG WAVE' : `WAVE ${S.wave + 1} / ${S.waves.length}`}</small><b>${S.wave === 0 ? 'Call the first wave' : 'Call early'}</b><div class="chips">${chips}</div>${S.wave > 0 ? '<span class="bonus"></span>' : 'When your defences are ready.'}<span class="go"></span>`;
+    html = `<small>${S.mode === 'iron' ? 'ONE LONG WAVE' : `WAVE ${S.wave + 1} / ${S.waves.length}`}</small><b>${S.wave === 0 ? 'Call the first wave' : held ? 'Call the next wave' : 'Call early'}</b><div class="chips">${chips}</div>${S.wave > 0 && !held ? '<span class="bonus"></span>' : 'When your defences are ready.'}<span class="go"></span>`;
   }
   wm.forEach(b => b.querySelector('.tip').innerHTML = html);
 }
@@ -2415,7 +2552,7 @@ function hud() {
   if (!S.L) return;
   const total = S.waves.length, can = canCallWave();
   const Hr = S.hero, hsel = !!(S.sel && S.sel.hero), bo = S.enemies.find(e => e.D.boss && !e.dead);
-  const key = [S.lives, S.gold, S.wave, S.spawnQ.length, Math.ceil(S.waveTimer * 4), can, Math.ceil(S.cds.fever), Math.ceil(S.cds.swarm), Math.ceil(S.cds.granzyme), S.ability, S.speed, S.paused, Math.ceil(Hr.hp), Hr.lvl, Hr.dead, Math.ceil(Hr.resp), hsel, bo ? Math.ceil(bo.hp) : -1].join('|');
+  const key = [S.lives, S.gold, S.wave, S.spawnQ.length, Math.ceil(S.waveTimer * 4), can, Math.ceil(S.cds.fever), Math.ceil(S.cds.swarm), Math.ceil(S.cds.granzyme), S.ability, S.speed, S.paused, Hr && Math.ceil(Hr.hp), Hr && Hr.lvl, Hr && Hr.dead, Hr && Math.ceil(Hr.resp), hsel, bo ? Math.ceil(bo.hp) : -1].join('|');
   if (key === lastHud) return; lastHud = key;
   $('#lives').textContent = S.lives; $('#lives').classList.toggle('low', S.lives <= 6);
   $('#gold').textContent = S.gold; $('#wave').innerHTML = S.mode === 'iron' ? `${S.wave ? Math.round((1 - S.spawnQ.length / S.qN) * 100) : 0}<span>%</span>` : `${S.wave}<span>/${total}</span>`;
@@ -2428,12 +2565,12 @@ function hud() {
     const b = $(k === 'granzyme' ? '#ab-gz' : '#ab-' + k), cd = S.cds[k], max = { fever: AB.fever.cd, swarm: AB.swarm.cd, granzyme: HERO.gz.cd }[k];
     b.querySelector('.cd').style.setProperty('--p', cd > 0 ? (cd / max * 100) + '%' : '0%');
     b.querySelector('.cd').textContent = cd > 0 ? Math.ceil(cd) : '';
-    b.classList.toggle('armed', S.ability === k); b.classList.toggle('ready', cd <= 0 && S.ability !== k && S.wave > 0 && (k === 'granzyme' ? !Hr.dead : S.mode !== 'iron'));
+    b.classList.toggle('armed', S.ability === k); b.classList.toggle('ready', cd <= 0 && S.ability !== k && S.wave > 0 && (k === 'granzyme' ? Hr && !Hr.dead : S.mode !== 'iron'));
   }
   const hb = $('#ab-hero'), hc = hb.querySelector('.cd');
-  hb.style.setProperty('--hp', (Hr.dead ? 0 : Hr.hp / Hr.max * 100) + '%'); hb.classList.toggle('low', !Hr.dead && Hr.hp < Hr.max * .35); hb.classList.toggle('armed', hsel);
+  if (Hr) { hb.style.setProperty('--hp', (Hr.dead ? 0 : Hr.hp / Hr.max * 100) + '%'); hb.classList.toggle('low', !Hr.dead && Hr.hp < Hr.max * .35); hb.classList.toggle('armed', hsel);
   hb.querySelector('.lv').textContent = Hr.lvl; hc.style.setProperty('--p', Hr.dead ? Hr.resp / HERO.resp * 100 + '%' : '0%'); hc.textContent = Hr.dead ? Math.ceil(Hr.resp) : '';
-  $('#ab-gz').classList.toggle('off', Hr.dead);
+  $('#ab-gz').classList.toggle('off', Hr.dead); } // no hero before specimen 04
   const bb = $('#boss'); bb.hidden = !bo; // boss bar while a boss is alive
   if (bo) {
     if (bb.dataset.t !== bo.type) { bb.dataset.t = bo.type; bb.querySelector('img').src = portrait(bo.type, 0, 76); bb.querySelector('b').textContent = bo.D.name; bb.style.setProperty('--bc', COL[bo.type]); layoutTop(); }
@@ -2456,23 +2593,23 @@ function toggleSpeed() { S.speed = S.speed === 1 ? 2 : 1; }
 function endLevel(win) {
   if (S.over) return; S.over = true; closeRadial(); S.ability = null; S.sel = null; showInfo(null); const run = S.run;
   wm.forEach(b => b.hidden = true);
-  const ch = S.M.name, stars = win ? (S.lives >= STAR3 ? 3 : S.lives >= STAR2 ? 2 : 1) : 0, first = ch && win && !save[S.mode][S.lvl];
-  if (ch) { if (first) { save[S.mode][S.lvl] = 1; persist(); } } // a challenge never touches campaign stars
-  else if (win && stars > (save.stars[S.lvl] || 0)) { save.stars[S.lvl] = stars; persist(); }
+  const ch = S.M.name, stars = win ? (S.lives >= STAR3 ? 3 : S.lives >= STAR2 ? 2 : 1) : 0, ck = S.mode === 'heroic' ? 'hc' : 'ic', first = ch && win && !save[ck][S.lvl];
+  if (ch) { if (first) { save[ck][S.lvl] = 1; persist(); } } // a challenge never touches campaign stars
+  else if (win && stars > save.st[S.lvl]) { save.st[S.lvl] = stars; persist(); }
   setTimeout(() => {
     if (S.run !== run) return;
     const nxt = win && !ch && S.lvl < LEVELS.length - 1;
-    $('#rep').innerHTML = `<div class="kick"><span>LAB REPORT${ch ? ' · ' + ch.toUpperCase() : ''}</span><span>SPEC-0${S.lvl + 1} · ${S.L.place.toUpperCase()}</span></div>
+    $('#rep').innerHTML = `<div class="kick"><span>LAB REPORT${ch ? ' · ' + ch.toUpperCase() : ''}</span><span>SPEC-${sn(S.lvl)} · ${S.L.place.toUpperCase()}</span></div>
       <div class="rhd"><h2 class="${win ? 'win' : 'lose'}">${win ? (ch ? `${ch} challenge won` : 'Specimen cleared') : 'Host overrun'}</h2>
       ${win && ch ? `<div class="bigbadge">${chBadge(S.mode, true, true)}<span>${first ? '+1 ★ for Immune Memory' : 'Already won · no new star'}</span></div>` : ''}
       ${win && !ch ? `<div class="bigstars">${[0, 1, 2].map(i => `<span class="${i < stars ? 'on' : ''}" style="animation-delay:${.15 + i * .2}s">★</span>`).join('')}</div>` : ''}</div>
       ${win && !ch && stars < 3 ? `<div class="srule">★★★ at ${STAR3}+ vitality${stars < 2 ? ` · ★★ at ${STAR2}+` : ''}</div>` : ''}
-      <div class="rows">${ch ? `<div><span>Mode</span><b>${ch}${S.mode === 'iron' ? ' · ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ' · elite waves'}</b></div>` : ''}<div><span>Vitality remaining</span><b>${S.lives} / ${ch ? 1 : 20}</b></div><div><span>Waves survived</span><b>${win ? S.wave : Math.max(0, S.wave - 1)} / ${S.waves.length}</b></div><div><span>Pathogens neutralised</span><b>${S.kills}</b></div>${breaches()}</div>
+      <div class="rows">${ch ? `<div><span>Mode</span><b>${ch}${S.mode === 'iron' ? ' · ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ' · elite waves'}</b></div>` : ''}<div><span>Vitality remaining</span><b>${S.lives} / ${S.mode === 'heroic' ? 3 : ch ? 1 : 20}</b></div><div><span>Waves survived</span><b>${win ? S.wave : Math.max(0, S.wave - 1)} / ${S.waves.length}</b></div><div><span>Pathogens neutralised</span><b>${S.kills}</b></div>${breaches()}</div>
       <p class="fact"><em>FIELD NOTE</em>${S.note || NOTES[0]}</p>
       <button class="mlink" id="eMem"><i class="mdot"></i><span>IMMUNE MEMORY</span><b>★ ${memStars().avail} to spend</b></button>
       <div class="btns"><button class="btn" id="eMap">Specimen tray</button><button class="btn ${nxt ? '' : 'pri'}" id="eRetry">${win ? 'Replay' : 'Try again'}</button>${nxt ? '<button class="btn pri" id="eNext">Next specimen</button>' : ''}</div>`;
     $('#eMap').onclick = showTitle; $('#eMem').onclick = () => showMemory('end'); $('#eRetry').onclick = () => startLevel(S.lvl, S.mode); if (nxt) $('#eNext').onclick = () => startLevel(S.lvl + 1);
-    $('#endOv').hidden = false; S.screen = 'end';
+    $('#endOv').hidden = false; S.screen = 'end'; hudInert(true);
   }, win ? 900 : 1200);
 }
 const STAR3 = 18, STAR2 = 10; // vitality left for ★★★ and ★★
@@ -2481,43 +2618,55 @@ function breaches() {
   const B = Object.entries(S.breach).sort((a, b) => b[1].n - a[1].n); if (!B.length) return '';
   return `<div><span>Breaches</span><b>${B.map(([t, b]) => `${b.n} ${ENEMIES[t].name}${S.mode === 'iron' ? '' : ` (w${b.w.join(', w')})`}`).join(' · ')}</b></div>`;
 }
-const thumbs = [];
+const thumbs = [], PAGE = 6, CHAPTER = ['Skin', 'Lungs', 'Blood', 'Lymph Node', 'Gut', 'Brain']; // the tray shows six specimens (two body places, by map) per page
+let trayPg = 0;
+const trayLocked = i => i > 0 && !save.st[i - 1] && i > save.rch && !save.st[i]; // reached specimens stay open (old saves, replays)
+const hudInert = v => ['#hudTL', '#hudTR', '#hudBL'].forEach(q => $(q).inert = v); // overlays cover the HUD: no Tab stops behind them
 function showTitle() {
-  cardClear(); const ka = $('#keyAb'); if (ka) ka.hidden = !kitAt(save.reach | 0).ab.length; /* touch devices replace the key legend */ S.screen = 'title'; $('#endOv').hidden = true; $('#memOv').hidden = true; $('#titleOv').hidden = false; closeRadial(); showInfo(null); wm.forEach(b => b.hidden = true);
+  hudInert(true); cardClear(); const kit = kitAt(save.rch), ka = $('#keyAb'), kh = $('#keyHero'); if (ka) { ka.hidden = !kit.ab.length; ka.innerHTML = `<b>${kit.ab.map(k => k === 'fever' ? 'Q' : 'W').join(' ')}</b> abilit${kit.ab.length > 1 ? 'ies' : 'y'}`; } if (kh) { kh.hidden = !kit.hero; kh.innerHTML = kit.gz ? '<b>H E</b> hero · burst' : '<b>H</b> hero'; } /* touch devices replace the key legend */ S.screen = 'title'; $('#endOv').hidden = true; $('#memOv').hidden = true; $('#titleOv').hidden = false; closeRadial(); showInfo(null); wm.forEach(b => b.hidden = true);
   guideDots(); $('#guideOv').hidden = true;
-  $('#memBtnN').textContent = '★ ' + memStars().avail; $('#starN').textContent = `★ ${memStars().total} / 30 STARS`;
+  $('#memBtnN').textContent = '★ ' + memStars().avail; $('#starN').textContent = `★ ${memStars().total} / ${LEVELS.length * 3 + LMARK.length * 2} STARS`;
+  const cur = LEVELS.findIndex((L, i) => !trayLocked(i) && !save.st[i]); // the page with the next specimen to play
+  trayPg = Math.floor((cur < 0 ? LEVELS.length - 1 : cur) / PAGE); renderTray();
+}
+function renderTray() {
+  const pages = Math.ceil(LEVELS.length / PAGE), hadF = !!(document.activeElement && document.activeElement.closest && document.activeElement.closest('#pager'));
+  $('#pager').innerHTML = Array.from({ length: pages }, (_, p) => { const a = LEVELS[p * PAGE], z = LEVELS[Math.min(LEVELS.length, p * PAGE + PAGE) - 1];
+    return `<button class="pg ${p === trayPg ? 'on' : ''}" data-p="${p}" aria-pressed="${p === trayPg}" aria-label="Specimens ${sn(p * PAGE)} to ${sn(p * PAGE + PAGE - 1)}"><b>${sn(p * PAGE)}–${sn(Math.min(LEVELS.length, p * PAGE + PAGE) - 1)}</b>${CHAPTER[a.m]} · ${CHAPTER[z.m]}</button>`; }).join('');
+  $('#pager').querySelectorAll('.pg').forEach(b => b.onclick = () => { trayPg = +b.dataset.p; sfx('click'); renderTray(); });
+  if (hadF) $(`#pager .pg[data-p="${trayPg}"]`).focus();
   $('#slides').innerHTML = LEVELS.map((L, i) => {
+    if (Math.floor(i / PAGE) !== trayPg) return '';
     thumbs[i] = thumbs[i] || makeBg(L, 400, 248).toDataURL();
-    const locked = i > 0 && !save.stars[i - 1];
-    // a div, not a button: it holds the challenge buttons. Challenges open once the campaign is cleared.
-    const chs = save.stars[i] && (save.reach | 0) < LEVELS.length - 1 ? '<div class="chs"><span class="chn">Challenges open at Specimen 06</span></div>' : save.stars[i] ? `<div class="chs">${['heroic', 'iron'].map(m => `<button class="chb ${save[m][i] ? 'won' : ''}" data-m="${m}" aria-label="${MODES[m].name} challenge${save[m][i] ? ', won' : ''}">${chBadge(m)}${MODES[m].name}</button>`).join('')}</div>` : '';
-    return `<div class="slide ${locked ? 'locked' : ''}" data-i="${i}" role="button" tabindex="${locked ? -1 : 0}"><span class="lab">SPEC-0${i + 1}</span><div class="body"><div class="thumb"><img src="${thumbs[i]}" alt=""><div class="rcap" hidden></div></div><div><div class="n">${locked ? 'Locked' : L.place}</div><b>${L.name}</b><p>${L.sub}</p><div class="stars">${[0, 1, 2].map(s => `<span class="${s < save.stars[i] ? 'on' : ''}">★</span>`).join('')}</div>${chs}</div></div></div>`;
+    const locked = trayLocked(i);
+    // a div, not a button: it holds the challenge buttons. Challenges live on the six full maps and open once the kit is complete.
+    const chs = L.chal == null || !save.st[i] ? '' : save.rch < KITFULL ? `<div class="chs"><span class="chn">Challenges open at Specimen ${sn(KITFULL)}</span></div>`
+      : `<div class="chs">${['heroic', 'iron'].map(m => { const w = save[m === 'heroic' ? 'hc' : 'ic'][i]; return `<button class="chb ${w ? 'won' : ''}" data-m="${m}" aria-label="${MODES[m].name} challenge${w ? ', won' : ''}">${chBadge(m)}${MODES[m].name}</button>`; }).join('')}</div>`;
+    return `<div class="slide ${locked ? 'locked' : ''}" data-i="${i}" role="button" tabindex="${locked ? -1 : 0}"><span class="lab">SPEC-${sn(i)}</span><div class="body"><div class="thumb"><img src="${thumbs[i]}" alt=""><div class="rcap" hidden></div></div><div><div class="n">${locked ? 'Locked' : L.place}</div><b>${L.name}</b><p>${L.sub}</p><div class="stars">${[0, 1, 2].map(s => `<span class="${s < save.st[i] ? 'on' : ''}">★</span>`).join('')}</div>${chs}</div></div></div>`;
   }).join('');
   $('#slides').querySelectorAll('.slide').forEach(b => {
     // a challenge chip shows its rule over the slide's thumbnail (no layout shift under the pointer) on hover or focus;
     // on touch the first tap shows it (amber chip), the second starts
     const cap = b.querySelector('.rcap'), i = +b.dataset.i;
     const rule = (c, tap) => { cap.hidden = !c; if (!c) return; const m = c.dataset.m;
-      cap.innerHTML = `<b>${MODES[m].name}</b> · ${MODES[m].rule}${m === 'iron' ? ': ' + CHAL[i].lines.map(k => TOWERS[k].name).join(' + ') : ''}.${tap ? ' <em>Tap again to start.</em>' : ''}`; };
+      cap.innerHTML = `<b>${MODES[m].name}</b> · ${MODES[m].rule}${m === 'iron' ? ': ' + CHAL[LEVELS[i].chal].lines.map(k => TOWERS[k].name).join(' + ') : ''}.${tap ? ' <em>Tap again to start.</em>' : ''}`; };
     b.querySelectorAll('.chb').forEach(c => { c.onmouseenter = c.onfocus = () => rule(c); c.onmouseleave = c.onblur = () => !c.classList.contains('confirm') && rule(null); });
     b.onclick = ev => {
       if (b.classList.contains('locked')) return; const c = ev.target.closest('.chb');
       if (c && lastPT === 'touch' && !c.classList.contains('confirm')) { document.querySelectorAll('.chb.confirm').forEach(x => { x.classList.remove('confirm'); x.onmouseleave(); }); c.classList.add('confirm'); rule(c, true); sfx('click'); return; }
       sfx('click'); startLevel(i, c ? c.dataset.m : 'campaign');
     };
-    b.onkeydown = ev => { if (ev.key === 'Enter' && ev.target === b) { ev.stopPropagation(); b.click(); } };
+    b.onkeydown = ev => { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target === b) { ev.preventDefault(); ev.stopPropagation(); b.click(); } };
   });
 }
 // Immune Memory screen: from = 'title' | 'end' (where Back returns)
 let memFrom = 'title', memConfirm = false, memFresh = '';
 function memLock(M, t) { // why a Memory node cannot be trained yet, or ''
-  const k = kitAt(save.reach | 0);
-  if (M.id === 'bcell' && !k.cells.includes('bcell')) return 'From specimen 02';
-  if (M.id === 'ab' && !k.ab.includes('fever')) return 'From specimen 03';
-  if (M.id === 'ab' && t >= 1 && !k.ab.includes('swarm')) return 'From specimen 06';
-  return '';
+  const id = M.id === 'ab' ? (t < 2 ? 'fever' : 'swarm') : M.id === 'hero' && t === 2 ? 'gz' : M.id, at = unlockAt(id); // Abilities: two Fever tiers, then Swarm; the hero's third tier is Granzyme's
+  return at > save.rch ? 'From specimen ' + sn(at) : '';
 }
 function showMemory(from) {
+  hudInert(true);
   if (from) { memFrom = from; memConfirm = false; }
   S.screen = 'memory'; $('#titleOv').hidden = true; $('#endOv').hidden = true; $('#memOv').hidden = false;
   const st = memStars(), roman = ['I', 'II', 'III'];
@@ -2649,8 +2798,8 @@ $('#ic-fever').src = portrait('fever', 0, 100); $('#ic-swarm').src = portrait('s
 sndRefresh();
 
 // ============================================================ field guide
-// plates: the four cell lines and the hero are open from the start, specialists once their line reaches level 3, pathogens once met
-const gOpen = id => (TOWERS[id] ? kitAt(save.reach | 0).cells.includes(id) : id === 'hero') || save.seen.includes(id);
+// plates: cells and the hero once they join the kit, specialists once their line reaches level 3, pathogens once met
+const gOpen = id => (TOWERS[id] ? kitAt(save.rch).cells.includes(id) : id === 'hero' && kitAt(save.rch).hero) || save.seen.includes(id);
 const gNew = id => gOpen(id) && !save.viewed.includes(id);
 const gName = id => (TOWERS[id] || SPECS[id] || ENEMIES[id] || HERO).name;
 const gKind = id => ENEMIES[id] ? ENEMIES[id].kind + (ENEMIES[id].flying ? ' · flying' : '') : id === 'hero' ? 'Hero · Natural killer cell'
@@ -2665,7 +2814,7 @@ function guideDots() {
 // from = 'title' | 'play' (the specimen waits behind it; Back resumes it)
 function openGuide(from) {
   if (from === 'play' && (S.screen !== 'play' || S.over)) return;
-  gFrom = from; S.screen = 'guide'; closeRadial(); S.ability = null; showInfo(null); sfx('click');
+  gFrom = from; S.screen = 'guide'; hudInert(true); closeRadial(); S.ability = null; showInfo(null); sfx('click');
   $('#titleOv').hidden = true; $('#guideOv').hidden = false; $('#gBack').textContent = from === 'play' ? 'Back to specimen' : 'Back to specimen tray';
   guideTab(gTab);
 }
@@ -2693,7 +2842,7 @@ function guideRows(id) {
 }
 function guideSpecial(id) {
   if (ENEMIES[id]) return ENEMIES[id].desc;
-  if (id === 'hero') return `Holds one pathogen and stings flyers too. Granzyme Burst (E) damages and stuns everything within ${HERO.gz.r}, every ${HERO.gz.cd} s.`;
+  if (id === 'hero') return `Holds one pathogen and stings flyers too.${kitAt(save.rch).gz ? ` Granzyme Burst (E) damages and stuns everything within ${HERO.gz.r}, every ${HERO.gz.cd} s.` : ''}`;
   const P = SPECS[id]; return P ? `${P.perk}<br>★ ${P.skn}: ${P.skd(P.sk[0])}` : TOWERS[id].perk;
 }
 function guideShow(id) {
@@ -2705,9 +2854,9 @@ function guideShow(id) {
   const T = $('#gText'); T.style.setProperty('--c', COL[id]);
   T.scrollTop = 0; T.innerHTML = open ? `<small>${gKind(id)}</small><h3>${gName(id)}</h3><div class="rows">${guideRows(id).map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('')}</div>` +
       `<p class="sp"><em>SPECIAL</em>${guideSpecial(id)}</p><p class="fact"><em>FIELD NOTE</em>${FACTS[id]}</p>`
-    : `<small>${path ? 'Pathogen' : TOWERS[id] ? 'Cell' : 'Specialist'} · locked</small><h3>${path ? 'Not yet observed' : 'Not yet trained'}</h3><p class="sp">${path ? 'Its plate fills in the first time it enters one of your specimens.'
-      : TOWERS[id] ? `It joins your cells at Specimen 0${UNLOCK.findIndex(u => (u.cells || []).includes(id)) + 1}.`
-      : kitAt(save.reach | 0).spec ? `Grow a ${TOWERS[SPECS[id].base].name} to level 3 to unlock this specialist.` : 'Specialists unlock at Specimen 04.'}</p>`;
+    : `<small>${path ? 'Pathogen' : TOWERS[id] ? 'Cell' : id === 'hero' ? 'Hero' : 'Specialist'} · locked</small><h3>${path ? 'Not yet observed' : 'Not yet trained'}</h3><p class="sp">${path ? 'Its plate fills in the first time it enters one of your specimens.'
+      : TOWERS[id] || id === 'hero' ? `It joins your cells at Specimen ${sn(unlockAt(id))}.`
+      : kitAt(save.rch).spec.includes(SPECS[id].base) ? `Grow a ${TOWERS[SPECS[id].base].name} to level 3 to unlock this specialist.` : `${TOWERS[SPECS[id].base].name} specialists unlock at Specimen ${sn(unlockAt('spec-' + SPECS[id].base))}.`}</p>`;
   guideDots();
 }
 // the plate is live: the same art function as in play, clocked, clipped to the microscope's field of view
@@ -2722,40 +2871,44 @@ function drawGuide(t) {
 }
 $('#gGrid').onclick = ev => { const b = ev.target.closest('.gt'); if (b) { sfx('click'); guideShow(b.dataset.id); } };
 document.querySelectorAll('.gtab').forEach(b => b.onclick = () => { sfx('click'); guideTab(b.dataset.tab); });
-$('#gBack').onclick = () => { $('#guideOv').hidden = true; if (gFrom === 'play') { S.screen = 'play'; lastHud = ''; } else showTitle(); };
+$('#gBack').onclick = () => { $('#guideOv').hidden = true; if (gFrom === 'play') { S.screen = 'play'; lastHud = ''; hudInert(false); } else showTitle(); };
 $('#guideBtn').onclick = () => openGuide('title'); $('#hudGuide').onclick = $('#pauseGuide').onclick = () => openGuide('play');
 
 // ============================================================ onboarding
-// First-play field notes on specimen 01, one at a time, each shown once (save.hints = ids done or dismissed). A note sits beside
+// First-play field notes on specimens 01 to 04, one at a time, each shown once (save.hints = ids done or dismissed). A note sits beside
 // its target, never over it, and only its dismiss button takes clicks, so play goes on underneath.
 const stRel = (el, pad) => { const s = $('#stage').getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: r.left - s.left + r.width / 2, y: r.top - s.top + r.height / 2, r: r.width / 2 + pad }; };
 const onMap = (o, r) => o && { x: o.x * viewK, y: o.y * viewK, r: r * viewK };
 const upTarget = () => S.towers.find(t => t.lvl < 2 && S.gold >= TOWERS[t.type].lv[t.lvl + 1].cost);
 const hintSlot = () => { const q = posAt(S.paths[0], 160), d = s => Math.hypot(s.x - q.x, s.y - q.y); return S.slots.filter(s => !s.tower).sort((a, b) => d(a) - d(b))[0]; };
 const HINTS = [
-  { id: 'build', k: 'Grow', txt: '<b>Tap or click a ring to grow a cell.</b> Rings are build sites beside the infection route. Each cell shows its ATP cost.',
+  { id: 'build', lvl: 0, k: 'Grow', txt: '<b>Tap or click a ring to grow a cell.</b> Rings are build sites beside the infection route. Each cell shows its ATP cost.',
     when: () => S.time > 1.5, done: () => S.towers.length, at: () => onMap(hintSlot(), 30) },
-  { id: 'wave', k: 'Call', txt: '<b>Call the first wave here.</b> Pathogens wait for your signal. Later, calling a wave early pays bonus ATP.',
+  { id: 'wave', lvl: 0, k: 'Call', txt: '<b>Call the first wave here.</b> Pathogens wait for your signal. Take your time to plan.',
     when: () => S.towers.length, done: () => S.wave, at: () => wm[0] && !wm[0].hidden && stRel(wm[0], 6) },
-  { id: 'upgrade', k: 'Upgrade', txt: '<b>You can afford an upgrade.</b> Tap or click this cell, then the ▲ button. Each level hits harder and reaches further.',
+  { id: 'upgrade', lvl: 1, k: 'Upgrade', txt: '<b>You can afford an upgrade.</b> Tap or click this cell, then the ▲ button. Each level hits harder and reaches further.',
     when: () => S.wave && upTarget(), done: () => S.towers.some(t => t.lvl), at: () => onMap(upTarget(), 34) },
-  { id: 'hero', k: 'Hero', txt: '<b>Meet your NK Sentinel.</b> Select it, then tap or click near the path to send it there. Press E for Granzyme Burst.',
-    when: () => S.wave >= 2, done: () => S.sel && S.sel.hero, at: () => !S.hero.dead && onMap(S.hero, 26) },
+  { id: 'timer', lvl: 2, k: 'Timer', txt: '<b>From now on, waves start on their own</b> when this ring runs out. Call early for bonus ATP.',
+    when: () => S.waveTimer > 0, done: () => S.wave >= 2, at: () => wm[0] && !wm[0].hidden && stRel(wm[0], 6) },
+  { id: 'hero', lvl: 3, k: 'Hero', txt: '<b>Meet your NK Sentinel.</b> Select it, then tap or click near the path to send it there.',
+    when: () => S.wave >= 1, done: () => S.sel && S.sel.hero, at: () => !S.hero.dead && onMap(S.hero, 26) },
 ];
 if (!Array.isArray(save.hints)) save.hints = firstRun ? [] : HINTS.map(h => h.id); // returning players never see them
+if (Array.isArray(save.stars) && !save.hints.includes('timer')) save.hints.push('timer'); // 6-specimen veterans already know timed waves
 let hintCur = null;
 function hintDone(id) { if (id && !save.hints.includes(id)) { save.hints.push(id); persist(); } }
 function coach() {
   const el = $('#hint'), ring = $('#hintRing'); let h = null;
-  if (S.lvl === 0 && S.mode === 'campaign' && S.screen === 'play' && !S.over && HINTS.some(x => !save.hints.includes(x.id))) {
-    for (const x of HINTS) if (x.done()) hintDone(x.id);
-    const todo = HINTS.filter(x => !save.hints.includes(x.id));
+  const here = HINTS.filter(x => x.lvl === S.lvl); // each note belongs to the specimen that introduces its idea
+  if (S.mode === 'campaign' && S.screen === 'play' && !S.over && here.some(x => !save.hints.includes(x.id))) {
+    for (const x of here) if (x.done()) hintDone(x.id);
+    const todo = here.filter(x => !save.hints.includes(x.id));
     h = todo.find(x => x.id === hintCur && x.at()) || todo.find(x => x.when()); // a note whose target is gone (upgrade no longer affordable) yields to the next
   }
   hintCur = h ? h.id : null;
   const at = h && !(S.sel && S.sel.slot) && !wm.some(b => b.matches(':hover') || b.classList.contains('show')) && h.at(); // an open radial or a wave preview owns the space around it
   el.hidden = ring.hidden = !at; if (!at) return;
-  if (el.dataset.id !== h.id) { el.dataset.id = h.id; el.querySelector('small').textContent = `Field note ${HINTS.indexOf(h) + 1} / ${HINTS.length} · ${h.k}`; el.querySelector('p').innerHTML = h.txt; }
+  if (el.dataset.id !== h.id) { el.dataset.id = h.id; el.querySelector('small').textContent = `Field note ${here.indexOf(h) + 1} / ${here.length} · ${h.k}`; el.querySelector('p').innerHTML = h.txt; }
   Object.assign(ring.style, { left: at.x - at.r + 'px', top: at.y - at.r + 'px', width: at.r * 2 + 'px', height: at.r * 2 + 'px' });
   // beside the target, on the side that stays on the stage and covers the fewest HUD panels, then build sites (preferred order breaks ties)
   const st = $('#stage'), s0 = st.getBoundingClientRect(), SW = st.clientWidth, SH = st.clientHeight, cw = el.offsetWidth * uK, ch = el.offsetHeight * uK, gap = 14 * uK, m = 8;
@@ -2783,7 +2936,7 @@ $('#hint .x').onclick = () => { sfx('click'); hintDone(hintCur); };
 // what the score should be doing: the specimen's theme in play (and on its lab report, or the guide opened from it), else the tray's
 function musicState() {
   const play = !!S.L && (S.screen === 'play' || S.screen === 'card' || S.screen === 'end' || (S.screen === 'guide' && gFrom === 'play')), live = play && S.screen === 'play' && !S.over && !S.paused;
-  return { theme: play ? S.lvl : 6, wave: live && (S.enemies.length > 0 || S.spawnQ.length > 0), boss: live && S.enemies.some(e => e.D.boss),
+  return { theme: play ? S.L.mapI : 6, wave: live && (S.enemies.length > 0 || S.spawnQ.length > 0), boss: live && S.enemies.some(e => e.D.boss),
     duck: play && (S.paused || S.screen === 'guide' || S.screen === 'card'), over: play && S.over ? (S.lives > 0 ? 'win' : 'lose') : null };
 }
 let acc = 0, last = performance.now(), anim = 0; // anim: display clock; S.time is game time and stands still off play
@@ -2798,10 +2951,10 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 addEventListener('resize', resize);
-startLevel(0); S.screen = 'title'; showTitle(); resize();
+startLevel(0); S.screen = 'title'; showTitle(); resize(); booted = true; // the specimen behind the title is scenery: it must not use up owed cards
 requestAnimationFrame(frame);
 
-window.IC = { S, LEVELS, LVLMULT, TOWERS, ENEMIES, SPECS, startLevel, sendWave, build: (i, k) => build(S.slots[i], k), upgrade: i => upgrade(S.slots[i].tower), sell: i => sell(S.slots[i].tower),
+window.IC = { S, LEVELS, MAPS, LMARK, KITFULL, unlockAt, fold, LVLMULT, CAMPHP, TOWERS, ENEMIES, SPECS, startLevel, sendWave, build: (i, k) => build(S.slots[i], k), upgrade: i => upgrade(S.slots[i].tower), sell: i => sell(S.slots[i].tower),
   specialize: (i, id) => specialize(S.slots[i].tower, id), skillUp: i => skillUp(S.slots[i].tower), refund: i => refund(S.slots[i].tower), step, makePath, nearestOnPath, posAt, castAbility, armAbility,
   HERO, mergeSave, heroMove, selectHero, granzyme, heroXp, hurt: (u, a) => hurtUnit(u, a), save, persist, MEMORY, AB, memStars, showMemory, endLevel, showTitle, CHAL, MODES, MEMCOST, TORDER,
   GUIDE, FACTS, HINTS, INTRO, UNLOCK, kitAt, cardNext, openGuide, AU, auInit, auApply, musicTick, musicState, M, THEMES, sfx, SFX };
