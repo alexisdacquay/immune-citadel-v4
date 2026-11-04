@@ -63,6 +63,7 @@ function createServer(store) {
       const url = new URL(req.url, 'http://x');
       if (req.method === 'OPTIONS') return send(204);
       if (url.pathname === '/health' && req.method === 'GET') return send(200, { ok: true });
+      if (url.pathname === '/debug-ip' && process.env.DEBUG_IP) return send(200, { xff: req.headers['x-forwarded-for'], tci: req.headers['true-client-ip'], cf: req.headers['cf-connecting-ip'], xri: req.headers['x-real-ip'], remote: req.socket.remoteAddress }); // TEMP
       const m = url.pathname.match(/^\/api\/save\/([^/]+)$/);
       if (!m) return send(404, { error: 'not found' });
       const code = m[1];
