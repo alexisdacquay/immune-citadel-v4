@@ -25,13 +25,17 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   await expectNote('wave', '25-note-wave');
   await p.mouse.click(...await mid('.wcall')); await p.waitForTimeout(300);
   ob(await p.evaluate(() => IC.S.wave === 1), 'the wave marker click did not call the wave');
+  // the first pathogen pauses the game on its intro card; a first-time player has no abilities and three cell lines
+  ob(await p.evaluate(() => IC.S.screen === 'card' && !document.getElementById('cardOv').hidden && /E\. coli/.test(document.getElementById('cardOv').textContent)), 'the first wave should open the E. coli intro card');
+  const t0 = await p.evaluate(() => IC.S.time); await p.waitForTimeout(400);
+  ob(await p.evaluate(t0 => IC.S.time === t0, t0), 'the game must wait while an intro card is open');
+  ob(await p.evaluate(() => document.getElementById('ab-fever').hidden && document.getElementById('ab-swarm').hidden && IC.S.lines.join() === 'neutro,macro,killer'), 'specimen 01 kit: no abilities, three cell lines');
+  await p.screenshot({ path: `${out}/27-card-ecoli.png` });
+  await p.keyboard.press('Enter'); await p.waitForTimeout(200);
+  ob(await p.evaluate(() => IC.S.screen === 'play' && document.getElementById('cardOv').hidden), 'Enter should close the intro card');
   await expectNote('upgrade', '26-note-upgrade');
   await p.mouse.click(...await mid('#hint .x')); await p.waitForTimeout(150);
   ob(await p.evaluate(() => IC.save.hints.includes('upgrade') && IC.S.towers[0].lvl === 0), 'dismiss did not retire the upgrade note');
-  await p.waitForFunction(() => IC.S.enemies.length >= 3, null, { timeout: 15000 }); await p.waitForTimeout(100);
-  await expectNote('fever', '27-note-fever');
-  await p.keyboard.press('q'); await p.mouse.click(...await onMap(...await p.evaluate(() => [IC.S.enemies[0].x, IC.S.enemies[0].y]))); await p.waitForTimeout(200);
-  ob(await p.evaluate(() => IC.S.cds.fever > 0 && IC.save.hints.includes('fever')), 'casting fever did not retire its note');
   await p.waitForFunction(() => !document.querySelector('.wcall').hidden, null, { timeout: 20000 }); await p.mouse.click(...await mid('.wcall')); await p.waitForTimeout(300);
   await expectNote('hero', '28-note-hero');
   await p.mouse.click(...await onMap(...await p.evaluate(() => [IC.S.hero.x, IC.S.hero.y]))); await p.waitForTimeout(150);
@@ -42,7 +46,7 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   await p.mouse.click(...await mid('#mapBtn')); await p.waitForTimeout(200);
   gg(await p.evaluate(() => !document.querySelector('#guideBtn .ndot').hidden), 'tray button should carry a NEW dot');
   await p.mouse.click(...await mid('#guideBtn')); await p.waitForTimeout(300);
-  gg(await p.evaluate(() => IC.S.screen === 'guide' && !document.getElementById('guideOv').hidden && document.querySelectorAll('.gt').length === 13 && document.querySelectorAll('.gt.lock').length === 8), 'cells tab: 13 plates, the 8 specialists locked');
+  gg(await p.evaluate(() => IC.S.screen === 'guide' && !document.getElementById('guideOv').hidden && document.querySelectorAll('.gt').length === 13 && document.querySelectorAll('.gt.lock').length === 9), 'cells tab: 13 plates, the 8 specialists and the B Cell (joins at specimen 02) locked');
   await p.screenshot({ path: `${out}/29-guide-cells.png` });
   await p.mouse.click(...await mid('.gtab[data-tab="path"]')); await p.waitForTimeout(200);
   gg(await p.evaluate(() => document.querySelectorAll('.gt').length === 12 && document.querySelectorAll('.gt:not(.lock)').length === 1 && !!document.querySelector('.gt[data-id="bact"]:not(.lock)')), 'pathogens tab: only E. coli observed');
@@ -73,7 +77,7 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
       const R0 = Math.random; let sd = (li + 1) * (mem === 'all' ? 7919 : 104729) + (mode === 'heroic' ? 17 : mode === 'iron' ? 31 : 0) >>> 0;
       Math.random = () => { sd = sd + 0x6D2B79F5 | 0; let t = Math.imul(sd ^ sd >>> 15, 1 | sd); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
       IC.save.mem = mem === 'all' ? Object.fromEntries(IC.MEMORY.map(M => [M.id, 3])) : {};
-      IC.startLevel(li, mode); const S = IC.S; S.screen = 'play';
+      IC.save.reach = mem === 'none' ? li : 5; IC.startLevel(li, mode); const S = IC.S; S.screen = 'play'; // a first-time player has only that specimen's kit
       const memOk = mem === 'none' ? S.hero.lvl === 1 && IC.AB.fever.cd === 32 : S.hero.lvl === 2 && IC.AB.fever.cd === 26 && IC.AB.swarm.n === 4 && IC.TOWERS.neutro.lv[0].range === 154;
       const order = ['neutro', 'macro', 'killer', 'bcell', 'neutro', 'killer', 'bcell', 'macro'].filter(k => S.lines.includes(k)); // iron: its two lines
       // rank slots by path coverage
@@ -89,7 +93,7 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
       }
       let bi = 0, t = 0, lowest = 20; const leaks = {}; const ol = S.lives; const origStep = IC.step; let prev = new Set();
       while (!S.over && t < 1500) {
-        for (let k = 0; k < 60; k++) { const before = S.lives, alive = S.enemies.slice(); IC.step(1 / 60); if (S.lives < before) for (const e of alive) if (e.dead && e.d >= e.path.len) leaks[e.type] = (leaks[e.type] || 0) + 1; } t++;
+        for (let k = 0; k < 60; k++) { const before = S.lives, alive = S.enemies.slice(); IC.step(1 / 60); while (S.screen === 'card') IC.cardNext(); if (S.lives < before) for (const e of alive) if (e.dead && e.d >= e.path.len) leaks[e.type] = (leaks[e.type] || 0) + 1; } t++;
         // spend
         for (let guard = 0; guard < 5; guard++) {
           const free = ranked.filter(i => !S.slots[i].tower);
@@ -101,7 +105,7 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
           const specOf = u => opts(u.type).sort((a, c) => (used[a] || 0) - (used[c] || 0))[0];
           const tier = u => u.lvl + (u.spec ? 1 + u.rank : 0), core = S.towers.slice(0, 4), key = u => u.spec ? -1 : tier(u);
           const cost = u => u.lvl < 2 ? IC.TOWERS[u.type].lv[u.lvl + 1].cost : !u.spec ? IC.SPECS[specOf(u)].cost : IC.SPECS[u.spec].sk[u.rank].cost;
-          const ups = S.towers.filter(x => tier(x) < (core.includes(x) ? 5 : 2)).sort((a, b) => (core.includes(b) - core.includes(a)) || key(a) - key(b) || (core.includes(a) ? want(a.type) - want(b.type) : 0));
+          const ups = S.towers.filter(x => tier(x) < (core.includes(x) && S.kit.spec ? 5 : 2)).sort((a, b) => (core.includes(b) - core.includes(a)) || key(a) - key(b) || (core.includes(a) ? want(a.type) - want(b.type) : 0));
           const wantUp = ups.length && (free.length === 0 || S.towers.length >= 6 && bi % 2 === 1);
           if (wantUp) { const u = ups[0], i = S.slots.indexOf(u.slot); if (S.gold >= cost(u)) { if (u.lvl < 2) IC.upgrade(i); else if (!u.spec) { const id = specOf(u); if (IC.specialize(i, id)) used[id] = (used[id] || 0) + 1; } else IC.skillUp(i); bi++; continue; } break; }
           if (free.length) { const k = order[bi % order.length]; if (S.gold >= IC.TOWERS[k].lv[0].cost) { IC.build(free[0], k); bi++; continue; } }
@@ -275,7 +279,7 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   const au = (ok, msg) => { if (!ok) errs.push('audio: ' + msg); };
   await p.reload(); await p.waitForTimeout(500);
   au(await p.evaluate(() => !IC.AU.ctx), 'an AudioContext was made before any user gesture');
-  await clickSel('.slide[data-i="2"]'); await p.evaluate(() => { IC.S.gold = 2000; [0, 1, 3, 4, 6].forEach((s, i) => IC.build(s, IC.TORDER[i % 4])); IC.sendWave(); IC.S.speed = 2; });
+  await clickSel('.slide[data-i="2"]'); await p.evaluate(() => { const go = () => { while (IC.S.screen === 'card') IC.cardNext(); }; go(); IC.S.gold = 2000; [0, 1, 3, 4, 6].forEach((s, i) => IC.build(s, IC.TORDER[i % 4])); IC.sendWave(); go(); IC.S.speed = 2; }); // intro cards (Fever unlock, new pathogens) closed
   await p.waitForTimeout(6000);
   au(await p.evaluate(() => IC.AU.ctx.state === 'running' && IC.M.th === 2 && IC.M.bus.L.perc._v === 1 && IC.AU.live.music < 120 && IC.AU.live.sfx <= 61), 'score not on specimen 03 with its wave layer, or too many live sources ' + await p.evaluate(() => JSON.stringify([IC.AU.ctx.state, IC.M.th, IC.AU.live])));
   await clickSel('#muteBtn'); au(await p.evaluate(() => !document.getElementById('sndPop').hidden), 'speaker did not open the sound popover');
