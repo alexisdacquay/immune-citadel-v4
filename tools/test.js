@@ -237,7 +237,7 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   cc(await p.evaluate(() => document.querySelectorAll('.slide .chb').length === 2 * IC.save.stars.filter(Boolean).length), 'every won specimen (and only those) offers Heroic and Iron');
   const camp = await p.evaluate(() => JSON.stringify(IC.save.stars));
   await clickSel('.slide[data-i="0"] .chb[data-m="heroic"]'); await p.waitForTimeout(300);
-  cc(await p.evaluate(() => IC.S.mode === 'heroic' && IC.S.lives === 1 && IC.S.waves.length === 6 && IC.S.screen === 'play' && /HEROIC/.test(document.getElementById('specId').textContent)), 'heroic badge did not start the heroic challenge');
+  cc(await p.evaluate(() => IC.S.mode === 'heroic' && IC.S.lives === 3 && IC.S.waves.length === 6 && IC.S.screen === 'play' && /HEROIC/.test(document.getElementById('specId').textContent)), 'heroic badge did not start the heroic challenge');
   await p.screenshot({ path: `${out}/16-heroic-start.png` });
   await p.evaluate(() => { IC.build(2, 'neutro'); IC.build(3, 'killer'); IC.sendWave(); IC.S.speed = 2; }); await p.waitForTimeout(5000);
   await p.screenshot({ path: `${out}/17-heroic-play.png` });

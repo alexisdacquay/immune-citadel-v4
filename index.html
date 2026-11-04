@@ -467,7 +467,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
   <div class="ov" id="memOv" hidden>
     <div class="tin mem">
       <div class="mhd"><div><div class="kick">LINEAGE ARCHIVE · PERMANENT TRAINING</div><h1>IMMUNE <span>MEMORY</span></h1>
-        <p class="lede">Every star trains a cell lineage for good: 3 per specimen, plus 1 each for its Heroic and Iron challenges. 30 stars train every lineage. Clones are bought in order and apply when a specimen starts.</p></div>
+        <p class="lede">Every star trains a cell lineage for good: 3 per specimen, plus 1 each for its Heroic and Iron challenges. 30 stars train every lineage. Each lineage trains its tiers in order; training applies when a specimen starts.</p></div>
         <div class="bank glass"><b id="memAvail">0</b><small>STARS TO SPEND</small></div></div>
       <div class="mroot"><i class="mdot"></i><label>STEM CELL</label><svg id="memTree" viewBox="0 0 600 44" preserveAspectRatio="none"></svg></div>
       <div class="mgrid" id="memGrid"></div>
@@ -755,7 +755,7 @@ const TOWERS = {
     perk: 'Level 3 · Phagolysosome: a third cell joins and cells regenerate fast between fights.', perkLv: 2,
   },
   bcell: {
-    name: 'B Cell', role: 'Antibody factory', kind: 'Splash · ground only', dtype: 'phys',
+    name: 'B Cell', role: 'Antibody factory', kind: 'Splash · tags flyers', dtype: 'phys',
     flavor: 'Lobs clouds of antibodies. Tagged pathogens take extra damage from everything.',
     lv: [{ cost: 110, dmg: 14, rate: 1.7, range: 150, splash: 52 }, { cost: 130, dmg: 30, rate: 1.6, range: 160, splash: 58 }, { cost: 190, dmg: 42, rate: 1.45, range: 175, splash: 68 }],
     perk: 'Opsonization: every hit tags enemies to take +25% damage for 3 s.', perkLv: 0,
@@ -821,7 +821,7 @@ const ENEMIES = {
   staph: { name: 'Staph aureus', kind: 'Armored bacterium', hp: 100, speed: 29, armor: .55, mr: 0, gold: 16, lives: 1, atk: 7, r: 12, desc: 'A golden capsule shrugs off physical damage. Send Killer T cells.' },
   candida: { name: 'Candida', kind: 'Fungus', hp: 150, speed: 25, armor: .25, mr: .35, gold: 18, lives: 2, atk: 7, r: 15, split: 3, desc: 'Budding yeast. Bursts into 3 fast spores when killed.' },
   spore: { name: 'Spore', kind: 'Fungal spore', hp: 26, speed: 50, armor: 0, mr: .2, gold: 2, lives: 1, atk: 2, r: 7, desc: 'Fast offspring of Candida.' },
-  flu: { name: 'Influenza', kind: 'Airborne virus', hp: 50, speed: 42, armor: 0, mr: .15, gold: 11, lives: 1, atk: 0, r: 10, flying: true, desc: 'Drifts over blockers. Antibody clouds can’t reach it.' },
+  flu: { name: 'Influenza', kind: 'Airborne virus', hp: 50, speed: 42, armor: 0, mr: .15, gold: 11, lives: 1, atk: 0, r: 10, flying: true, desc: 'Drifts over blockers. Antibody clouds tag it but can’t hurt it: other cells must finish it.' },
   worm: { name: 'Helminth', kind: 'Parasitic worm', hp: 430, speed: 19, armor: .35, mr: .55, gold: 45, lives: 3, atk: 16, r: 13, desc: 'Huge parasite. Resists magic. Grind it down with blockers and antibodies.' },
   boss: { name: 'MRSA Superbug', kind: 'Boss · drug-resistant', hp: 2300, speed: 14, armor: .5, mr: .35, gold: 300, lives: 10, atk: 34, r: 30, boss: true, desc: 'Grows a biofilm shield over nearby allies and buds fresh bacteria.' },
   salmon: { name: 'Salmonella', kind: 'Flagellated bacterium', hp: 60, speed: 64, armor: .1, mr: 0, gold: 9, lives: 1, atk: 5, r: 10, regen: .12, desc: 'Fast, flagellated. Heals itself when left unhit for 2 s.' },
@@ -895,14 +895,14 @@ LEVELS.push(
   },
 );
 const LVLMULT = [1.5, 1.8, 3.4, 2.15, 2.35, 2.6]; // no memory, 12-16 runs each (playtest bal.js): wide bot median 20/20/18/15/19/17, focus bot (rushes 2 specialists) 20/14/16/17/18/14; 05 swings most (toxo, salmonella)
-// challenges, unlocked by clearing a specimen; 1 vitality, any leak loses, a win is worth 1 star each.
+// challenges, unlocked by clearing a specimen; Heroic 3 vitality, Iron 1 (any leak loses); a win is worth 1 star each.
 // Heroic: 6 elite waves (tougher and faster than the campaign). Iron: one long wave that starts soft and hardens as it goes (ramp per second of delay), two cell lines only, no Fever or Swarm.
 // player difficulty: pathogen health, spacing inside a wave, and the auto-call timer between waves
 const DIFF = { easy: { hp: .7, space: 1.3, timer: 1.5 }, normal: { hp: 1, space: 1, timer: 1 }, hard: { hp: 1.2, space: .9, timer: .8 } };
 const MODES = {
   campaign: { hp: 1, spd: 1 },
-  heroic: { name: 'Heroic', hp: 1.2, spd: 1.1, gold: 1.15, rule: '6 elite waves · 1 vitality' },
-  iron: { name: 'Iron', hp: .9, spd: 1.05, gold: 2, ramp: .006, rule: 'One endless wave · 1 vitality · two cell lines · no Fever or Swarm' }, // gold ×2: no wave breaks, no early-call bonus
+  heroic: { name: 'Heroic', hp: 1.2, spd: 1.1, gold: 1.15, rule: '6 elite waves · 3 vitality' },
+  iron: { name: 'Iron', hp: .9, spd: 1.05, gold: 2, ramp: .006, rule: 'One long wave · 1 vitality · two cell lines · no Fever or Swarm' }, // gold ×2: no wave breaks, no early-call bonus
 };
 const CHAL = [ // per specimen: heroic = 6 waves; iron = one wave (groups by delay), lines = the two cell lines allowed,
   // hp = [heroic, iron] pathogen health on top of the mode's (tuned so the full-memory bot wins about half its tries)
@@ -958,6 +958,7 @@ const MEMORY = [
 ];
 const LIVE = { TOWERS, SPECS, HERO, AB }, BASE = JSON.parse(JSON.stringify(LIVE)); // functions (SPECS.skd) are not data: JSON drops them and reset skips them
 function resetData(d, s) { for (const k in s) if (s[k] && typeof s[k] === 'object') resetData(d[k], s[k]); else d[k] = s[k]; }
+// report field notes: plain strings fit anywhere; { at } only on that specimen, { foe } only where that pathogen comes
 const NOTES = [
   'Neutrophils make up about 60% of your white blood cells, and most live less than a day.',
   'Macrophage means “big eater”. One can swallow around 100 bacteria before it dies.',
@@ -967,12 +968,12 @@ const NOTES = [
   'Neutrophils can burst on purpose, casting sticky nets of DNA to trap bacteria.',
   'MRSA is Staph aureus that evolved to shrug off the antibiotic methicillin.',
   'Antibodies tagging a pathogen for destruction is called opsonization.',
-  'Lymph nodes swell when they are busy training immune cells.',
-  'Flattened out, your lungs’ alveoli would cover about half a tennis court.',
-  'Salmonella swims with dozens of whip-like flagella spread over its whole surface.',
-  'Toxoplasma hides inside our own cells. Roughly a third of people carry it without knowing.',
-  'The blood–brain barrier is sealed by tight junctions between endothelial cells, helped by star-shaped astrocytes.',
-  'Rabies virus climbs nerves to reach the brain, hiding from the immune system on the way.',
+  { at: 3, t: 'Lymph nodes swell when they are busy training immune cells.' },
+  { at: 1, t: 'Flattened out, your lungs’ alveoli would cover about half a tennis court.' },
+  { foe: 'salmon', t: 'Salmonella swims with dozens of whip-like flagella spread over its whole surface.' },
+  { foe: 'toxo', t: 'Toxoplasma hides inside our own cells. Roughly a third of people carry it without knowing.' },
+  { at: 5, t: 'The blood–brain barrier is sealed by tight junctions between endothelial cells, helped by star-shaped astrocytes.' },
+  { foe: 'rabies', t: 'Rabies virus climbs nerves to reach the brain, hiding from the immune system on the way.' },
 ];
 // Field Guide: plates in display order (each cell line next to its two specialists), one true fact each (max 25 words)
 const GUIDE = { cells: ['neutro', 'net', 'degran', 'macro', 'm1', 'm2', 'bcell', 'plasma', 'memory', 'killer', 'ctl', 'th1', 'hero'],
@@ -1013,7 +1014,7 @@ const SPEC = [
     slots: [[130, 225], [250, 100], [225, 300], [395, 300], [355, 525], [510, 400], [520, 545], [600, 330], [765, 300], [760, 92], [900, 232], [960, 90]] },
   { place: 'Alveoli', name: 'Two Breaths', sub: 'Every inhale brings a new wave down two airways at once.', edge: '#b3c7a5', // sage-grey: mint read as macrophage
     slots: [[230, 195], [140, 180], [320, 88], [432, 182], [140, 440], [240, 400], [332, 512], [312, 305], [540, 230], [540, 370], [700, 360], [680, 190], [860, 150], [880, 290]] },
-  { place: 'Aorta', name: 'The Current', sub: 'A long, fast artery. Parasites ride it toward the heart.', edge: '#7cf08c' }, // elastin autofluorescence: clear of red rhinovirus
+  { place: 'Aorta', name: 'The Current', sub: 'A long, fast artery. Parasites ride it away from the heart, out to the whole body.', edge: '#7cf08c' }, // elastin autofluorescence: clear of red rhinovirus
   { place: 'Lymph Node', name: 'The Superbug', sub: 'A drug-resistant colony marches on the immune system’s own school.', edge: '#c9b48f' }, // reticulin gold-grey: lemon swallowed lime E. coli
 ];
 LEVELS.forEach((L, i) => Object.assign(L, SPEC[i]));
@@ -1293,7 +1294,7 @@ function startLevel(i, mode = 'campaign') {
     lvl: i, L, mode, M, waves: mode === 'campaign' ? L.waves : mode === 'heroic' ? C.heroic : [C.iron], lines: mode === 'iron' ? C.lines : TORDER,
     paths: L.paths.map(makePath), slots: L.slots.map(([x, y], k) => ({ x, y, k, tower: null })),
     towers: [], enemies: [], units: [], proj: [], parts: [], floats: [], fx: [], spawnQ: [], home: null, breach: {}, kills: 0,
-    gold: Math.round(L.gold * (M.gold || 1) / 10) * 10, lives: M.name ? 1 : 20, wave: 0, waveTimer: -1, waveTimerMax: 1, time: 0, cds: { fever: 0, swarm: 0, granzyme: 0 },
+    gold: Math.round(L.gold * (M.gold || 1) / 10) * 10, lives: mode === 'heroic' ? 3 : M.name ? 1 : 20, wave: 0, waveTimer: -1, waveTimerMax: 1, time: 0, cds: { fever: 0, swarm: 0, granzyme: 0 },
     ability: null, sel: null, armed: null, preview: null, over: false, run: (S.run || 0) + 1, paused: false, shake: 0, hurt: 0, screen: 'play', noteI: i * 3, pinned: null,
   });
   S.hero = mkHero(); bgCache = null; closeRadial(); lastHud = '';
@@ -1692,7 +1693,7 @@ function step(dt) {
       p.x = lerp(p.sx, p.tx, k); p.y = lerp(p.sy, p.ty, k) - Math.sin(Math.PI * k) * 70; p.rot += dt * 9;
       if (k >= 1) {
         p.done = true;
-        for (const e of S.enemies) if (!e.dead && !e.D.flying && Math.hypot(e.x - p.tx, e.y - p.ty) < p.splash + e.D.r * .5) { e.ops = e.opsT > 0 ? Math.max(e.ops, p.ops || 1.25) : p.ops || 1.25; e.opsT = 3; damage(e, p.dmg, 'phys', p.src); }
+        for (const e of S.enemies) if (!e.dead && Math.hypot(e.x - p.tx, e.y - p.ty) < p.splash + e.D.r * .5) { e.ops = e.opsT > 0 ? Math.max(e.ops, p.ops || 1.25) : p.ops || 1.25; e.opsT = 3; if (!e.D.flying) damage(e, p.dmg, 'phys', p.src); } // antibodies tag flyers too; only the ground takes the splash
         S.fx.push({ k: 'splash', x: p.tx, y: p.ty, r: p.splash, t: 0, T: .45 });
         for (let i = 0; i < 10; i++) { const a = rand(0, TAU), v = rand(30, 90); S.parts.push({ x: p.tx, y: p.ty, vx: Math.cos(a) * v, vy: Math.sin(a) * v * .5, life: .5, max: .5, c: '#ffd166', r: 2, y_: 1 }); }
       }
@@ -1891,7 +1892,7 @@ function drawTower(g, t, T) {
     g.font = '700 15px "JetBrains Mono", ui-monospace, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffd6dc'; g.shadowColor = '#ff3355'; g.shadowBlur = 10;
     g.fillText(Math.ceil(t.hij), 0, 1); g.shadowBlur = 0; g.textBaseline = 'alphabetic';
   }
-  if (t.mem) { let n = 0; for (const k in t.mem) n += t.mem[k]; if (n) { g.font = '700 10px "JetBrains Mono", ui-monospace, monospace'; g.textAlign = 'center'; g.fillStyle = '#e8f6ff'; g.shadowColor = '#5fb4ff'; g.shadowBlur = 6; g.fillText('MEM ' + n, 0, -R0 - 8); g.shadowBlur = 0; } }
+  if (t.mem) { let n = 0; for (const k in t.mem) n += t.mem[k]; if (n) { g.font = '700 10px "JetBrains Mono", ui-monospace, monospace'; g.textAlign = 'center'; g.fillStyle = '#e8f6ff'; g.shadowColor = '#5fb4ff'; g.shadowBlur = 6; g.fillText(n + ' REMEMBERED', 0, -R0 - 8); g.shadowBlur = 0; } }
   g.restore();
   if (t.type === 'macro') { g.save(); g.translate(t.rally.x, t.rally.y); g.strokeStyle = 'rgba(63,224,208,.35)'; g.setLineDash([3, 4]); g.lineWidth = 1.2; circ(g, 0, 0, 24); g.stroke(); g.restore(); }
 }
@@ -2234,7 +2235,7 @@ function showInfo(o) {
     const D = ENEMIES[o.type], e = o.e;
     const hp = e ? Math.ceil(Math.max(0, e.hp)) : Math.round(D.hp * LVLMULT[S.lvl || 0] * S.M.hp * (1 + Math.max(0, S.wave - 1) * .045));
     html = `<div class="por"><img src="${portrait(o.type)}"></div><div class="meta"><small>${D.kind}${D.flying ? ' · flying' : ''}</small><b>${D.name}</b><span>${D.desc}</span></div>
-      <div class="sv">${sv('HP', hp)}${sv('ARMOR', Math.round(Math.max(0, D.armor - (e ? e.shred : 0)) * 100) + '%')}${sv('RESIST', Math.round(D.mr * 100) + '%', null, 'opt')}${sv('LEAK', '−' + D.lives, null, 'opt')}</div>`;
+      <div class="sv">${sv('HP', e ? `${hp}<i>/${Math.round(e.max)}</i>` : hp)}${sv('ARMOR', Math.round(Math.max(0, D.armor - (e ? e.shred : 0)) * 100) + '%')}${sv('RESIST', Math.round(D.mr * 100) + '%', null, 'opt')}${sv('LEAK', '−' + D.lives, null, 'opt')}</div>`;
   }
   if (html !== infoKey) { el.innerHTML = html; infoKey = html; }
   el.hidden = false;
@@ -2242,7 +2243,8 @@ function showInfo(o) {
   const f = S.sel && (S.sel.slot || (S.sel.hero && S.hero)); el.classList.remove('up');
   if (f) { const r = el.getBoundingClientRect(), c = cv.getBoundingClientRect(), x = c.left + f.x * viewK, y = c.top + f.y * viewK, pad = 34 * viewK; el.classList.toggle('up', x > r.left - pad && x < r.right + pad && y > r.top - pad); }
 }
-function nextNote() { S.note = NOTES[(S.noteI = (S.noteI || 0) + 1) % NOTES.length]; }
+const noteFits = n => typeof n === 'string' || (n.at !== undefined ? n.at === S.lvl : S.waves.some(w => w.some(g => g.t === n.foe)));
+function nextNote() { for (let k = 0; k < NOTES.length; k++) { const n = NOTES[(S.noteI = (S.noteI || 0) + 1) % NOTES.length]; if (noteFits(n)) { S.note = n.t || n; return; } } }
 // top-centre cards, one at a time from a queue. kind: 'intro' (cut when wave 1 is called), 'incoming' (dropped while a
 // New-threat card is up or waiting), 'threat'
 const BQ = []; let bCur = null;
@@ -2292,7 +2294,7 @@ function layoutWaveMarkers() {
   const box = $('#wcalls'); box.innerHTML = ''; wm.length = 0;
   if (!S.paths) return;
   S.paths.forEach(p => {
-    let d = 70, q = posAt(p, d); while (q.x < 320 && q.y > 500 && d < p.len / 3) q = posAt(p, d += 15); // keep clear of the bottom-left cluster
+    let d = 70, q = posAt(p, d); while (((q.x < 320 && q.y > 500) || (q.y < 130 && Math.abs(q.x - W / 2) < 230)) && d < p.len / 3) q = posAt(p, d += 15); // keep clear of the bottom-left cluster and the top-centre banner
     if (wm.some(b => Math.hypot(b.qx - q.x, b.qy - q.y) < 40)) return; // forked routes share one entry: one marker
     const b = document.createElement('button');
     b.className = 'wcall'; b.style.left = clamp(q.x, 36, W - 36) * viewK + 'px'; b.style.top = clamp(q.y, 36, H - 36) * viewK + 'px';
@@ -2313,7 +2315,7 @@ function updateChips() {
   else {
     const counts = {}; S.waves[S.wave].forEach(g => counts[g.t] = (counts[g.t] || 0) + g.n);
     const chips = Object.entries(counts).map(([t, n]) => `<span class="chip"><img src="${portrait(t, 0, 48)}">${n}</span>`).join('');
-    html = `<small>${S.mode === 'iron' ? 'ONE ENDLESS WAVE' : `WAVE ${S.wave + 1} / ${S.waves.length}`}</small><b>${S.wave === 0 ? 'Start the infection' : 'Call early'}</b><div class="chips">${chips}</div>${S.wave > 0 ? '<span class="bonus"></span>' : 'When your defences are ready.'}<span class="go"></span>`;
+    html = `<small>${S.mode === 'iron' ? 'ONE LONG WAVE' : `WAVE ${S.wave + 1} / ${S.waves.length}`}</small><b>${S.wave === 0 ? 'Call the first wave' : 'Call early'}</b><div class="chips">${chips}</div>${S.wave > 0 ? '<span class="bonus"></span>' : 'When your defences are ready.'}<span class="go"></span>`;
   }
   wm.forEach(b => b.querySelector('.tip').innerHTML = html);
 }
@@ -2657,7 +2659,7 @@ function coach() {
   hintCur = h ? h.id : null;
   const at = h && !(S.sel && S.sel.slot) && !wm.some(b => b.matches(':hover') || b.classList.contains('show')) && h.at(); // an open radial or a wave preview owns the space around it
   el.hidden = ring.hidden = !at; if (!at) return;
-  if (el.dataset.id !== h.id) { el.dataset.id = h.id; el.querySelector('small').textContent = `Field note ${save.hints.length + 1} / ${HINTS.length} · ${h.k}`; el.querySelector('p').innerHTML = h.txt; }
+  if (el.dataset.id !== h.id) { el.dataset.id = h.id; el.querySelector('small').textContent = `Field note ${HINTS.indexOf(h) + 1} / ${HINTS.length} · ${h.k}`; el.querySelector('p').innerHTML = h.txt; }
   Object.assign(ring.style, { left: at.x - at.r + 'px', top: at.y - at.r + 'px', width: at.r * 2 + 'px', height: at.r * 2 + 'px' });
   // beside the target, on the side that stays on the stage and covers the fewest HUD panels, then build sites (preferred order breaks ties)
   const st = $('#stage'), s0 = st.getBoundingClientRect(), SW = st.clientWidth, SH = st.clientHeight, cw = el.offsetWidth * uK, ch = el.offsetHeight * uK, gap = 14 * uK, m = 8;
