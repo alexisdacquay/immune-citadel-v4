@@ -17,6 +17,9 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   // every level twice: no Immune Memory upgrades, then all 18 tiers
   for (const mem of ['none', 'all']) for (let li = 0; li < nLv; li++) {
     const r = await p.evaluate(([li, mem, used]) => {
+      // seeded: the same code always plays the same game, so a loss is a real regression, not luck (playtest/balance/bal.js measures the spread)
+      const R0 = Math.random; let sd = (li + 1) * (mem === 'all' ? 7919 : 104729) >>> 0;
+      Math.random = () => { sd = sd + 0x6D2B79F5 | 0; let t = Math.imul(sd ^ sd >>> 15, 1 | sd); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
       IC.save.mem = mem === 'all' ? Object.fromEntries(IC.MEMORY.map(M => [M.id, 3])) : {};
       IC.startLevel(li); const S = IC.S; S.screen = 'play';
       const memOk = mem === 'none' ? S.hero.lvl === 1 && IC.AB.fever.cd === 32 : S.hero.lvl === 2 && IC.AB.fever.cd === 26 && IC.AB.swarm.n === 4 && IC.TOWERS.neutro.lv[0].range === 154;
@@ -60,6 +63,7 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
         if (!H.dead && S.cds.granzyme <= 0) { const n = S.enemies.filter(e => Math.hypot(e.x - H.x, e.y - H.y) < IC.HERO.gz.r).length; if (n >= 3 || (n && H.hp < H.max * .35)) IC.granzyme(); }
         lowest = Math.min(lowest, S.lives);
       }
+      Math.random = R0;
       return { mem, memOk, level: li, won: S.over && S.lives > 0, lives: S.lives, wave: S.wave, secs: t, towers: S.towers.map(x => x.spec ? x.spec + x.rank : x.type[0] + x.lvl).join(' '), gold: S.gold, leaks: JSON.stringify(leaks), hero: `L${S.hero.lvl} kills ${S.hero.kills} park ${park.x | 0},${park.y | 0}`, used };
     }, [li, mem, used]);
     used = r.used;
