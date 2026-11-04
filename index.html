@@ -205,6 +205,22 @@ button{font:inherit;color:inherit;cursor:pointer}
 .btn:hover{background:rgba(140,205,255,.14)}
 .btn.pri{background:var(--cyan);border-color:var(--cyan);color:#04121c;box-shadow:0 0 22px rgba(127,216,255,.35)}
 [hidden]{display:none!important}
+/* sound popover: two channel switches */
+.mute .sw,.half .sw2,:not(.mute)>svg>.sx{display:none}
+#sndBtn{padding:9px;margin:0 0 14px auto;flex:none}#sndBtn svg{fill:none;stroke-linecap:round}
+#sndPop{position:absolute;z-index:12;width:240px;padding:8px 6px 6px;transform:scale(var(--u,1));transform-origin:0 0;background:var(--glass2);border-color:var(--rim2);box-shadow:0 0 26px -8px rgba(127,216,255,.5),0 14px 30px -14px #000;animation:hpop .2s ease-out}
+#sndPop small{display:block;padding:0 10px 4px;font:600 9px var(--mono);letter-spacing:.18em;color:var(--cyan)}
+.tg{display:flex;align-items:center;gap:11px;width:100%;padding:8px 10px;border:0;border-radius:9px;background:none;text-align:left;color:var(--dim)}
+.tg:hover{background:rgba(140,205,255,.08)}
+.tg svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tg span{flex:1;font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.tg em{display:block;font:400 11px var(--sans);font-style:normal;letter-spacing:0;text-transform:none;color:var(--dim);margin-top:1px}
+.tg i{position:relative;flex:none;width:32px;height:18px;border-radius:9px;background:rgba(140,205,255,.12);border:1px solid var(--rim);transition:background .15s,box-shadow .15s}
+.tg i::after{content:'';position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#6c8196;transition:transform .15s,background .15s}
+.tg[aria-checked=true]{color:var(--txt)}
+.tg[aria-checked=true] i{background:rgba(127,216,255,.3);border-color:var(--cyan);box-shadow:0 0 10px rgba(127,216,255,.45)}
+.tg[aria-checked=true] i::after{transform:translateX(14px);background:#e8f6ff;box-shadow:0 0 8px #7fd8ff}
+.touch .tg{min-height:calc(44px / var(--u,1))}
 /* immune memory */
 #titleOv .tin{position:relative}
 .tbtns{position:absolute;right:0;top:-8px;display:flex;gap:8px}
@@ -368,7 +384,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   <div id="hudTR" class="ui glass">
     <button class="ib" id="speedBtn" title="Speed (F)">1×</button>
     <button class="ib" id="pauseBtn" title="Pause (Space)"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button>
-    <button class="ib" id="muteBtn" title="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path id="muteWave" d="M16 9c1.5 1.5 1.5 4.5 0 6M18.5 6.5c3 3 3 8 0 11"/></svg></button>
+    <button class="ib" id="muteBtn" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="sw" d="M16 9c1.5 1.5 1.5 4.5 0 6"/><path class="sw sw2" d="M18.5 6.5c3 3 3 8 0 11"/><path class="sx" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button>
     <button class="ib" id="restartBtn" title="Restart specimen"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/></svg></button>
     <button class="ib" id="hudGuide" title="Field guide (G)"><svg viewBox="0 0 24 24"><path d="M4 5.5c3-1.2 5.8-1 8 1 2.2-2 5-2.2 8-1v13c-3-1.2-5.8-1-8 1-2.2-2-5-2.2-8-1z"/><path d="M12 6.5v13"/></svg><em class="ndot" hidden></em></button>
     <button class="ib" id="mapBtn" title="Specimen tray"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="1.5"/><path d="M8 7v10"/></svg></button>
@@ -384,6 +400,10 @@ button{font:inherit;color:inherit;cursor:pointer}
   <div id="topc"><div id="boss" class="glass" hidden><img alt=""><div><small>Boss <span></span></small><b></b><div class="bar"><i></i></div></div></div><div id="banner"></div></div>
   <div id="pausePill" class="ui glass" hidden>PAUSED <small>space to resume</small><button class="btn" id="pauseGuide">FIELD GUIDE · G</button></div>
   <div id="hintRing" hidden></div>
+  <div id="sndPop" class="glass" hidden><small>AUDIO · CHANNELS</small>
+    <button class="tg" data-k="music" role="switch"><svg viewBox="0 0 24 24"><path d="M9 17.5V6l10-2v11.5"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/></svg><span>Music<em>Tissue score</em></span><i></i></button>
+    <button class="tg" data-k="sfx" role="switch"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9c1.5 1.5 1.5 4.5 0 6M18.5 6.5c3 3 3 8 0 11"/></svg><span>Effects<em>Cells and pathogens</em></span><i></i></button>
+  </div>
   <div id="hint" class="glass" hidden><i class="ar"></i><small></small><p></p><button class="x" aria-label="Dismiss tip" title="Dismiss tip">×</button></div>
 
   <div class="ov" id="titleOv">
@@ -392,7 +412,7 @@ button{font:inherit;color:inherit;cursor:pointer}
       <div class="tbtns"><button class="mbtn" id="guideBtn"><svg viewBox="0 0 24 24"><path d="M4 5.5c3-1.2 5.8-1 8 1 2.2-2 5-2.2 8-1v13c-3-1.2-5.8-1-8 1-2.2-2-5-2.2-8-1z"/><path d="M12 6.5v13"/></svg>FIELD GUIDE<em class="ndot" hidden></em></button>
       <button class="mbtn" id="memBtn"><i></i>IMMUNE MEMORY <b id="memBtnN"></b></button></div>
       <div class="hd"><h1>IMMUNE<br><span>CITADEL</span></h1>
-      <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p></div>
+      <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p><button class="mbtn" id="sndBtn" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="sw" d="M16 9c1.5 1.5 1.5 4.5 0 6"/><path class="sw sw2" d="M18.5 6.5c3 3 3 8 0 11"/><path class="sx" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button></div>
       <div class="slides" id="slides"></div>
       <div class="keys"><span><b>Click a ring</b> grow a cell</span><span><b>Click a cell</b> upgrade / recycle</span><span><b>Red marker</b> call the next wave</span><span><b>Q W</b> abilities</span><span><b>H E</b> hero · burst</span><span><b>Space</b> pause</span><span><b>F</b> speed</span></div>
     </div>
@@ -485,21 +505,195 @@ function blob(g, r, n, t, amp, seed) {
 }
 
 // ============================================================ audio
-let AC = null, muted = false, lastShot = 0;
+// All sound is synthesised, no files. Voices → music (per-theme layer buses, crossfaded) or sfx bus → master → glue compressor
+// → limiter → speakers, plus one shared reverb send. The context is made on the first user gesture (autoplay rules).
+// Audio never calls Math.random: the balance bot seeds it, and sound must not change a game.
+const AU = { ctx: null, on: { music: true, sfx: true }, live: { music: 0, sfx: 0 }, made: 0 };
+const arnd = rng(9001), mtof = m => 440 * 2 ** ((m - 69) / 12);
+function auInit(ctx) {
+  const c = AU.ctx = ctx || new (window.AudioContext || window.webkitAudioContext)(), sr = c.sampleRate;
+  const G = (v, to) => { const g = c.createGain(); g.gain.value = v; if (to) g.connect(to); return g; };
+  const comp = (th, kn, ra, at, re) => { const k = c.createDynamicsCompressor(); Object.entries({ threshold: th, knee: kn, ratio: ra, attack: at, release: re }).forEach(([p, v]) => k[p].value = v); return k; };
+  const lim = comp(-3, 0, 20, .002, .1), glue = comp(-16, 10, 3, .01, .25); lim.connect(c.destination); glue.connect(lim);
+  AU.master = G(.9, glue);
+  AU.rev = c.createConvolver(); const n = Math.round(sr * 2.6), ir = c.createBuffer(2, n, sr); // dark exponential tail
+  for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); let lp = 0; for (let i = 0; i < n; i++) { lp += (arnd() * 2 - 1 - lp) * .3; d[i] = lp * (1 - i / n) ** 3; } }
+  AU.rev.buffer = ir; AU.rev.connect(AU.master);
+  AU.nbuf = c.createBuffer(1, sr * 2, sr); const nd = AU.nbuf.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = arnd() * 2 - 1;
+  AU.music = G(0, AU.master); AU.music.connect(G(.4, AU.rev));
+  AU.sfx = G(0, AU.master); AU.sfx.connect(G(.12, AU.rev));
+  AU.duck = G(1, AU.music); auApply();
+}
+function auApply() { if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.music.gain.setTargetAtTime(AU.on.music ? .5 : 0, t, .3); AU.sfx.gain.setTargetAtTime(AU.on.sfx ? .55 : 0, t, .08); }
+// browsers start audio only from a gesture: the first pointer or key press makes (or resumes) the context
+function auUnlock() {
+  if (!AU.on.music && !AU.on.sfx) return;
+  try { if (!AU.ctx) auInit(); if (AU.ctx.state === 'suspended' && !document.hidden) AU.ctx.resume().catch(() => {}); } catch (e) {}
+}
+for (const ev of ['pointerdown', 'keydown', 'touchend']) addEventListener(ev, auUnlock, true);
+document.addEventListener('visibilitychange', () => { const c = AU.ctx; if (!c) return; if (document.hidden) c.suspend().catch(() => {}); else c.resume().catch(() => {}); }); // no CPU in a background tab
+// one enveloped voice. o: w wave | noise, f→f1 pitch (glide gl s), det cents (a detuned pair), fm ratio + fmi index + fmd decay,
+// ft filter type, ff→ff1 cutoff, q, a attack, h hold, r release, g peak gain, pan. Every source is counted until it ends.
+function voice(out, t, o, kind = out === AU.sfx ? 'sfx' : 'music') {
+  const c = AU.ctx; t = Math.max(t, c.currentTime); const a = o.a || .002, end = t + a + (o.h || 0) + o.r;
+  const env = c.createGain(); env.gain.setValueAtTime(0, t); env.gain.linearRampToValueAtTime(o.g, t + a);
+  if (o.h) env.gain.setValueAtTime(o.g, t + a + o.h); env.gain.exponentialRampToValueAtTime(.0001, end);
+  if (o.pan && c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = o.pan; env.connect(p); p.connect(out); } else env.connect(out);
+  let inp = env;
+  if (o.ff) { const f = c.createBiquadFilter(); f.type = o.ft || 'lowpass'; f.frequency.setValueAtTime(o.ff, t); if (o.ff1) f.frequency.exponentialRampToValueAtTime(o.ff1, end); f.Q.value = o.q || .7; f.connect(env); inp = f; }
+  const go = s => { s.start(t, s.buffer ? arnd() * 1.5 : 0); s.stop(end + .03); AU.live[kind]++; AU.made++; s.onended = () => { AU.live[kind]--; s.disconnect(); }; };
+  if (o.noise) { const s = c.createBufferSource(); s.buffer = AU.nbuf; s.loop = true; s.connect(inp); go(s); return; }
+  for (const d of o.det ? [-o.det, o.det] : [0]) {
+    const s = c.createOscillator(); s.type = o.w || 'sine'; s.detune.value = d; s.frequency.setValueAtTime(o.f, t);
+    if (o.f1) s.frequency.exponentialRampToValueAtTime(o.f1, t + (o.gl || end - t));
+    if (o.fm) { const m = c.createOscillator(), mg = c.createGain(); m.frequency.value = o.f * o.fm; mg.gain.setValueAtTime(o.f * (o.fmi || 1), t); mg.gain.exponentialRampToValueAtTime(o.f * .01, t + (o.fmd || o.r)); m.connect(mg); mg.connect(s.frequency); go(m); }
+    s.connect(inp); go(s);
+  }
+}
+// ---- sound effects: gap = minimum ms between two of a kind, pri = still plays when many voices are busy
+const V = (t, p, o) => voice(AU.sfx, t, p ? { pan: p, ...o } : o);
+const bell = (t, p, f, r, g, fm = 2, fmi = 1.2) => V(t, p, { f, fm, fmi, fmd: r * .5, r, g });
+const PENTA = [0, 2, 4, 7, 9];
 const SFX = {
-  shoot: [900, 1300, .04, 'triangle', .018], ab: [300, 160, .14, 'sine', .05], zap: [1500, 500, .09, 'sawtooth', .018],
-  pop: [520, 160, .1, 'square', .028], leak: [140, 45, .4, 'sawtooth', .09], build: [520, 900, .2, 'triangle', .07],
-  coin: [1250, 1700, .08, 'sine', .035], horn: [180, 270, .55, 'sawtooth', .045], boom: [170, 38, .5, 'sawtooth', .1],
-  click: [700, 650, .04, 'sine', .04], sell: [900, 500, .15, 'triangle', .05], bite: [260, 120, .06, 'square', .02],
+  // tower lines and the hero: granule tick, acid granule burst, perforin zing, antibody lob, macrophage bite, NK sting
+  shoot: { gap: 60, fn: (t, p) => { V(t, p, { w: 'triangle', f: 1500, f1: 900, r: .05, g: .05 }); V(t, p, { noise: 1, ft: 'bandpass', ff: 3800, q: 1.5, r: .03, g: .045 }); } },
+  burst: { gap: 60, fn: (t, p) => { V(t, p, { w: 'triangle', f: 2200, f1: 1300, r: .035, g: .045 }); V(t, p, { noise: 1, ft: 'bandpass', ff: 5600, q: 3, r: .025, g: .05 }); } },
+  bolt: { gap: 70, fn: (t, p) => V(t, p, { f: 1250, f1: 520, fm: 1.5, fmi: 1.2, fmd: .08, a: .003, r: .12, g: .045 }) },
+  ctl: { gap: 90, fn: (t, p) => { V(t, p, { f: 900, f1: 300, fm: 1.5, fmi: 1.6, fmd: .1, a: .003, r: .16, g: .055 }); V(t, p, { f: 160, f1: 80, r: .12, g: .08 }); } },
+  lob: { gap: 90, fn: (t, p) => { V(t, p, { f: 260, f1: 560, a: .01, r: .14, g: .07 }); V(t, p, { noise: 1, ff: 900, r: .08, g: .03 }); } },
+  bite: { gap: 90, fn: (t, p) => { V(t, p, { w: 'square', f: 180, f1: 90, ff: 900, r: .07, g: .045 }); V(t, p, { noise: 1, ff: 1200, r: .05, g: .035 }); } },
+  hero: { gap: 90, fn: (t, p) => { V(t, p, { f: 1700, f1: 2300, r: .06, g: .035 }); V(t, p, { w: 'triangle', f: 850, r: .04, g: .03 }); } },
+  spit: { gap: 120, fn: (t, p) => { V(t, p, { noise: 1, ft: 'bandpass', ff: 1800, ff1: 700, q: 2, r: .1, g: .05 }); V(t, p, { f: 420, f1: 200, r: .08, g: .04 }); } },
+  // specialists' signature skills
+  snare: { gap: 150, fn: (t, p) => { V(t, p, { noise: 1, ft: 'bandpass', ff: 400, ff1: 2600, q: 1.2, a: .05, r: .3, g: .08 }); V(t, p, { f: 110, f1: 65, a: .01, r: .3, g: .14 }); } },
+  rain: { gap: 200, fn: (t, p) => [0, 3, 7, 10].forEach((s, i) => V(t + i * .07, p + (i % 2 ? .15 : -.15), { f: 480 * 2 ** (s / 12), f1: 760 * 2 ** (s / 12), a: .008, r: .13, g: .05 })) },
+  recall: { gap: 200, fn: (t, p) => { bell(t, p, 660, 1.1, .08, 3.5, 2.5); bell(t + .02, p, 990, .8, .04, 2); V(t, p, { f: 140, f1: 70, r: .25, g: .12 }); } },
+  verdict: { gap: 150, fn: (t, p) => { V(t, p, { f: 2600, f1: 1700, fm: 1.41, fmi: 3, fmd: .15, r: .25, g: .05 }); V(t, p, { f: 120, f1: 50, r: .22, g: .16 }); } },
+  surge: { gap: 300, fn: (t, p) => [523, 659, 784].forEach((f, i) => V(t + i * .05, p, { w: 'triangle', f, f1: f * 1.5, ff: 3000, a: .2, r: .5, g: .035 })) },
+  eat: { gap: 200, fn: (t, p) => { V(t, p, { f: 320, f1: 150, a: .005, r: .12, g: .07 }); bell(t + .08, p, 1320, .25, .03); } },
+  // pathogens: rupture pops pitched by size (v = radius), boss death, biofilm, hijack, leak alarm
+  pop: { gap: 40, fn: (t, p, v = 10) => { const f = 1300 * 7 / v; V(t, p, { f, f1: f * .35, r: .04 + v * .006, g: .07 }); V(t, p, { noise: 1, ft: 'bandpass', ff: f * 2, q: 1.2, r: .04, g: .045 }); } },
+  bossdie: { pri: 1, fn: (t, p) => { V(t, p, { noise: 1, ff: 1400, ff1: 90, a: .01, r: 1.4, g: .3 }); V(t, p, { f: 90, f1: 28, r: 1.3, g: .35 }); bell(t + .1, p, 220, 2.2, .07, 1.41, 3); } },
+  biofilm: { gap: 300, fn: (t, p) => { V(t, p, { noise: 1, ff: 600, ff1: 250, a: .05, r: .35, g: .08 }); V(t, p, { f: 140, f1: 105, a: .02, r: .3, g: .06 }); } },
+  hijack: { pri: 1, fn: (t, p) => { V(t, p, { w: 'sawtooth', f: 330, f1: 140, det: 25, ff: 1600, ff1: 500, fm: .07, fmi: .08, a: .02, h: .12, r: .45, g: .05 }); bell(t, p, 1245, .6, .03, 1.07, 2); } },
+  leak: { gap: 450, pri: 1, fn: t => { for (const [i, f] of [[0, 523], [1, 392]]) V(t + i * .14, 0, { w: 'sawtooth', f, ff: 1400, a: .01, h: .07, r: .08, g: .07 }); V(t, 0, { f: 80, f1: 45, r: .3, g: .16 }); } },
+  // the player: wave call, ATP, growth, upgrades, hero, abilities, interface
+  wave: { pri: 1, fn: t => { V(t, 0, { w: 'sawtooth', f: 110, det: 9, ff: 300, ff1: 1500, a: .25, h: .25, r: .8, g: .07 }); V(t, 0, { f: 220, a: .3, r: 1, g: .05 }); bell(t + .22, 0, 880, 1.4, .05); } },
+  coin: { pri: 1, fn: (t, p) => [1319, 1760, 2093].forEach((f, i) => bell(t + i * .07, p, f, .3, .045)) },
+  atp: { gap: 260, fn: (t, p) => bell(t, p, mtof(84 + PENTA[(arnd() * 5) | 0]), .2, .022, 2, .5) },
+  build: { pri: 1, fn: (t, p, v) => { const f = mtof({ neutro: 72, macro: 60, bcell: 67, killer: 76 }[v] || 69); V(t, p, { f: f / 2, f1: f, a: .005, r: .14, g: .1 }); bell(t + .04, p, f * 2, .4, .04); } },
+  up: { pri: 1, fn: (t, p) => { V(t, p, { w: 'triangle', f: 587, r: .2, g: .06 }); V(t + .08, p, { w: 'triangle', f: 880, r: .3, g: .06 }); bell(t + .08, p, 1760, .4, .025); } },
+  spec: { pri: 1, fn: (t, p) => { [0, 7, 14].forEach((s, i) => bell(t + i * .08, p, 523 * 2 ** (s / 12), .7, .05)); V(t, p, { noise: 1, ft: 'highpass', ff: 6000, a: .05, r: .4, g: .02 }); } },
+  rank: { pri: 1, fn: (t, p) => { bell(t, p, 784, .5, .05); bell(t + .07, p, 1568, .5, .04); } },
+  sell: { pri: 1, fn: (t, p) => { V(t, p, { w: 'triangle', f: 900, f1: 450, r: .15, g: .06 }); bell(t + .06, p, 1047, .2, .03); } },
+  lvl: { pri: 1, fn: (t, p) => [72, 76, 79, 84, 88].forEach((m, i) => bell(t + i * .06, p, mtof(m), .55, .045)) },
+  gz: { pri: 1, fn: (t, p) => { V(t, p, { noise: 1, ft: 'bandpass', ff: 900, ff1: 4200, q: 1, a: .02, r: .35, g: .12 }); V(t, p, { f: 600, f1: 120, r: .3, g: .09 }); bell(t, p, 1500, .6, .04, 3.2, 2); } },
+  fever: { pri: 1, fn: (t, p) => { V(t, p, { noise: 1, ff: 300, ff1: 2400, a: .08, r: .9, g: .22 }); V(t, p, { f: 70, f1: 38, a: .02, r: .8, g: .25 }); } },
+  swarm: { pri: 1, fn: (t, p) => [0, 1, 2, 3].forEach(i => V(t + i * .045, p, { w: 'triangle', f: 900 + i * 130, f1: 1300 + i * 130, r: .05, g: .04 })) },
+  click: { gap: 40, pri: 1, fn: t => V(t, 0, { f: 1200, f1: 1000, r: .035, g: .05 }) },
+  deny: { gap: 150, pri: 1, fn: t => { for (const i of [0, 1]) V(t + i * .11, 0, { w: 'square', f: 160, ff: 700, h: .05, r: .06, g: .045 }); } },
 };
-function sfx(k) {
-  if (muted) return;
-  if (k === 'shoot' || k === 'zap' || k === 'bite') { const n = performance.now(); if (n - lastShot < 70) return; lastShot = n; }
-  try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
-  const P = SFX[k], t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
-  o.type = P[3]; o.frequency.setValueAtTime(P[0], t); o.frequency.exponentialRampToValueAtTime(P[1], t + P[2]);
-  g.gain.setValueAtTime(P[4], t); g.gain.exponentialRampToValueAtTime(.0001, t + P[2]);
-  o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + P[2] + .02);
+// k = sound, x = map x (stereo position), v = variant (pathogen radius, cell line)
+const lastSfx = {};
+function sfx(k, x, v) {
+  const c = AU.ctx, P = SFX[k]; if (!c || !AU.on.sfx || c.state === 'closed' || !P) return;
+  const now = performance.now(); if (P.gap && now - (lastSfx[k] || -1e9) < P.gap) return;
+  if (AU.live.sfx > (P.pri ? 60 : 28)) return; // voice cap: busy fights drop shots and pops, never alarms or the interface
+  lastSfx[k] = now; P.fn(c.currentTime + .005, x == null ? 0 : clamp((x / W - .5) * 1.2, -.6, .6), v);
+}
+// ---- music: a generative score per specimen, scheduled ahead on the audio clock one eighth at a time
+// sc = mode, ch = chord degrees (2 bars each), pad = oscillator + cut filter (+ air = breath noise), pulse = the tissue's slow rhythm
+// (hb = heartbeats per bar), bell = FM ratio of the motif bells (1 pluck-like … 3.5 glassy), dens = motif chance per bar, pat = wave drums
+const DOR = [0, 2, 3, 5, 7, 9, 10], AEO = [0, 2, 3, 5, 7, 8, 10], PHR = [0, 1, 3, 5, 7, 8, 10], LYD = [0, 2, 4, 6, 7, 9, 11], ION = [0, 2, 4, 5, 7, 9, 11];
+const THEMES = [ // 0-5 = specimens 01-06, 6 = specimen tray
+  { root: 50, sc: DOR, bpm: 70, ch: [0, 3, 6, 4], pad: 'sawtooth', cut: 650, pulse: 'heart', hb: 1, bell: 1, dens: .4, pat: 'k.h.s.hh' }, // dermis: warm, a slow pulse under the wound
+  { root: 57, sc: AEO, bpm: 62, ch: [0, 5, 3, 4], pad: 'triangle', cut: 1500, air: .018, pulse: 'breath', bell: 2, dens: .3, pat: 'k..hs.h.' }, // alveoli: breathing
+  { root: 49, sc: AEO, bpm: 66, ch: [0, 5, 6, 4], pad: 'sawtooth', cut: 480, pulse: 'heart', hb: 4, bell: 1.5, dens: .25, pat: 'k.h.s.hk' }, // aorta: a heartbeat on every beat
+  { root: 52, sc: PHR, bpm: 76, ch: [0, 5, 1, 3], pad: 'square', cut: 560, pulse: 'march', bell: 3, dens: .3, pat: 'khhhskhh' }, // lymph node: the training ground marches
+  { root: 53, sc: LYD, bpm: 68, ch: [0, 1, 5, 4], pad: 'triangle', cut: 1100, pulse: 'drip', bell: 2.5, dens: .35, pat: 'k.thsh.t' }, // villi: bubbles in the mucus
+  { root: 47, sc: AEO, bpm: 58, ch: [0, 5, 2, 6], pad: 'sine', cut: 3000, pulse: 'glass', bell: 3.5, dens: .4, pat: 'k..hs..h' }, // brain barrier: glassy
+  { root: 55, sc: ION, bpm: 54, ch: [0, 5, 3, 4], pad: 'triangle', cut: 900, pulse: 'none', bell: 2, dens: .45, pat: '' }, // tray: calm
+];
+const M = { th: -1, bus: null, old: [], step: 0, next: 0, over: null, drone: null, offT: { perc: -9, tension: -9 } };
+const deg = (T, d, oct = 0) => { const n = T.sc.length, k = ((d % n) + n) % n; return T.root + 12 * (oct + Math.floor(d / n)) + T.sc[k]; };
+function lvl(node, v, now, tc = 1.2) { if (node._v !== v) { node._v = v; node.gain.setTargetAtTime(v, now, tc); } }
+function setTheme(i, now) {
+  const c = AU.ctx, G = (v, to) => { const g = c.createGain(); g.gain.value = v; g.connect(to); return g; };
+  if (M.bus) { lvl(M.bus.out, 0, now, .8); M.old.push({ out: M.bus.out, t: now + 6 }); }
+  droneOff(now);
+  const out = G(0, AU.duck); lvl(out, 1, now, .8);
+  M.bus = { out, L: { bed: G(.75, out), pulse: G(.8, out), perc: G(0, out), tension: G(0, out) } };
+  M.th = i; M.step = 0; M.next = now + .1;
+}
+function drone(T, now) {
+  const c = AU.ctx, f = c.createBiquadFilter(), g = c.createGain(), lfo = c.createOscillator(), lg = c.createGain(), srcs = [lfo];
+  f.type = 'lowpass'; f.frequency.value = 300; f.Q.value = 3; g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(.07, now + 3);
+  f.connect(g); g.connect(M.bus.L.tension); lfo.frequency.value = .13; lg.gain.value = 170; lfo.connect(lg); lg.connect(f.frequency);
+  for (const [m, d] of [[T.root - 12, -9], [T.root - 12, 9], [T.root - 6, 0]]) { const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = d; o.connect(f); srcs.push(o); }
+  srcs.forEach(s => { s.start(now); AU.live.music++; AU.made++; s.onended = () => { AU.live.music--; s.disconnect(); }; });
+  M.drone = { g, srcs, t0: now };
+}
+function droneOff(now) {
+  const d = M.drone; if (!d) return; M.drone = null;
+  const t = Math.max(now, d.t0 + 3); d.g.gain.setTargetAtTime(0, t, .6); d.srcs.forEach(s => s.stop(t + 4)); // after its fade-in ramp, never mid-ramp
+}
+function chord(T, L, t, d, dur) {
+  for (const k of [0, 2, 4]) voice(L, t, { w: T.pad, f: mtof(deg(T, d + k)), det: 6, ff: T.cut, ff1: T.cut * 1.5, q: .5, a: 2.4, h: dur - 2.4, r: 3.2, g: .032 });
+  voice(L, t, { f: mtof(deg(T, d, -1)), a: 1.6, h: dur - 1.6, r: 2.8, g: .07 });
+  if (T.air) voice(L, t, { noise: 1, ft: 'bandpass', ff: 2400, q: .6, a: 3, h: dur - 3, r: 3, g: T.air });
+}
+function motif(T, L, t, d, e8) {
+  const n = 2 + (arnd() * 3 | 0), at = [0, 1, 2, 3, 4, 5, 6, 7].sort(() => arnd() - .5).slice(0, n).sort((a, b) => a - b);
+  let k = d + [0, 2, 4][arnd() * 3 | 0];
+  for (const s of at) { voice(L, t + s * e8, { f: mtof(deg(T, k, 1)), fm: T.bell, fmi: 1.3, fmd: .9, r: 2.2, g: .03, pan: arnd() * .8 - .4 }); k += [-2, -1, 1, 2][arnd() * 4 | 0]; }
+}
+function stinger(win, T, t) {
+  const o = AU.music;
+  if (win) { [0, 4, 7, 11, 14, 19].forEach((s, i) => voice(o, t + i * .11, { f: mtof(T.root + 12 + s), fm: 2, fmi: 1.4, fmd: 1, r: 1.8, g: .06, pan: i % 2 ? .25 : -.25 }));
+    for (const s of [0, 4, 7, 12]) voice(o, t, { w: 'triangle', f: mtof(T.root + s), det: 5, ff: 2200, a: .3, h: .8, r: 2.5, g: .035 }); }
+  else { [7, 3, 0, -2, -5].forEach((s, i) => voice(o, t + i * .22, { w: 'sawtooth', f: mtof(T.root + s), ff: 900, ff1: 300, a: .02, r: .7, g: .05 }));
+    voice(o, t, { f: 55, f1: 35, r: 1.5, g: .2 }); for (const s of [0, 3, 7]) voice(o, t + 1.1, { w: 'triangle', f: mtof(T.root - 12 + s), ff: 600, a: .4, r: 3, g: .045 }); }
+}
+function pulse(T, L, t, pos, bar, e8) {
+  const P = T.pulse, beat = pos % 2 === 0, B = e8 * 8;
+  if (P === 'heart' && beat && (T.hb === 4 || pos === 0)) { const k = T.hb === 4 ? 1 : .7; // lub-dub
+    voice(L, t, { f: 64, f1: 40, a: .008, r: .18, g: .2 * k }); voice(L, t, { w: 'triangle', f: 110, f1: 70, a: .006, r: .12, g: .05 * k }); voice(L, t + .26, { f: 56, f1: 38, a: .008, r: .16, g: .13 * k }); }
+  else if (P === 'breath' && pos === 0 && bar % 2 === 0) { // inhale for a bar and a bit, exhale for the rest
+    voice(L, t, { noise: 1, ft: 'bandpass', ff: 450, ff1: 1500, q: .9, a: B * 1.1, r: B * .3, g: .05 });
+    voice(L, t + B * 1.2, { noise: 1, ft: 'bandpass', ff: 1300, ff1: 420, q: .9, a: .25, r: B * .75, g: .035 }); }
+  else if (P === 'drip' && pos === 0) for (let i = 0, n = 1 + (arnd() * 3 | 0); i < n; i++) { const f = mtof(deg(T, arnd() * 7 | 0, 1)); voice(L, t + (arnd() * 8 | 0) * e8, { f, f1: f * 1.9, gl: .07, r: .12, g: .04, pan: arnd() * 1.2 - .6 }); }
+  else if (P === 'glass' && beat) voice(L, t, { f: mtof(deg(T, arnd() * 7 | 0, 2)), fm: 3.5, fmi: .6, fmd: 1, r: 1.6, g: .014, pan: arnd() * 1.4 - .7 });
+  else if (P === 'march' && beat) voice(L, t, { w: 'triangle', f: mtof(deg(T, pos % 4 ? 4 : 0, -1)), ff: 700, a: .004, r: .22, g: .06 });
+}
+const DRUM = {
+  k: (L, t) => { voice(L, t, { f: 120, f1: 44, r: .3, g: .24 }); voice(L, t, { noise: 1, ff: 900, a: .001, r: .03, g: .05 }); },
+  s: (L, t) => { voice(L, t, { noise: 1, ft: 'bandpass', ff: 1700, q: .9, r: .13, g: .065 }); voice(L, t, { w: 'triangle', f: 210, f1: 170, r: .08, g: .04 }); },
+  h: (L, t, pos) => voice(L, t, { noise: 1, ft: 'bandpass', ff: 7500, q: 1.2, r: .045, g: pos % 4 === 1 ? .04 : .028, pan: pos % 4 === 1 ? .25 : -.25 }),
+  t: (L, t) => voice(L, t, { f: 170, f1: 115, a: .003, r: .2, g: .11 }),
+};
+function eighth(T, L, t, i, e8) {
+  const pos = i % 8, bar = i >> 3, d = T.ch[(bar >> 1) % T.ch.length], spare = AU.live.music < 90, now = AU.ctx.currentTime; // spare: voice cap for ornaments
+  if (i % 16 === 0) chord(T, L.bed, t, d, 16 * e8);
+  if (pos === 0 && spare && arnd() < T.dens) motif(T, L.bed, t, d, e8);
+  if (spare) pulse(T, L.pulse, t, pos, bar, e8);
+  const on = k => L[k]._v > 0 || now - M.offT[k] < 4; // keep playing while the layer fades out
+  if (T.pat && on('perc') && T.pat[pos] !== '.') DRUM[T.pat[pos]](L.perc, t, pos);
+  if (on('tension')) voice(L.tension, t, { w: 'sawtooth', f: mtof(T.root - 12 + (pos % 4 === 3 ? 1 : 0)), ff: 800, ff1: 400, r: .14, g: .04 }); // ostinato with a flat-second sting
+}
+// st: theme (0-5 specimen, 6 tray), wave (pathogens on the slide), boss (one alive), duck (paused / guide over play), over ('win' | 'lose')
+function musicTick(st) {
+  const c = AU.ctx; if (!c || c.state === 'closed') return;
+  const now = c.currentTime;
+  for (let i = M.old.length - 1; i >= 0; i--) if (now > M.old[i].t) { M.old[i].out.disconnect(); M.old.splice(i, 1); }
+  if (!AU.on.music) { droneOff(now); M.over = st.over; return; }
+  if (st.theme !== M.th) setTheme(st.theme, now);
+  const T = THEMES[M.th], L = M.bus.L, e8 = 30 / T.bpm;
+  for (const [k, v] of [['perc', st.wave ? 1 : 0], ['tension', st.boss ? 1 : 0]]) { if (L[k]._v && !v) M.offT[k] = now; lvl(L[k], v, now); }
+  lvl(L.bed, st.wave ? 1 : .75, now); lvl(L.pulse, st.wave ? 1 : .8, now); lvl(AU.duck, st.duck ? .35 : st.over ? .5 : 1, now, .5);
+  if (st.boss && !M.drone) drone(T, now); else if (!st.boss && M.drone) droneOff(now);
+  if (st.over !== M.over) { if (st.over && !M.over) stinger(st.over === 'win', T, now + .05); M.over = st.over; }
+  if (M.next < now - .25) M.next = now + .06; // stalled (hidden tab, music re-enabled): start again, never catch up in a burst
+  while (M.next < now + .3) { eighth(T, L, M.next, M.step++, e8); M.next += e8; }
 }
 
 // ============================================================ data
@@ -998,10 +1192,11 @@ const S = { screen: 'title', speed: 1, paused: false, mouse: { x: -99, y: -99 },
 let save = { stars: [0, 0, 0, 0, 0, 0], seen: [], mem: {} };
 let firstRun = false; // no save at all: this player gets the specimen 01 field notes
 try { firstRun = localStorage.getItem('immune-citadel-v4') == null; } catch (e) {}
-try { Object.assign(save, JSON.parse(localStorage.getItem('immune-citadel-v4') || '{}')); muted = !!save.muted; } catch (e) {}
+try { Object.assign(save, JSON.parse(localStorage.getItem('immune-citadel-v4') || '{}')); } catch (e) {}
+AU.on.music = save.music ?? !save.muted; AU.on.sfx = save.sfx ?? !save.muted; delete save.muted; // saves from before the two toggles had one mute
 if (!save.mem || typeof save.mem !== 'object') save.mem = {}; // saves from before Immune Memory
 for (const m of ['heroic', 'iron']) if (!save[m] || !Array.isArray(save[m])) save[m] = [0, 0, 0, 0, 0, 0]; // saves from before challenges: 1 = won
-function persist() { try { localStorage.setItem('immune-citadel-v4', JSON.stringify({ ...save, muted })); } catch (e) {} }
+function persist() { try { localStorage.setItem('immune-citadel-v4', JSON.stringify({ ...save, music: AU.on.music, sfx: AU.on.sfx })); } catch (e) {} }
 const memTier = id => clamp(save.mem[id] | 0, 0, 3);
 const sum = a => a.reduce((s, b) => s + (b | 0), 0);
 // seen = observed in play (pathogen types, and specialists once a line reaches level 3); viewed = Field Guide plates opened
@@ -1057,7 +1252,7 @@ function sendWave() {
     S.spawnQ.push({ t: S.time + gp.d + n * gp.gap, type: gp.t, p, mult: mult * (1 + (S.M.ramp || 0) * gp.d) }); // iron: later groups are tougher
   }
   S.spawnQ.sort((a, b) => a.t - b.t);
-  S.wave++; S.waveTimer = -1; sfx('horn');
+  S.wave++; S.waveTimer = -1; sfx('wave');
   const types = waveTypes(S.wave - 1), fresh = types.filter(t => !save.seen.includes(t));
   observe(types.flatMap(t => SPAWNS[t] ? [t, SPAWNS[t]] : [t]));
   if (fresh.length) {
@@ -1100,10 +1295,10 @@ function kill(e, src) {
   for (const t of S.towers) if (t.spec === 'm2' && skill(t) && !(t.hij > 0) && (!ef || skill(t).atp > ef.atp) && t.units.some(u => !u.dead && Math.hypot(e.x - u.x, e.y - u.y) < SPECS.m2.st.eat)) ef = skill(t);
   if (ef) { // 26 above the +ATP float so both stay readable; in a burst of kills only the first spells out the skill name
     S.gold += ef.atp; const named = S.floats.some(f => f.ef && f.t < .8);
-    floatText(e.x, e.y - 44, named ? `+${ef.atp}` : `+${ef.atp} efferocytosis`, '#8ff0ff', 1.1); S.floats[S.floats.length - 1].ef = 1;
+    floatText(e.x, e.y - 44, named ? `+${ef.atp}` : `+${ef.atp} efferocytosis`, '#8ff0ff', 1.1); S.floats[S.floats.length - 1].ef = 1; sfx('eat', e.x);
   }
   burst(e.x, e.y, COL[e.type], e.D.boss ? 60 : e.D.r > 12 ? 18 : 10, e.D.boss ? 4 : 2.4); S.fx.push({ k: 'rupture', x: e.x, y: e.y - (e.D.flying ? 12 : 0), r: e.D.r, c: COL[e.type], t: 0, T: e.D.boss ? .8 : .4 });
-  sfx(e.D.boss ? 'boom' : 'pop'); if (e.D.boss) S.shake = 14;
+  sfx(e.D.boss ? 'bossdie' : 'pop', e.x, e.D.r); sfx('atp', e.x); if (e.D.boss) S.shake = 14;
   if (e.D.split) for (let k = 0; k < e.D.split; k++) spawnEnemy('spore', e.p, e.mult, Math.max(0, e.d - k * 9), rand(-10, 10));
   if (e.blocker) e.blocker = null;
 }
@@ -1128,7 +1323,7 @@ function build(slot, type) {
   if (type === 'macro') {
     t.rally = rallyOf(slot); syncUnits(t);
   }
-  slot.tower = t; S.towers.push(t); sfx('build'); ring(slot.x, slot.y, '#fff');
+  slot.tower = t; S.towers.push(t); sfx('build', slot.x, type); ring(slot.x, slot.y, '#fff');
   burst(slot.x, slot.y, '#7fd8ff', 12, 2);
   renderArsenal(); return true;
 }
@@ -1137,7 +1332,7 @@ function upgrade(t) {
   const c = TOWERS[t.type].lv[t.lvl + 1].cost; if (S.gold < c) { flashGold(); return false; }
   S.gold -= c; t.lvl++; t.built = 0; if (t.type === 'macro') syncUnits(t, true);
   if (t.lvl === 2) observe(Object.keys(SPECS).filter(id => SPECS[id].base === t.type)); // its specialists become available
-  sfx('build'); ring(t.x, t.y - 12, '#ffd27a'); burst(t.x, t.y - 12, '#ffd27a', 16, 2.5);
+  sfx('up', t.x); ring(t.x, t.y - 12, '#ffd27a'); burst(t.x, t.y - 12, '#ffd27a', 16, 2.5);
   return true;
 }
 function specialize(t, id) {
@@ -1146,14 +1341,14 @@ function specialize(t, id) {
   if (S.gold < P.cost) { flashGold(); return false; }
   S.gold -= P.cost; Object.assign(t, { spec: id, rank: 0, sk: 1.5, surge: 0, bn: 0, built: 0, mem: id === 'memory' ? {} : null });
   if (t.type === 'macro') syncUnits(t, true);
-  sfx('build'); ring(t.x, t.y, COL[id]); ring(t.x, t.y - 12, '#ffd27a'); burst(t.x, t.y, COL[id], 26, 3);
+  sfx('spec', t.x); ring(t.x, t.y, COL[id]); ring(t.x, t.y - 12, '#ffd27a'); burst(t.x, t.y, COL[id], 26, 3);
   floatText(t.x, t.y - 44, P.name, COL[id], 1.6); flashInfo('SPECIALIZED'); return true;
 }
 function skillUp(t) {
   if (!t || !t.spec || t.rank >= 2 || S.over) return false;
   const c = SPECS[t.spec].sk[t.rank].cost; if (S.gold < c) { flashGold(); return false; }
   S.gold -= c; t.rank++; t.sk = Math.min(t.sk, 1);
-  sfx('build'); ring(t.x, t.y, '#7fd8ff'); burst(t.x, t.y - 12, '#7fd8ff', 16, 2.5);
+  sfx('rank', t.x); ring(t.x, t.y, '#7fd8ff'); burst(t.x, t.y - 12, '#7fd8ff', 16, 2.5);
   floatText(t.x, t.y - 44, `${SPECS[t.spec].skn} ${['I', 'II'][t.rank - 1]}`, '#7fd8ff', 1.4); flashInfo(`SKILL RANK ${['I', 'II'][t.rank - 1]}`); return true;
 }
 function sell(t) {
@@ -1161,7 +1356,7 @@ function sell(t) {
   S.gold += refund(t); floatText(t.x, t.y - 30, `+${refund(t)}`, '#ffc24a');
   for (const u of t.units) { u.gone = true; if (u.tgt && u.tgt.blocker === u) u.tgt.blocker = null; }
   S.units = S.units.filter(u => !u.gone);
-  S.towers = S.towers.filter(x => x !== t); t.slot.tower = null; sfx('sell'); burst(t.x, t.y, '#7fd8ff', 14, 2);
+  S.towers = S.towers.filter(x => x !== t); t.slot.tower = null; sfx('sell', t.x); burst(t.x, t.y, '#7fd8ff', 14, 2);
 }
 function syncUnits(t, heal) {
   const L = stat(t);
@@ -1208,7 +1403,7 @@ function heroXp(n) {
   const h = S.hero; if (h.lvl >= 5) return; h.xp += n;
   while (h.lvl < 5 && h.xp >= HERO.xp[h.lvl - 1]) {
     h.xp -= HERO.xp[h.lvl - 1]; h.lvl++; h.max = HERO.lv[h.lvl - 1].hp; if (!h.dead) h.hp = h.max; h.glow = 1.2;
-    S.fx.push({ k: 'lvl', t: 0, T: 1.1 }); burst(h.x, h.y, '#e8f6ff', 24, 2.6); floatText(h.x, h.y - 42, `LEVEL ${h.lvl}`, '#e8f6ff', 1.8); sfx('build');
+    S.fx.push({ k: 'lvl', t: 0, T: 1.1 }); burst(h.x, h.y, '#e8f6ff', 24, 2.6); floatText(h.x, h.y - 42, `LEVEL ${h.lvl}`, '#e8f6ff', 1.8); sfx('lvl', h.x);
   }
   if (h.lvl >= 5) h.xp = 0;
 }
@@ -1230,7 +1425,7 @@ function granzyme() {
   const dmg = HERO.lv[h.lvl - 1].dmg * G.k;
   for (const e of S.enemies) if (!e.dead && Math.hypot(e.x - h.x, e.y - h.y) < G.r + e.D.r) { damage(e, dmg, 'magic', h); e.stunT = Math.max(e.stunT, e.D.boss ? G.stun / 2 : G.stun); }
   S.fx.push({ k: 'gz', x: h.x, y: h.y, r: G.r, t: 0, T: .7 }); burst(h.x, h.y, '#e8f6ff', 20, 3);
-  S.cds.granzyme = G.cd; S.shake = Math.max(S.shake, 5); h.glow = .6; sfx('zap'); return true;
+  S.cds.granzyme = G.cd; S.shake = Math.max(S.shake, 5); h.glow = .6; sfx('gz', h.x); return true;
 }
 // like a macrophage cell: holds one ground pathogen near its post; also shoots anything (flyers too) in short range
 function heroStep(dt) {
@@ -1260,7 +1455,7 @@ function heroStep(dt) {
       let tg = t && t.blocker === h ? t : null, bd = HERO.range;
       if (!tg) for (const e of S.enemies) { const d = Math.hypot(e.x - h.x, e.y - (e.D.flying ? 12 : 0) - h.y) - e.D.r; if (!e.dead && e.seen && d < bd) { bd = d; tg = e; } }
       h.cd = tg ? HERO.rate : .1;
-      if (tg) { S.proj.push({ k: 'acid', c: COL.hero, x: h.x, y: h.y - 6, tgt: tg, sp: 420, dmg: L.dmg, dt: 'phys', src: h }); sfx('shoot'); }
+      if (tg) { S.proj.push({ k: 'acid', c: COL.hero, x: h.x, y: h.y - 6, tgt: tg, sp: 420, dmg: L.dmg, dt: 'phys', src: h }); sfx('hero', h.x); }
     }
   }
   if (!(t && t.blocker === h)) h.hp = Math.min(h.max, h.hp + L.regen * dt);
@@ -1306,7 +1501,7 @@ function step(dt) {
       if ((e.abT -= dt) <= 0) { // hijack the nearest unhijacked tower in reach
         let tw = null, bd = 330; for (const t of S.towers) { const d = Math.hypot(t.x - e.x, t.y - e.y); if (!(t.hij > 0) && d < bd) { bd = d; tw = t; } }
         e.abT = tw ? 9 : 1;
-        if (tw) { tw.hij = 4; tw.hijE = e; ring(tw.x, tw.y, '#ff3355'); floatText(tw.x, tw.y - 44, 'Hijacked!', '#ff3355', 1.4); sfx('zap'); }
+        if (tw) { tw.hij = 4; tw.hijE = e; ring(tw.x, tw.y, '#ff3355'); floatText(tw.x, tw.y - 44, 'Hijacked!', '#ff3355', 1.4); sfx('hijack', tw.x); }
       }
       if ((e.shedT -= dt) <= 0) { e.shedT = 4.5; for (let k = 0; k < 3; k++) spawnEnemy('virion', e.p, e.mult * .7, Math.max(0, e.d - 18 - k * 10), rand(-12, 12)); }
     } else if (e.D.boss) {
@@ -1315,7 +1510,7 @@ function step(dt) {
         e.abT = 7; S.fx.push({ k: 'biofilm', x: e.x, y: e.y, t: 0, T: .8 });
         for (const o of S.enemies) if (!o.dead && Math.hypot(o.x - e.x, o.y - e.y) < 130) o.shieldT = 3.5;
         for (let k = 0; k < 2; k++) spawnEnemy('bact', e.p, e.mult * .8, Math.max(0, e.d - 20 - k * 12), rand(-10, 10));
-        floatText(e.x, e.y - 50, 'Biofilm!', '#a6ff4d', 1.2);
+        floatText(e.x, e.y - 50, 'Biofilm!', '#a6ff4d', 1.2); sfx('biofilm', e.x);
       }
     }
   }
@@ -1336,7 +1531,7 @@ function step(dt) {
       let best = null, bd = ac.r;
       for (const e of S.enemies) { const d = Math.hypot(e.x - u.x, e.y - u.y); if (!e.dead && e.seen && d < bd) { bd = d; best = e; } }
       u.spit = best ? ac.cd : .2;
-      if (best) S.proj.push({ k: 'acid', x: u.x, y: u.y - 4, tgt: best, sp: 360, dmg: ac.dmg, dt: 'phys', src: u });
+      if (best) { S.proj.push({ k: 'acid', x: u.x, y: u.y - 4, tgt: best, sp: 360, dmg: ac.dmg, dt: 'phys', src: u }); sfx('spit', u.x); }
     }
     const t = u.tgt;
     if (t && (t.dead || Math.hypot(t.x - u.hx, t.y - u.hy) > 95 || (t.blocker && t.blocker !== u && Math.hypot(t.x - u.x, t.y - u.y) > 30))) { if (t.blocker === u) t.blocker = null; u.tgt = null; }
@@ -1357,7 +1552,7 @@ function step(dt) {
       else {
         if (!e.blocker) e.blocker = u;
         u.cd -= dt * (1 + (ow && ow.haste || 0));
-        if (u.cd <= 0 && !(ow && ow.hij > 0)) { u.cd = u.rate; damage(e, u.dmg, 'phys', u); sfx('bite'); S.parts.push({ x: e.x + rand(-4, 4), y: e.y + rand(-4, 4), vx: 0, vy: -20, life: .25, max: .25, c: '#fff', r: 2.4 }); }
+        if (u.cd <= 0 && !(ow && ow.hij > 0)) { u.cd = u.rate; damage(e, u.dmg, 'phys', u); sfx('bite', u.x); S.parts.push({ x: e.x + rand(-4, 4), y: e.y + rand(-4, 4), vx: 0, vy: -20, life: .25, max: .25, c: '#fff', r: 2.4 }); }
       }
     } else {
       const dx = u.hx - u.x, dy = u.hy - u.y, d = Math.hypot(dx, dy);
@@ -1374,7 +1569,7 @@ function step(dt) {
   for (const a of S.towers) {
     if (a.spec !== 'th1' || a.hij > 0) continue; // hijacked: no aura
     const L = SPECS.th1.st, R = skill(a); a.surge = Math.max(0, a.surge - dt);
-    if (R && (a.sk -= dt) <= 0 && S.enemies.length) { a.sk = R.cd; a.surge = R.dur; ring(a.x, a.y, '#5fb4ff'); floatText(a.x, a.y - 44, 'Cytokine surge', '#7fc4ff', 1.4); sfx('ab'); }
+    if (R && (a.sk -= dt) <= 0 && S.enemies.length) { a.sk = R.cd; a.surge = R.dur; ring(a.x, a.y, '#5fb4ff'); floatText(a.x, a.y - 44, 'Cytokine surge', '#7fc4ff', 1.4); sfx('surge', a.x); }
     const h = a.surge > 0 && R ? R.haste : L.haste;
     for (const t of S.towers) if (Math.hypot(t.x - a.x, t.y - a.y) <= L.aura && h > t.haste) { t.haste = h; t.hasteBy = a; }
   }
@@ -1398,22 +1593,22 @@ function step(dt) {
       t.sk = sk.cd || 0;
       if (t.spec === 'net') {
         for (const e of S.enemies) if (!e.dead && !e.D.flying && Math.hypot(e.x - best.x, e.y - best.y) < sk.r) e.rootT = Math.max(e.rootT, e.D.boss ? sk.root / 2 : sk.root);
-        S.fx.push({ k: 'snare', x: best.x, y: best.y, r: sk.r, t: 0, T: .8 }); sfx('ab');
+        S.fx.push({ k: 'snare', x: best.x, y: best.y, r: sk.r, t: 0, T: .8 }); sfx('snare', best.x);
       } else if (t.spec === 'plasma') {
         const gs = S.enemies.filter(e => !e.dead && e.seen && !e.D.flying && inR(e));
         for (let i = 0; i < sk.n && gs.length; i++) { const e = gs[(Math.random() * gs.length) | 0]; S.proj.push({ k: 'ab', sx: ox, sy: oy, x: ox, y: oy, tx: e.x + rand(-14, 14), ty: e.y + rand(-14, 14), t: 0, T: .55 + i * .09, dmg: sk.dmg, splash: 50, rot: 0, ops: L.ops, src: t }); }
-        floatText(t.x, t.y - 44, 'Antibody rain', '#ffd166', 1.2);
+        floatText(t.x, t.y - 44, 'Antibody rain', '#ffd166', 1.2); sfx('rain', t.x);
       } else if (t.spec === 'memory') {
         let st = best; for (const e of S.enemies) if (!e.dead && e.seen && !e.D.flying && inR(e) && e.hp > st.hp) st = e;
-        damage(st, sk.dmg, 'true', t); S.fx.push({ k: 'recall', x: st.x, y: st.y, t: 0, T: .55 }); S.shake = Math.max(S.shake, 4); sfx('zap');
+        damage(st, sk.dmg, 'true', t); S.fx.push({ k: 'recall', x: st.x, y: st.y, t: 0, T: .55 }); S.shake = Math.max(S.shake, 4); sfx('recall', st.x);
       }
     }
-    if (t.type === 'neutro') { S.proj.push({ k: 'gran', x: ox, y: oy, tgt: best, sp: 520, dmg: L.dmg, dt: 'phys', net: t.lvl >= 2 && t.shots % 4 === 0, slow: L.slow, shred: sk && sk.shred && sk, src: t }); sfx('shoot'); }
-    else if (t.type === 'killer') { S.proj.push({ k: 'bolt', x: ox, y: oy, tgt: best, sp: 430, dmg: L.dmg, dt: 'magic', chain: t.lvl >= 2, trail: [], src: t }); sfx('zap'); }
+    if (t.type === 'neutro') { S.proj.push({ k: 'gran', x: ox, y: oy, tgt: best, sp: 520, dmg: L.dmg, dt: 'phys', net: t.lvl >= 2 && t.shots % 4 === 0, slow: L.slow, shred: sk && sk.shred && sk, src: t }); sfx(t.spec === 'degran' ? 'burst' : 'shoot', t.x); }
+    else if (t.type === 'killer') { S.proj.push({ k: 'bolt', x: ox, y: oy, tgt: best, sp: 430, dmg: L.dmg, dt: 'magic', chain: t.lvl >= 2, trail: [], src: t }); sfx(t.spec === 'ctl' ? 'ctl' : 'bolt', t.x); }
     else if (t.type === 'bcell') {
       const lead = best.blocker || best.rootT > 0 ? 0 : best.D.speed * S.M.spd * best.slowF * .85, pp = posAt(best.path, Math.min(best.path.len, best.d + lead));
       const tx = pp.x - Math.sin(pp.a) * best.lat, ty = pp.y + Math.cos(pp.a) * best.lat;
-      S.proj.push({ k: 'ab', sx: ox, sy: oy, x: ox, y: oy, tx, ty, t: 0, T: .85, dmg: L.dmg, splash: L.splash, rot: 0, ops: L.ops, src: t }); sfx('ab');
+      S.proj.push({ k: 'ab', sx: ox, sy: oy, x: ox, y: oy, tx, ty, t: 0, T: .85, dmg: L.dmg, splash: L.splash, rot: 0, ops: L.ops, src: t }); sfx('lob', t.x);
     }
   }
 
@@ -1443,7 +1638,7 @@ function step(dt) {
         if (p.shred) { e.shred = Math.max(e.shred, Math.min(p.shred.cap, e.shred + p.shred.shred)); e.shredBy = p.src; } // a weaker Degranulator never lowers shred
         const vd = p.src && p.src.spec === 'ctl' && skill(p.src);
         if (vd && p.src.sk <= 0 && !e.dead && !e.D.boss && e.hp < e.max * vd.th) {
-          p.src.sk = vd.cd; S.fx.push({ k: 'verdict', x: e.x, y: e.y, t: 0, T: .6 }); floatText(e.x, e.y - 30, 'Verdict', '#ff7a8f', 1.1); p.src.dealt = (p.src.dealt || 0) + e.hp; kill(e, p.src);
+          p.src.sk = vd.cd; S.fx.push({ k: 'verdict', x: e.x, y: e.y, t: 0, T: .6 }); floatText(e.x, e.y - 30, 'Verdict', '#ff7a8f', 1.1); sfx('verdict', e.x); p.src.dealt = (p.src.dealt || 0) + e.hp; kill(e, p.src);
         }
         if (p.k === 'bolt') {
           for (let i = 0; i < 5; i++) S.parts.push({ x: p.lx, y: p.ly, vx: rand(-60, 60), vy: rand(-60, 60), life: .3, max: .3, c: '#ff7fb0', r: 2 });
@@ -1462,7 +1657,7 @@ function step(dt) {
   for (const f of S.fx) {
     f.t += dt;
     if (f.k === 'fever' && !f.hit && f.t >= .4) {
-      f.hit = true; S.shake = Math.max(S.shake, 8); sfx('boom');
+      f.hit = true; S.shake = Math.max(S.shake, 8); sfx('fever', f.x);
       for (const e of S.enemies) if (!e.dead && Math.hypot(e.x - f.x, e.y - f.y) < 90) { damage(e, AB.fever.dmg * LVLMULT[S.lvl], 'magic'); e.slowF = .6; e.slowT = 2.5; e.revealT = 6; }
       S.fx.push({ k: 'reveal', x: f.x, y: f.y, r: 90, t: 0, T: 6 });
       for (let i = 0; i < 40; i++) { const a = rand(0, TAU), v = rand(40, 200); S.parts.push({ x: f.x, y: f.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, life: rand(.4, .9), max: .9, c: i % 3 ? '#f59a3c' : '#ffe08a', r: rand(2, 4.5) }); }
@@ -1497,7 +1692,7 @@ function castAbility(x, y) {
       const off = (i - (n - 1) / 2) * 16, u = mkUnit('swarm', best.x + Math.cos(best.a) * off, best.y + Math.sin(best.a) * off - 30, null, 13);
       u.hx = best.x + Math.cos(best.a) * off; u.hy = best.y + Math.sin(best.a) * off; S.units.push(u);
     }
-    ring(best.x, best.y, '#c39bdc'); sfx('build'); S.cds.swarm = AB.swarm.cd; S.ability = null; return true;
+    ring(best.x, best.y, '#c39bdc'); sfx('swarm', best.x); S.cds.swarm = AB.swarm.cd; S.ability = null; return true;
   }
   return false;
 }
@@ -1984,7 +2179,7 @@ function layoutTop() {
   const st = $('#stage').getBoundingClientRect(), l = $('#hudTL').getBoundingClientRect().right - st.left + 10, r = Math.min(st.width - 10, $('#hudTR').getBoundingClientRect().left - st.left - 10), tc = $('#topc');
   tc.style.left = (l + r) / 2 + 'px'; tc.style.setProperty('--bw', Math.max(160, r - l) + 'px');
 }
-function flashGold() { $('#gold').animate([{ color: '#ff4d5e', transform: 'scale(1.18)' }, { color: '', transform: 'none' }], { duration: 400 }); }
+function flashGold() { sfx('deny'); $('#gold').animate([{ color: '#ff4d5e', transform: 'scale(1.18)' }, { color: '', transform: 'none' }], { duration: 400 }); }
 
 // ============================================================ wave markers
 const wm = [];
@@ -2125,8 +2320,8 @@ function showMemory(from) {
 $('#memGrid').onclick = ev => {
   const b = ev.target.closest('.mnode'); if (!b || !b.classList.contains('next')) return;
   const M = MEMORY[+b.dataset.c], t = +b.dataset.t;
-  if (MEMCOST[t] > memStars().avail) { sfx('click'); $('#memAvail').animate([{ color: '#ff4d5e', transform: 'scale(1.15)' }, { color: '', transform: 'none' }], { duration: 400 }); return; }
-  save.mem[M.id] = t + 1; persist(); memFresh = M.id + t; memConfirm = false; sfx('build'); showMemory();
+  if (MEMCOST[t] > memStars().avail) { sfx('deny'); $('#memAvail').animate([{ color: '#ff4d5e', transform: 'scale(1.15)' }, { color: '', transform: 'none' }], { duration: 400 }); return; }
+  save.mem[M.id] = t + 1; persist(); memFresh = M.id + t; memConfirm = false; sfx('up'); showMemory();
 };
 $('#memReset').onclick = ev => {
   const id = ev.target.id;
@@ -2140,7 +2335,25 @@ $('#memBack').onclick = () => { if (memFrom === 'end') { $('#memOv').hidden = tr
 $('#memBtn').onclick = () => { sfx('click'); showMemory('title'); };
 $('#mapBtn').onclick = showTitle;
 $('#restartBtn').onclick = () => { if (S.L) startLevel(S.lvl, S.mode); };
-$('#muteBtn').onclick = () => { muted = !muted; persist(); $('#muteWave').style.display = muted ? 'none' : ''; $('#muteBtn').classList.toggle('on', muted); };
+// sound popover: Music and Effects toggles, opened from the HUD speaker or the tray's; it sits below its button, or beside it in a gutter column
+let sndAt = null;
+function sndRefresh() {
+  document.querySelectorAll('#sndPop .tg').forEach(b => b.setAttribute('aria-checked', AU.on[b.dataset.k]));
+  document.querySelectorAll('#muteBtn,#sndBtn').forEach(b => { b.classList.toggle('mute', !AU.on.music && !AU.on.sfx); b.classList.toggle('half', AU.on.music !== AU.on.sfx); });
+}
+function sndOpen(b) { // below its button; beside it in a gutter column or with no room below
+  const P = $('#sndPop'); if (!P.hidden && sndAt === b) return sndClose();
+  sndAt = b; P.hidden = false; $('#muteBtn').classList.toggle('on', b.id === 'muteBtn'); sfx('click');
+  const s = $('#stage').getBoundingClientRect(), r = b.getBoundingClientRect(), p = { width: P.offsetWidth * uK, height: P.offsetHeight * uK }; // not its rect: it pops in scaled
+  let x = r.right - s.left - p.width, y = r.bottom - s.top + 8;
+  if (r.left > s.right || y + p.height > s.height - 8) { x = r.left - s.left - p.width - 8; y = r.top - s.top; }
+  P.style.left = clamp(x, 8, s.width - p.width - 8) + 'px'; P.style.top = clamp(y, 8, s.height - p.height - 8) + 'px';
+}
+function sndClose() { $('#sndPop').hidden = true; sndAt = null; $('#muteBtn').classList.remove('on'); }
+$('#muteBtn').onclick = () => sndOpen($('#muteBtn')); $('#sndBtn').onclick = () => sndOpen($('#sndBtn'));
+$('#sndPop').onclick = ev => { const b = ev.target.closest('.tg'); if (!b) return; AU.on[b.dataset.k] = !AU.on[b.dataset.k]; persist(); auUnlock(); auApply(); sndRefresh(); sfx('click'); };
+addEventListener('pointerdown', ev => { if (!$('#sndPop').hidden && !ev.target.closest('#sndPop,#muteBtn,#sndBtn')) sndClose(); }, true);
+addEventListener('keydown', ev => { if (ev.key === 'Escape') sndClose(); });
 $('#speedBtn').onclick = toggleSpeed; $('#pauseBtn').onclick = togglePause;
 $('#pausePill').onclick = ev => { if (TOUCH && !ev.target.closest('.btn')) togglePause(); }; // touch: tap the card to resume
 if (TOUCH) {
@@ -2150,7 +2363,7 @@ if (TOUCH) {
 $('#ab-fever').onclick = () => armAbility('fever'); $('#ab-swarm').onclick = () => armAbility('swarm');
 $('#ab-hero').onclick = () => selectHero(); $('#ab-gz').onclick = () => granzyme();
 $('#ic-fever').src = portrait('fever', 0, 100); $('#ic-swarm').src = portrait('swarm', 0, 100); $('#ic-hero').src = portrait('hero', 0, 100); $('#ic-gz').src = portrait('granzyme', 0, 100);
-if (muted) { $('#muteWave').style.display = 'none'; $('#muteBtn').classList.add('on'); }
+sndRefresh();
 
 // ============================================================ field guide
 // plates: the four cell lines and the hero are open from the start, specialists once their line reaches level 3, pathogens once met
@@ -2282,6 +2495,12 @@ function coach() {
 $('#hint .x').onclick = () => { sfx('click'); hintDone(hintCur); };
 
 // ============================================================ loop
+// what the score should be doing: the specimen's theme in play (and on its lab report, or the guide opened from it), else the tray's
+function musicState() {
+  const play = !!S.L && (S.screen === 'play' || S.screen === 'end' || (S.screen === 'guide' && gFrom === 'play')), live = play && S.screen === 'play' && !S.over && !S.paused;
+  return { theme: play ? S.lvl : 6, wave: live && (S.enemies.length > 0 || S.spawnQ.length > 0), boss: live && S.enemies.some(e => e.D.boss),
+    duck: play && (S.paused || S.screen === 'guide'), over: play && S.over ? (S.lives > 0 ? 'win' : 'lose') : null };
+}
 let acc = 0, last = performance.now(), anim = 0; // anim: display clock; S.time is game time and stands still off play
 function frame(now) {
   const real = Math.min(.1, (now - last) / 1000); last = now;
@@ -2290,6 +2509,7 @@ function frame(now) {
   else if (S.L) { for (const t of S.towers) t.built += real; for (const p of S.parts) { p.life -= real; p.x += p.vx * real; p.y += p.vy * real; } S.parts = S.parts.filter(p => p.life > 0); }
   if (!$('#rotate').hidden && S.screen === 'play' && !S.paused && !S.over) togglePause();
   render(); hud(); coach(); if (S.screen === 'guide') drawGuide(now / 1000);
+  musicTick(musicState());
   requestAnimationFrame(frame);
 }
 addEventListener('resize', resize);
@@ -2299,7 +2519,7 @@ requestAnimationFrame(frame);
 window.IC = { S, LEVELS, LVLMULT, TOWERS, ENEMIES, SPECS, startLevel, sendWave, build: (i, k) => build(S.slots[i], k), upgrade: i => upgrade(S.slots[i].tower), sell: i => sell(S.slots[i].tower),
   specialize: (i, id) => specialize(S.slots[i].tower, id), skillUp: i => skillUp(S.slots[i].tower), refund: i => refund(S.slots[i].tower), step, makePath, nearestOnPath, posAt, castAbility, armAbility,
   HERO, heroMove, selectHero, granzyme, heroXp, hurt: (u, a) => hurtUnit(u, a), save, persist, MEMORY, AB, memStars, showMemory, endLevel, showTitle, CHAL, MODES, MEMCOST, TORDER,
-  GUIDE, FACTS, HINTS, openGuide };
+  GUIDE, FACTS, HINTS, openGuide, AU, auInit, auApply, musicTick, musicState, M, THEMES, sfx, SFX };
 </script>
 </body>
 </html>

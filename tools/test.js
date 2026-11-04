@@ -268,6 +268,35 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   await clickSel('#memBack'); await clickSel('.slide[data-i="0"]'); await p.waitForTimeout(2500);
   ob(await p.evaluate(() => IC.S.lvl === 0 && IC.S.screen === 'play' && document.getElementById('hint').hidden && IC.save.hints.length === IC.HINTS.length), 'a returning player saw field notes');
   gg(await p.evaluate(() => Object.keys(IC.SPECS).every(k => IC.save.seen.includes(k))), 'an old save with stars should have its specialists catalogued');
+  // audio: no context before a gesture (autoplay rules); the score follows the specimen and its waves; the speaker opens a popover
+  // whose two switches work with real clicks and persist; an old single mute migrates; an offline render ends with no live sources
+  const au = (ok, msg) => { if (!ok) errs.push('audio: ' + msg); };
+  await p.reload(); await p.waitForTimeout(500);
+  au(await p.evaluate(() => !IC.AU.ctx), 'an AudioContext was made before any user gesture');
+  await clickSel('.slide[data-i="2"]'); await p.evaluate(() => { IC.S.gold = 2000; [0, 1, 3, 4, 6].forEach((s, i) => IC.build(s, IC.TORDER[i % 4])); IC.sendWave(); IC.S.speed = 2; });
+  await p.waitForTimeout(6000);
+  au(await p.evaluate(() => IC.AU.ctx.state === 'running' && IC.M.th === 2 && IC.M.bus.L.perc._v === 1 && IC.AU.live.music < 120 && IC.AU.live.sfx <= 61), 'score not on specimen 03 with its wave layer, or too many live sources ' + await p.evaluate(() => JSON.stringify([IC.AU.ctx.state, IC.M.th, IC.AU.live])));
+  await clickSel('#muteBtn'); au(await p.evaluate(() => !document.getElementById('sndPop').hidden), 'speaker did not open the sound popover');
+  await clickSel('.tg[data-k="music"]'); await p.waitForTimeout(300);
+  au(await p.evaluate(() => !IC.AU.on.music && IC.AU.on.sfx && JSON.parse(localStorage.getItem('immune-citadel-v4')).music === false), 'music switch did not turn music off and save it');
+  await p.screenshot({ path: `${out}/24-sound-popover.png` });
+  await clickSel('.tg[data-k="music"]'); await clickSel('#hudTL');
+  au(await p.evaluate(() => IC.AU.on.music && document.getElementById('sndPop').hidden), 'music back on, and a click elsewhere closes the popover');
+  await p.evaluate(() => localStorage.setItem('immune-citadel-v4', JSON.stringify({ ...JSON.parse(localStorage.getItem('immune-citadel-v4')), music: undefined, sfx: undefined, muted: true })));
+  await p.reload(); await p.waitForTimeout(400);
+  au(await p.evaluate(() => !IC.AU.on.music && !IC.AU.on.sfx && document.getElementById('sndBtn').classList.contains('mute')), 'an old muted save must start with both switches off');
+  await p.evaluate(() => { IC.AU.on.music = IC.AU.on.sfx = true; IC.persist(); });
+  const off = await p.evaluate(async () => { // 40 s offline: specimen 03, wave + boss, a win, then music off; sources must all end
+    const sr = 22050, o = new OfflineAudioContext(2, sr * 40, sr), tick = IC.musicTick; window.musicTick = () => {}; IC.auInit(o); let max = 0;
+    for (let t = .1; t < 39.9; t += .1) o.suspend(Math.round(t * sr / 128) * 128 / sr).then(() => { const c = o.currentTime;
+      if (c > 30 && IC.AU.on.music) { IC.AU.on.music = false; IC.auApply(); }
+      tick({ theme: 2, wave: c > 5 && c < 20, boss: c > 10 && c < 20, duck: false, over: c > 20 ? 'win' : null }); if (c < 20 && Math.round(c * 10) % 3 === 0) IC.sfx('pop', 500, 9);
+      max = Math.max(max, IC.AU.live.music + IC.AU.live.sfx); o.resume(); });
+    const d = (await o.startRendering()).getChannelData(0); await new Promise(r => setTimeout(r, 200)); let pk = 0; for (const v of d) pk = Math.max(pk, Math.abs(v));
+    return { max, live: IC.AU.live.music + IC.AU.live.sfx, pk };
+  });
+  au(off.live === 0 && off.max < 150 && off.pk < .9, 'offline render: ' + JSON.stringify(off));
+  console.log('audio offline 40 s:', JSON.stringify(off));
   await require('./touch.js')(b, out, errs); // phones, tablet and both mouse sizes: taps, two-tap buy, target sizes, layout, rotate card
   console.log('errors:', errs.length ? errs : 'none'); await b.close();
 })();
