@@ -1,0 +1,8 @@
+{
+  "name": "immune-citadel-v4-api",
+  "private": true,
+  "type": "commonjs",
+  "engines": { "node": ">=20" },
+  "scripts": { "start": "node index.js", "test": "node --test test.js" },
+  "dependencies": { "pg": "^8.13.1" }
+}

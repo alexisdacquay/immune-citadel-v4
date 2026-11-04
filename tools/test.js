@@ -60,6 +60,8 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   // routes must not run under the bottom-left ability cluster (enemies would walk under the HUD). Cluster, worst case (HUD scale 1.05 of the map):
   // x < 335, y > 531; a pathogen reaches ~21 below the route centre (lane offset 9 + body), so the centre must stay above y 510
   const route = await p.evaluate(() => IC.LEVELS.map((L, li) => L.paths.map((raw, pi) => { const q = IC.makePath(raw); for (let d = 0; d < q.len; d += 8) { const r = IC.posAt(q, d); if (r.x > -10 && r.x < 335 && r.y > 510) return `L${li + 1} route${pi + 1} under the ability cluster at [${r.x | 0},${r.y | 0}]`; } return null; }).filter(Boolean)).flat());
+  const mg = await p.evaluate(() => { const m = IC.mergeSave({ stars: [3, 0, 0, 0, 0, 0], seen: ['a'], mem: { x: 1 }, diff: 'hard', at: 2 }, { stars: [1, 2, 0, 0, 0, 0], seen: ['b', 'a'], mem: {}, diff: 'easy', at: 1, heroic: [1] }); return JSON.stringify([m.stars, m.seen, m.mem, m.diff, m.heroic, m.at]); });
+  if (mg !== '[[3,2,0,0,0,0],["a","b"],{"x":1},"hard",[1,0,0,0,0,0],2]') errs.push('cloud merge lost progress or picked the older choices: ' + mg);
   console.log('route problems:', route.length ? route : 'none'); errs.push(...route);
   const results = []; let used = {}; // specialists bought by the bot, across all runs
   const nLv = await p.evaluate(() => IC.LEVELS.length);

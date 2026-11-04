@@ -228,8 +228,17 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 .mute .sw,.half .sw2,:not(.mute)>svg>.sx{display:none}
 .seg{padding:3px;gap:2px;margin:0 8px 14px auto;flex:none}.seg+#sndBtn{margin-left:0}.seg button{border:0;border-radius:9px;background:none;padding:5px 9px;font:inherit;letter-spacing:inherit;color:var(--dim)}.seg button:hover{color:var(--txt)}.seg button.on{background:rgba(127,216,255,.16);color:var(--cyan);box-shadow:inset 0 0 0 1px rgba(127,216,255,.45)}
 #sndBtn{padding:9px;margin:0 0 14px auto;flex:none}#sndBtn svg{fill:none;stroke-linecap:round}
-#sndPop{position:absolute;z-index:12;width:240px;padding:8px 6px 6px;transform:scale(var(--u,1));transform-origin:0 0;background:var(--glass2);border-color:var(--rim2);box-shadow:0 0 26px -8px rgba(127,216,255,.5),0 14px 30px -14px #000;animation:hpop .2s ease-out}
-#sndPop small{display:block;padding:0 10px 4px;font:600 max(9px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.18em;color:var(--cyan)}
+#cloudBtn{padding:9px;margin:0 0 14px 6px;flex:none}#cloudBtn svg{stroke-linecap:round}#cloudBtn.busy svg{animation:cpulse 1s ease-in-out infinite alternate}#cloudBtn.err svg{stroke:#ffb15c;fill:rgba(255,177,92,.14);filter:none}
+@keyframes cpulse{to{opacity:.35}}
+#cloudPop p{margin:0 0 10px;font:400 13px/1.4 var(--sans);color:var(--dim)}
+#cloudPop .cc{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-bottom:12px}#cloudPop .cc span,#cloudPop .ci span{flex:1 0 100%;font:600 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+#cloudPop .cc b{flex:1;font:600 15px var(--mono);letter-spacing:.06em;color:var(--txt);user-select:all}
+#cloudPop .btn{padding:7px 12px;font-size:12px}#cloudPop .cc .btn{flex:none}#cloudGo{width:100%;margin-top:8px}
+#cloudPop .ci{display:block}#cloudPop input{display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:8px 10px;border-radius:9px;border:1px solid var(--rim2);background:rgba(2,4,7,.5);color:var(--txt);font:600 14px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+#cloudPop input:focus{outline:2px solid var(--cyan);outline-offset:1px}
+#sndPop,#cloudPop{position:absolute;z-index:12;width:240px;padding:8px 6px 6px;transform:scale(var(--u,1));transform-origin:0 0;background:var(--glass2);border-color:var(--rim2);box-shadow:0 0 26px -8px rgba(127,216,255,.5),0 14px 30px -14px #000;animation:hpop .2s ease-out}
+#sndPop small,#cloudPop small{display:block;padding:0 10px 4px;font:600 max(9px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.18em;color:var(--cyan)}
+#cloudPop{width:290px;max-width:calc(100vw - 16px);box-sizing:border-box;padding:8px 14px 12px;transform:none;animation:cpop .2s ease-out}@keyframes cpop{from{transform:scale(.6);opacity:0}}#cloudPop small{padding:0 0 6px;font-size:10px}
 .tg{display:flex;align-items:center;gap:11px;width:100%;padding:8px 10px;border:0;border-radius:9px;background:none;text-align:left;color:var(--dim)}
 .tg:hover{background:rgba(140,205,255,.08)}
 .tg svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -433,6 +442,12 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
     <button class="tg" data-k="music" role="switch"><svg viewBox="0 0 24 24"><path d="M9 17.5V6l10-2v11.5"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/></svg><span>Music<em>Tissue score</em></span><i></i></button>
     <button class="tg" data-k="sfx" role="switch"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9c1.5 1.5 1.5 4.5 0 6M18.5 6.5c3 3 3 8 0 11"/></svg><span>Effects<em>Cells and pathogens</em></span><i></i></button>
   </div>
+  <div id="cloudPop" class="glass" hidden><small>CLOUD SAVE</small>
+    <p id="cloudSt" role="status"></p>
+    <div class="cc"><span>This device's code</span><b id="cloudCode"></b><button class="btn" id="cloudCopy">Copy</button></div>
+    <label class="ci"><span>Continue a save from another device</span><input id="cloudIn" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24"></label>
+    <button class="btn" id="cloudGo">Load that save</button>
+  </div>
   <div id="hint" class="glass" hidden><i class="ar"></i><small></small><p></p><button class="x" aria-label="Dismiss tip" title="Dismiss tip">×</button></div>
 
   <div class="ov" id="titleOv">
@@ -441,7 +456,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
       <div class="tbtns"><button class="mbtn" id="guideBtn"><svg viewBox="0 0 24 24"><path d="M4 5.5c3-1.2 5.8-1 8 1 2.2-2 5-2.2 8-1v13c-3-1.2-5.8-1-8 1-2.2-2-5-2.2-8-1z"/><path d="M12 6.5v13"/></svg>FIELD GUIDE<em class="ndot" hidden></em></button>
       <button class="mbtn" id="memBtn"><i></i>IMMUNE MEMORY <b id="memBtnN"></b></button></div>
       <div class="hd"><h1>IMMUNE<br><span>CITADEL</span></h1>
-      <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p><div class="mbtn seg" id="diffSeg" role="radiogroup" aria-label="Difficulty"><button data-d="easy" role="radio">EASY</button><button data-d="normal" role="radio">NORMAL</button><button data-d="hard" role="radio">HARD</button></div><button class="mbtn" id="sndBtn" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="sw" d="M16 9c1.5 1.5 1.5 4.5 0 6"/><path class="sw sw2" d="M18.5 6.5c3 3 3 8 0 11"/><path class="sx" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button></div>
+      <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p><div class="mbtn seg" id="diffSeg" role="radiogroup" aria-label="Difficulty"><button data-d="easy" role="radio">EASY</button><button data-d="normal" role="radio">NORMAL</button><button data-d="hard" role="radio">HARD</button></div><button class="mbtn" id="sndBtn" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="sw" d="M16 9c1.5 1.5 1.5 4.5 0 6"/><path class="sw sw2" d="M18.5 6.5c3 3 3 8 0 11"/><path class="sx" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button><button class="mbtn" id="cloudBtn" title="Cloud save" aria-label="Cloud save" hidden><svg viewBox="0 0 24 24"><path d="M7 18.5h10.5a4 4 0 0 0 .4-8 6 6 0 0 0-11.6-1A4.6 4.6 0 0 0 7 18.5z"/></svg></button></div>
       <div class="slides" id="slides"></div>
       <div class="keys"><span><b>Click a ring</b> grow a cell</span><span><b>Click a cell</b> upgrade / recycle</span><span><b>Red marker</b> call the next wave</span><span><b>Q W</b> abilities</span><span><b>H E</b> hero · burst</span><span><b>Space</b> pause</span><span><b>F</b> speed</span></div>
     </div>
@@ -1229,7 +1244,27 @@ AU.on.music = save.music ?? !save.muted; AU.on.sfx = save.sfx ?? !save.muted; de
 if (!DIFF[save.diff]) save.diff = 'normal';
 if (!save.mem || typeof save.mem !== 'object') save.mem = {}; // saves from before Immune Memory
 for (const m of ['heroic', 'iron']) if (!save[m] || !Array.isArray(save[m])) save[m] = [0, 0, 0, 0, 0, 0]; // saves from before challenges: 1 = won
-function persist() { try { localStorage.setItem('immune-citadel-v4', JSON.stringify({ ...save, music: AU.on.music, sfx: AU.on.sfx })); } catch (e) {} }
+const snapshot = () => ({ ...save, music: AU.on.music, sfx: AU.on.sfx });
+function persistLocal() { try { localStorage.setItem('immune-citadel-v4', JSON.stringify(snapshot())); } catch (e) {} }
+function persist() { save.at = Date.now(); persistLocal(); cloudQueue(); }
+// Cloud save: the browser keeps the save; the API holds a copy under a 16-character code, so another device can continue it.
+// Hosts without an API (file://) play exactly as before.
+const CLOUD_API = { 'immune-citadel-v4.onrender.com': 'https://immune-citadel-v4-api.onrender.com', 'immune-citadel-v4-dev.onrender.com': 'https://immune-citadel-v4-api-dev.onrender.com', localhost: 'http://localhost:8787', '127.0.0.1': 'http://localhost:8787' }[location.hostname] || null;
+const CODE_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', CODE_RE = /^[A-HJ-NP-Z2-9]{16}$/; // no I, O, 0, 1: codes get read aloud and retyped
+const cloud = { code: null, st: 'idle', at: 0, busy: false, again: false, timer: 0 };
+try { const c = localStorage.getItem('immune-citadel-v4-code'); if (CODE_RE.test(c)) cloud.code = c; } catch (e) {}
+// two saves of one player: progress only grows (best stars, every challenge won, everything seen); choices (memory, settings) follow the newer save
+function mergeSave(a, b) {
+  const arr = (o, k) => Array.isArray(o[k]) ? o[k] : [];
+  const out = (a.at || 0) >= (b.at || 0) ? { ...b, ...a } : { ...a, ...b };
+  for (const k of ['stars', 'heroic', 'iron']) { const x = arr(a, k), y = arr(b, k); out[k] = Array.from({ length: Math.max(x.length, y.length, 6) }, (_, i) => Math.max(x[i] | 0, y[i] | 0)); }
+  for (const k of ['seen', 'viewed', 'hints']) out[k] = [...new Set([...arr(a, k), ...arr(b, k)])].filter(v => typeof v === 'string');
+  if (!out.mem || typeof out.mem !== 'object' || Array.isArray(out.mem)) out.mem = {};
+  if (!DIFF[out.diff]) out.diff = 'normal';
+  out.at = Math.max(a.at || 0, b.at || 0);
+  return out;
+}
+function cloudQueue() { if (!CLOUD_API) return; clearTimeout(cloud.timer); cloud.timer = setTimeout(cloudSync, 1500); }
 const memTier = id => clamp(save.mem[id] | 0, 0, 3);
 const sum = a => a.reduce((s, b) => s + (b | 0), 0);
 // seen = observed in play (pathogen types, and specialists once a line reaches level 3); viewed = Field Guide plates opened
@@ -2068,6 +2103,7 @@ if (TOUCH) {
   addEventListener('touchmove', ev => { if (ev.touches.length > 1) ev.preventDefault(); }, { passive: false });
 }
 addEventListener('keydown', ev => {
+  if (ev.target.tagName === 'INPUT') return; // typing a save code
   if (S.screen === 'guide' && /^(escape|g)$/i.test(ev.key)) { $('#gBack').click(); return; }
   if (S.screen !== 'play') return;
   const k = ev.key.toLowerCase();
@@ -2427,10 +2463,12 @@ function sndRefresh() {
   document.querySelectorAll('#sndPop .tg').forEach(b => b.setAttribute('aria-checked', AU.on[b.dataset.k]));
   document.querySelectorAll('#muteBtn,#sndBtn').forEach(b => { b.classList.toggle('mute', !AU.on.music && !AU.on.sfx); b.classList.toggle('half', AU.on.music !== AU.on.sfx); });
 }
-function sndOpen(b) { // below its button; beside it in a gutter column or with no room below
+function sndOpen(b) {
   const P = $('#sndPop'); if (!P.hidden && sndAt === b) return sndClose();
-  sndAt = b; P.hidden = false; $('#muteBtn').classList.toggle('on', b.id === 'muteBtn'); sfx('click');
-  const s = $('#stage').getBoundingClientRect(), r = b.getBoundingClientRect(), p = { width: P.offsetWidth * uK, height: P.offsetHeight * uK }; // not its rect: it pops in scaled
+  sndAt = b; P.hidden = false; $('#muteBtn').classList.toggle('on', b.id === 'muteBtn'); sfx('click'); popPlace(P, b);
+}
+function popPlace(P, b, k = uK) { // below its button; beside it in a gutter column or with no room below. k: the scale it pops in at
+  const s = $('#stage').getBoundingClientRect(), r = b.getBoundingClientRect(), p = { width: P.offsetWidth * k, height: P.offsetHeight * k }; // not its rect: it pops in scaled
   let x = r.right - s.left - p.width, y = r.bottom - s.top + 8;
   if (r.left > s.right || y + p.height > s.height - 8) { x = r.left - s.left - p.width - 8; y = r.top - s.top; }
   P.style.left = clamp(x, 8, s.width - p.width - 8) + 'px'; P.style.top = clamp(y, 8, s.height - p.height - 8) + 'px';
@@ -2441,7 +2479,65 @@ document.querySelectorAll('#diffSeg button').forEach(b => b.onclick = () => { sa
 $('#muteBtn').onclick = () => sndOpen($('#muteBtn')); $('#sndBtn').onclick = () => sndOpen($('#sndBtn'));
 $('#sndPop').onclick = ev => { const b = ev.target.closest('.tg'); if (!b) return; AU.on[b.dataset.k] = !AU.on[b.dataset.k]; persist(); auUnlock(); auApply(); sndRefresh(); sfx('click'); };
 addEventListener('pointerdown', ev => { if (!$('#sndPop').hidden && !ev.target.closest('#sndPop,#muteBtn,#sndBtn')) sndClose(); }, true);
-addEventListener('keydown', ev => { if (ev.key === 'Escape') sndClose(); });
+addEventListener('keydown', ev => { if (ev.key === 'Escape') { sndClose(); cloudClose(); } });
+// cloud save: pull, merge, push, so two devices never overwrite each other's progress
+async function cloudSync() {
+  if (!CLOUD_API) return;
+  if (cloud.busy) { cloud.again = true; return; }
+  cloud.busy = true; cloud.st = 'sync'; cloudShow();
+  try {
+    if (!cloud.code) { // first save on this device: mint a code
+      cloud.code = Array.from(crypto.getRandomValues(new Uint8Array(16)), v => CODE_ABC[v & 31]).join('');
+      try { localStorage.setItem('immune-citadel-v4-code', cloud.code); } catch (e) {}
+    }
+    const url = `${CLOUD_API}/api/save/${cloud.code}`, r = await fetch(url, { cache: 'no-store' });
+    if (!r.ok && r.status !== 404) throw new Error('pull ' + r.status);
+    const local = snapshot(), remote = r.ok ? ((await r.json()).save || {}) : null, merged = remote ? mergeSave(local, remote) : local;
+    if (JSON.stringify(merged) !== JSON.stringify(local)) cloudApply(merged);
+    if (!remote || JSON.stringify(merged) !== JSON.stringify(remote)) {
+      const w = await fetch(url, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ save: merged }) });
+      if (!w.ok) throw new Error('push ' + w.status);
+    }
+    cloud.st = 'ok'; cloud.at = Date.now();
+  } catch (e) { cloud.st = 'err'; } // the save is safe in this browser; the next save or visit retries
+  cloud.busy = false; cloudShow();
+  if (cloud.again) { cloud.again = false; cloudQueue(); }
+}
+function cloudApply(m) { // a merged save arrived: adopt it and redraw whatever shows it
+  const { music, sfx: fx, ...rest } = m; Object.assign(save, rest);
+  if (typeof music === 'boolean') AU.on.music = music; if (typeof fx === 'boolean') AU.on.sfx = fx;
+  persistLocal(); auApply(); sndRefresh(); diffSync(); guideDots();
+  if (S.screen === 'title') showTitle(); else if (S.screen === 'memory') showMemory();
+}
+const cloudMsg = { idle: 'Your progress will sync after your first save.', sync: 'Syncing…', ok: 'Synced. Use this code on another device to continue there.', err: 'Cloud unreachable. Your progress is safe on this device and will sync later.' };
+function cloudShow(note) {
+  const B = $('#cloudBtn'); B.hidden = !CLOUD_API; B.classList.toggle('err', cloud.st === 'err'); B.classList.toggle('busy', cloud.st === 'sync');
+  $('#cloudSt').textContent = note || cloudMsg[cloud.st];
+  $('#cloudCode').textContent = cloud.code ? cloud.code.match(/.{4}/g).join('-') : '— — — —';
+  $('#cloudCopy').hidden = !cloud.code || !navigator.clipboard;
+}
+async function cloudLoad() { // continue a save made on another device; this device's progress merges into it
+  const code = $('#cloudIn').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!CODE_RE.test(code)) return cloudShow('A save code is 16 letters and digits, like ABCD-EFGH-JKLM-NPQR.');
+  if (code === cloud.code) return cloudShow('That is already this device\'s code.');
+  cloudShow('Looking for that save…');
+  try {
+    const r = await fetch(`${CLOUD_API}/api/save/${code}`, { cache: 'no-store' });
+    if (r.status === 404) return cloudShow('No save under that code. Check it on the other device.');
+    if (!r.ok) throw new Error(r.status);
+  } catch (e) { return cloudShow('Cloud unreachable. Try again in a minute.'); }
+  cloud.code = code; try { localStorage.setItem('immune-citadel-v4-code', code); } catch (e) {}
+  $('#cloudIn').value = ''; sfx('up'); await cloudSync();
+}
+function cloudOpen() { const P = $('#cloudPop'); if (!P.hidden) return cloudClose(); sndClose(); P.hidden = false; cloudShow(); sfx('click'); popPlace(P, $('#cloudBtn'), 1); } // unscaled: it holds text to read and a code to type
+function cloudClose() { $('#cloudPop').hidden = true; }
+$('#cloudBtn').onclick = cloudOpen;
+$('#cloudGo').onclick = cloudLoad;
+$('#cloudIn').onkeydown = ev => { if (ev.key === 'Enter') cloudLoad(); };
+$('#cloudCopy').onclick = () => navigator.clipboard.writeText(cloud.code).then(() => cloudShow('Code copied.'), () => {});
+addEventListener('pointerdown', ev => { if (!$('#cloudPop').hidden && !ev.target.closest('#cloudPop,#cloudBtn')) cloudClose(); }, true);
+addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && cloud.code) cloudQueue(); }); // back from the other device
+cloudShow(); if (cloud.code) cloudSync();
 $('#speedBtn').onclick = toggleSpeed; $('#pauseBtn').onclick = togglePause;
 $('#pausePill').onclick = ev => { if (TOUCH && !ev.target.closest('.btn')) togglePause(); }; // touch: tap the card to resume
 if (TOUCH) {
@@ -2608,7 +2704,7 @@ requestAnimationFrame(frame);
 
 window.IC = { S, LEVELS, LVLMULT, TOWERS, ENEMIES, SPECS, startLevel, sendWave, build: (i, k) => build(S.slots[i], k), upgrade: i => upgrade(S.slots[i].tower), sell: i => sell(S.slots[i].tower),
   specialize: (i, id) => specialize(S.slots[i].tower, id), skillUp: i => skillUp(S.slots[i].tower), refund: i => refund(S.slots[i].tower), step, makePath, nearestOnPath, posAt, castAbility, armAbility,
-  HERO, heroMove, selectHero, granzyme, heroXp, hurt: (u, a) => hurtUnit(u, a), save, persist, MEMORY, AB, memStars, showMemory, endLevel, showTitle, CHAL, MODES, MEMCOST, TORDER,
+  HERO, mergeSave, heroMove, selectHero, granzyme, heroXp, hurt: (u, a) => hurtUnit(u, a), save, persist, MEMORY, AB, memStars, showMemory, endLevel, showTitle, CHAL, MODES, MEMCOST, TORDER,
   GUIDE, FACTS, HINTS, openGuide, AU, auInit, auApply, musicTick, musicState, M, THEMES, sfx, SFX };
 </script>
 </body>
