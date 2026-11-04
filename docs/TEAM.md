@@ -1,0 +1,50 @@
+# Agent team and process
+
+Immune Citadel v4 is built by a small team of AI agents and one human owner. This page defines who does what, how work flows, and where every step leaves a trace. It describes how the game has actually been built since P0; it does not invent a new process.
+
+## The team
+
+| Role | Who | Model | Owns | Never does |
+|---|---|---|---|---|
+| **Owner** | the human | | priorities, approvals, playtests, production releases | |
+| **Orchestrator** (PM, game designer, integrator) | the main Claude Code session | the session's model | the backlog, issue specs and acceptance criteria, design decisions, the final diff review, merges to `dev`, reports to the owner | merge to `main` (production) without the owner's word |
+| **Engineer** | subagent `ic-engineer` ([role](../.claude/agents/ic-engineer.md)) | Opus | implementing one issue on its own branch, running the test suites, an engineer report | choose priorities, change scope, merge |
+| **QA** | subagent `ic-qa` ([role](../.claude/agents/ic-qa.md)) | Opus | adversarial verification of one issue against its acceptance criteria and the regression suites, a QA verdict | edit game code, read the engineer's reasoning before testing |
+| **Panels** | groups of short-lived subagents run as a workflow | Opus | wide questions one agent should not answer alone: design options (designers + judges), audits (finders + independent verifiers) | decide; a panel returns options and evidence, the orchestrator decides |
+
+Why two subagent roles and not more: the game is one file, so parallel engineers would collide. One engineer per issue, a separate QA that does not see the engineer's reasoning, and panels for breadth when a question needs several independent views.
+
+## The loop: what "continue" means
+
+When the owner says **continue**, the orchestrator runs this loop. The [`team-loop` skill](../.claude/skills/team-loop/SKILL.md) holds the checklist; it is not named `continue` because `/continue` is a built-in Claude Code command.
+
+1. **Triage.** Read the open issues and anything learned since the last cycle (test output, QA findings, owner feedback). New work becomes an issue. Every issue gets a priority (`P0` bug that breaks play or teaches wrong biology, `P1` next feature the owner asked for, `P2` planned, `P3` polish, `P4` someday), a type, and a status.
+2. **Spec.** The top `status:ready` issue gets a **Spec** comment: why, what changes, acceptance criteria (checkable statements), out of scope. Design questions are settled here, by the orchestrator, or by a panel when the space is wide. Anything that needs the owner gets `needs-owner` and waits.
+3. **Build.** The [issue-cycle workflow](../.claude/workflows/issue-cycle.js) starts an `ic-engineer` on a branch `issue/<n>-<slug>`. It posts an **Engineer report** comment: what changed, tests run, results, risks.
+4. **Verify.** The same workflow starts an `ic-qa` with only the spec and the branch, not the engineer's reasoning. It posts a **QA verdict** comment: PASS or FAIL per acceptance criterion, with evidence. A FAIL goes back to the engineer with the QA findings; after two failed rounds the issue escalates to the orchestrator.
+5. **Integrate.** The orchestrator reviews the diff, merges the branch into `dev`, pushes (the dev site deploys on push), checks the dev site serves it, and labels the issue `status:on-dev`.
+6. **Report.** One short message to the owner: what shipped, what is not verified, what needs them.
+
+Issues close when `dev` is promoted to `main`, which only the owner approves.
+
+## Where to see it
+
+Everything the team does leaves a trace on GitHub, so the process is visible without reading chat logs:
+
+- **Issues** are the backlog. Labels: priority `P0`-`P4`, type (`bug`, `type:feature`, `type:content`, `type:chore`, `type:design`), status (`status:ready`, `status:in-progress`, `status:in-qa`, `status:on-dev`), and `needs-owner`.
+- **Issue comments** carry the Spec, the Engineer report and the QA verdict, in that order.
+- **Branches** `issue/<n>-<slug>` hold each engineer's work until it is merged into `dev`.
+- **Commits** on `dev` reference their issue (`(#n)`).
+
+## Gates
+
+- Production (`main`) changes only with the owner's explicit approval.
+- Pushing to `dev` is allowed once QA passes; the owner may pre-approve a batch.
+- Every gameplay change runs the balance bot (`node tools/balance.js`); every change runs `node tools/test.js` and `node tools/touch.js`.
+- Biology text follows Rule #1: fun first, honest always. A bend of the real biology carries an "In reality" note.
+
+## Tools the team uses
+
+- `tools/test.js`: full browser suite (layout, saves, onboarding, every specimen played by a seeded bot, challenges, Memory, Field Guide, audio).
+- `tools/touch.js`: phones, tablet, touch targets, HUD coverage.
+- `tools/balance.js`: unseeded balance bot; `node tools/balance.js RUNS LEVELS none|all` prints the vitality left per run. Env `C='9:.85'` overrides campaign pathogen health per specimen.
