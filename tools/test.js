@@ -14,16 +14,17 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   console.log('route problems:', route.length ? route : 'none'); errs.push(...route);
   const results = []; let used = {}; // specialists bought by the bot, across all runs
   const nLv = await p.evaluate(() => IC.LEVELS.length);
-  // every level twice: no Immune Memory upgrades, then all 18 tiers
-  for (const mem of ['none', 'all']) for (let li = 0; li < nLv; li++) {
-    const r = await p.evaluate(([li, mem, used]) => {
+  // every level twice: no Immune Memory upgrades, then all 18 tiers; then each challenge with all tiers (reported, not required to win)
+  for (const [mem, mode] of [['none', 'campaign'], ['all', 'campaign'], ['all', 'heroic'], ['all', 'iron']]) for (let li = 0; li < nLv; li++) {
+    if (mode === 'heroic') await p.evaluate(() => { window._camp = JSON.stringify(IC.save.stars); });
+    const r = await p.evaluate(([li, mem, used, mode]) => {
       // seeded: the same code always plays the same game, so a loss is a real regression, not luck (playtest/balance/bal.js measures the spread)
-      const R0 = Math.random; let sd = (li + 1) * (mem === 'all' ? 7919 : 104729) >>> 0;
+      const R0 = Math.random; let sd = (li + 1) * (mem === 'all' ? 7919 : 104729) + (mode === 'heroic' ? 17 : mode === 'iron' ? 31 : 0) >>> 0;
       Math.random = () => { sd = sd + 0x6D2B79F5 | 0; let t = Math.imul(sd ^ sd >>> 15, 1 | sd); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
       IC.save.mem = mem === 'all' ? Object.fromEntries(IC.MEMORY.map(M => [M.id, 3])) : {};
-      IC.startLevel(li); const S = IC.S; S.screen = 'play';
+      IC.startLevel(li, mode); const S = IC.S; S.screen = 'play';
       const memOk = mem === 'none' ? S.hero.lvl === 1 && IC.AB.fever.cd === 32 : S.hero.lvl === 2 && IC.AB.fever.cd === 26 && IC.AB.swarm.n === 4 && IC.TOWERS.neutro.lv[0].range === 154;
-      const order = ['neutro', 'macro', 'killer', 'bcell', 'neutro', 'killer', 'bcell', 'macro'];
+      const order = ['neutro', 'macro', 'killer', 'bcell', 'neutro', 'killer', 'bcell', 'macro'].filter(k => S.lines.includes(k)); // iron: its two lines
       // rank slots by path coverage
       const cover = s => { let c = 0; for (const p of S.paths) for (let d = 0; d < p.len; d += 10) { const q = (function(){ return null })(); } return 0; };
       const ranked = S.slots.map((s, i) => { let c = 0; for (const p of S.paths) for (const [x, y] of p.pts) if (Math.hypot(x - s.x, y - s.y) < 140) c++; return [c, i]; }).sort((a, b) => b[0] - a[0]).map(x => x[1]);
@@ -64,18 +65,22 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
         lowest = Math.min(lowest, S.lives);
       }
       Math.random = R0;
-      return { mem, memOk, level: li, won: S.over && S.lives > 0, lives: S.lives, wave: S.wave, secs: t, towers: S.towers.map(x => x.spec ? x.spec + x.rank : x.type[0] + x.lvl).join(' '), gold: S.gold, leaks: JSON.stringify(leaks), hero: `L${S.hero.lvl} kills ${S.hero.kills} park ${park.x | 0},${park.y | 0}`, used };
-    }, [li, mem, used]);
+      return { mem, mode, memOk, level: li, time: S.time | 0, chStar: mode !== 'campaign' && IC.save[mode][li], won: S.over && S.lives > 0, lives: S.lives, wave: S.wave, secs: t, towers: S.towers.map(x => x.spec ? x.spec + x.rank : x.type[0] + x.lvl).join(' '), gold: S.gold, leaks: JSON.stringify(leaks), hero: `L${S.hero.lvl} kills ${S.hero.kills} park ${park.x | 0},${park.y | 0}`, used };
+    }, [li, mem, used, mode]);
     used = r.used;
     results.push(r);
-    if (!r.won) errs.push(`bot lost level ${li + 1} with memory ${mem}`);
+    if (!r.won && mode === 'campaign') errs.push(`bot lost level ${li + 1} with memory ${mem}`);
+    if (mode !== 'campaign' && r.won !== !!r.chStar) errs.push(`${mode} ${li + 1}: won=${r.won} but challenge star=${r.chStar}`);
     if (!r.memOk) errs.push(`memory ${mem} not applied on level ${li + 1}`);
   }
   console.log(results);
   const specIds = await p.evaluate(() => Object.keys(IC.SPECS));
   console.log('specialists used by the bot:', specIds.map(k => `${k} ×${used[k] || 0}`).join(', '));
   const unused = specIds.filter(k => !used[k]); if (unused.length) errs.push('bot never bought: ' + unused.join(', '));
-  for (const mem of ['none', 'all']) console.log(`bot, memory ${mem}:`, results.filter(r => r.mem === mem).map(r => `L${r.level + 1} ${r.won ? 'won' : 'LOST'} lives ${r.lives}`).join(' | '));
+  for (const mem of ['none', 'all']) console.log(`bot, memory ${mem}:`, results.filter(r => r.mem === mem && r.mode === 'campaign').map(r => `L${r.level + 1} ${r.won ? 'won' : 'LOST'} lives ${r.lives}`).join(' | '));
+  for (const mode of ['heroic', 'iron']) { const rs = results.filter(r => r.mode === mode); console.log(`bot, ${mode} challenge (memory all): ${rs.filter(r => r.won).length}/${rs.length} won ·`, rs.map(r => `L${r.level + 1} ${r.won ? 'won' : `LOST wave ${r.wave} at ${r.time}s ${r.leaks}`}`).join(' | ')); }
+  // campaign stars may rise during the campaign runs; the challenge runs must not touch them
+  if (await p.evaluate(() => JSON.stringify(IC.save.stars) !== window._camp)) errs.push('challenges changed campaign stars');
   await p.evaluate(() => { IC.save.mem = {}; IC.persist(); });
   // visual: start level 1 for real, build, play 25s with rAF, screenshot
   await p.reload(); await p.waitForTimeout(600); await p.screenshot({ path: `${out}/0-tray.png` });
@@ -158,5 +163,41 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   await clickSel('#eMem'); mm(await p.evaluate(() => !document.getElementById('memOv').hidden), 'lab report link did not open the screen');
   await clickSel('#memBack'); mm(await p.evaluate(() => !document.getElementById('endOv').hidden && IC.S.screen === 'end'), 'back did not return to the lab report');
   await p.evaluate(() => { IC.save.mem = {}; IC.persist(); });
+  // challenges: real clicks on the slide badges, the rules they impose, the lab report, the star economy
+  const cc = (ok, msg) => { if (!ok) errs.push('challenge: ' + msg); };
+  cc(await p.evaluate(() => IC.MEMORY.length * IC.MEMCOST.reduce((a, b) => a + b) === 30 && IC.LEVELS.length * 5 === 30), 'buying every memory tier must cost exactly 30 stars');
+  await p.evaluate(() => IC.showTitle()); await p.waitForTimeout(200);
+  cc(await p.evaluate(() => document.querySelectorAll('.slide .chb').length === 2 * IC.save.stars.filter(Boolean).length), 'every won specimen (and only those) offers Heroic and Iron');
+  const camp = await p.evaluate(() => JSON.stringify(IC.save.stars));
+  await clickSel('.slide[data-i="0"] .chb[data-m="heroic"]'); await p.waitForTimeout(300);
+  cc(await p.evaluate(() => IC.S.mode === 'heroic' && IC.S.lives === 1 && IC.S.waves.length === 6 && IC.S.screen === 'play' && /HEROIC/.test(document.getElementById('specId').textContent)), 'heroic badge did not start the heroic challenge');
+  await p.screenshot({ path: `${out}/16-heroic-start.png` });
+  await p.evaluate(() => { IC.build(2, 'neutro'); IC.build(3, 'killer'); IC.sendWave(); IC.S.speed = 2; }); await p.waitForTimeout(5000);
+  await p.screenshot({ path: `${out}/17-heroic-play.png` });
+  await clickSel('#mapBtn'); await clickSel('.slide[data-i="4"] .chb[data-m="iron"]'); await p.waitForTimeout(300);
+  cc(await p.evaluate(() => IC.S.mode === 'iron' && IC.S.lives === 1 && IC.S.waves.length === 1 && IC.S.lines.join() === IC.CHAL[4].lines.join()), 'iron badge did not start the iron challenge');
+  const sl5 = await p.evaluate(() => { const r = document.getElementById('cv').getBoundingClientRect(); const s = IC.S.slots[5]; return { x: r.left + s.x / 1000 * r.width, y: r.top + s.y / 620 * r.height }; });
+  await p.mouse.click(sl5.x, sl5.y); await p.waitForTimeout(300);
+  cc(await p.evaluate(() => document.querySelectorAll('#radial .rb').length === 2), 'iron radial must offer exactly its two cell lines');
+  await p.keyboard.press('q'); cc(await p.evaluate(() => !IC.S.ability && IC.build(6, IC.TORDER.find(k => !IC.S.lines.includes(k))) === false), 'iron must refuse fever and other cell lines');
+  await p.mouse.move(sl5.x + 30, sl5.y - 60); await p.waitForTimeout(300); await p.screenshot({ path: `${out}/18-iron-radial.png` });
+  await p.keyboard.press('Escape');
+  await p.evaluate(() => { IC.S.gold = 2000; [0, 2, 4, 6, 8, 10].forEach((s, i) => IC.build(s, IC.S.lines[i % 2])); IC.sendWave(); IC.S.speed = 2; }); await p.waitForTimeout(9000);
+  await p.screenshot({ path: `${out}/19-iron-play.png` });
+  const iron0 = await p.evaluate(() => IC.save.iron[4]);
+  await p.evaluate(() => IC.endLevel(true)); await p.waitForTimeout(1200);
+  cc(await p.evaluate(() => IC.save.iron[4] === 1 && /IRON/.test(document.getElementById('rep').textContent) && !document.getElementById('eNext')), 'iron win not recorded or report missing the mode');
+  cc(await p.evaluate(c => JSON.stringify(IC.save.stars) === c, camp), 'a challenge changed campaign stars');
+  if (!iron0) await p.screenshot({ path: `${out}/20-report-iron.png` }); else { await p.evaluate(() => { IC.save.iron[4] = 0; IC.startLevel(4, 'iron'); IC.endLevel(true); }); await p.waitForTimeout(1200); await p.screenshot({ path: `${out}/20-report-iron.png` }); }
+  await clickSel('#eRetry'); cc(await p.evaluate(() => IC.S.mode === 'iron' && IC.S.lvl === 4), 'retry left the challenge');
+  await p.evaluate(() => { IC.startLevel(5, 'heroic'); IC.S.wave = 3; IC.endLevel(false); }); await p.waitForTimeout(1500);
+  await p.screenshot({ path: `${out}/21-report-heroic-lost.png` });
+  // a save from before challenges whose purchases cost more than its stars: purchases kept, nothing negative, challenge arrays added
+  await p.evaluate(() => localStorage.setItem('immune-citadel-v4', JSON.stringify({ stars: [3, 2, 0, 0, 0, 0], seen: [], mem: { neutro: 3, macro: 3 } })));
+  await p.reload(); await p.waitForTimeout(600);
+  cc(await p.evaluate(() => { const m = IC.memStars(); return m.total === 5 && m.spent === 10 && m.avail === 0 && IC.save.mem.neutro === 3 && IC.save.heroic.length === 6 && document.getElementById('memBtnN').textContent === '★ 0'; }), 'old save not migrated cleanly');
+  await p.screenshot({ path: `${out}/22-tray-oldsave.png` });
+  await clickSel('#memBtn'); cc(await p.evaluate(() => document.getElementById('memAvail').textContent === '0 / 5'), 'memory bank shows a negative or wrong balance');
+  await p.screenshot({ path: `${out}/23-memory-oldsave.png` });
   console.log('errors:', errs.length ? errs : 'none'); await b.close();
 })();
