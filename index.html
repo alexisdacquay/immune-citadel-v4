@@ -31,8 +31,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 .mt:last-child{border-right:0}
 .mt svg{width:26px;height:26px;flex:none}
 .mt b{display:block;font:700 21px/1 var(--mono);letter-spacing:-.02em}
-.mt b span{font-size:12px;color:var(--dim)}
-.mt small{display:block;font:600 9px var(--mono);letter-spacing:.18em;color:var(--dim);margin-top:3px}
+.mt b span{font-size:max(12px,calc(9px / var(--u,1)));color:var(--dim)}
+.mt small{display:block;font:600 max(9px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.18em;color:var(--dim);margin-top:3px}
 #lives.low{color:var(--red);text-shadow:0 0 12px rgba(255,77,94,.7)}
 /* top-right controls */
 #hudTR{right:12px;top:12px;transform-origin:top right;display:flex;gap:4px;padding:5px}
@@ -55,12 +55,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 @keyframes ready{50%{box-shadow:0 0 18px rgba(127,216,255,.45),0 8px 20px -8px #000}}
 .tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .12s;background:var(--glass2);border:1px solid var(--rim);border-radius:10px;padding:8px 11px;width:max-content;max-width:230px;text-align:left;font:400 12px/1.4 var(--sans);color:var(--txt)}
 .tip b{display:block;font:600 14px var(--sans);color:#fff}
-.tip small{font:600 10px var(--mono);letter-spacing:.1em;color:var(--cyan)}
+.tip small{font:600 max(10px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.1em;color:var(--cyan)}
 .ab .tip{bottom:78px;left:0}
+.ab .ti,.ab.iron .tb{display:none}.ab.iron .ti{display:inline}
+html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card and the field note already say it */
 @media (hover:hover){.ab:hover .tip,.wcall:hover .tip{opacity:1}}
 .wcall.show .tip{opacity:1}
 /* specimen label bottom-right */
-#spec{right:14px;bottom:14px;transform-origin:bottom right;text-align:right;font:500 11px var(--mono);color:var(--dim);letter-spacing:.08em;pointer-events:none;text-shadow:0 1px 3px #000}
+#spec{right:14px;bottom:14px;transform-origin:bottom right;text-align:right;font:500 max(11px,calc(9px / var(--u,1))) var(--mono);color:var(--dim);letter-spacing:.08em;pointer-events:none;text-shadow:0 1px 3px #000}
 #spec b{display:block;font:600 18px var(--sans);letter-spacing:0;color:var(--txt);margin:2px 0}
 #spec .bar{display:inline-flex;align-items:center;gap:8px;margin-top:4px}
 #spec .bar i{display:inline-block;width:64px;height:4px;background:#e8f3ff;box-shadow:0 0 8px rgba(200,230,255,.6)}
@@ -70,12 +72,12 @@ button{font:inherit;color:inherit;cursor:pointer}
 #info.up:not([hidden]) ~ #topc{opacity:0} /* the banner / boss bar make room for it while it is up there */
 #info .por{width:58px;height:58px;border-radius:12px;background:radial-gradient(circle,rgba(30,50,75,.9),rgba(5,10,16,.9));border:1px solid var(--rim);display:grid;place-items:center;flex:none}
 #info .por img{width:54px;height:54px}
-#info .meta small{display:block;font:600 9px var(--mono);letter-spacing:.16em;color:var(--cyan);text-transform:uppercase}
+#info .meta small{display:block;font:600 max(9px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.16em;color:var(--cyan);text-transform:uppercase}
 #info .meta b{display:block;font:600 19px/1.15 var(--sans);color:#fff;white-space:nowrap}
 #info .meta span{font-size:12px;color:var(--dim);white-space:nowrap}
 #info .sv{display:flex;gap:6px}
 #info .s{background:rgba(140,205,255,.07);border:1px solid rgba(140,205,255,.12);border-radius:9px;padding:4px 9px;min-width:54px}
-#info .s small{display:block;font:600 8px var(--mono);letter-spacing:.14em;color:var(--dim)}
+#info .s small{display:block;font:600 max(8px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.14em;color:var(--dim)}
 #info .s b{font:700 14px var(--mono);white-space:nowrap}
 #info .s b i{font-style:normal;color:var(--dim);font-size:10px}
 #info .s b em{font-style:normal;color:var(--lime);font-size:11px;margin-left:3px}
@@ -85,7 +87,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 #info .sv.g2{display:grid;grid-template-columns:auto auto}
 #info .meta small{white-space:nowrap}
 #info .skt{margin-top:5px;padding-top:5px;border-top:1px solid rgba(140,205,255,.14)}
-#info .skn{font:600 10px var(--mono);letter-spacing:.08em;color:var(--cyan);text-transform:uppercase}
+#info .skn{font:600 max(10px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.08em;color:var(--cyan);text-transform:uppercase}
 #info .pips.sk{display:inline-flex;margin:0 0 0 6px;vertical-align:middle}
 #info .pips.sk i.on{background:var(--cyan);box-shadow:0 0 6px rgba(127,216,255,.7)}
 #info .chips{margin:4px 0 0}
@@ -99,6 +101,13 @@ button{font:inherit;color:inherit;cursor:pointer}
 .wcall svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;position:relative}
 .wcall .cd{position:absolute;inset:-6px;border-radius:50%;background:conic-gradient(rgba(255,138,143,.9) var(--p,100%),transparent 0);-webkit-mask:radial-gradient(circle,transparent 26px,#000 27px);mask:radial-gradient(circle,transparent 26px,#000 27px)}
 .wcall .tip{left:56px;top:-6px}
+/* what the next click or tap does: hover (mouse) says click; the touch preview says tap again, with the radial's amber check */
+.wcall .go{display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid rgba(140,205,255,.14);font:600 max(10px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+.wcall .go::after{content:'Click to call'}
+.wcall.show .go{color:var(--amber)}
+.wcall.show .go::after{content:'Tap again to call'}
+.wcall.show .go::before{content:'';flex:none;width:16px;height:16px;border-radius:50%;border:1px solid var(--amber);box-shadow:0 0 8px rgba(255,194,74,.6);background:#06101a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 10.5l3 3 6-7' fill='none' stroke='%23ffc24a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/13px no-repeat}
+.wcall.show{border-color:var(--amber)}
 .wcall.first{width:58px;height:58px;margin:-29px 0 0 -29px}
 .wcall.first .cd{-webkit-mask:radial-gradient(circle,transparent 32px,#000 33px);mask:radial-gradient(circle,transparent 32px,#000 33px)}
 @keyframes wpulse{50%{box-shadow:0 0 0 8px rgba(255,77,94,.12),0 0 26px rgba(255,77,94,.55)}}
@@ -125,13 +134,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 /* banner */
 /* #topc sits centred in the gap between the meters and the controls; layoutTop() sets left and --bw (gap width) */
-#topc{position:absolute;left:50%;top:14px;transform:translateX(-50%) scale(var(--u,1));transform-origin:top center;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:3}
+#topc{position:absolute;left:50%;top:14px;width:max-content;transform:translateX(-50%) scale(var(--u,1));transform-origin:top center;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:3;transition:opacity .25s} /* max-content: absolute + left would cap it at (stage width − left) */
+#topc.dim{opacity:.35} /* a wave marker, pathogen or open radial lies under it */
 #banner{display:flex;flex-direction:column;align-items:center;gap:8px}
 .bn{background:var(--glass2);border:1px solid var(--rim);border-radius:12px;padding:9px 16px;display:flex;gap:12px;align-items:center;box-shadow:0 14px 30px -14px #000;animation:drop .35s ease-out both;max-width:min(470px,calc(var(--bw,470px) / var(--u,1)))}
 #boss{display:flex;align-items:center;gap:10px;padding:6px 14px 8px 6px;width:min(360px,calc(var(--bw,360px) / var(--u,1)));border-color:rgba(255,77,94,.45);box-shadow:0 0 24px -8px rgba(255,51,85,.6),0 10px 30px -14px #000;animation:drop .35s ease-out both}
 #boss img{width:38px;height:38px;flex:none}
 #boss div{flex:1;min-width:0}
-#boss small{display:flex;justify-content:space-between;font:600 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#ff8a8f}
+#boss small{display:flex;justify-content:space-between;font:600 max(9px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#ff8a8f}
 #boss small span{color:var(--txt);letter-spacing:.04em}
 #boss b{display:block;font:600 15px/1.2 var(--sans);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #boss .bar{height:7px;margin-top:4px;border-radius:4px;background:rgba(255,77,94,.14);overflow:hidden}
@@ -142,7 +152,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 @keyframes iflash{0%,30%{border-color:var(--amber);box-shadow:0 0 0 1px rgba(255,194,74,.6),0 0 30px rgba(255,194,74,.45)}}
 .bn.out{animation:fade .4s ease-in forwards}
 .bn img{width:44px;height:44px;border-radius:9px;background:rgba(0,0,0,.4)}
-.bn small{display:block;font:600 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#ff8a8f}
+.bn small{display:block;font:600 max(9px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#ff8a8f}
 .bn b{font:600 18px var(--sans);color:#fff}
 .bn p{margin:2px 0 0;font-size:12px;color:var(--dim)}
 @keyframes drop{from{transform:translateY(-12px);opacity:0}to{transform:none;opacity:1}}
@@ -154,7 +164,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .tin{width:min(960px,100%);margin:auto;zoom:var(--ut,1)}
 .hd{display:flex;align-items:flex-end;gap:40px;margin-bottom:20px}
 .hd h1{flex:none}.hd .lede{margin:0 0 14px!important}
-.tin .kick{font:600 11px var(--mono);letter-spacing:.24em;color:var(--cyan)}
+.tin .kick{font:600 max(11px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.24em;color:var(--cyan)}
 .tin h1{font:700 64px/0.95 var(--sans);letter-spacing:-.03em;margin:10px 0 12px;color:#fff;text-shadow:0 0 40px rgba(91,140,255,.45)}
 .tin h1 span{color:var(--cyan)}
 .tin .lede{color:var(--dim);font-size:15px;max-width:560px;margin:0 0 24px}
@@ -164,7 +174,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .slide .lab{background:repeating-linear-gradient(45deg,rgba(255,255,255,.16) 0 2px,rgba(255,255,255,.07) 2px 5px);writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font:700 11px var(--mono);letter-spacing:.24em;color:#eef6ff}
 .slide .body{display:grid;grid-template-columns:1.25fr 1fr;gap:12px;padding:10px}
 .slide img{width:100%;aspect-ratio:1000/620;object-fit:cover;border-radius:4px;display:block}
-.slide .n{font:600 max(9px,calc(8px / var(--ut,1))) var(--mono);letter-spacing:.16em;color:var(--cyan);text-transform:uppercase}
+.slide .n{font:600 max(9px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.16em;color:var(--cyan);text-transform:uppercase}
 .slide b{display:block;font:600 18px/1.15 var(--sans);color:#fff;margin:4px 0}
 .slide p{margin:0 0 6px;font-size:max(12px,calc(9px / var(--ut,1)));color:var(--dim)}
 .stars{font-size:16px;letter-spacing:3px;color:rgba(140,205,255,.2)}
@@ -173,9 +183,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 .slide.locked{opacity:.45;cursor:default}
 /* challenges: shield = Heroic, anvil = Iron; amber once won */
 .chs{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
-.chb{display:flex;align-items:center;gap:6px;padding:2px 9px 2px 2px;border-radius:14px;border:1px solid var(--rim);background:rgba(140,205,255,.06);font:700 max(9px,calc(8.5px / var(--ut,1))) var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--txt)}
+@media (max-height:600px){.chs{flex-wrap:nowrap;gap:4px}.chb{padding-right:7px;gap:4px;letter-spacing:.08em}} /* one row: a second chip row pushes the third slide row off a short screen */
+.chb{display:flex;align-items:center;gap:6px;padding:2px 9px 2px 2px;border-radius:14px;border:1px solid var(--rim);background:rgba(140,205,255,.06);font:700 max(9px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--txt)}
 .chb:hover{border-color:#fff;background:rgba(140,205,255,.16);box-shadow:0 0 14px rgba(127,216,255,.35)}
 .chb.won{border-color:rgba(255,194,74,.5);color:#ffe3a3}
+.chb.confirm{border-color:var(--amber);box-shadow:0 0 0 2px rgba(255,194,74,.28),0 0 16px rgba(255,194,74,.5)}
+.slide .thumb{position:relative;align-self:start}
+.rcap{position:absolute;inset:auto 0 0;padding:6px 8px;border-radius:0 0 4px 4px;background:rgba(6,12,20,.9);border-top:1px solid rgba(255,194,74,.4);font-size:max(11px,calc(9px / var(--ut,1)));line-height:1.3;color:#c9d6e3;pointer-events:none;animation:drop .2s ease-out}
+.rcap b{display:inline;font:inherit;font-weight:700;color:#ffe3a3;margin:0}.rcap em{font-style:normal;color:var(--amber)}
 .bdg{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--rim2);background:radial-gradient(circle at 40% 35%,rgba(40,60,85,.95),rgba(8,14,22,.95))}
 .bdg svg{width:14px;height:14px;fill:rgba(127,216,255,.14);stroke:var(--cyan);stroke-width:1.7;stroke-linejoin:round;stroke-linecap:round}
 .bdg.iron svg{fill:rgba(201,214,227,.14);stroke:#c9d6e3}
@@ -188,7 +203,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .keys{display:flex;gap:6px 22px;flex-wrap:wrap;margin-top:16px;font:500 max(12px,calc(10px / var(--ut,1))) var(--mono);color:var(--dim)}
 .keys b{color:var(--txt)}
 .rep{width:min(440px,100%);padding:24px 26px;margin:auto;zoom:var(--u,1)}
-.rep .kick{font:600 10px var(--mono);letter-spacing:.2em;color:var(--dim);display:flex;justify-content:space-between}
+.rep .kick{font:600 max(10px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.2em;color:var(--dim);display:flex;justify-content:space-between}
 .rep h2{font:700 34px/1 var(--sans);margin:12px 0 6px;color:#fff}
 .rep h2.win{text-shadow:0 0 28px rgba(127,216,255,.6)}
 .rep h2.lose{color:#ff8a8f;text-shadow:0 0 28px rgba(255,77,94,.5)}
@@ -197,8 +212,12 @@ button{font:inherit;color:inherit;cursor:pointer}
 .bigstars .on{color:var(--amber);text-shadow:0 0 18px rgba(255,194,74,.8);animation:star .5s cubic-bezier(.3,1.6,.6,1) both}
 @keyframes star{from{transform:scale(0) rotate(-90deg)}to{transform:none}}
 .rows{border-top:1px solid rgba(140,205,255,.15);margin:8px 0 14px}
-.rows div{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(140,205,255,.08);font:500 12px var(--mono);color:var(--dim)}
-.rows b{color:var(--txt)}
+.rows div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid rgba(140,205,255,.08);font:500 max(12px,calc(9px / var(--u,1))) var(--mono);color:var(--dim)}
+.rows b{color:var(--txt);text-align:right}
+.srule{margin:-4px 0 8px;font:600 max(10px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.12em;color:var(--dim)}
+.rep .fact em{display:block;font:600 max(9px,calc(9px / var(--u,1))) var(--mono);font-style:normal;letter-spacing:.16em;color:var(--dapi);margin-bottom:2px}
+/* phone landscape: the report must fit 390 px with its buttons, no scroll */
+@media (max-height:450px){.rep{padding:14px 22px}.rep .rhd{display:flex;align-items:center;gap:6px 16px;flex-wrap:wrap}.rep h2{font-size:27px;margin:8px 0 6px}.rhd .bigstars{font-size:28px;letter-spacing:5px;margin:0}.rhd .bigbadge{margin:0}.rhd .bigbadge .bdg{width:40px;height:40px}.rhd .bigbadge .bdg svg{width:24px;height:24px}.srule{margin:0 0 4px}.rows{margin:4px 0 8px}.rows div{padding:4px 0}.rep .fact{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;margin:0 0 8px;font-size:12px}.rep .mlink{margin-bottom:8px;padding:6px 12px}}
 .rep .fact{font-size:13px;color:var(--dim);margin:0 0 16px;padding-left:10px;border-left:2px solid var(--dapi)}
 .btns{display:flex;gap:8px}
 .btn{flex:1 1 auto;white-space:nowrap;border:1px solid var(--rim2);border-radius:10px;padding:11px 12px;font:600 13px var(--sans);background:rgba(140,205,255,.06)}
@@ -209,11 +228,11 @@ button{font:inherit;color:inherit;cursor:pointer}
 .mute .sw,.half .sw2,:not(.mute)>svg>.sx{display:none}
 #sndBtn{padding:9px;margin:0 0 14px auto;flex:none}#sndBtn svg{fill:none;stroke-linecap:round}
 #sndPop{position:absolute;z-index:12;width:240px;padding:8px 6px 6px;transform:scale(var(--u,1));transform-origin:0 0;background:var(--glass2);border-color:var(--rim2);box-shadow:0 0 26px -8px rgba(127,216,255,.5),0 14px 30px -14px #000;animation:hpop .2s ease-out}
-#sndPop small{display:block;padding:0 10px 4px;font:600 9px var(--mono);letter-spacing:.18em;color:var(--cyan)}
+#sndPop small{display:block;padding:0 10px 4px;font:600 max(9px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.18em;color:var(--cyan)}
 .tg{display:flex;align-items:center;gap:11px;width:100%;padding:8px 10px;border:0;border-radius:9px;background:none;text-align:left;color:var(--dim)}
 .tg:hover{background:rgba(140,205,255,.08)}
 .tg svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.tg span{flex:1;font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.tg span{flex:1;font:600 max(11px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.14em;text-transform:uppercase}
 .tg em{display:block;font:400 11px var(--sans);font-style:normal;letter-spacing:0;text-transform:none;color:var(--dim);margin-top:1px}
 .tg i{position:relative;flex:none;width:32px;height:18px;border-radius:9px;background:rgba(140,205,255,.12);border:1px solid var(--rim);transition:background .15s,box-shadow .15s}
 .tg i::after{content:'';position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#6c8196;transition:transform .15s,background .15s}
@@ -224,7 +243,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* immune memory */
 #titleOv .tin{position:relative}
 .tbtns{position:absolute;right:0;top:-8px;display:flex;gap:8px}
-.mbtn{position:relative;display:flex;align-items:center;gap:10px;padding:7px 14px 7px 9px;border-radius:12px;border:1px solid var(--rim2);background:var(--glass2);font:600 12px var(--mono);letter-spacing:.14em;color:var(--txt);box-shadow:0 0 22px -6px rgba(91,140,255,.5)}
+.mbtn{position:relative;display:flex;align-items:center;gap:10px;padding:7px 14px 7px 9px;border-radius:12px;border:1px solid var(--rim2);background:var(--glass2);font:600 max(12px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.14em;color:var(--txt);box-shadow:0 0 22px -6px rgba(91,140,255,.5)}
 .mbtn:hover{border-color:#fff;box-shadow:0 0 26px rgba(127,216,255,.4)}
 .mbtn i,.mdot{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#d6e2ff,#6f98ff 45%,rgba(40,70,210,.75));box-shadow:0 0 10px rgba(91,140,255,.8)}
 .mbtn b,.mlink b{color:var(--amber);text-shadow:0 0 10px rgba(255,194,74,.6);letter-spacing:.04em}
@@ -237,13 +256,13 @@ button{font:inherit;color:inherit;cursor:pointer}
 .bank{flex:none;padding:12px 18px;text-align:right}
 .bank b{font:700 40px/1 var(--mono);color:var(--amber);text-shadow:0 0 18px rgba(255,194,74,.6)}
 .bank b span{font-size:18px;color:var(--dim);text-shadow:none}
-.bank small{display:block;font:600 9px var(--mono);letter-spacing:.2em;color:var(--dim);margin-top:5px}
+.bank small{display:block;font:600 max(9px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.2em;color:var(--dim);margin-top:5px}
 .mroot{position:relative;height:58px;margin-top:14px}
 .mroot svg{position:absolute;left:0;top:14px;width:100%;height:44px;overflow:visible}
 .mroot path{fill:none;stroke:rgba(140,205,255,.16);stroke-width:1.5;vector-effect:non-scaling-stroke}
 .mroot path.on{stroke:var(--c);filter:drop-shadow(0 0 4px var(--c))}
 .mroot .mdot{position:absolute;left:50%;top:0;margin-left:-14px;width:28px;height:28px}
-.mroot label{position:absolute;left:50%;top:5px;margin-left:24px;font:600 9px var(--mono);letter-spacing:.2em;color:var(--dim);white-space:nowrap}
+.mroot label{position:absolute;left:50%;top:5px;margin-left:24px;font:600 max(9px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.2em;color:var(--dim);white-space:nowrap}
 .mgrid{display:grid;grid-template-columns:repeat(6,1fr)}
 .mcol{margin:0 6px;padding:12px 10px 10px;text-align:center;border-color:color-mix(in srgb,var(--c) 30%,transparent)}
 .mcol.has{box-shadow:0 0 26px -10px var(--c),0 10px 30px -14px #000}
@@ -251,14 +270,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 .mpor img{width:62px;height:62px}
 .mpor img+img{position:absolute;width:40px;height:40px;right:-8px;bottom:-6px}
 .mcol>b{display:block;font:600 15px/1.15 var(--sans);color:#fff}
-.mcol>small{display:block;font:600 8.5px var(--mono);letter-spacing:.16em;color:var(--c);text-transform:uppercase;margin:3px 0 4px}
+.mcol>small{display:block;font:600 max(8.5px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.16em;color:var(--c);text-transform:uppercase;margin:3px 0 4px}
 .mnode{display:flex;align-items:flex-start;gap:9px;width:100%;margin-top:16px;padding:0;border:0;background:none;text-align:left;position:relative;cursor:default}
 /* lineage links: tier I hangs from the portrait, each tier links down to the next; lit when the lower tier is trained */
 .mnode[data-t="0"]::before,.mnode:not([data-t="2"])::after{content:'';position:absolute;left:14px;width:2px;background:rgba(140,205,255,.14)}
 .mnode[data-t="0"]::before{top:-16px;height:16px}
 .mnode:not([data-t="2"])::after{top:30px;bottom:-16px}
 .mnode.own[data-t="0"]::before,.mnode.lk::after{background:var(--c);box-shadow:0 0 6px var(--c)}
-.mnode .dot{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 10px var(--mono);border:1.5px solid rgba(140,205,255,.2);color:var(--dim);background:rgba(5,10,16,.8)}
+.mnode .dot{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 max(10px,calc(9px / var(--ut,1))) var(--mono);border:1.5px solid rgba(140,205,255,.2);color:var(--dim);background:rgba(5,10,16,.8)}
 .mnode .tx{font:500 max(12px,calc(10px / var(--ut,1)))/1.3 var(--sans);color:var(--dim)}
 .mnode .tx em{display:block;font:700 max(10px,calc(9px / var(--ut,1))) var(--mono);font-style:normal;letter-spacing:.1em;color:rgba(255,194,74,.55)}
 .mnode.own .dot{border-color:var(--c);color:#fff;background:radial-gradient(circle at 38% 35%,#d6e2ff,#6f98ff 45%,rgba(40,70,210,.75));box-shadow:0 0 14px var(--c),0 0 4px var(--c) inset}
@@ -283,7 +302,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 #hudGuide{position:relative}#hudGuide .ndot{top:calc(50% - 15px);right:calc(50% - 16px);width:9px;height:9px}
 #pausePill .btn{pointer-events:auto;padding:6px 12px;font:600 11px var(--mono);letter-spacing:.12em}
 .gtabs{display:flex;gap:4px;padding:4px;flex:none}
-.gtab{position:relative;display:flex;align-items:center;gap:9px;border:1px solid transparent;background:none;border-radius:10px;padding:9px 14px;font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.gtab{position:relative;display:flex;align-items:center;gap:9px;border:1px solid transparent;background:none;border-radius:10px;padding:9px 14px;font:600 max(11px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 .gtab b{font-weight:700;color:var(--txt);letter-spacing:.04em}
 .gtab:hover{color:var(--txt);background:rgba(140,205,255,.07)}
 .gtab.on{color:#fff;background:rgba(127,216,255,.14);border-color:var(--rim2)}
@@ -297,7 +316,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .gt img{width:48px;height:48px;flex:none;border-radius:50%;background:radial-gradient(circle,rgba(30,50,75,.9),rgba(4,8,13,.95));border:1px solid rgba(140,205,255,.12)}
 .gt span{min-width:0}
 .gt b{display:block;font:600 13px/1.2 var(--sans);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gt small{display:block;margin-top:2px;font:600 max(8.5px,calc(8px / var(--ut,1))) var(--mono);letter-spacing:.12em;line-height:1.25;color:var(--dim);text-transform:uppercase}
+.gt small{display:block;margin-top:2px;font:600 max(8.5px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.12em;line-height:1.25;color:var(--dim);text-transform:uppercase}
 .gt.lock b{color:var(--dim)}
 .gt .ndot{top:4px;right:4px;width:9px;height:9px}
 .gcard{overflow:hidden;border-radius:8px}
@@ -307,17 +326,23 @@ button{font:inherit;color:inherit;cursor:pointer}
 .gfield::before{content:'';position:absolute;width:206px;height:206px;border-radius:50%;background:radial-gradient(circle,#070d16 55%,#020407);box-shadow:inset 0 0 34px #000,0 0 0 1px rgba(140,205,255,.16),0 0 30px -10px rgba(91,140,255,.4)}
 #gCv{position:relative;width:206px;height:206px}
 .gtext{padding:12px 18px 14px;min-height:380px} /* plates keep one height, so Back stays put */
-.gtext>small{display:block;font:600 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--c,var(--cyan))}
+.gtext>small{display:block;font:600 max(9px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--c,var(--cyan))}
 .gtext h3{font:700 25px/1.05 var(--sans);letter-spacing:-.01em;color:#fff;margin:4px 0 8px}
 .gtext .rows{margin:0 0 9px}.gtext .rows div{padding:4px 0;gap:14px}.gtext .rows b{text-align:right}
 .gtext .sp{margin:0 0 9px;font-size:12.5px;line-height:1.35;color:#c9d6e3}
-.gtext .sp em{display:block;font:600 9px var(--mono);font-style:normal;letter-spacing:.16em;color:var(--dim);margin-bottom:2px}
-.gtext .fact{margin:0}.gtext .fact em{display:block;font:600 9px var(--mono);font-style:normal;letter-spacing:.16em;color:var(--dapi);margin-bottom:2px}
+.gtext .sp em{display:block;font:600 max(9px,calc(9px / var(--ut,1))) var(--mono);font-style:normal;letter-spacing:.16em;color:var(--dim);margin-bottom:2px}
+.gtext .fact{margin:0}.gtext .fact em{display:block;font:600 max(9px,calc(9px / var(--ut,1))) var(--mono);font-style:normal;letter-spacing:.16em;color:var(--dapi);margin-bottom:2px}
+/* short screens (phone landscape): plate beside its text and pinned while the tiles scroll, so a tap visibly changes the whole card */
+@media (max-height:500px){.gbody{grid-template-columns:minmax(0,1fr) 440px}.gcard{display:grid;grid-template-columns:150px minmax(0,1fr);position:sticky;top:0}
+  .gplate{border-bottom:0;border-right:1px solid rgba(180,220,255,.22);grid-template-columns:24px 1fr}.gfield{padding:6px}.gfield::before,#gCv{width:116px;height:116px}
+  .gtext{min-height:0;max-height:calc(100vh / var(--ut,1) - 24px);overflow:auto;padding:10px 14px 12px}.gtext h3{font-size:21px}}
+/* screen-px floors for the overlays' small sans text (they zoom by --ut) */
+.gtext .rows div{font-size:max(12px,calc(9px / var(--ut,1)))}.gtext .sp,.gtext .fact{font-size:max(12.5px,calc(10px / var(--ut,1)))}.tin .btn{font-size:max(13px,calc(10px / var(--ut,1)))}.mem .lede{font-size:max(14px,calc(10px / var(--ut,1)))!important}
 .gfoot{font:500 max(12px,calc(10px / var(--ut,1))) var(--mono);color:var(--dim)}
 /* onboarding: a field note beside its target, which wears a pulsing ring; only the dismiss button takes clicks */
 #hint{position:absolute;z-index:4;width:250px;padding:10px 38px 12px 14px;pointer-events:none;transform:scale(var(--u,1));transform-origin:0 0;background:var(--glass2);border-color:var(--rim2);box-shadow:0 0 26px -8px rgba(127,216,255,.6),0 14px 30px -14px #000;animation:hpop .25s ease-out}
 @keyframes hpop{from{transform:scale(calc(var(--u,1) * .6));opacity:0}} /* pop at the card's own HUD scale */
-#hint small{display:block;font:600 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);margin-bottom:4px}
+#hint small{display:block;font:600 max(9px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);margin-bottom:4px}
 #hint p{margin:0;font-size:12.5px;line-height:1.4;color:var(--dim)}
 #hint p b{display:block;font:600 14.5px/1.25 var(--sans);color:#fff;margin-bottom:3px}
 #hint .x{pointer-events:auto;position:absolute;top:7px;right:7px;width:24px;height:24px;padding:0;border-radius:7px;border:1px solid var(--rim);background:rgba(140,205,255,.06);font:500 16px/1 var(--sans);color:var(--dim)}
@@ -331,8 +356,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 @keyframes hring{50%{transform:scale(1.1);opacity:.55}}
 /* below ~1700px a centred info bar would run into the bottom-left cluster (hero + 3 skills) */
 @media (max-width:1700px){#info{left:calc(330px * var(--u,1));transform:scale(var(--u,1));transform-origin:bottom left;max-width:calc(100% / var(--u,1) - 346px)}#info.up{transform-origin:top left}#info:not([hidden]) ~ #spec{opacity:0}}
-@media (max-width:1100px){#info .perk:not(.wide),#info .meta span:not(.xp){display:none}#info .perk.wide{flex:0 1 210px;font-size:11px}#info .skt:not(.nx) .skd{display:none}#info .s b em{display:block;margin:0}#info .meta b{font-size:16px}}
-@media (max-height:600px){.ov{padding:10px 20px}}
+/* narrow: the mechanic line (pathogen desc, base perk) stays, clamped to 2 lines; the RESIST and LEAK chips make room */
+@media (max-width:1100px){#info .perk:not(.wide),#info .meta span:not(.xp){display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;white-space:normal;font-size:11px;line-height:1.3;max-width:230px}#info .s.opt{display:none}#info .perk.wide{flex:0 1 210px;font-size:11px}#info .skt:not(.nx) .skd{display:none}#info .s b em{display:block;margin:0}#info .meta b{font-size:16px}}
+@media (max-height:600px){.ov{padding:10px 20px}.kick .kx{display:none} /* the kick must clear the tray's top-right buttons */
+  .tin h1{font-size:44px;margin:6px 0 8px}.hd{margin-bottom:10px}.slides{gap:8px}.slide .body{grid-template-columns:1fr 1.2fr;padding:7px 8px}.slide b{margin:2px 0}.slide p{margin-bottom:3px}.chs{margin-top:4px}.keys{margin-top:6px;gap:2px 16px}} /* the tray's third row and keys fit 540 px with challenge badges */
 /* touch: every target at least 40 px on screen (sizes are divided by the scale the element is drawn at), no keyboard hints */
 .touch .ab kbd{display:none}
 .touch .ib{width:max(38px,calc(42px / var(--u,1)));height:max(38px,calc(42px / var(--u,1)))}
@@ -350,11 +377,12 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* phone landscape: the map keeps its aspect, so the side gutters it leaves hold the controls (right) and hero + abilities (left), off the map */
 .gut{overflow:visible!important}.gut #cv{border-radius:10px}
 .gut #hudTL{left:8px;top:8px} /* a small map: the 12 px inset would push the meters further over the routes */
+.gut #hudTL{padding:4px 6px}.gut .mt{gap:6px;padding-right:8px}.gut .mt small{letter-spacing:.06em;line-height:1;margin-top:2px} /* the 9 px label floor widens the meters: keep them off the routes */
 .gut #hudTR{left:calc(100% + var(--gw) / 2);right:auto;top:8px;flex-direction:column;transform:translateX(-50%) scale(var(--u));transform-origin:top center}
 .gut #hudBL{left:calc(var(--gw) / -2);bottom:8px;flex-direction:column;gap:10px;transform:translateX(-50%) scale(var(--u));transform-origin:bottom center}
 .gut .ab .tip{bottom:auto;top:0;left:80px}
 .gut #info{left:50%;width:max-content;transform:translateX(-50%) scale(var(--u,1));transform-origin:bottom center;max-width:calc((100% - 16px) / var(--u,1))}
-.gut .ab .tip{transform:scale(.8);transform-origin:top left}.gut #info.up{transform-origin:top center}
+.gut .ab .tip{transform:scale(.8);transform-origin:top left}.gut .ab .tip small{font-size:max(10px,calc(11.25px / var(--u,1)))}.gut #info.up{transform-origin:top center}
 .gut .ov{left:calc(var(--gw) * -1);right:calc(var(--gw) * -1)}
 /* portrait on a touch device: the specimen pauses behind this card */
 #rotate{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:24px;background:rgba(2,5,9,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
@@ -391,8 +419,8 @@ button{font:inherit;color:inherit;cursor:pointer}
   </div>
   <div id="hudBL" class="ui">
     <button class="ab" id="ab-hero"><i class="hp"></i><img id="ic-hero" alt="NK Sentinel"><div class="cd"></div><span class="lv">1</span><kbd>H</kbd><div class="tip"><small>HERO · NATURAL KILLER CELL</small><b>NK Sentinel</b>Select it (H), then tap or click near the path to send it there. Tap it again, right-click or Esc cancels.</div></button>
-    <button class="ab" id="ab-fever"><img id="ic-fever" alt="Fever"><div class="cd"></div><kbd>Q</kbd><div class="tip"><small>ABILITY · 32 s</small><b>Fever spike</b>Heat burns everything in an area and slows survivors. Then tap or click the map.</div></button>
-    <button class="ab" id="ab-swarm"><img id="ic-swarm" alt="Swarm"><div class="cd"></div><kbd>W</kbd><div class="tip"><small>ABILITY · 22 s</small><b>Neutrophil swarm</b>Drop <span id="swN">three</span> short-lived neutrophils that block the path. Then tap or click the path.</div></button>
+    <button class="ab" id="ab-fever"><img id="ic-fever" alt="Fever"><div class="cd"></div><kbd>Q</kbd><div class="tip"><small>ABILITY · 32 s</small><b>Fever spike</b><span class="tb">Heat burns everything in an area and slows survivors. Then tap or click the map.</span><span class="ti">Not available in the Iron challenge.</span></div></button>
+    <button class="ab" id="ab-swarm"><img id="ic-swarm" alt="Swarm"><div class="cd"></div><kbd>W</kbd><div class="tip"><small>ABILITY · 18 s</small><b>Neutrophil swarm</b><span class="tb">Drop <span id="swN">three</span> short-lived neutrophils that block the path. Then tap or click the path.</span><span class="ti">Not available in the Iron challenge.</span></div></button>
     <button class="ab" id="ab-gz"><img id="ic-gz" alt="Granzyme"><div class="cd"></div><kbd>E</kbd><div class="tip"><small>HERO SKILL · 20 s</small><b>Granzyme Burst</b>The NK Sentinel sprays granzyme, damaging and stunning every pathogen around it.</div></button>
   </div>
   <div id="info" class="ui glass" hidden></div>
@@ -408,7 +436,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 
   <div class="ov" id="titleOv">
     <div class="tin">
-      <div class="kick">IMMUNOFLUORESCENCE FIELD STUDY · 6 SPECIMENS · <span id="starN"></span></div>
+      <div class="kick"><span class="kx">IMMUNOFLUORESCENCE FIELD STUDY · </span>6 SPECIMENS · <span id="starN"></span></div>
       <div class="tbtns"><button class="mbtn" id="guideBtn"><svg viewBox="0 0 24 24"><path d="M4 5.5c3-1.2 5.8-1 8 1 2.2-2 5-2.2 8-1v13c-3-1.2-5.8-1-8 1-2.2-2-5-2.2-8-1z"/><path d="M12 6.5v13"/></svg>FIELD GUIDE<em class="ndot" hidden></em></button>
       <button class="mbtn" id="memBtn"><i></i>IMMUNE MEMORY <b id="memBtnN"></b></button></div>
       <div class="hd"><h1>IMMUNE<br><span>CITADEL</span></h1>
@@ -701,25 +729,25 @@ const TOWERS = {
   neutro: {
     name: 'Neutrophil', role: 'Rapid responder', kind: 'Physical · fast', dtype: 'phys',
     flavor: 'First to arrive, first to die. Spits toxic granules at anything that moves.',
-    lv: [{ cost: 70, dmg: 6, rate: .5, range: 140 }, { cost: 90, dmg: 10, rate: .42, range: 152 }, { cost: 140, dmg: 17, rate: .35, range: 166 }],
+    lv: [{ cost: 70, dmg: 6, rate: .5, range: 140 }, { cost: 80, dmg: 12, rate: .42, range: 152 }, { cost: 140, dmg: 17, rate: .35, range: 166 }],
     perk: 'Level 3 · NETosis: every 4th shot casts a sticky DNA net that slows by 45%.', perkLv: 2,
   },
   macro: {
     name: 'Macrophage', role: 'Big eater · blocker', kind: 'Holds the line', dtype: 'phys',
     flavor: '“Big eater” in Greek. Its cells crawl onto the path and hold invaders in place.',
-    lv: [{ cost: 80, units: 2, hp: 80, dmg: 6, range: 110 }, { cost: 100, units: 2, hp: 125, dmg: 9, range: 118 }, { cost: 150, units: 3, hp: 180, dmg: 14, range: 126 }],
+    lv: [{ cost: 80, units: 2, hp: 80, dmg: 6, range: 110 }, { cost: 85, units: 2, hp: 125, dmg: 9, range: 118 }, { cost: 150, units: 3, hp: 180, dmg: 14, range: 126 }],
     perk: 'Level 3 · Phagolysosome: a third cell joins and cells regenerate fast between fights.', perkLv: 2,
   },
   bcell: {
     name: 'B Cell', role: 'Antibody factory', kind: 'Splash · ground only', dtype: 'phys',
     flavor: 'Lobs clouds of antibodies. Tagged pathogens take extra damage from everything.',
-    lv: [{ cost: 110, dmg: 14, rate: 1.7, range: 150, splash: 52 }, { cost: 130, dmg: 26, rate: 1.6, range: 160, splash: 58 }, { cost: 190, dmg: 42, rate: 1.45, range: 175, splash: 68 }],
+    lv: [{ cost: 110, dmg: 14, rate: 1.7, range: 150, splash: 52 }, { cost: 130, dmg: 30, rate: 1.6, range: 160, splash: 58 }, { cost: 190, dmg: 42, rate: 1.45, range: 175, splash: 68 }],
     perk: 'Opsonization: every hit tags enemies to take +25% damage for 3 s.', perkLv: 0,
   },
   killer: {
     name: 'Killer T Cell', role: 'Assassin', kind: 'Magic · ignores armor', dtype: 'magic',
     flavor: 'Reads the invader’s ID card and orders it to self-destruct. Armor means nothing.',
-    lv: [{ cost: 100, dmg: 20, rate: 1.1, range: 135 }, { cost: 130, dmg: 36, rate: 1.0, range: 145 }, { cost: 190, dmg: 62, rate: .9, range: 155 }],
+    lv: [{ cost: 100, dmg: 20, rate: 1.1, range: 135 }, { cost: 130, dmg: 40, rate: 1.0, range: 145 }, { cost: 190, dmg: 62, rate: .9, range: 155 }],
     perk: 'Level 3 · Perforin chain: each bolt leaps to a second target for 60%.', perkLv: 2,
   },
 };
@@ -728,44 +756,44 @@ TOWERS.macro.resp = 9; // seconds before a fallen macrophage cell returns
 const TORDER = ['neutro', 'macro', 'bcell', 'killer'];
 // tier IV specialists: st = stats, sk = signature skill ranks (bought after specializing)
 const SPECS = {
-  net: { base: 'neutro', name: 'NET Trapper', role: 'Tier IV · Controller', kind: 'Physical · every shot slows', cost: 180,
+  net: { base: 'neutro', name: 'NET Trapper', role: 'Tier IV · Controller', kind: 'Physical · every shot slows', cost: 215,
     st: { dmg: 30, rate: .3, range: 180, slow: .5 }, tag: ['SLOW', '50%'],
     perk: 'Casts DNA nets: every granule slows its target by 50%.',
     skn: 'Chromatin Snare', sk: [{ cost: 90, cd: 7, r: 75, root: 1.8 }, { cost: 120, cd: 6, r: 90, root: 2.4 }],
     skd: r => `Every ${r.cd} s roots all ground pathogens within ${r.r} of its target for ${r.root} s (bosses half).` },
-  degran: { base: 'neutro', name: 'Degranulator', role: 'Tier IV · Shredder', kind: 'Physical · 3-shot bursts', cost: 200,
+  degran: { base: 'neutro', name: 'Degranulator', role: 'Tier IV · Shredder', kind: 'Physical · 3-shot bursts', cost: 240,
     st: { dmg: 30, rate: .45, range: 165, burst: 3 }, tag: ['BURST', '×3'],
     perk: 'Empties its granules in rapid bursts of three.',
     skn: 'Myeloperoxidase', sk: [{ cost: 100, shred: .05, cap: .3 }, { cost: 130, shred: .07, cap: .5 }],
     skd: r => `Bleach-laced hits strip ${Math.round(r.shred * 100)}% armor each, stacking up to ${Math.round(r.cap * 100)}%.` },
-  m1: { base: 'macro', name: 'M1 Inflammatory', role: 'Tier IV · Brawler', kind: 'Three hard-hitting cells', cost: 170,
+  m1: { base: 'macro', name: 'M1 Inflammatory', role: 'Tier IV · Brawler', kind: 'Three hard-hitting cells', cost: 205,
     st: { units: 3, hp: 300, dmg: 40, rate: .7, regen: .12 }, tag: ['RATE', (1 / .7).toFixed(1) + '/s'],
     perk: 'Activated by danger signals: cells bite almost three times as hard, and faster.',
     skn: 'Acid Spit', sk: [{ cost: 80, dmg: 24, cd: .9, r: 90 }, { cost: 110, dmg: 40, cd: .7, r: 110 }],
     skd: r => `Cells spit ${r.dmg}-damage acid every ${r.cd} s at pathogens within ${r.r}, flyers included.` },
-  m2: { base: 'macro', name: 'M2 Resolver', role: 'Tier IV · Healer', kind: 'Four tanky, healing cells', cost: 150,
-    st: { units: 4, hp: 500, dmg: 36, rate: .9, regen: .25, heal: 16, eat: 120 }, tag: ['HEAL', '16/s'],
+  m2: { base: 'macro', name: 'M2 Resolver', role: 'Tier IV · Healer', kind: 'Four tanky, healing cells', cost: 190,
+    st: { units: 4, hp: 500, dmg: 26, rate: .9, regen: .25, heal: 16, eat: 120 }, tag: ['HEAL', '16/s'],
     perk: 'Calms the fight: cells regenerate fast and heal nearby cells 16 HP/s.',
     skn: 'Efferocytosis', sk: [{ cost: 60, atp: 4 }, { cost: 90, atp: 7 }],
     skd: r => `Eats the dead: every pathogen that dies within ${SPECS.m2.st.eat} of its cells returns +${r.atp} ATP, whoever killed it.` },
-  plasma: { base: 'bcell', name: 'Plasma Cell', role: 'Tier IV · Artillery', kind: 'Splash · rapid barrage', cost: 210,
+  plasma: { base: 'bcell', name: 'Plasma Cell', role: 'Tier IV · Artillery', kind: 'Splash · rapid barrage', cost: 250,
     st: { dmg: 46, rate: .7, range: 180, splash: 82, ops: 1.4 }, tag: ['TAG', '+40%'],
     perk: 'An antibody factory: rapid wide clouds; tagged pathogens take +40% damage.',
     skn: 'Antibody Rain', sk: [{ cost: 110, cd: 7, n: 4, dmg: 55 }, { cost: 140, cd: 5, n: 6, dmg: 65 }],
     skd: r => `Every ${r.cd} s rains ${r.n} antibody clouds of ${r.dmg} damage on pathogens in range.` },
-  memory: { base: 'bcell', name: 'Memory B Cell', role: 'Tier IV · Learner', kind: 'Splash · remembers kills', cost: 200,
+  memory: { base: 'bcell', name: 'Memory B Cell', role: 'Tier IV · Learner', kind: 'Splash · remembers kills', cost: 240,
     st: { dmg: 75, rate: 1.2, range: 200, splash: 64, mem: .08, memCap: 1.2 }, tag: ['MEMORY', '+8%/kill'],
     perk: 'Each kill of a pathogen type adds +8% damage against that type for the rest of the specimen (max +120%).',
     skn: 'Recall', sk: [{ cost: 110, cd: 10, dmg: 400 }, { cost: 140, cd: 7, dmg: 600 }],
     skd: r => `Every ${r.cd} s strikes the toughest pathogen in range for ${r.dmg}, ignoring armor.` },
-  ctl: { base: 'killer', name: 'CTL Executioner', role: 'Tier IV · Assassin', kind: 'Magic · ignores armor', cost: 230,
+  ctl: { base: 'killer', name: 'CTL Executioner', role: 'Tier IV · Assassin', kind: 'Magic · ignores armor', cost: 275,
     st: { dmg: 125, rate: .85, range: 170 }, tag: ['CHAIN', '60%'],
     perk: 'A seasoned killer: heavy perforin bolts that still leap to a second target.',
     skn: 'Perforin Verdict', sk: [{ cost: 100, cd: 5, th: .3 }, { cost: 140, cd: 3.5, th: .45 }],
     skd: r => `Every ${r.cd} s a bolt executes a non-boss pathogen below ${Math.round(r.th * 100)}% health.` },
-  th1: { base: 'killer', name: 'Th1 Helper', role: 'Tier IV · Commander', kind: 'Magic · attack-speed aura', cost: 170,
+  th1: { base: 'killer', name: 'Th1 Helper', role: 'Tier IV · Commander', kind: 'Magic · attack-speed aura', cost: 205,
     st: { dmg: 60, rate: .9, range: 160, aura: 200, haste: .35 }, tag: ['AURA', '+35%'],
-    perk: 'Lighter bolts that still leap, and its cytokines give every tower within 200 +35% attack speed.',
+    perk: 'Lighter bolts that still leap, and its cytokines give every tower within 200 +35% attack speed. Auras from several Th1 do not stack.',
     skn: 'Cytokine Surge', sk: [{ cost: 90, cd: 14, dur: 6, haste: .7 }, { cost: 110, cd: 11, dur: 7, haste: 1 }],
     skd: r => `Every ${r.cd} s the aura surges to +${Math.round(r.haste * 100)}% attack speed for ${r.dur} s.` },
 };
@@ -780,9 +808,9 @@ const ENEMIES = {
   flu: { name: 'Influenza', kind: 'Airborne virus', hp: 50, speed: 42, armor: 0, mr: .15, gold: 11, lives: 1, atk: 0, r: 10, flying: true, desc: 'Drifts over blockers. Antibody clouds can’t reach it.' },
   worm: { name: 'Helminth', kind: 'Parasitic worm', hp: 430, speed: 19, armor: .35, mr: .55, gold: 45, lives: 3, atk: 16, r: 13, desc: 'Huge parasite. Resists magic. Grind it down with blockers and antibodies.' },
   boss: { name: 'MRSA Superbug', kind: 'Boss · drug-resistant', hp: 2300, speed: 14, armor: .5, mr: .35, gold: 300, lives: 10, atk: 34, r: 30, boss: true, desc: 'Grows a biofilm shield over nearby allies and buds fresh bacteria.' },
-  salmon: { name: 'Salmonella', kind: 'Flagellated bacterium', hp: 60, speed: 64, armor: .1, mr: 0, gold: 9, lives: 1, atk: 5, r: 10, regen: .16, desc: 'Fast, flagellated. Heals itself when left unhit for 2 s.' },
+  salmon: { name: 'Salmonella', kind: 'Flagellated bacterium', hp: 60, speed: 64, armor: .1, mr: 0, gold: 9, lives: 1, atk: 5, r: 10, regen: .12, desc: 'Fast, flagellated. Heals itself when left unhit for 2 s.' },
   toxo: { name: 'Toxoplasma', kind: 'Parasite · stealth', hp: 130, speed: 34, armor: .2, mr: .25, gold: 15, lives: 2, atk: 8, r: 12, stealth: 85, desc: 'Hidden unless a cell is within 85. Fever reveals it for 6 s.' },
-  rabies: { name: 'Rabies Lyssavirus', kind: 'Boss · neurotropic virus', hp: 2000, speed: 13, armor: .3, mr: .45, gold: 400, lives: 10, atk: 40, r: 30, boss: true, desc: 'Silences the nearest immune cell for 4 s every 9 s. Sheds virions.' },
+  rabies: { name: 'Rabies Lyssavirus', kind: 'Boss · neurotropic virus', hp: 2600, speed: 13, armor: .3, mr: .45, gold: 400, lives: 10, atk: 40, r: 30, boss: true, desc: 'Every 6 s silences your most-invested immune cell in reach for 5 s. Sheds virions.' },
   virion: { name: 'Lyssa virion', kind: 'Shed virion', hp: 30, speed: 56, armor: 0, mr: .3, gold: 2, lives: 1, atk: 2, r: 7, desc: 'Bullet-shaped offspring shed by the Rabies Lyssavirus.' },
 };
 const g_ = (t, n, gap, d = 0, p = 0) => ({ t, n, gap, d, p });
@@ -794,7 +822,7 @@ const LEVELS = [
     slots: [[120, 85], [250, 100], [225, 300], [395, 300], [355, 525], [510, 400], [520, 545], [600, 330], [765, 300], [760, 92], [900, 232], [960, 90]],
     waves: [[g_('bact', 6, 1.3)], [g_('bact', 10, 1)], [g_('virus', 8, .7), g_('bact', 5, 1.1, 5)], [g_('bact', 6, 1), g_('staph', 3, 2.2, 3)],
       [g_('virus', 16, .45)], [g_('staph', 5, 1.8), g_('bact', 10, .8, 2)], [g_('candida', 2, 4), g_('virus', 12, .5, 3)],
-      [g_('bact', 14, .6), g_('staph', 6, 1.6, 4), g_('candida', 3, 3.5, 10)]],
+      [g_('bact', 14, .6), g_('staph', 8, 1.6, 4), g_('candida', 4, 3.5, 10)]],
   },
   {
     place: 'The Lungs', name: 'Storm in the Alveoli', sub: 'Airborne invaders arrive on two breaths at once.', seed: 23, gold: 330, style: 'lung',
@@ -828,17 +856,17 @@ const LEVELS = [
 ];
 LEVELS.push(
   {
-    place: 'Gut Lining', name: 'The Villi Maze', sub: 'Two tainted meals, two routes through the villi. They cross, then merge.', seed: 67, gold: 480, style: 'villi', edge: '#b47dff', // PAS-stained mucin lilac: clear of orange flu, magenta candida, pink toxo
+    place: 'Gut Lining', name: 'The Villi Maze', sub: 'Two tainted meals, two routes through the villi. They cross, then merge.', seed: 67, gold: 480, style: 'villi', edge: '#d8a3b4', // PAS rose-grey counterstain. Walls stay desaturated: saturated cool hues read as immune cells, warm ones as pathogens
    
     paths: [[[-40, 120], [200, 120], [330, 250], [470, 420], [620, 470], [760, 380], [860, 300], [1040, 300]], [[-40, 470], [190, 470], [330, 380], [470, 250], [600, 180], [760, 220], [860, 300], [1040, 300]]],
     slots: [[160, 190], [240, 360], [300, 310], [390, 230], [380, 410], [490, 340], [560, 310], [570, 390], [650, 380], [690, 270], [760, 300], [850, 210], [850, 390], [920, 240], [170, 400], [460, 190]],
     waves: [[g_('bact', 12, .9, 0, -1)], [g_('salmon', 8, 1.2, 0, -1)], [g_('virus', 18, .4, 0, -1), g_('staph', 4, 1.8, 3, -1)], [g_('toxo', 4, 2.5, 0, -1), g_('bact', 10, .8, 2, -1)],
-      [g_('salmon', 12, .8, 0, -1), g_('flu', 6, 1.2, 4, -1)], [g_('candida', 4, 2.5, 0, -1), g_('toxo', 6, 1.8, 3, -1)], [g_('staph', 10, 1.1, 0, -1), g_('salmon', 10, .7, 4, -1)],
-      [g_('worm', 3, 4, 0, -1), g_('toxo', 8, 1.5, 3, -1)], [g_('virus', 36, .25, 0, -1), g_('salmon', 8, .7, 5, -1)], [g_('flu', 12, .8, 0, -1), g_('toxo', 8, 1.3, 3, -1), g_('staph', 8, 1, 6, -1)],
+      [g_('salmon', 12, .8, 0, -1), g_('flu', 6, 1.2, 4, -1)], [g_('candida', 4, 2.5, 0, -1), g_('toxo', 6, 1.8, 3, -1)], [g_('staph', 10, 1.1, 0, -1), g_('salmon', 8, .7, 4, -1)],
+      [g_('worm', 3, 4, 0, -1), g_('toxo', 8, 1.5, 3, -1)], [g_('virus', 28, .3, 0, -1), g_('salmon', 6, .7, 5, -1)], [g_('flu', 12, .8, 0, -1), g_('toxo', 8, 1.3, 3, -1), g_('staph', 8, 1, 6, -1)],
       [g_('candida', 6, 2, 0, -1), g_('salmon', 16, .5, 3, -1), g_('worm', 3, 4, 6, -1)], [g_('toxo', 12, 1.1, 0, -1), g_('salmon', 16, .5, 4, -1), g_('worm', 4, 3.5, 8, -1), g_('flu', 10, .8, 12, -1)]],
   },
   {
-    place: 'Brain Barrier', name: 'The Last Wall', sub: 'Behind this barrier lies the brain. One long road, one fork, nothing left behind it.', seed: 79, gold: 560, style: 'bbb', edge: '#6df0a6', // GFAP green: clear of pink toxo, magenta candida, lime E. coli
+    place: 'Brain Barrier', name: 'The Last Wall', sub: 'Behind this barrier lies the brain. One long road, one fork, nothing left behind it.', seed: 79, gold: 560, style: 'bbb', edge: '#a9b9cc', // pale steel: tight-junction grey, clear of the mint macrophage / NK family
    
     paths: [[[-40, 90], [230, 90], [330, 160], [300, 270], [160, 330], [150, 440], [260, 505], [440, 510], [520, 380], [600, 280], [720, 250], [830, 330], [900, 380], [1040, 380]],
       [[-40, 90], [230, 90], [330, 160], [300, 270], [160, 330], [150, 440], [260, 505], [440, 510], [600, 560], [760, 560], [850, 450], [900, 380], [1040, 380]]],
@@ -850,7 +878,7 @@ LEVELS.push(
       [g_('rabies', 1, 1, 0, 0), g_('toxo', 20, 1.1, 3, -1), g_('salmon', 24, .6, 8, -1), g_('flu', 12, .8, 14, -1)]],
   },
 );
-const LVLMULT = [1.15, 1.8, 2.25, 1.7, 1.92, 1.9]; // bot without memory: 01-02 ~20 lives, 03-04 ~17, 05-06 ~17; 05 and 06 still win ~90% at +5-10% (waves 05/09-12 and 06/06-14 tuned so)
+const LVLMULT = [1.5, 2.2, 3.4, 2.15, 2.35, 2.6]; // no memory, 12-16 runs each (playtest bal.js): wide bot median 20/20/18/15/19/17, focus bot (rushes 2 specialists) 20/14/16/17/18/14; 05 swings most (toxo, salmonella)
 // challenges, unlocked by clearing a specimen; 1 vitality, any leak loses, a win is worth 1 star each.
 // Heroic: 6 elite waves (tougher and faster than the campaign). Iron: one long wave that starts soft and hardens as it goes (ramp per second of delay), two cell lines only, no Fever or Swarm.
 const MODES = {
@@ -862,15 +890,15 @@ const CHAL = [ // per specimen: heroic = 6 waves; iron = one wave (groups by del
   // hp = [heroic, iron] pathogen health on top of the mode's (tuned so the full-memory bot wins about half its tries)
   { heroic: [[g_('bact', 12, .7), g_('virus', 10, .45, 3)], [g_('staph', 5, 1.5), g_('bact', 12, .6, 2)], [g_('candida', 3, 3), g_('virus', 16, .4, 2)],
       [g_('staph', 8, 1.2), g_('candida', 3, 3, 4), g_('bact', 14, .5, 6)], [g_('virus', 30, .3), g_('staph', 6, 1.3, 5)], [g_('candida', 5, 2.5), g_('staph', 10, 1, 3), g_('bact', 20, .45, 6), g_('virus', 16, .4, 10)]],
-    hp: [1.92, 1.47], lines: ['neutro', 'killer'], // armored staph: assassins; swarms of rods: granules
+    hp: [1.65, 1.25], lines: ['neutro', 'killer'], // armored staph: assassins; swarms of rods: granules
     iron: [g_('bact', 20, .6), g_('virus', 20, .4, 10), g_('staph', 8, 1.5, 20), g_('candida', 4, 4, 32), g_('bact', 24, .5, 45), g_('virus', 30, .3, 60), g_('staph', 12, 1.2, 75), g_('candida', 6, 3, 90), g_('bact', 30, .4, 105), g_('staph', 10, 1, 115)] },
   { heroic: [[g_('bact', 14, .7, 0, -1), g_('flu', 6, 1.4, 3, -1)], [g_('staph', 8, 1.3, 0, -1), g_('virus', 16, .4, 3, -1)], [g_('candida', 4, 2.5, 0, -1), g_('flu', 10, .9, 4, -1)],
       [g_('staph', 12, 1, 0, -1), g_('bact', 16, .5, 3, -1), g_('flu', 8, 1, 8, -1)], [g_('virus', 36, .25, 0, -1), g_('candida', 5, 2, 6, -1)], [g_('staph', 14, .9, 0, -1), g_('candida', 6, 2, 4, -1), g_('flu', 14, .8, 8, -1), g_('bact', 20, .4, 12, -1)]],
-    hp: [1.26, 1.22], lines: ['bcell', 'killer'], // flyers drift over blockers: antibody clouds for the ground, assassins for the air
-    iron: [g_('bact', 20, .6, 0, -1), g_('staph', 8, 1.4, 12, -1), g_('flu', 10, 1, 25, -1), g_('candida', 5, 3, 38, -1), g_('virus', 30, .3, 52, -1), g_('staph', 12, 1, 65, -1), g_('flu', 14, .8, 80, -1), g_('candida', 6, 2.5, 95, -1), g_('bact', 30, .35, 110, -1), g_('flu', 12, .8, 120, -1)] },
+    hp: [1.26, 1.15], lines: ['bcell', 'killer'], // flyers drift over blockers: antibody clouds for the ground, assassins for the air
+    iron: [g_('bact', 20, .6, 0, -1), g_('staph', 8, 1.4, 12, -1), g_('flu', 8, 1, 40, -1), g_('candida', 5, 3, 38, -1), g_('virus', 30, .3, 52, -1), g_('staph', 12, 1, 65, -1), g_('flu', 14, .8, 80, -1), g_('candida', 6, 2.5, 95, -1), g_('bact', 30, .35, 110, -1), g_('flu', 12, .8, 120, -1)] },
   { heroic: [[g_('bact', 16, .6), g_('virus', 16, .4, 4)], [g_('worm', 2, 4), g_('staph', 8, 1.2, 3)], [g_('flu', 14, .8), g_('candida', 4, 2.5, 4)],
       [g_('worm', 3, 3.5), g_('virus', 24, .3, 3), g_('staph', 8, 1, 8)], [g_('candida', 6, 2), g_('flu', 12, .8, 4), g_('bact', 20, .4, 8)], [g_('worm', 5, 3), g_('staph', 12, .9, 4), g_('flu', 14, .7, 8), g_('virus', 24, .3, 12)]],
-    hp: [1.03, .95], lines: ['macro', 'bcell'], // magic-resistant helminths: grind them down with blockers and antibodies (no flyers in this wave)
+    hp: [.95, .8], lines: ['macro', 'bcell'], // magic-resistant helminths: grind them down with blockers and antibodies (no flyers in this wave)
     iron: [g_('bact', 24, .5), g_('worm', 2, 5, 10), g_('virus', 30, .3, 22), g_('staph', 10, 1.2, 35), g_('worm', 3, 4, 50), g_('candida', 6, 2.5, 62), g_('bact', 30, .35, 78), g_('worm', 4, 3.5, 92), g_('staph', 8, 1.2, 105), g_('virus', 36, .25, 118)] },
   { heroic: [[g_('bact', 14, .6, 0, -1), g_('flu', 8, 1, 3, -1)], [g_('staph', 10, 1.1, 0, -1), g_('spore', 16, .35, 4, -1)], [g_('worm', 3, 4, 0, -1), g_('virus', 24, .3, 3, -1)],
       [g_('candida', 6, 2, 0, -1), g_('flu', 12, .8, 4, -1), g_('staph', 8, 1, 8, -1)], [g_('worm', 4, 3.5, 0, -1), g_('staph', 12, .9, 3, -1), g_('flu', 12, .7, 8, -1)], [g_('boss', 1, 1, 0, 0), g_('staph', 12, 1, 3, -1), g_('candida', 6, 2, 8, -1), g_('flu', 12, .8, 12, -1)]],
@@ -878,18 +906,18 @@ const CHAL = [ // per specimen: heroic = 6 waves; iron = one wave (groups by del
     iron: [g_('staph', 12, 1.2, 0, -1), g_('bact', 20, .5, 10, -1), g_('flu', 8, 1.2, 22, -1), g_('worm', 3, 4, 34, -1), g_('staph', 14, 1, 48, -1), g_('candida', 6, 2.4, 62, -1), g_('flu', 14, .8, 76, -1), g_('worm', 4, 3.5, 90, -1), g_('staph', 16, .9, 104, -1), g_('spore', 30, .3, 118, -1)] },
   { heroic: [[g_('bact', 14, .6, 0, -1), g_('salmon', 8, 1.1, 5, -1)], [g_('toxo', 8, 1.5, 0, -1), g_('virus', 20, .35, 3, -1)], [g_('staph', 10, 1.1, 0, -1), g_('salmon', 14, .6, 4, -1)],
       [g_('worm', 3, 4, 0, -1), g_('toxo', 10, 1.3, 3, -1), g_('flu', 10, .9, 8, -1)], [g_('candida', 6, 2, 0, -1), g_('salmon', 20, .45, 4, -1), g_('staph', 8, 1, 8, -1)], [g_('toxo', 16, 1, 0, -1), g_('salmon', 24, .4, 4, -1), g_('worm', 4, 3.5, 8, -1), g_('flu', 12, .8, 12, -1)]],
-    hp: [.83, .78], lines: ['neutro', 'macro'], // salmonella heals when left alone: constant granule fire; macrophage cells on the path unmask toxoplasma
+    hp: [.83, .74], lines: ['neutro', 'macro'], // salmonella heals when left alone: constant granule fire; macrophage cells on the path unmask toxoplasma
     iron: [g_('bact', 20, .5, 0, -1), g_('salmon', 12, .9, 12, -1), g_('toxo', 8, 1.6, 24, -1), g_('salmon', 24, .45, 38, -1), g_('staph', 10, 1.1, 52, -1), g_('toxo', 12, 1.3, 66, -1), g_('flu', 12, .9, 80, -1), g_('salmon', 30, .4, 94, -1), g_('worm', 3, 4, 108, -1), g_('toxo', 14, 1.1, 118, -1)] },
   { heroic: [[g_('salmon', 14, .7, 0, -1), g_('toxo', 6, 1.6, 4, -1)], [g_('virus', 30, .3, 0, -1), g_('staph', 8, 1.1, 4, -1)], [g_('worm', 3, 4, 0, -1), g_('flu', 12, .8, 3, -1)],
       [g_('toxo', 14, 1.1, 0, -1), g_('candida', 5, 2.2, 4, -1), g_('salmon', 12, .6, 8, -1)], [g_('staph', 14, .9, 0, -1), g_('worm', 4, 3.5, 3, -1), g_('flu', 14, .7, 8, -1)], [g_('rabies', 1, 1, 0, 0), g_('toxo', 12, 1.2, 3, -1), g_('salmon', 20, .5, 8, -1), g_('worm', 3, 4, 12, -1)]],
-    hp: [.92, 1.27], lines: ['bcell', 'killer'], // the last wall: antibodies against the rush, assassins against the armor and the air
+    hp: [.8, 1.05], lines: ['bcell', 'killer'], // the last wall: antibodies against the rush, assassins against the armor and the air
     iron: [g_('salmon', 20, .6, 0, -1), g_('toxo', 10, 1.4, 10, -1), g_('staph', 12, 1.1, 24, -1), g_('worm', 3, 4, 38, -1), g_('virus', 36, .25, 50, -1), g_('toxo', 14, 1.2, 64, -1), g_('candida', 6, 2.4, 78, -1), g_('flu', 12, .8, 92, -1), g_('salmon', 24, .5, 104, -1), g_('worm', 4, 3.5, 116, -1)] },
 ];
 // hero: lv = stats per level 1-5, xp = XP to reach the next level, gz = Granzyme Burst (damage = dmg × k)
 const HERO = { name: 'NK Sentinel', rate: .7, range: 95, speed: 105, resp: 14, start: 1,
   lv: [{ hp: 200, dmg: 11, regen: 5 }, { hp: 250, dmg: 15, regen: 7 }, { hp: 310, dmg: 20, regen: 9 }, { hp: 380, dmg: 26, regen: 12 }, { hp: 460, dmg: 33, regen: 15 }],
   xp: [45, 100, 170, 260], gz: { cd: 20, r: 85, k: 3.5, stun: 1.8 } };
-const AB = { fever: { cd: 32, dmg: 95 }, swarm: { cd: 22, n: 3 } };
+const AB = { fever: { cd: 32, dmg: 95 }, swarm: { cd: 18, n: 3 } };
 // Immune Memory: permanent upgrades bought with stars, tiers in order. Tier costs MEMCOST: 5 a column, 30 in all = every star
 // (3 campaign + 1 Heroic + 1 Iron per specimen).
 const MEMCOST = [1, 2, 2];
@@ -965,10 +993,10 @@ const FACTS = {
 const SPEC = [
   { place: 'Dermis', name: 'The Splinter', sub: 'A splinter broke the skin barrier. Bacteria flood the wound channel.', edge: '#ff7f50',
     slots: [[130, 225], [250, 100], [225, 300], [395, 300], [355, 525], [510, 400], [520, 545], [600, 330], [765, 300], [760, 92], [900, 232], [960, 90]] },
-  { place: 'Alveoli', name: 'Two Breaths', sub: 'Every inhale brings a new wave down two airways at once.', edge: '#4dffb0',
+  { place: 'Alveoli', name: 'Two Breaths', sub: 'Every inhale brings a new wave down two airways at once.', edge: '#b3c7a5', // sage-grey: mint read as macrophage
     slots: [[230, 195], [140, 180], [320, 88], [432, 182], [140, 440], [240, 400], [332, 512], [312, 305], [540, 230], [540, 370], [700, 360], [680, 190], [860, 150], [880, 290]] },
   { place: 'Aorta', name: 'The Current', sub: 'A long, fast artery. Parasites ride it toward the heart.', edge: '#7cf08c' }, // elastin autofluorescence: clear of red rhinovirus
-  { place: 'Lymph Node', name: 'The Superbug', sub: 'A drug-resistant colony marches on the immune system’s own school.', edge: '#e6ef6a' }, // lemon: clear of amber staph and lime E. coli
+  { place: 'Lymph Node', name: 'The Superbug', sub: 'A drug-resistant colony marches on the immune system’s own school.', edge: '#c9b48f' }, // reticulin gold-grey: lemon swallowed lime E. coli
 ];
 LEVELS.forEach((L, i) => Object.assign(L, SPEC[i]));
 
@@ -1225,17 +1253,18 @@ function startLevel(i, mode = 'campaign') {
   Object.assign(S, {
     lvl: i, L, mode, M, waves: mode === 'campaign' ? L.waves : mode === 'heroic' ? C.heroic : [C.iron], lines: mode === 'iron' ? C.lines : TORDER,
     paths: L.paths.map(makePath), slots: L.slots.map(([x, y], k) => ({ x, y, k, tower: null })),
-    towers: [], enemies: [], units: [], proj: [], parts: [], floats: [], fx: [], spawnQ: [], home: null,
+    towers: [], enemies: [], units: [], proj: [], parts: [], floats: [], fx: [], spawnQ: [], home: null, breach: {}, kills: 0,
     gold: Math.round(L.gold * (M.gold || 1) / 10) * 10, lives: M.name ? 1 : 20, wave: 0, waveTimer: -1, waveTimerMax: 1, time: 0, cds: { fever: 0, swarm: 0, granzyme: 0 },
     ability: null, sel: null, armed: null, preview: null, over: false, run: (S.run || 0) + 1, paused: false, shake: 0, hurt: 0, screen: 'play', noteI: i * 3, pinned: null,
   });
   S.hero = mkHero(); bgCache = null; closeRadial(); lastHud = '';
   $('#titleOv').hidden = true; $('#endOv').hidden = true; $('#memOv').hidden = true; $('#guideOv').hidden = true;
   $('#specId').textContent = `SPEC-0${i + 1} · ${L.place.toUpperCase()}${M.name ? ' · ' + M.name.toUpperCase() : ''}`; $('#specName').textContent = L.name;
-  for (const k of ['fever', 'swarm']) { $('#ab-' + k).classList.toggle('off', mode === 'iron'); if (mode === 'iron') $(`#ab-${k} .tip small`).textContent = 'DISABLED · IRON CHALLENGE'; }
-  showInfo(null); layoutWaveMarkers(); nextNote(); hintCur = null; $('#banner').innerHTML = '';
+  for (const k of ['fever', 'swarm']) { $('#ab-' + k).classList.toggle('off', mode === 'iron'); $('#ab-' + k).classList.toggle('iron', mode === 'iron'); if (mode === 'iron') $(`#ab-${k} .tip small`).textContent = 'DISABLED · IRON CHALLENGE'; }
+  $('#wave').nextElementSibling.textContent = mode === 'iron' ? 'RELEASED' : 'WAVE';
+  showInfo(null); layoutWaveMarkers(); nextNote(); hintCur = null; bannerCut();
   banner(M.name ? `${chBadge(mode, true)}<div><small>${M.name} challenge · Specimen 0${i + 1}</small><b>${L.name}</b><p>${M.rule}${mode === 'iron' ? ': ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ''}.</p></div>`
-    : `<div><small>Specimen 0${i + 1} · ${L.place}</small><b>${L.name}</b><p>${L.sub}</p></div>`, M.name ? 6000 : 4200);
+    : `<div><small>Specimen 0${i + 1} · ${L.place}</small><b>${L.name}</b><p>${L.sub}</p></div>`, M.name ? 6000 : 4200, 'intro');
 }
 
 // ============================================================ waves
@@ -1252,13 +1281,13 @@ function sendWave() {
     let p = gp.p === -1 ? (alt++) % S.paths.length : Math.min(gp.p, S.paths.length - 1);
     S.spawnQ.push({ t: S.time + gp.d + n * gp.gap, type: gp.t, p, mult: mult * (1 + (S.M.ramp || 0) * gp.d) }); // iron: later groups are tougher
   }
-  S.spawnQ.sort((a, b) => a.t - b.t);
+  S.spawnQ.sort((a, b) => a.t - b.t); S.qN = S.spawnQ.length; // iron: the HUD shows how much of its one wave is out
   S.wave++; S.waveTimer = -1; sfx('wave');
   const types = waveTypes(S.wave - 1), fresh = types.filter(t => !save.seen.includes(t));
   observe(types.flatMap(t => SPAWNS[t] ? [t, SPAWNS[t]] : [t]));
-  if (fresh.length) {
-    fresh.forEach((t, i) => setTimeout(() => banner(`<img src="${portrait(t, 0, 88)}"><div><small>New threat</small><b>${ENEMIES[t].name}</b><p>${ENEMIES[t].desc}</p></div>`, 5200), i * 600));
-  } else banner(`<div><small>Incoming</small><b>Wave ${S.wave} of ${S.waves.length}</b></div>`, 1800);
+  bannerCut('intro', 'incoming'); // the map needs the top once pathogens move
+  for (const t of fresh) banner(`<img src="${portrait(t, 0, 88)}"><div><small>New threat</small><b>${ENEMIES[t].name}</b><p>${ENEMIES[t].desc}</p></div>`, 5200, 'threat');
+  if (S.mode !== 'iron') banner(`<div><small>Incoming</small><b>Wave ${S.wave} of ${S.waves.length}</b></div>`, 1800, 'incoming'); // iron: one wave, nothing to count
   if (S.wave % 2 === 0) nextNote();
   updateChips();
 }
@@ -1287,7 +1316,7 @@ function damage(e, amt, type, src) {
   if (e.hp <= 0) kill(e, src);
 }
 function kill(e, src) {
-  if (e.dead) return; e.dead = true;
+  if (e.dead) return; e.dead = true; S.kills++;
   S.gold += e.D.gold; floatText(e.x, e.y - 18, `+${e.D.gold}`, '#ffc24a');
   if (src && src.mem) src.mem[e.type] = (src.mem[e.type] || 0) + 1;
   const H = S.hero; if (H && src === H) H.kills++;
@@ -1305,7 +1334,8 @@ function kill(e, src) {
 }
 function leak(e) {
   e.dead = true; S.lives = Math.max(0, S.lives - e.D.lives); S.shake = Math.max(S.shake, 7); S.hurt = .6; sfx('leak');
-  floatText(e.x - 40, e.y - 20, `−${e.D.lives} tissue`, '#ff6b78', 1.4);
+  floatText(clamp(e.x, 80, W - 80), clamp(e.y - 20, 30, H - 30), `−${e.D.lives} ${e.D.name}`, '#ff6b78', 1.6); // the exit is at the map edge: pull the label in
+  const b = S.breach[e.type] = S.breach[e.type] || { n: 0, w: [] }; b.n++; if (!b.w.includes(S.wave)) b.w.push(S.wave);
   if (S.lives <= 0) endLevel(false);
 }
 function towerAt(slot) { return slot.tower; }
@@ -1370,7 +1400,7 @@ function syncUnits(t, heal) {
   });
 }
 function mkUnit(kind, x, y, owner, ttl = 0) {
-  const L = kind === 'macro' ? stat(owner) : { hp: 55, dmg: 7, rate: .6 };
+  const L = kind === 'macro' ? stat(owner) : { hp: 55 * LVLMULT[S.lvl], dmg: 7 * LVLMULT[S.lvl], rate: .6 }; // swarm grows with the specimen, like Fever
   return { kind, x, y, hx: x, hy: y, hp: L.hp, max: L.hp, dmg: L.dmg, rate: L.rate, spit: 0, cd: 0, tgt: null, dead: false, resp: 0, owner, ttl, t: rand(0, 5), hit: 0 };
 }
 function hurtUnit(u, amt) {
@@ -1396,14 +1426,17 @@ function heroHome() {
   }
   return S.home = best;
 }
+// hero stats on this specimen: damage grows with the specimen's LVLMULT (relative to 01, where the base table is tuned),
+// health and regeneration with its square root, like pathogen bites
+function heroLv(n) { const L = HERO.lv[n - 1], k = LVLMULT[S.lvl || 0] / LVLMULT[0], q = Math.sqrt(k); return { hp: Math.round(L.hp * q), dmg: Math.round(L.dmg * k), regen: Math.round(L.regen * q) }; }
 function mkHero() {
-  const p = heroHome(), L = HERO.lv[HERO.start - 1];
+  const p = heroHome(), L = heroLv(HERO.start);
   return { kind: 'hero', x: p.x, y: p.y, hx: p.x, hy: p.y, hp: L.hp, max: L.hp, lvl: HERO.start, xp: 0, kills: 0, cd: 0, tgt: null, dead: false, resp: 0, mv: false, t: 0, hit: 0, glow: 0 };
 }
 function heroXp(n) {
   const h = S.hero; if (h.lvl >= 5) return; h.xp += n;
   while (h.lvl < 5 && h.xp >= HERO.xp[h.lvl - 1]) {
-    h.xp -= HERO.xp[h.lvl - 1]; h.lvl++; h.max = HERO.lv[h.lvl - 1].hp; if (!h.dead) h.hp = h.max; h.glow = 1.2;
+    h.xp -= HERO.xp[h.lvl - 1]; h.lvl++; h.max = heroLv(h.lvl).hp; if (!h.dead) h.hp = h.max; h.glow = 1.2;
     S.fx.push({ k: 'lvl', t: 0, T: 1.1 }); burst(h.x, h.y, '#e8f6ff', 24, 2.6); floatText(h.x, h.y - 42, `LEVEL ${h.lvl}`, '#e8f6ff', 1.8); sfx('lvl', h.x);
   }
   if (h.lvl >= 5) h.xp = 0;
@@ -1423,7 +1456,7 @@ function selectHero(on = !(S.sel && S.sel.hero)) {
 }
 function granzyme() {
   const h = S.hero, G = HERO.gz; if (S.screen !== 'play' || S.over || !h || h.dead || S.cds.granzyme > 0) return false;
-  const dmg = HERO.lv[h.lvl - 1].dmg * G.k;
+  const dmg = heroLv(h.lvl).dmg * G.k;
   for (const e of S.enemies) if (!e.dead && Math.hypot(e.x - h.x, e.y - h.y) < G.r + e.D.r) { damage(e, dmg, 'magic', h); e.stunT = Math.max(e.stunT, e.D.boss ? G.stun / 2 : G.stun); }
   S.fx.push({ k: 'gz', x: h.x, y: h.y, r: G.r, t: 0, T: .7 }); burst(h.x, h.y, '#e8f6ff', 20, 3);
   S.cds.granzyme = G.cd; S.shake = Math.max(S.shake, 5); h.glow = .6; sfx('gz', h.x); return true;
@@ -1436,7 +1469,7 @@ function heroStep(dt) {
     if ((h.resp -= dt) <= 0) { const p = heroHome(); Object.assign(h, { dead: false, hp: h.max, x: p.x, y: p.y, hx: p.x, hy: p.y, mv: false, tgt: null }); ring(p.x, p.y, COL.hero); burst(p.x, p.y, COL.hero, 14, 2); }
     return;
   }
-  const L = HERO.lv[h.lvl - 1];
+  const L = heroLv(h.lvl);
   const walk = (x, y, v, stop = 0) => { const dx = x - h.x, dy = y - h.y, d = Math.hypot(dx, dy); if (d > stop + .5) { const s = Math.min(v * dt, d - stop); h.x += dx / d * s; h.y += dy / d * s; } return d; };
   let t = h.tgt;
   if (t && (h.mv || t.dead || Math.hypot(t.x - h.hx, t.y - h.hy) > 100 || (t.blocker && t.blocker !== h && Math.hypot(t.x - h.x, t.y - h.y) > 30))) { if (t.blocker === h) t.blocker = null; h.tgt = t = null; }
@@ -1474,7 +1507,7 @@ function step(dt) {
   for (const k in S.cds) S.cds[k] = Math.max(0, S.cds[k] - dt);
   // spawning
   while (S.spawnQ.length && S.spawnQ[0].t <= S.time) { const q = S.spawnQ.shift(); spawnEnemy(q.type, q.p, q.mult); }
-  if (S.wave > 0 && S.wave < S.waves.length && !S.spawnQ.length && S.waveTimer < 0) { S.waveTimer = S.waveTimerMax = 16; }
+  if (S.wave > 0 && S.wave < S.waves.length && !S.spawnQ.length && S.waveTimer < 0) { S.waveTimer = S.waveTimerMax = S.lvl < 2 ? 10 : 16; } // 01-02 waves die in seconds: less dead time
   if (S.waveTimer > 0) { S.waveTimer -= dt; if (S.waveTimer <= 0) { S.waveTimer = 0; sendWave(); } }
 
   // enemies
@@ -1499,10 +1532,10 @@ function step(dt) {
     }
     place(e);
     if (e.type === 'rabies') {
-      if ((e.abT -= dt) <= 0) { // hijack the nearest unhijacked tower in reach
-        let tw = null, bd = 330; for (const t of S.towers) { const d = Math.hypot(t.x - e.x, t.y - e.y); if (!(t.hij > 0) && d < bd) { bd = d; tw = t; } }
-        e.abT = tw ? 9 : 1;
-        if (tw) { tw.hij = 4; tw.hijE = e; ring(tw.x, tw.y, '#ff3355'); floatText(tw.x, tw.y - 44, 'Hijacked!', '#ff3355', 1.4); sfx('hijack', tw.x); }
+      if ((e.abT -= dt) <= 0) { // hijack the most-invested unhijacked tower in reach (nearest breaks ties)
+        let tw = null, bv = -1; for (const t of S.towers) { const d = Math.hypot(t.x - e.x, t.y - e.y), v = invested(t) - d * .01; if (!(t.hij > 0) && d < 330 && v > bv) { bv = v; tw = t; } }
+        e.abT = tw ? 6 : 1;
+        if (tw) { tw.hij = 5; tw.hijE = e; ring(tw.x, tw.y, '#ff3355'); floatText(tw.x, tw.y - 44, 'Hijacked!', '#ff3355', 1.4); sfx('hijack', tw.x); }
       }
       if ((e.shedT -= dt) <= 0) { e.shedT = 4.5; for (let k = 0; k < 3; k++) spawnEnemy('virion', e.p, e.mult * .7, Math.max(0, e.d - 18 - k * 10), rand(-12, 12)); }
     } else if (e.D.boss) {
@@ -2122,7 +2155,7 @@ function placeRadial(items, slot, sc) {
     used.push(pick); b.style.left = Math.round(pick[0]) + 'px'; b.style.top = Math.round(pick[1]) + 'px';
   }
 }
-function sv(label, val, nxt) { return `<div class="s"><small>${label}</small><b>${val}${nxt != null && nxt !== val ? `<em>→${nxt}</em>` : ''}</b></div>`; }
+function sv(label, val, nxt, cls = '') { return `<div class="s ${cls}"><small>${label}</small><b>${val}${nxt != null && nxt !== val ? `<em>→${nxt}</em>` : ''}</b></div>`; }
 // L = current stats, N = stats to compare against (next level / specialist) or null
 function towerStats(type, L, N) {
   const dm = X => X && (X.burst ? X.dmg + '×' + X.burst : X.dmg);
@@ -2146,14 +2179,14 @@ function showInfo(o) {
     const id = o.id || o.t.spec, P = SPECS[id], cur = o.kind === 'spec';
     const mem = o.t.mem ? Object.entries(o.t.mem).map(([k, n]) => `<span class="chip"><img src="${portrait(k, 0, 48)}">+${Math.round(Math.min(P.st.memCap, n * P.st.mem) * 100)}%</span>`).join('') : '';
     html = `<div class="por"><img src="${portrait(id)}"></div><div class="meta"><small>${cur ? 'Specialize · ' + P.role.split('· ')[1] : P.role}</small><b>${P.name}</b><span>${P.kind}</span><div class="pips">${[0, 1, 2, 3].map(i => `<i class="on"></i>`).join('')}</div></div>
-      <div class="sv g2">${cur ? towerStats(o.t.type, stat(o.t), P.st) : towerStats(o.t.type, P.st)}${sv(P.tag[0], P.tag[1])}</div>
+      <div class="sv g2">${cur ? towerStats(o.t.type, stat(o.t), P.st) : towerStats(o.t.type, P.st)}${sv(P.tag[0], cur && id === 'th1' && o.t.haste > 0 ? 'already boosted' : P.tag[1])}</div>
       <div class="perk on wide">${P.perk}${mem ? `<div class="chips">${mem}</div>` : ''}<div class="skt ${cur || o.next ? 'nx' : ''}">${skillHtml(P, cur ? 0 : o.t.rank, !cur && o.next)}</div></div>`;
   } else if (o.kind === 'type' || o.kind === 'tower') {
     const type = o.kind === 'type' ? o.type : o.t.type, lvl = o.kind === 'type' ? o.lvl : o.t.lvl, T = TOWERS[type], nl = o.next && lvl < 2 ? lvl + 1 : null, show = nl ?? lvl;
     html = `<div class="por"><img src="${portrait(type, show)}"></div><div class="meta"><small>${T.role}</small><b>${T.name}</b><span>${T.kind}</span><div class="pips">${[0, 1, 2].map(i => `<i class="${i <= show ? 'on' : ''}"></i>`).join('')}</div></div>
       <div class="sv">${towerStats(type, T.lv[lvl], nl != null ? T.lv[nl] : null)}</div><div class="perk ${show >= T.perkLv ? 'on' : ''}">${T.perk}${o.kind === 'tower' && lvl === 2 ? '<br><span class="skn">Max level · choose a specialization</span>' : ''}</div>`;
   } else if (o.kind === 'hero') {
-    const h = S.hero, L = HERO.lv[h.lvl - 1], N = HERO.lv[h.lvl], need = HERO.xp[h.lvl - 1], G = HERO.gz;
+    const h = S.hero, L = heroLv(h.lvl), N = h.lvl < 5 && heroLv(h.lvl + 1), need = HERO.xp[h.lvl - 1], G = HERO.gz;
     html = `<div class="por"><img src="${portrait('hero')}"></div><div class="meta"><small>Hero · Natural Killer cell</small><b>${HERO.name}</b><span class="xp">${h.dead ? `Respawning in ${Math.ceil(h.resp)} s` : need ? `Level ${h.lvl} · ${h.xp} / ${need} XP` : `Level ${h.lvl} · max`}</span><div class="pips">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= h.lvl ? 'on' : ''}"></i>`).join('')}</div></div>
       <div class="sv g2">${sv('HEALTH', `${Math.ceil(Math.max(0, h.hp))}<i>/${h.max}</i>`)}${sv('DMG', L.dmg, N && N.dmg)}${sv('REGEN', L.regen + '/s', N && N.regen + '/s')}${sv('KILLS', h.kills)}</div>
       <div class="perk wide">Holds one pathogen and stings flyers too. Tap or click near the path to send it.<div class="skt"><span class="skn">★ Granzyme Burst · E</span><span class="skd"><br>${Math.round(L.dmg * G.k)} damage and a ${G.stun} s stun to everything within ${G.r}. Every ${G.cd} s.</span></div></div>`;
@@ -2161,7 +2194,7 @@ function showInfo(o) {
     const D = ENEMIES[o.type], e = o.e;
     const hp = e ? Math.ceil(Math.max(0, e.hp)) : Math.round(D.hp * LVLMULT[S.lvl || 0] * S.M.hp * (1 + Math.max(0, S.wave - 1) * .045));
     html = `<div class="por"><img src="${portrait(o.type)}"></div><div class="meta"><small>${D.kind}${D.flying ? ' · flying' : ''}</small><b>${D.name}</b><span>${D.desc}</span></div>
-      <div class="sv">${sv('HP', hp)}${sv('ARMOR', Math.round(Math.max(0, D.armor - (e ? e.shred : 0)) * 100) + '%')}${sv('RESIST', Math.round(D.mr * 100) + '%')}${sv('LEAK', '−' + D.lives)}</div>`;
+      <div class="sv">${sv('HP', hp)}${sv('ARMOR', Math.round(Math.max(0, D.armor - (e ? e.shred : 0)) * 100) + '%')}${sv('RESIST', Math.round(D.mr * 100) + '%', null, 'opt')}${sv('LEAK', '−' + D.lives, null, 'opt')}</div>`;
   }
   if (html !== infoKey) { el.innerHTML = html; infoKey = html; }
   el.hidden = false;
@@ -2170,15 +2203,46 @@ function showInfo(o) {
   if (f) { const r = el.getBoundingClientRect(), c = cv.getBoundingClientRect(), x = c.left + f.x * viewK, y = c.top + f.y * viewK, pad = 34 * viewK; el.classList.toggle('up', x > r.left - pad && x < r.right + pad && y > r.top - pad); }
 }
 function nextNote() { S.note = NOTES[(S.noteI = (S.noteI || 0) + 1) % NOTES.length]; }
-function banner(html, ms) {
-  layoutTop(); const b = document.createElement('div'); b.className = 'bn'; b.innerHTML = html; $('#banner').appendChild(b);
-  setTimeout(() => { b.classList.add('out'); setTimeout(() => b.remove(), 450); }, ms);
+// top-centre cards, one at a time from a queue. kind: 'intro' (cut when wave 1 is called), 'incoming' (dropped while a
+// New-threat card is up or waiting), 'threat'
+const BQ = []; let bCur = null;
+function banner(html, ms, kind = '') {
+  if (kind === 'incoming' && [bCur, ...BQ].some(q => q && q.kind === 'threat')) return;
+  BQ.push({ html, ms, kind }); if (!bCur) bannerNext();
+}
+function bannerNext() {
+  const q = bCur = BQ.shift(); if (!q) return;
+  layoutTop(); const b = q.el = document.createElement('div'); b.className = 'bn'; b.innerHTML = q.html; $('#banner').appendChild(b);
+  q.t = setTimeout(() => bannerOut(q), BQ.length ? Math.min(q.ms, 3800) : q.ms); // a queue behind it: shorter turns
+}
+function bannerOut(q) { // fades out; the next card drops in once it is gone
+  if (q !== bCur || q.out) return; q.out = true; clearTimeout(q.t); q.el.classList.add('out');
+  q.t = setTimeout(() => { q.el.remove(); if (bCur === q) { bCur = null; bannerNext(); } }, 420);
+}
+// kinds = which cards to drop now (queued ones and the one showing); no kinds = all, at once (a new specimen)
+function bannerCut(...kinds) {
+  const hit = q => !kinds.length || kinds.includes(q.kind);
+  for (let i = BQ.length - 1; i >= 0; i--) if (hit(BQ[i])) BQ.splice(i, 1);
+  if (bCur && hit(bCur)) { if (kinds.length) bannerOut(bCur); else { clearTimeout(bCur.t); bCur = null; } }
+  if (!kinds.length) $('#banner').innerHTML = '';
 }
 function flashInfo(label) { const el = $('#info'); el.dataset.flash = label; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); clearTimeout(flashInfo.t); flashInfo.t = setTimeout(() => el.classList.remove('flash'), 1400); }
 // centre the banner / boss bar in the gap between the meters and the controls, and cap its width to that gap
 function layoutTop() {
   const st = $('#stage').getBoundingClientRect(), l = $('#hudTL').getBoundingClientRect().right - st.left + 10, r = Math.min(st.width - 10, $('#hudTR').getBoundingClientRect().left - st.left - 10), tc = $('#topc');
   tc.style.left = (l + r) / 2 + 'px'; tc.style.setProperty('--bw', Math.max(160, r - l) + 'px');
+}
+// the top-centre cards fade to 35% while a wave marker, a visible pathogen or an open radial lies under them
+function topDim() {
+  const tc = $('#topc'); let dim = false;
+  if (S.screen === 'play' && (bCur || !$('#boss').hidden)) {
+    const r = tc.getBoundingClientRect(), c = cv.getBoundingClientRect(), pad = 10;
+    const under = (x, y, q = 0) => x + q > r.left - pad && x - q < r.right + pad && y + q > r.top - pad && y - q < r.bottom + pad;
+    dim = wm.some(b => { if (b.hidden) return false; const q = b.getBoundingClientRect(); return under(q.left + q.width / 2, q.top + q.height / 2, q.width / 2); })
+      || S.enemies.some(e => e.seen && under(c.left + e.x * viewK, c.top + (e.y - (e.D.flying ? 12 : 0)) * viewK, e.D.r * viewK))
+      || !!(S.sel && S.sel.slot && under(c.left + S.sel.slot.x * viewK, c.top + S.sel.slot.y * viewK, 100 * viewK));
+  }
+  tc.classList.toggle('dim', dim);
 }
 function flashGold() { sfx('deny'); $('#gold').animate([{ color: '#ff4d5e', transform: 'scale(1.18)' }, { color: '', transform: 'none' }], { duration: 400 }); }
 
@@ -2209,7 +2273,7 @@ function updateChips() {
   else {
     const counts = {}; S.waves[S.wave].forEach(g => counts[g.t] = (counts[g.t] || 0) + g.n);
     const chips = Object.entries(counts).map(([t, n]) => `<span class="chip"><img src="${portrait(t, 0, 48)}">${n}</span>`).join('');
-    html = `<small>WAVE ${S.wave + 1} / ${S.waves.length}</small><b>${S.wave === 0 ? 'Start the infection' : 'Call early'}</b><div class="chips">${chips}</div>${S.wave > 0 ? '<span class="bonus"></span>' : 'Tap or click when your defences are ready.'}`;
+    html = `<small>${S.mode === 'iron' ? 'ONE ENDLESS WAVE' : `WAVE ${S.wave + 1} / ${S.waves.length}`}</small><b>${S.wave === 0 ? 'Start the infection' : 'Call early'}</b><div class="chips">${chips}</div>${S.wave > 0 ? '<span class="bonus"></span>' : 'When your defences are ready.'}<span class="go"></span>`;
   }
   wm.forEach(b => b.querySelector('.tip').innerHTML = html);
 }
@@ -2220,10 +2284,10 @@ function hud() {
   if (!S.L) return;
   const total = S.waves.length, can = canCallWave();
   const Hr = S.hero, hsel = !!(S.sel && S.sel.hero), bo = S.enemies.find(e => e.D.boss && !e.dead);
-  const key = [S.lives, S.gold, S.wave, Math.ceil(S.waveTimer * 4), can, Math.ceil(S.cds.fever), Math.ceil(S.cds.swarm), Math.ceil(S.cds.granzyme), S.ability, S.speed, S.paused, Math.ceil(Hr.hp), Hr.lvl, Hr.dead, Math.ceil(Hr.resp), hsel, bo ? Math.ceil(bo.hp) : -1].join('|');
+  const key = [S.lives, S.gold, S.wave, S.spawnQ.length, Math.ceil(S.waveTimer * 4), can, Math.ceil(S.cds.fever), Math.ceil(S.cds.swarm), Math.ceil(S.cds.granzyme), S.ability, S.speed, S.paused, Math.ceil(Hr.hp), Hr.lvl, Hr.dead, Math.ceil(Hr.resp), hsel, bo ? Math.ceil(bo.hp) : -1].join('|');
   if (key === lastHud) return; lastHud = key;
   $('#lives').textContent = S.lives; $('#lives').classList.toggle('low', S.lives <= 6);
-  $('#gold').textContent = S.gold; $('#wave').innerHTML = `${S.wave}<span>/${total}</span>`;
+  $('#gold').textContent = S.gold; $('#wave').innerHTML = S.mode === 'iron' ? `${S.wave ? Math.round((1 - S.spawnQ.length / S.qN) * 100) : 0}<span>%</span>` : `${S.wave}<span>/${total}</span>`;
   wm.forEach(b => {
     b.hidden = !can; b.classList.toggle('first', S.wave === 0); if (!can) b.classList.remove('show');
     b.style.setProperty('--p', S.waveTimer > 0 ? (S.waveTimer / S.waveTimerMax * 100) + '%' : '100%');
@@ -2261,23 +2325,30 @@ function toggleSpeed() { S.speed = S.speed === 1 ? 2 : 1; }
 function endLevel(win) {
   if (S.over) return; S.over = true; closeRadial(); S.ability = null; S.sel = null; showInfo(null); const run = S.run;
   wm.forEach(b => b.hidden = true);
-  const ch = S.M.name, stars = win ? (S.lives >= 18 ? 3 : S.lives >= 10 ? 2 : 1) : 0, first = ch && win && !save[S.mode][S.lvl];
+  const ch = S.M.name, stars = win ? (S.lives >= STAR3 ? 3 : S.lives >= STAR2 ? 2 : 1) : 0, first = ch && win && !save[S.mode][S.lvl];
   if (ch) { if (first) { save[S.mode][S.lvl] = 1; persist(); } } // a challenge never touches campaign stars
   else if (win && stars > (save.stars[S.lvl] || 0)) { save.stars[S.lvl] = stars; persist(); }
   setTimeout(() => {
     if (S.run !== run) return;
     const nxt = win && !ch && S.lvl < LEVELS.length - 1;
     $('#rep').innerHTML = `<div class="kick"><span>LAB REPORT${ch ? ' · ' + ch.toUpperCase() : ''}</span><span>SPEC-0${S.lvl + 1} · ${S.L.place.toUpperCase()}</span></div>
-      <h2 class="${win ? 'win' : 'lose'}">${win ? (ch ? `${ch} challenge won` : 'Specimen cleared') : 'Host overrun'}</h2>
+      <div class="rhd"><h2 class="${win ? 'win' : 'lose'}">${win ? (ch ? `${ch} challenge won` : 'Specimen cleared') : 'Host overrun'}</h2>
       ${win && ch ? `<div class="bigbadge">${chBadge(S.mode, true, true)}<span>${first ? '+1 ★ for Immune Memory' : 'Already won · no new star'}</span></div>` : ''}
-      ${win && !ch ? `<div class="bigstars">${[0, 1, 2].map(i => `<span class="${i < stars ? 'on' : ''}" style="animation-delay:${.15 + i * .2}s">★</span>`).join('')}</div>` : ''}
-      <div class="rows">${ch ? `<div><span>Mode</span><b>${ch}${S.mode === 'iron' ? ' · ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ' · elite waves'}</b></div>` : ''}<div><span>Vitality remaining</span><b>${S.lives} / ${ch ? 1 : 20}</b></div><div><span>Waves survived</span><b>${win ? S.wave : Math.max(0, S.wave - 1)} / ${S.waves.length}</b></div><div><span>ATP unspent</span><b>${S.gold}</b></div></div>
-      <p class="fact">${S.note || NOTES[0]}</p>
+      ${win && !ch ? `<div class="bigstars">${[0, 1, 2].map(i => `<span class="${i < stars ? 'on' : ''}" style="animation-delay:${.15 + i * .2}s">★</span>`).join('')}</div>` : ''}</div>
+      ${win && !ch && stars < 3 ? `<div class="srule">★★★ at ${STAR3}+ vitality${stars < 2 ? ` · ★★ at ${STAR2}+` : ''}</div>` : ''}
+      <div class="rows">${ch ? `<div><span>Mode</span><b>${ch}${S.mode === 'iron' ? ' · ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ' · elite waves'}</b></div>` : ''}<div><span>Vitality remaining</span><b>${S.lives} / ${ch ? 1 : 20}</b></div><div><span>Waves survived</span><b>${win ? S.wave : Math.max(0, S.wave - 1)} / ${S.waves.length}</b></div><div><span>Pathogens neutralised</span><b>${S.kills}</b></div>${breaches()}</div>
+      <p class="fact"><em>FIELD NOTE</em>${S.note || NOTES[0]}</p>
       <button class="mlink" id="eMem"><i class="mdot"></i><span>IMMUNE MEMORY</span><b>★ ${memStars().avail} to spend</b></button>
       <div class="btns"><button class="btn" id="eMap">Specimen tray</button><button class="btn ${nxt ? '' : 'pri'}" id="eRetry">${win ? 'Replay' : 'Try again'}</button>${nxt ? '<button class="btn pri" id="eNext">Next specimen</button>' : ''}</div>`;
     $('#eMap').onclick = showTitle; $('#eMem').onclick = () => showMemory('end'); $('#eRetry').onclick = () => startLevel(S.lvl, S.mode); if (nxt) $('#eNext').onclick = () => startLevel(S.lvl + 1);
     $('#endOv').hidden = false; S.screen = 'end';
   }, win ? 900 : 1200);
+}
+const STAR3 = 18, STAR2 = 10; // vitality left for ★★★ and ★★
+// lab report row: what got through, most first; only when something did, so a clean win stays clean
+function breaches() {
+  const B = Object.entries(S.breach).sort((a, b) => b[1].n - a[1].n); if (!B.length) return '';
+  return `<div><span>Breaches</span><b>${B.map(([t, b]) => `${b.n} ${ENEMIES[t].name}${S.mode === 'iron' ? '' : ` (w${b.w.join(', w')})`}`).join(' · ')}</b></div>`;
 }
 const thumbs = [];
 function showTitle() {
@@ -2288,11 +2359,21 @@ function showTitle() {
     thumbs[i] = thumbs[i] || makeBg(L, 400, 248).toDataURL();
     const locked = i > 0 && !save.stars[i - 1];
     // a div, not a button: it holds the challenge buttons. Challenges open once the campaign is cleared.
-    const chs = save.stars[i] ? `<div class="chs">${['heroic', 'iron'].map(m => `<button class="chb ${save[m][i] ? 'won' : ''}" data-m="${m}" title="${save[m][i] ? 'Won · ' : ''}${MODES[m].rule}${m === 'iron' ? ': ' + CHAL[i].lines.map(k => TOWERS[k].name).join(' + ') : ''}">${chBadge(m)}${MODES[m].name}</button>`).join('')}</div>` : '';
-    return `<div class="slide ${locked ? 'locked' : ''}" data-i="${i}" role="button" tabindex="${locked ? -1 : 0}"><span class="lab">SPEC-0${i + 1}</span><div class="body"><img src="${thumbs[i]}" alt=""><div><div class="n">${locked ? 'Locked' : L.place}</div><b>${L.name}</b><p>${L.sub}</p><div class="stars">${[0, 1, 2].map(s => `<span class="${s < save.stars[i] ? 'on' : ''}">★</span>`).join('')}</div>${chs}</div></div></div>`;
+    const chs = save.stars[i] ? `<div class="chs">${['heroic', 'iron'].map(m => `<button class="chb ${save[m][i] ? 'won' : ''}" data-m="${m}" aria-label="${MODES[m].name} challenge${save[m][i] ? ', won' : ''}">${chBadge(m)}${MODES[m].name}</button>`).join('')}</div>` : '';
+    return `<div class="slide ${locked ? 'locked' : ''}" data-i="${i}" role="button" tabindex="${locked ? -1 : 0}"><span class="lab">SPEC-0${i + 1}</span><div class="body"><div class="thumb"><img src="${thumbs[i]}" alt=""><div class="rcap" hidden></div></div><div><div class="n">${locked ? 'Locked' : L.place}</div><b>${L.name}</b><p>${L.sub}</p><div class="stars">${[0, 1, 2].map(s => `<span class="${s < save.stars[i] ? 'on' : ''}">★</span>`).join('')}</div>${chs}</div></div></div>`;
   }).join('');
   $('#slides').querySelectorAll('.slide').forEach(b => {
-    b.onclick = ev => { if (b.classList.contains('locked')) return; const c = ev.target.closest('.chb'); sfx('click'); startLevel(+b.dataset.i, c ? c.dataset.m : 'campaign'); };
+    // a challenge chip shows its rule over the slide's thumbnail (no layout shift under the pointer) on hover or focus;
+    // on touch the first tap shows it (amber chip), the second starts
+    const cap = b.querySelector('.rcap'), i = +b.dataset.i;
+    const rule = (c, tap) => { cap.hidden = !c; if (!c) return; const m = c.dataset.m;
+      cap.innerHTML = `<b>${MODES[m].name}</b> · ${MODES[m].rule}${m === 'iron' ? ': ' + CHAL[i].lines.map(k => TOWERS[k].name).join(' + ') : ''}.${tap ? ' <em>Tap again to start.</em>' : ''}`; };
+    b.querySelectorAll('.chb').forEach(c => { c.onmouseenter = c.onfocus = () => rule(c); c.onmouseleave = c.onblur = () => !c.classList.contains('confirm') && rule(null); });
+    b.onclick = ev => {
+      if (b.classList.contains('locked')) return; const c = ev.target.closest('.chb');
+      if (c && lastPT === 'touch' && !c.classList.contains('confirm')) { document.querySelectorAll('.chb.confirm').forEach(x => { x.classList.remove('confirm'); x.onmouseleave(); }); c.classList.add('confirm'); rule(c, true); sfx('click'); return; }
+      sfx('click'); startLevel(i, c ? c.dataset.m : 'campaign');
+    };
     b.onkeydown = ev => { if (ev.key === 'Enter' && ev.target === b) b.click(); };
   });
 }
@@ -2398,10 +2479,10 @@ const guard = v => v > 0 ? `${band(v, [.2, .4], ['Light', 'Medium', 'Heavy'])} �
 const hz = X => X.burst ? X.burst / (X.rate + .09 * (X.burst - 1)) : 1 / X.rate; // hits per second, as on the info card
 function guideRows(id) {
   const E = ENEMIES[id];
-  if (E) return [['Health', `${band(E.hp, [35, 80, 200, 600], ['Fragile', 'Weak', 'Sturdy', 'Tough', 'Colossal'])} · ${E.hp}`],
+  if (E) return [['Base health', `${band(E.hp, [35, 80, 200, 600], ['Fragile', 'Weak', 'Sturdy', 'Tough', 'Colossal'])} · ${E.hp}`],
     ['Speed', band(E.speed, [20, 30, 45, 58], ['Crawls', 'Slow', 'Steady', 'Fast', 'Very fast']) + (E.flying ? ' · flies' : '')],
     ['Armor · blunts physical', guard(E.armor)], ['Resistance · blunts magic', guard(E.mr)], ['If it breaks through', `−${E.lives} vitality`]];
-  if (id === 'hero') { const a = HERO.lv[0], z = HERO.lv[4]; return [['Health', `${a.hp} → ${z.hp}`], ['Damage', `${a.dmg} → ${z.dmg} · physical`], ['Regeneration', `${a.regen} → ${z.regen} per s`], ['Reach', `Short · ${HERO.range}`], ['Back after falling', `${HERO.resp} s`]]; }
+  if (id === 'hero') { const a = HERO.lv[0], z = HERO.lv[4]; return [['Base health', `${a.hp} → ${z.hp}`], ['Base damage', `${a.dmg} → ${z.dmg} · physical`], ['Regeneration', `${a.regen} → ${z.regen} per s`], ['Reach', `Short · ${HERO.range}`], ['Back after falling', `${HERO.resp} s`]]; }
   const P = SPECS[id], T = TOWERS[P ? P.base : id], a = P ? P.st : T.lv[0], z = P ? a : T.lv[2], span = k => a[k] !== z[k] ? `${a[k]} → ${z[k]}` : a[k];
   const cost = ['Cost', P ? `${P.cost} ATP to specialize` : `${a.cost} ATP`];
   if (T === TOWERS.macro) return [['Cells', span('units') + ' blockers'], ['Health per cell', span('hp')], ['Bite', span('dmg') + ' · physical'], ['Back after falling', `${TOWERS.macro.resp} s`], cost];
@@ -2421,7 +2502,7 @@ function guideShow(id) {
     `<span><b>${gOpen(k) ? gName(k) : 'Unknown'}</b><small>${gOpen(k) ? gRole(k) : path ? 'Not yet observed' : 'Not yet trained'}</small></span>${gNew(k) ? '<em class="ndot"></em>' : ''}</button>`).join('');
   $('#gLab').textContent = `${path ? 'PATHOGEN' : 'CELL'} · PLATE ${String(GUIDE[gTab].indexOf(id) + 1).padStart(2, '0')}`;
   const T = $('#gText'); T.style.setProperty('--c', COL[id]);
-  T.innerHTML = open ? `<small>${gKind(id)}</small><h3>${gName(id)}</h3><div class="rows">${guideRows(id).map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('')}</div>` +
+  T.scrollTop = 0; T.innerHTML = open ? `<small>${gKind(id)}</small><h3>${gName(id)}</h3><div class="rows">${guideRows(id).map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('')}</div>` +
       `<p class="sp"><em>SPECIAL</em>${guideSpecial(id)}</p><p class="fact"><em>FIELD NOTE</em>${FACTS[id]}</p>`
     : `<small>${path ? 'Pathogen' : 'Specialist'} · locked</small><h3>${path ? 'Not yet observed' : 'Not yet trained'}</h3><p class="sp">${path ? 'Its plate fills in the first time it enters one of your specimens.' : `Grow a ${TOWERS[SPECS[id].base].name} to level 3 to unlock this specialist.`}</p>`;
   guideDots();
@@ -2480,14 +2561,16 @@ function coach() {
   const huds = ['#hudTL', '#hudTR', '#hudBL'].map(s => { const r = $(s).getBoundingClientRect(); return [r.left - s0.left, r.top - s0.top, r.right - s0.left, r.bottom - s0.top]; });
   const C = { right: [at.x + at.r + gap, at.y - ch / 2], left: [at.x - at.r - gap - cw, at.y - ch / 2], above: [at.x - cw / 2, at.y - at.r - gap - ch], below: [at.x - cw / 2, at.y + at.r + gap] };
   const order = at.y > SH * .7 ? ['above', 'right', 'left', 'below'] : at.x < SW / 2 ? ['right', 'below', 'above', 'left'] : ['left', 'below', 'above', 'right'];
-  let best = null;
+  let best = null; const keep = [S.hero && !S.hero.dead && S.hero, S.pinned && S.pinned.t].filter(Boolean);
   order.forEach((sd, i) => {
     let [x, y] = C[sd]; if (sd === 'right' || sd === 'left') y = clamp(y, m, SH - m - ch); else x = clamp(x, m, SW - m - cw);
     const hit = (l, t, r, b) => x < r && x + cw > l && y < b && y + ch > t, q = 20 * viewK;
     const cover = (l, t, r, b) => Math.max(0, Math.min(r, x + cw) - Math.max(l, x)) * Math.max(0, Math.min(b, y + ch) - Math.max(t, y)) / ((r - l) * (b - t));
     // a hidden build site costs far more than a grazed one; both cost less than a covered HUD panel
     const score = (x >= m && y >= m && x + cw <= SW - m && y + ch <= SH - m ? 0 : 1000) + 100 * huds.filter(r => hit(...r)).length
-      + S.slots.reduce((a, s) => a + 60 * cover(s.x * viewK - q, s.y * viewK - q, s.x * viewK + q, s.y * viewK + q) ** 2, 0) + i;    if (!best || score < best[0]) best = [score, sd, x, y];
+      + S.slots.reduce((a, s) => a + 60 * cover(s.x * viewK - q, s.y * viewK - q, s.x * viewK + q, s.y * viewK + q) ** 2, 0) + i
+      + keep.reduce((a, o) => a + 300 * cover(o.x * viewK - q * 1.5, o.y * viewK - q * 1.5, o.x * viewK + q * 1.5, o.y * viewK + q * 1.5), 0); // never sit on the hero or the pinned cell
+    if (!best || score < best[0]) best = [score, sd, x, y];
   });
   const [, sd, x, y] = best, vert = sd === 'right' || sd === 'left', ar = el.querySelector('.ar');
   el.dataset.side = sd; el.style.left = x + 'px'; el.style.top = y + 'px';
@@ -2509,7 +2592,7 @@ function frame(now) {
   if (live) { acc += real * S.speed; let n = 0; while (acc >= DT && n < 8) { step(DT); acc -= DT; n++; } if (n === 8) acc = 0; }
   else if (S.L) { for (const t of S.towers) t.built += real; for (const p of S.parts) { p.life -= real; p.x += p.vx * real; p.y += p.vy * real; } S.parts = S.parts.filter(p => p.life > 0); }
   if (!$('#rotate').hidden && S.screen === 'play' && !S.paused && !S.over) togglePause();
-  render(); hud(); coach(); if (S.screen === 'guide') drawGuide(now / 1000);
+  render(); hud(); topDim(); coach(); if (S.screen === 'guide') drawGuide(now / 1000);
   musicTick(musicState());
   requestAnimationFrame(frame);
 }
