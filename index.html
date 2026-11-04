@@ -271,7 +271,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .gt img{width:48px;height:48px;flex:none;border-radius:50%;background:radial-gradient(circle,rgba(30,50,75,.9),rgba(4,8,13,.95));border:1px solid rgba(140,205,255,.12)}
 .gt span{min-width:0}
 .gt b{display:block;font:600 13px/1.2 var(--sans);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gt small{display:block;margin-top:2px;font:600 max(8.5px,calc(8px / var(--ut,1))) var(--mono);letter-spacing:.12em;color:var(--dim);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gt small{display:block;margin-top:2px;font:600 max(8.5px,calc(8px / var(--ut,1))) var(--mono);letter-spacing:.12em;line-height:1.25;color:var(--dim);text-transform:uppercase}
 .gt.lock b{color:var(--dim)}
 .gt .ndot{top:4px;right:4px;width:9px;height:9px}
 .gcard{overflow:hidden;border-radius:8px}
@@ -289,7 +289,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 .gtext .fact{margin:0}.gtext .fact em{display:block;font:600 9px var(--mono);font-style:normal;letter-spacing:.16em;color:var(--dapi);margin-bottom:2px}
 .gfoot{font:500 max(12px,calc(10px / var(--ut,1))) var(--mono);color:var(--dim)}
 /* onboarding: a field note beside its target, which wears a pulsing ring; only the dismiss button takes clicks */
-#hint{position:absolute;z-index:4;width:250px;padding:10px 38px 12px 14px;pointer-events:none;transform:scale(var(--u,1));transform-origin:0 0;background:var(--glass2);border-color:var(--rim2);box-shadow:0 0 26px -8px rgba(127,216,255,.6),0 14px 30px -14px #000;animation:pop .25s ease-out}
+#hint{position:absolute;z-index:4;width:250px;padding:10px 38px 12px 14px;pointer-events:none;transform:scale(var(--u,1));transform-origin:0 0;background:var(--glass2);border-color:var(--rim2);box-shadow:0 0 26px -8px rgba(127,216,255,.6),0 14px 30px -14px #000;animation:hpop .25s ease-out}
+@keyframes hpop{from{transform:scale(calc(var(--u,1) * .6));opacity:0}} /* pop at the card's own HUD scale */
 #hint small{display:block;font:600 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);margin-bottom:4px}
 #hint p{margin:0;font-size:12.5px;line-height:1.4;color:var(--dim)}
 #hint p b{display:block;font:600 14.5px/1.25 var(--sans);color:#fff;margin-bottom:3px}
@@ -697,7 +698,7 @@ const FACTS = {
   m2: 'M2 macrophages calm inflammation and help wounds heal: they release repair signals, build new tissue and clear away dead cells.',
   bcell: 'Each B cell makes a single antibody shape. Shuffling gene segments lets your body produce billions of different shapes.',
   plasma: 'A plasma cell is a B cell turned antibody factory. It can release thousands of antibodies every second.',
-  memory: 'Memory B cells can persist for decades. That is why one bout of measles, or one vaccine, protects for life.',
+  memory: 'Memory B cells can persist for decades. That is why one bout of measles usually protects for life.',
   killer: 'Killer T cells dock onto a target, punch holes in it with perforin, then inject granzymes that make it self-destruct.',
   ctl: 'Cytotoxic T cells are serial killers: one can destroy an infected cell and move on to the next within minutes.',
   th1: 'Th1 helper cells barely kill anything themselves. Their interferon-gamma supercharges the macrophages and killer cells around them.',
@@ -960,6 +961,7 @@ const sum = a => a.reduce((s, b) => s + (b | 0), 0);
 if (!Array.isArray(save.seen)) save.seen = [];
 if (!Array.isArray(save.viewed)) { save.viewed = []; if (sum(save.stars)) save.seen.push(...Object.keys(SPECS).filter(k => !save.seen.includes(k))); } // saves from before the guide: a cleared specimen means the player has met the specialists
 const SPAWNS = { candida: 'spore', rabies: 'virion', boss: 'bact' }; // offspring are observed with their parent
+for (const [k, v] of Object.entries(SPAWNS)) if (save.seen.includes(k) && !save.seen.includes(v)) save.seen.push(v); // saves that met a parent before offspring were tracked
 function observe(ids) {
   const f = ids.filter(k => !save.seen.includes(k));
   if (f.length) { save.seen.push(...f); persist(); guideDots(); }
@@ -988,7 +990,7 @@ function startLevel(i, mode = 'campaign') {
   $('#titleOv').hidden = true; $('#endOv').hidden = true; $('#memOv').hidden = true; $('#guideOv').hidden = true;
   $('#specId').textContent = `SPEC-0${i + 1} · ${L.place.toUpperCase()}${M.name ? ' · ' + M.name.toUpperCase() : ''}`; $('#specName').textContent = L.name;
   for (const k of ['fever', 'swarm']) { $('#ab-' + k).classList.toggle('off', mode === 'iron'); if (mode === 'iron') $(`#ab-${k} .tip small`).textContent = 'DISABLED · IRON CHALLENGE'; }
-  showInfo(null); layoutWaveMarkers(); nextNote(); $('#banner').innerHTML = '';
+  showInfo(null); layoutWaveMarkers(); nextNote(); hintCur = null; $('#banner').innerHTML = '';
   banner(M.name ? `${chBadge(mode, true)}<div><small>${M.name} challenge · Specimen 0${i + 1}</small><b>${L.name}</b><p>${M.rule}${mode === 'iron' ? ': ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ''}.</p></div>`
     : `<div><small>Specimen 0${i + 1} · ${L.place}</small><b>${L.name}</b><p>${L.sub}</p></div>`, M.name ? 6000 : 4200);
 }
@@ -1643,7 +1645,7 @@ function render() {
   g.drawImage(bgCache, 0, 0, W, H);
   const E = S.L.edge;
   g.globalCompositeOperation = 'lighter';
-  for (const p of S.paths) for (let d = (S.time * 26) % 38; d < p.len; d += 38) { const q = posAt(p, d), o = Math.sin(d * .05) * 12; g.fillStyle = rgba(E, .16); circ(g, q.x - Math.sin(q.a) * o, q.y + Math.cos(q.a) * o, 1.8); g.fill(); }
+  for (const p of S.paths) for (let d = (anim * 26) % 38; d < p.len; d += 38) { const q = posAt(p, d), o = Math.sin(d * .05) * 12; g.fillStyle = rgba(E, .16); circ(g, q.x - Math.sin(q.a) * o, q.y + Math.cos(q.a) * o, 1.8); g.fill(); }
   g.globalCompositeOperation = 'source-over';
   // host core at the exit
   const ep = S.paths[0], ex = posAt(ep, ep.len - 46);
@@ -1929,7 +1931,7 @@ function updateChips() {
   else {
     const counts = {}; S.waves[S.wave].forEach(g => counts[g.t] = (counts[g.t] || 0) + g.n);
     const chips = Object.entries(counts).map(([t, n]) => `<span class="chip"><img src="${portrait(t, 0, 48)}">${n}</span>`).join('');
-    html = `<small>WAVE ${S.wave + 1} / ${S.waves.length}</small><b>${S.wave === 0 ? 'Start the infection' : 'Call early'}</b><div class="chips">${chips}</div>${S.wave > 0 ? '<span class="bonus"></span>' : 'Click when your defences are ready.'}`;
+    html = `<small>WAVE ${S.wave + 1} / ${S.waves.length}</small><b>${S.wave === 0 ? 'Start the infection' : 'Call early'}</b><div class="chips">${chips}</div>${S.wave > 0 ? '<span class="bonus"></span>' : 'Tap or click when your defences are ready.'}`;
   }
   wm.forEach(b => b.querySelector('.tip').innerHTML = html);
 }
@@ -2146,15 +2148,15 @@ const onMap = (o, r) => o && { x: o.x * viewK, y: o.y * viewK, r: r * viewK };
 const upTarget = () => S.towers.find(t => t.lvl < 2 && S.gold >= TOWERS[t.type].lv[t.lvl + 1].cost);
 const hintSlot = () => { const q = posAt(S.paths[0], 160), d = s => Math.hypot(s.x - q.x, s.y - q.y); return S.slots.filter(s => !s.tower).sort((a, b) => d(a) - d(b))[0]; };
 const HINTS = [
-  { id: 'build', k: 'Grow', txt: '<b>Click a ring to grow a cell.</b> Rings are build sites beside the infection route. Hover a choice to preview its reach.',
+  { id: 'build', k: 'Grow', txt: '<b>Tap or click a ring to grow a cell.</b> Rings are build sites beside the infection route. Each cell shows its ATP cost.',
     when: () => S.time > 1.5, done: () => S.towers.length, at: () => onMap(hintSlot(), 30) },
   { id: 'wave', k: 'Call', txt: '<b>Call the first wave here.</b> Pathogens wait for your signal. Later, calling a wave early pays bonus ATP.',
     when: () => S.towers.length, done: () => S.wave, at: () => wm[0] && !wm[0].hidden && stRel(wm[0], 6) },
-  { id: 'upgrade', k: 'Upgrade', txt: '<b>You can afford an upgrade.</b> Click this cell, then the ▲ button. Each level hits harder and reaches further.',
+  { id: 'upgrade', k: 'Upgrade', txt: '<b>You can afford an upgrade.</b> Tap or click this cell, then the ▲ button. Each level hits harder and reaches further.',
     when: () => S.wave && upTarget(), done: () => S.towers.some(t => t.lvl), at: () => onMap(upTarget(), 34) },
-  { id: 'fever', k: 'Fever', txt: '<b>Fever is ready.</b> Press Q or click the flame, then click a crowd of pathogens to burn them.',
+  { id: 'fever', k: 'Fever', txt: '<b>Fever is ready.</b> Press Q or tap the flame, then tap a crowd of pathogens to burn them.',
     when: () => S.wave && S.enemies.length >= 3, done: () => S.cds.fever > 0, at: () => stRel($('#ab-fever'), 5) },
-  { id: 'hero', k: 'Hero', txt: '<b>Meet your NK Sentinel.</b> Click it, then click near the path to send it there. Press E for Granzyme Burst.',
+  { id: 'hero', k: 'Hero', txt: '<b>Meet your NK Sentinel.</b> Select it, then tap or click near the path to send it there. Press E for Granzyme Burst.',
     when: () => S.wave >= 2, done: () => S.sel && S.sel.hero, at: () => !S.hero.dead && onMap(S.hero, 26) },
 ];
 if (!Array.isArray(save.hints)) save.hints = firstRun ? [] : HINTS.map(h => h.id); // returning players never see them
@@ -2168,7 +2170,7 @@ function coach() {
     h = todo.find(x => x.id === hintCur) || todo.find(x => x.when());
   }
   hintCur = h ? h.id : null;
-  const at = h && !(S.sel && S.sel.slot) && h.at(); // an open radial owns the space around its site
+  const at = h && !(S.sel && S.sel.slot) && !wm.some(b => b.matches(':hover')) && h.at(); // an open radial or a wave preview owns the space around it
   el.hidden = ring.hidden = !at; if (!at) return;
   if (el.dataset.id !== h.id) { el.dataset.id = h.id; el.querySelector('small').textContent = `Field note ${HINTS.indexOf(h) + 1} / ${HINTS.length} · ${h.k}`; el.querySelector('p').innerHTML = h.txt; }
   Object.assign(ring.style, { left: at.x - at.r + 'px', top: at.y - at.r + 'px', width: at.r * 2 + 'px', height: at.r * 2 + 'px' });
@@ -2181,9 +2183,10 @@ function coach() {
   order.forEach((sd, i) => {
     let [x, y] = C[sd]; if (sd === 'right' || sd === 'left') y = clamp(y, m, SH - m - ch); else x = clamp(x, m, SW - m - cw);
     const hit = (l, t, r, b) => x < r && x + cw > l && y < b && y + ch > t, q = 20 * viewK;
+    const cover = (l, t, r, b) => Math.max(0, Math.min(r, x + cw) - Math.max(l, x)) * Math.max(0, Math.min(b, y + ch) - Math.max(t, y)) / ((r - l) * (b - t));
+    // a hidden build site costs far more than a grazed one; both cost less than a covered HUD panel
     const score = (x >= m && y >= m && x + cw <= SW - m && y + ch <= SH - m ? 0 : 1000) + 100 * huds.filter(r => hit(...r)).length
-      + 10 * S.slots.filter(s => hit(s.x * viewK - q, s.y * viewK - q, s.x * viewK + q, s.y * viewK + q)).length + i;
-    if (!best || score < best[0]) best = [score, sd, x, y];
+      + S.slots.reduce((a, s) => a + 60 * cover(s.x * viewK - q, s.y * viewK - q, s.x * viewK + q, s.y * viewK + q) ** 2, 0) + i;    if (!best || score < best[0]) best = [score, sd, x, y];
   });
   const [, sd, x, y] = best, vert = sd === 'right' || sd === 'left', ar = el.querySelector('.ar');
   el.dataset.side = sd; el.style.left = x + 'px'; el.style.top = y + 'px';
@@ -2192,11 +2195,12 @@ function coach() {
 $('#hint .x').onclick = () => { sfx('click'); hintDone(hintCur); };
 
 // ============================================================ loop
-let acc = 0, last = performance.now();
+let acc = 0, last = performance.now(), anim = 0; // anim: display clock; S.time is game time and stands still off play
 function frame(now) {
   const real = Math.min(.1, (now - last) / 1000); last = now;
-  if (S.screen === 'play' && !S.paused && !S.over) { acc += real * S.speed; let n = 0; while (acc >= DT && n < 8) { step(DT); acc -= DT; n++; } if (n === 8) acc = 0; }
-  else if (S.L) { S.time += real * .3; for (const t of S.towers) t.built += real; for (const p of S.parts) { p.life -= real; p.x += p.vx * real; p.y += p.vy * real; } S.parts = S.parts.filter(p => p.life > 0); }
+  const live = S.screen === 'play' && !S.paused && !S.over; anim += real * (live ? S.speed : .3);
+  if (live) { acc += real * S.speed; let n = 0; while (acc >= DT && n < 8) { step(DT); acc -= DT; n++; } if (n === 8) acc = 0; }
+  else if (S.L) { for (const t of S.towers) t.built += real; for (const p of S.parts) { p.life -= real; p.x += p.vx * real; p.y += p.vy * real; } S.parts = S.parts.filter(p => p.life > 0); }
   render(); hud(); coach(); if (S.screen === 'guide') drawGuide(now / 1000);
   requestAnimationFrame(frame);
 }
