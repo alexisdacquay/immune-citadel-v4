@@ -63,7 +63,6 @@ function createServer(store) {
       const url = new URL(req.url, 'http://x');
       if (req.method === 'OPTIONS') return send(204);
       if (url.pathname === '/health' && req.method === 'GET') return send(200, { ok: true });
-      if (url.pathname === '/debug-ip' && process.env.DEBUG_IP) return send(200, { xff: req.headers['x-forwarded-for'], tci: req.headers['true-client-ip'], cf: req.headers['cf-connecting-ip'], xri: req.headers['x-real-ip'], remote: req.socket.remoteAddress }); // TEMP
       const m = url.pathname.match(/^\/api\/save\/([^/]+)$/);
       if (!m) return send(404, { error: 'not found' });
       const code = m[1];
@@ -73,7 +72,7 @@ function createServer(store) {
         return row ? send(200, { save: row.data, updatedAt: row.updatedAt }) : send(404, { error: 'no save for this code' });
       }
       if (req.method === 'PUT') {
-        const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress).split(',').pop().trim(); // the proxy appends the real client; earlier entries are client-supplied
+        const ip = req.headers['cf-connecting-ip'] || req.socket.remoteAddress; // Render sits behind Cloudflare, which overwrites this header with the real client; X-Forwarded-For starts with whatever the client sent
         if (limited(ip)) return send(429, { error: 'too many saves, slow down' });
         let size = 0; const chunks = [];
         for await (const c of req) { size += c.length; if (size > MAX_BODY) return send(413, { error: 'save too large' }); chunks.push(c); }

@@ -27,6 +27,6 @@ test('save API', async t => {
   assert.equal((await fetch(`${base}/api/save/${code}`, { method: 'OPTIONS', headers: { origin: 'https://game.example' } })).status, 204);
   assert.equal((await fetch(`${base}/api/save/${code}`, { method: 'DELETE' })).status, 405);
 
-  let last; for (let i = 0; i < 130; i++) last = (await put(code, { save: { i } }, { 'x-forwarded-for': `9.9.9.${i}, 1.2.3.4` })).status;
-  assert.equal(last, 429, 'write rate limit keys on the proxy-added address, not the spoofable first entry');
+  let last; for (let i = 0; i < 130; i++) last = (await put(code, { save: { i } }, { 'x-forwarded-for': `9.9.9.${i}`, 'cf-connecting-ip': '1.2.3.4' })).status;
+  assert.equal(last, 429, 'write rate limit keys on the Cloudflare client address, not X-Forwarded-For');
 });
