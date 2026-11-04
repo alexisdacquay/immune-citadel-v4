@@ -268,5 +268,6 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   await clickSel('#memBack'); await clickSel('.slide[data-i="0"]'); await p.waitForTimeout(2500);
   ob(await p.evaluate(() => IC.S.lvl === 0 && IC.S.screen === 'play' && document.getElementById('hint').hidden && IC.save.hints.length === IC.HINTS.length), 'a returning player saw field notes');
   gg(await p.evaluate(() => Object.keys(IC.SPECS).every(k => IC.save.seen.includes(k))), 'an old save with stars should have its specialists catalogued');
+  await require('./touch.js')(b, out, errs); // phones, tablet and both mouse sizes: taps, two-tap buy, target sizes, layout, rotate card
   console.log('errors:', errs.length ? errs : 'none'); await b.close();
 })();
