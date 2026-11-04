@@ -12,11 +12,11 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   // x < 335, y > 531; a pathogen reaches ~21 below the route centre (lane offset 9 + body), so the centre must stay above y 510
   const route = await p.evaluate(() => IC.LEVELS.map((L, li) => L.paths.map((raw, pi) => { const q = IC.makePath(raw); for (let d = 0; d < q.len; d += 8) { const r = IC.posAt(q, d); if (r.x > -10 && r.x < 335 && r.y > 510) return `L${li + 1} route${pi + 1} under the ability cluster at [${r.x | 0},${r.y | 0}]`; } return null; }).filter(Boolean)).flat());
   console.log('route problems:', route.length ? route : 'none'); errs.push(...route);
-  const results = [];
+  const results = []; let used = {}; // specialists bought by the bot, across all runs
   const nLv = await p.evaluate(() => IC.LEVELS.length);
   // every level twice: no Immune Memory upgrades, then all 18 tiers
   for (const mem of ['none', 'all']) for (let li = 0; li < nLv; li++) {
-    const r = await p.evaluate(([li, mem]) => {
+    const r = await p.evaluate(([li, mem, used]) => {
       IC.save.mem = mem === 'all' ? Object.fromEntries(IC.MEMORY.map(M => [M.id, 3])) : {};
       IC.startLevel(li); const S = IC.S; S.screen = 'play';
       const memOk = mem === 'none' ? S.hero.lvl === 1 && IC.AB.fever.cd === 32 : S.hero.lvl === 2 && IC.AB.fever.cd === 26 && IC.AB.swarm.n === 4 && IC.TOWERS.neutro.lv[0].range === 154;
@@ -39,14 +39,16 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
         for (let guard = 0; guard < 5; guard++) {
           const free = ranked.filter(i => !S.slots[i].tower);
           // tier 0-2 = levels, 3 = specialist, 4-5 = skill ranks. The first 4 towers are the core and go all the way;
-          // a specialist buys its skill ranks before the next core tower specializes, so real runs reach skill ranks;
-          // same-type core towers alternate between the two specializations so every branch gets played.
-          const specOf = u => { const o = Object.keys(IC.SPECS).filter(k => IC.SPECS[k].base === u.type); return o[S.towers.filter(x => x.type === u.type).indexOf(u) % 2]; };
+          // a specialist buys its skill ranks before the next core tower specializes, so real runs reach skill ranks.
+          // Rotation across runs (used = how often each specialist was bought so far): among core towers at the same tier the line
+          // whose specialists were bought least goes first, and it takes its less-used specialist, so all 8 get played.
+          const opts = b => Object.keys(IC.SPECS).filter(k => IC.SPECS[k].base === b), want = b => opts(b).reduce((s, k) => s + (used[k] || 0), 0);
+          const specOf = u => opts(u.type).sort((a, c) => (used[a] || 0) - (used[c] || 0))[0];
           const tier = u => u.lvl + (u.spec ? 1 + u.rank : 0), core = S.towers.slice(0, 4), key = u => u.spec ? -1 : tier(u);
           const cost = u => u.lvl < 2 ? IC.TOWERS[u.type].lv[u.lvl + 1].cost : !u.spec ? IC.SPECS[specOf(u)].cost : IC.SPECS[u.spec].sk[u.rank].cost;
-          const ups = S.towers.filter(x => tier(x) < (core.includes(x) ? 5 : 2)).sort((a, b) => (core.includes(b) - core.includes(a)) || key(a) - key(b));
+          const ups = S.towers.filter(x => tier(x) < (core.includes(x) ? 5 : 2)).sort((a, b) => (core.includes(b) - core.includes(a)) || key(a) - key(b) || (core.includes(a) ? want(a.type) - want(b.type) : 0));
           const wantUp = ups.length && (free.length === 0 || S.towers.length >= 6 && bi % 2 === 1);
-          if (wantUp) { const u = ups[0], i = S.slots.indexOf(u.slot); if (S.gold >= cost(u)) { u.lvl < 2 ? IC.upgrade(i) : !u.spec ? IC.specialize(i, specOf(u)) : IC.skillUp(i); bi++; continue; } break; }
+          if (wantUp) { const u = ups[0], i = S.slots.indexOf(u.slot); if (S.gold >= cost(u)) { if (u.lvl < 2) IC.upgrade(i); else if (!u.spec) { const id = specOf(u); if (IC.specialize(i, id)) used[id] = (used[id] || 0) + 1; } else IC.skillUp(i); bi++; continue; } break; }
           if (free.length) { const k = order[bi % order.length]; if (S.gold >= IC.TOWERS[k].lv[0].cost) { IC.build(free[0], k); bi++; continue; } }
           break;
         }
@@ -58,13 +60,17 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
         if (!H.dead && S.cds.granzyme <= 0) { const n = S.enemies.filter(e => Math.hypot(e.x - H.x, e.y - H.y) < IC.HERO.gz.r).length; if (n >= 3 || (n && H.hp < H.max * .35)) IC.granzyme(); }
         lowest = Math.min(lowest, S.lives);
       }
-      return { mem, memOk, level: li, won: S.over && S.lives > 0, lives: S.lives, wave: S.wave, secs: t, towers: S.towers.map(x => x.spec ? x.spec + x.rank : x.type[0] + x.lvl).join(' '), gold: S.gold, leaks: JSON.stringify(leaks), hero: `L${S.hero.lvl} kills ${S.hero.kills} park ${park.x | 0},${park.y | 0}` };
-    }, [li, mem]);
+      return { mem, memOk, level: li, won: S.over && S.lives > 0, lives: S.lives, wave: S.wave, secs: t, towers: S.towers.map(x => x.spec ? x.spec + x.rank : x.type[0] + x.lvl).join(' '), gold: S.gold, leaks: JSON.stringify(leaks), hero: `L${S.hero.lvl} kills ${S.hero.kills} park ${park.x | 0},${park.y | 0}`, used };
+    }, [li, mem, used]);
+    used = r.used;
     results.push(r);
     if (!r.won) errs.push(`bot lost level ${li + 1} with memory ${mem}`);
     if (!r.memOk) errs.push(`memory ${mem} not applied on level ${li + 1}`);
   }
   console.log(results);
+  const specIds = await p.evaluate(() => Object.keys(IC.SPECS));
+  console.log('specialists used by the bot:', specIds.map(k => `${k} ×${used[k] || 0}`).join(', '));
+  const unused = specIds.filter(k => !used[k]); if (unused.length) errs.push('bot never bought: ' + unused.join(', '));
   for (const mem of ['none', 'all']) console.log(`bot, memory ${mem}:`, results.filter(r => r.mem === mem).map(r => `L${r.level + 1} ${r.won ? 'won' : 'LOST'} lives ${r.lives}`).join(' | '));
   await p.evaluate(() => { IC.save.mem = {}; IC.persist(); });
   // visual: start level 1 for real, build, play 25s with rAF, screenshot

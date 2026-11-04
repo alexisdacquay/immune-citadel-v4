@@ -406,45 +406,45 @@ TOWERS.macro.resp = 9; // seconds before a fallen macrophage cell returns
 const TORDER = ['neutro', 'macro', 'bcell', 'killer'];
 // tier IV specialists: st = stats, sk = signature skill ranks (bought after specializing)
 const SPECS = {
-  net: { base: 'neutro', name: 'NET Trapper', role: 'Tier IV · Controller', kind: 'Physical · every shot slows', cost: 270,
-    st: { dmg: 20, rate: .33, range: 175, slow: .5 }, tag: ['SLOW', '50%'],
+  net: { base: 'neutro', name: 'NET Trapper', role: 'Tier IV · Controller', kind: 'Physical · every shot slows', cost: 230,
+    st: { dmg: 24, rate: .32, range: 175, slow: .5 }, tag: ['SLOW', '50%'],
     perk: 'Casts DNA nets: every granule slows its target by 50%.',
-    skn: 'Chromatin Snare', sk: [{ cost: 150, cd: 9, r: 65, root: 1.6 }, { cost: 190, cd: 8, r: 85, root: 2.6 }],
+    skn: 'Chromatin Snare', sk: [{ cost: 120, cd: 8, r: 70, root: 1.8 }, { cost: 170, cd: 7, r: 85, root: 2.4 }],
     skd: r => `Every ${r.cd} s roots all ground pathogens within ${r.r} of its target for ${r.root} s (bosses half).` },
-  degran: { base: 'neutro', name: 'Degranulator', role: 'Tier IV · Shredder', kind: 'Physical · 3-shot bursts', cost: 300,
-    st: { dmg: 15, rate: .55, range: 165, burst: 3 }, tag: ['BURST', '×3'],
+  degran: { base: 'neutro', name: 'Degranulator', role: 'Tier IV · Shredder', kind: 'Physical · 3-shot bursts', cost: 260,
+    st: { dmg: 24, rate: .48, range: 165, burst: 3 }, tag: ['BURST', '×3'],
     perk: 'Empties its granules in rapid bursts of three.',
-    skn: 'Myeloperoxidase', sk: [{ cost: 160, shred: .03, cap: .25 }, { cost: 200, shred: .05, cap: .4 }],
+    skn: 'Myeloperoxidase', sk: [{ cost: 140, shred: .04, cap: .3 }, { cost: 170, shred: .06, cap: .45 }],
     skd: r => `Bleach-laced hits strip ${Math.round(r.shred * 100)}% armor each, stacking up to ${Math.round(r.cap * 100)}%.` },
-  m1: { base: 'macro', name: 'M1 Inflammatory', role: 'Tier IV · Brawler', kind: 'Three hard-hitting cells', cost: 280,
-    st: { units: 3, hp: 240, dmg: 30, rate: .75, regen: .12 }, tag: ['RATE', (1 / .75).toFixed(1) + '/s'],
-    perk: 'Activated by danger signals: cells bite twice as hard.',
-    skn: 'Acid Spit', sk: [{ cost: 150, dmg: 16, cd: 1.1, r: 75 }, { cost: 190, dmg: 28, cd: .9, r: 90 }],
+  m1: { base: 'macro', name: 'M1 Inflammatory', role: 'Tier IV · Brawler', kind: 'Three hard-hitting cells', cost: 220,
+    st: { units: 3, hp: 300, dmg: 40, rate: .7, regen: .12 }, tag: ['RATE', (1 / .7).toFixed(1) + '/s'],
+    perk: 'Activated by danger signals: cells bite almost three times as hard, and faster.',
+    skn: 'Acid Spit', sk: [{ cost: 120, dmg: 24, cd: .9, r: 90 }, { cost: 160, dmg: 40, cd: .7, r: 110 }],
     skd: r => `Cells spit ${r.dmg}-damage acid every ${r.cd} s at pathogens within ${r.r}, flyers included.` },
-  m2: { base: 'macro', name: 'M2 Resolver', role: 'Tier IV · Healer', kind: 'Four tanky, healing cells', cost: 260,
-    st: { units: 4, hp: 330, dmg: 13, rate: .9, regen: .25, heal: 10 }, tag: ['HEAL', '10/s'],
-    perk: 'Calms the fight: cells regenerate fast and heal nearby cells 10 HP/s.',
-    skn: 'Efferocytosis', sk: [{ cost: 120, atp: 3 }, { cost: 160, atp: 6 }],
-    skd: r => `Eats the dead: each kill landed by its cells returns +${r.atp} ATP.` },
-  plasma: { base: 'bcell', name: 'Plasma Cell', role: 'Tier IV · Artillery', kind: 'Splash · rapid barrage', cost: 300,
-    st: { dmg: 26, rate: .75, range: 180, splash: 82, ops: 1.4 }, tag: ['TAG', '+40%'],
+  m2: { base: 'macro', name: 'M2 Resolver', role: 'Tier IV · Healer', kind: 'Four tanky, healing cells', cost: 190,
+    st: { units: 4, hp: 500, dmg: 30, rate: .9, regen: .25, heal: 16, eat: 120 }, tag: ['HEAL', '16/s'],
+    perk: 'Calms the fight: cells regenerate fast and heal nearby cells 16 HP/s.',
+    skn: 'Efferocytosis', sk: [{ cost: 90, atp: 4 }, { cost: 120, atp: 7 }],
+    skd: r => `Eats the dead: every pathogen that dies within ${SPECS.m2.st.eat} of its cells returns +${r.atp} ATP, whoever killed it.` },
+  plasma: { base: 'bcell', name: 'Plasma Cell', role: 'Tier IV · Artillery', kind: 'Splash · rapid barrage', cost: 270,
+    st: { dmg: 32, rate: .7, range: 180, splash: 82, ops: 1.4 }, tag: ['TAG', '+40%'],
     perk: 'An antibody factory: rapid wide clouds; tagged pathogens take +40% damage.',
-    skn: 'Antibody Rain', sk: [{ cost: 170, cd: 9, n: 4, dmg: 45 }, { cost: 210, cd: 7, n: 6, dmg: 60 }],
+    skn: 'Antibody Rain', sk: [{ cost: 150, cd: 8, n: 4, dmg: 50 }, { cost: 180, cd: 6, n: 6, dmg: 60 }],
     skd: r => `Every ${r.cd} s rains ${r.n} antibody clouds of ${r.dmg} damage on pathogens in range.` },
-  memory: { base: 'bcell', name: 'Memory B Cell', role: 'Tier IV · Learner', kind: 'Splash · remembers kills', cost: 280,
-    st: { dmg: 52, rate: 1.35, range: 195, splash: 64, mem: .06, memCap: 1.2 }, tag: ['MEMORY', '+6%/kill'],
-    perk: 'Each kill of a pathogen type adds +6% damage against that type for the rest of the specimen (max +120%).',
-    skn: 'Recall', sk: [{ cost: 160, cd: 12, dmg: 320 }, { cost: 210, cd: 9, dmg: 520 }],
+  memory: { base: 'bcell', name: 'Memory B Cell', role: 'Tier IV · Learner', kind: 'Splash · remembers kills', cost: 260,
+    st: { dmg: 60, rate: 1.3, range: 195, splash: 64, mem: .08, memCap: 1.2 }, tag: ['MEMORY', '+8%/kill'],
+    perk: 'Each kill of a pathogen type adds +8% damage against that type for the rest of the specimen (max +120%).',
+    skn: 'Recall', sk: [{ cost: 140, cd: 11, dmg: 360 }, { cost: 180, cd: 8, dmg: 520 }],
     skd: r => `Every ${r.cd} s strikes the toughest pathogen in range for ${r.dmg}, ignoring armor.` },
-  ctl: { base: 'killer', name: 'CTL Executioner', role: 'Tier IV · Assassin', kind: 'Magic · ignores armor', cost: 310,
-    st: { dmg: 92, rate: .85, range: 170 }, tag: ['CHAIN', '60%'],
+  ctl: { base: 'killer', name: 'CTL Executioner', role: 'Tier IV · Assassin', kind: 'Magic · ignores armor', cost: 290,
+    st: { dmg: 105, rate: .85, range: 170 }, tag: ['CHAIN', '60%'],
     perk: 'A seasoned killer: heavy perforin bolts that still leap to a second target.',
-    skn: 'Perforin Verdict', sk: [{ cost: 170, cd: 5, th: .3 }, { cost: 220, cd: 3.5, th: .45 }],
+    skn: 'Perforin Verdict', sk: [{ cost: 140, cd: 5, th: .3 }, { cost: 180, cd: 3.5, th: .45 }],
     skd: r => `Every ${r.cd} s a bolt executes a non-boss pathogen below ${Math.round(r.th * 100)}% health.` },
-  th1: { base: 'killer', name: 'Th1 Helper', role: 'Tier IV · Commander', kind: 'Magic · attack-speed aura', cost: 250,
-    st: { dmg: 24, rate: .9, range: 160, aura: 150, haste: .2 }, tag: ['AURA', '+20%'],
-    perk: 'Weak bolt, but its cytokines give every tower within 150 +20% attack speed.',
-    skn: 'Cytokine Surge', sk: [{ cost: 140, cd: 20, dur: 6, haste: .55 }, { cost: 180, cd: 16, dur: 8, haste: .8 }],
+  th1: { base: 'killer', name: 'Th1 Helper', role: 'Tier IV · Commander', kind: 'Magic · attack-speed aura', cost: 220,
+    st: { dmg: 50, rate: .9, range: 160, aura: 200, haste: .3 }, tag: ['AURA', '+30%'],
+    perk: 'Lighter bolts that still leap, and its cytokines give every tower within 200 +30% attack speed.',
+    skn: 'Cytokine Surge', sk: [{ cost: 110, cd: 16, dur: 6, haste: .6 }, { cost: 140, cd: 12, dur: 7, haste: .9 }],
     skd: r => `Every ${r.cd} s the aura surges to +${Math.round(r.haste * 100)}% attack speed for ${r.dur} s.` },
 };
 const stat = t => t.spec ? SPECS[t.spec].st : TOWERS[t.type].lv[t.lvl];
@@ -848,13 +848,14 @@ function spawnEnemy(type, p, mult, d = 0, lat) {
   place(e); S.enemies.push(e); return e;
 }
 function place(e) { const p = posAt(e.path, e.d); e.a = p.a; e.x = p.x - Math.sin(p.a) * e.lat; e.y = p.y + Math.cos(p.a) * e.lat; }
-// src = tower or unit that dealt the hit (memory stacks, efferocytosis)
+// src = tower or unit that dealt the hit (memory stacks, damage tally)
 function damage(e, amt, type, src) {
   if (e.dead) return;
   amt *= 1 - (type === 'magic' ? e.D.mr : type === 'true' ? 0 : Math.max(0, e.D.armor - e.shred));
   if (e.opsT > 0) amt *= e.ops;
   if (e.shieldT > 0) amt *= .5;
   if (src && src.mem) amt *= 1 + Math.min(SPECS.memory.st.memCap, (src.mem[e.type] || 0) * SPECS.memory.st.mem);
+  const o = src && (src.owner || src); if (o) o.dealt = (o.dealt || 0) + Math.min(amt, Math.max(0, e.hp)); // damage dealt per tower (balance harness)
   e.hp -= amt; e.flash = .09; e.hitT = S.time; if (src && src === S.hero) e.heroT = S.time;
   if (e.hp <= 0) kill(e, src);
 }
@@ -864,7 +865,8 @@ function kill(e, src) {
   if (src && src.mem) src.mem[e.type] = (src.mem[e.type] || 0) + 1;
   const H = S.hero; if (H && src === H) H.kills++;
   if (H && (src === H || S.time - e.heroT < 4)) heroXp(src === H ? e.D.gold : Math.ceil(e.D.gold / 2)); // kill or assist
-  const ef = src && src.owner && src.owner.spec === 'm2' && skill(src.owner);
+  let ef = null; // efferocytosis: an M2 Resolver eats whatever dies near its cells' post, whoever landed the kill (best rank wins)
+  for (const t of S.towers) if (t.spec === 'm2' && skill(t) && !(t.hij > 0) && Math.hypot(e.x - t.rally.x, e.y - t.rally.y) < SPECS.m2.st.eat && (!ef || skill(t).atp > ef.atp)) ef = skill(t);
   if (ef) { S.gold += ef.atp; floatText(e.x, e.y - 32, `+${ef.atp} efferocytosis`, '#8ff0ff', 1.1); }
   burst(e.x, e.y, COL[e.type], e.D.boss ? 60 : e.D.r > 12 ? 18 : 10, e.D.boss ? 4 : 2.4); S.fx.push({ k: 'rupture', x: e.x, y: e.y - (e.D.flying ? 12 : 0), r: e.D.r, c: COL[e.type], t: 0, T: e.D.boss ? .8 : .4 });
   sfx(e.D.boss ? 'boom' : 'pop'); if (e.D.boss) S.shake = 14;
@@ -1172,7 +1174,7 @@ function step(dt) {
       }
     }
     if (t.type === 'neutro') { S.proj.push({ k: 'gran', x: ox, y: oy, tgt: best, sp: 520, dmg: L.dmg, dt: 'phys', net: t.lvl >= 2 && t.shots % 4 === 0, slow: L.slow, shred: sk && sk.shred && sk, src: t }); sfx('shoot'); }
-    else if (t.type === 'killer') { S.proj.push({ k: 'bolt', x: ox, y: oy, tgt: best, sp: 430, dmg: L.dmg, dt: 'magic', chain: t.lvl >= 2 && t.spec !== 'th1', trail: [], src: t }); sfx('zap'); }
+    else if (t.type === 'killer') { S.proj.push({ k: 'bolt', x: ox, y: oy, tgt: best, sp: 430, dmg: L.dmg, dt: 'magic', chain: t.lvl >= 2, trail: [], src: t }); sfx('zap'); }
     else if (t.type === 'bcell') {
       const lead = best.blocker || best.rootT > 0 ? 0 : best.D.speed * best.slowF * .85, pp = posAt(best.path, Math.min(best.path.len, best.d + lead));
       const tx = pp.x - Math.sin(pp.a) * best.lat, ty = pp.y + Math.cos(pp.a) * best.lat;
@@ -1206,7 +1208,7 @@ function step(dt) {
         if (p.shred) e.shred = Math.max(e.shred, Math.min(p.shred.cap, e.shred + p.shred.shred)); // a weaker Degranulator never lowers shred
         const vd = p.src && p.src.spec === 'ctl' && skill(p.src);
         if (vd && p.src.sk <= 0 && !e.dead && !e.D.boss && e.hp < e.max * vd.th) {
-          p.src.sk = vd.cd; S.fx.push({ k: 'verdict', x: e.x, y: e.y, t: 0, T: .6 }); floatText(e.x, e.y - 30, 'Verdict', '#ff7a8f', 1.1); kill(e, p.src);
+          p.src.sk = vd.cd; S.fx.push({ k: 'verdict', x: e.x, y: e.y, t: 0, T: .6 }); floatText(e.x, e.y - 30, 'Verdict', '#ff7a8f', 1.1); p.src.dealt = (p.src.dealt || 0) + e.hp; kill(e, p.src);
         }
         if (p.k === 'bolt') {
           for (let i = 0; i < 5; i++) S.parts.push({ x: p.lx, y: p.ly, vx: rand(-60, 60), vy: rand(-60, 60), life: .3, max: .3, c: '#ff7fb0', r: 2 });
