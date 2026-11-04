@@ -226,6 +226,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 [hidden]{display:none!important}
 /* sound popover: two channel switches */
 .mute .sw,.half .sw2,:not(.mute)>svg>.sx{display:none}
+.seg{padding:3px;gap:2px;margin:0 8px 14px auto;flex:none}.seg+#sndBtn{margin-left:0}.seg button{border:0;border-radius:9px;background:none;padding:5px 9px;font:inherit;letter-spacing:inherit;color:var(--dim)}.seg button:hover{color:var(--txt)}.seg button.on{background:rgba(127,216,255,.16);color:var(--cyan);box-shadow:inset 0 0 0 1px rgba(127,216,255,.45)}
 #sndBtn{padding:9px;margin:0 0 14px auto;flex:none}#sndBtn svg{fill:none;stroke-linecap:round}
 #sndPop{position:absolute;z-index:12;width:240px;padding:8px 6px 6px;transform:scale(var(--u,1));transform-origin:0 0;background:var(--glass2);border-color:var(--rim2);box-shadow:0 0 26px -8px rgba(127,216,255,.5),0 14px 30px -14px #000;animation:hpop .2s ease-out}
 #sndPop small{display:block;padding:0 10px 4px;font:600 max(9px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.18em;color:var(--cyan)}
@@ -440,7 +441,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
       <div class="tbtns"><button class="mbtn" id="guideBtn"><svg viewBox="0 0 24 24"><path d="M4 5.5c3-1.2 5.8-1 8 1 2.2-2 5-2.2 8-1v13c-3-1.2-5.8-1-8 1-2.2-2-5-2.2-8-1z"/><path d="M12 6.5v13"/></svg>FIELD GUIDE<em class="ndot" hidden></em></button>
       <button class="mbtn" id="memBtn"><i></i>IMMUNE MEMORY <b id="memBtnN"></b></button></div>
       <div class="hd"><h1>IMMUNE<br><span>CITADEL</span></h1>
-      <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p><button class="mbtn" id="sndBtn" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="sw" d="M16 9c1.5 1.5 1.5 4.5 0 6"/><path class="sw sw2" d="M18.5 6.5c3 3 3 8 0 11"/><path class="sx" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button></div>
+      <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p><div class="mbtn seg" id="diffSeg" role="radiogroup" aria-label="Difficulty"><button data-d="easy" role="radio">EASY</button><button data-d="normal" role="radio">NORMAL</button><button data-d="hard" role="radio">HARD</button></div><button class="mbtn" id="sndBtn" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="sw" d="M16 9c1.5 1.5 1.5 4.5 0 6"/><path class="sw sw2" d="M18.5 6.5c3 3 3 8 0 11"/><path class="sx" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button></div>
       <div class="slides" id="slides"></div>
       <div class="keys"><span><b>Click a ring</b> grow a cell</span><span><b>Click a cell</b> upgrade / recycle</span><span><b>Red marker</b> call the next wave</span><span><b>Q W</b> abilities</span><span><b>H E</b> hero · burst</span><span><b>Space</b> pause</span><span><b>F</b> speed</span></div>
     </div>
@@ -825,13 +826,13 @@ const LEVELS = [
       [g_('bact', 14, .6), g_('staph', 8, 1.6, 4), g_('candida', 4, 3.5, 10)]],
   },
   {
-    place: 'The Lungs', name: 'Storm in the Alveoli', sub: 'Airborne invaders arrive on two breaths at once.', seed: 23, gold: 330, style: 'lung',
+    place: 'The Lungs', name: 'Storm in the Alveoli', sub: 'Airborne invaders arrive on two breaths at once.', seed: 23, gold: 400, style: 'lung',
     th: { bg: '#f2d9dc', cell: '#f8e8ea', edge: '#e2b6bd', nuc: '#dca5ae', out: '#9c4456', path: '#c86f80', hi: '#eaa2ae' },
     paths: [[[-40, 110], [240, 110], [340, 190], [460, 300], [620, 300], [760, 220], [1040, 220]], [[-40, 505], [220, 505], [340, 420], [460, 300], [620, 300], [760, 220], [1040, 220]]], // route 2 clears the ability cluster
     slots: [[120, 45], [140, 180], [320, 88], [432, 182], [140, 450], [140, 588], [332, 512], [312, 305], [540, 230], [540, 370], [700, 360], [680, 190], [860, 150], [880, 290]],
     waves: [[g_('bact', 8, 1.1, 0, -1)], [g_('virus', 12, .5, 0, -1)], [g_('flu', 5, 1.6, 0, 0), g_('bact', 8, 1, 1, 1)], [g_('staph', 4, 2, 0, 0), g_('staph', 4, 2, 1, 1), g_('bact', 6, 1, 4, -1)],
-      [g_('candida', 3, 3, 0, -1), g_('virus', 10, .5, 4, -1)], [g_('flu', 10, 1, 0, -1)], [g_('staph', 8, 1.2, 0, -1), g_('bact', 14, .6, 3, -1)],
-      [g_('candida', 5, 2.5, 0, -1), g_('flu', 8, 1, 5, -1)], [g_('virus', 30, .3, 0, -1)], [g_('staph', 10, 1, 0, -1), g_('candida', 6, 2, 4, -1), g_('flu', 10, .9, 8, -1)]],
+      [g_('candida', 3, 3, 0, -1), g_('virus', 10, .5, 4, -1)], [g_('flu', 7, 1.4, 0, -1)], [g_('staph', 6, 1.4, 0, -1), g_('bact', 12, .7, 3, -1)], // 02: fewer flyers/armor for new players
+      [g_('candida', 4, 2.8, 0, -1), g_('flu', 6, 1.3, 5, -1)], [g_('virus', 24, .35, 0, -1)], [g_('staph', 6, 1.4, 0, -1), g_('candida', 4, 2.5, 4, -1), g_('flu', 6, 1.3, 9, -1)]],
   },
   {
     place: 'The Bloodstream', name: 'Rapids of the Aorta', sub: 'The current carries parasites deep into the body.', seed: 37, gold: 380, style: 'blood',
@@ -878,9 +879,11 @@ LEVELS.push(
       [g_('rabies', 1, 1, 0, 0), g_('toxo', 20, 1.1, 3, -1), g_('salmon', 24, .6, 8, -1), g_('flu', 12, .8, 14, -1)]],
   },
 );
-const LVLMULT = [1.5, 2.2, 3.4, 2.15, 2.35, 2.6]; // no memory, 12-16 runs each (playtest bal.js): wide bot median 20/20/18/15/19/17, focus bot (rushes 2 specialists) 20/14/16/17/18/14; 05 swings most (toxo, salmonella)
+const LVLMULT = [1.5, 1.8, 3.4, 2.15, 2.35, 2.6]; // no memory, 12-16 runs each (playtest bal.js): wide bot median 20/20/18/15/19/17, focus bot (rushes 2 specialists) 20/14/16/17/18/14; 05 swings most (toxo, salmonella)
 // challenges, unlocked by clearing a specimen; 1 vitality, any leak loses, a win is worth 1 star each.
 // Heroic: 6 elite waves (tougher and faster than the campaign). Iron: one long wave that starts soft and hardens as it goes (ramp per second of delay), two cell lines only, no Fever or Swarm.
+// player difficulty: pathogen health, spacing inside a wave, and the auto-call timer between waves
+const DIFF = { easy: { hp: .7, space: 1.3, timer: 1.5 }, normal: { hp: 1, space: 1, timer: 1 }, hard: { hp: 1.2, space: .9, timer: .8 } };
 const MODES = {
   campaign: { hp: 1, spd: 1 },
   heroic: { name: 'Heroic', hp: 1.2, spd: 1.1, gold: 1.15, rule: '6 elite waves · 1 vitality' },
@@ -1223,6 +1226,7 @@ let firstRun = false; // no save at all: this player gets the specimen 01 field 
 try { firstRun = localStorage.getItem('immune-citadel-v4') == null; } catch (e) {}
 try { Object.assign(save, JSON.parse(localStorage.getItem('immune-citadel-v4') || '{}')); } catch (e) {}
 AU.on.music = save.music ?? !save.muted; AU.on.sfx = save.sfx ?? !save.muted; delete save.muted; // saves from before the two toggles had one mute
+if (!DIFF[save.diff]) save.diff = 'normal';
 if (!save.mem || typeof save.mem !== 'object') save.mem = {}; // saves from before Immune Memory
 for (const m of ['heroic', 'iron']) if (!save[m] || !Array.isArray(save[m])) save[m] = [0, 0, 0, 0, 0, 0]; // saves from before challenges: 1 = won
 function persist() { try { localStorage.setItem('immune-citadel-v4', JSON.stringify({ ...save, music: AU.on.music, sfx: AU.on.sfx })); } catch (e) {} }
@@ -1275,11 +1279,11 @@ function sendWave() {
   if (!canCallWave()) return;
   const b = earlyBonus();
   if (b > 0) { S.gold += b; floatText(500, 40, `+${b} ATP early call`, '#ffc24a', 1.6); sfx('coin'); }
-  const grp = S.waves[S.wave], mult = LVLMULT[S.lvl] * S.M.hp * (1 + S.wave * .045);
+  const D = DIFF[save.diff] || DIFF.normal, grp = S.waves[S.wave], mult = LVLMULT[S.lvl] * S.M.hp * D.hp * (1 + S.wave * .045);
   let alt = 0;
   for (const gp of grp) for (let n = 0; n < gp.n; n++) {
     let p = gp.p === -1 ? (alt++) % S.paths.length : Math.min(gp.p, S.paths.length - 1);
-    S.spawnQ.push({ t: S.time + gp.d + n * gp.gap, type: gp.t, p, mult: mult * (1 + (S.M.ramp || 0) * gp.d) }); // iron: later groups are tougher
+    S.spawnQ.push({ t: S.time + (gp.d + n * gp.gap) * D.space, type: gp.t, p, mult: mult * (1 + (S.M.ramp || 0) * gp.d) }); // iron: later groups are tougher
   }
   S.spawnQ.sort((a, b) => a.t - b.t); S.qN = S.spawnQ.length; // iron: the HUD shows how much of its one wave is out
   S.wave++; S.waveTimer = -1; sfx('wave');
@@ -1507,7 +1511,7 @@ function step(dt) {
   for (const k in S.cds) S.cds[k] = Math.max(0, S.cds[k] - dt);
   // spawning
   while (S.spawnQ.length && S.spawnQ[0].t <= S.time) { const q = S.spawnQ.shift(); spawnEnemy(q.type, q.p, q.mult); }
-  if (S.wave > 0 && S.wave < S.waves.length && !S.spawnQ.length && S.waveTimer < 0) { S.waveTimer = S.waveTimerMax = S.lvl < 2 ? 10 : 16; } // 01-02 waves die in seconds: less dead time
+  if (S.wave > 0 && S.wave < S.waves.length && !S.spawnQ.length && S.waveTimer < 0) { S.waveTimer = S.waveTimerMax = (S.lvl === 1 ? 22 : 16) * (DIFF[save.diff] || DIFF.normal).timer; } // 02: two airways at once, give new players room // early call pays a bonus for anyone who wants less dead time
   if (S.waveTimer > 0) { S.waveTimer -= dt; if (S.waveTimer <= 0) { S.waveTimer = 0; sendWave(); } }
 
   // enemies
@@ -2432,6 +2436,8 @@ function sndOpen(b) { // below its button; beside it in a gutter column or with 
   P.style.left = clamp(x, 8, s.width - p.width - 8) + 'px'; P.style.top = clamp(y, 8, s.height - p.height - 8) + 'px';
 }
 function sndClose() { $('#sndPop').hidden = true; sndAt = null; $('#muteBtn').classList.remove('on'); }
+function diffSync() { document.querySelectorAll('#diffSeg button').forEach(b => { b.classList.toggle('on', b.dataset.d === save.diff); b.setAttribute('aria-checked', b.dataset.d === save.diff); }); }
+document.querySelectorAll('#diffSeg button').forEach(b => b.onclick = () => { save.diff = b.dataset.d; persist(); diffSync(); sfx('click'); }); diffSync();
 $('#muteBtn').onclick = () => sndOpen($('#muteBtn')); $('#sndBtn').onclick = () => sndOpen($('#sndBtn'));
 $('#sndPop').onclick = ev => { const b = ev.target.closest('.tg'); if (!b) return; AU.on[b.dataset.k] = !AU.on[b.dataset.k]; persist(); auUnlock(); auApply(); sndRefresh(); sfx('click'); };
 addEventListener('pointerdown', ev => { if (!$('#sndPop').hidden && !ev.target.closest('#sndPop,#muteBtn,#sndBtn')) sndClose(); }, true);
