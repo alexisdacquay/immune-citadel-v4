@@ -23,10 +23,10 @@ test('save API', async t => {
   assert.equal((await put(code, 'not json')).status, 400);
   assert.equal((await put(code, { save: [1, 2] })).status, 400, 'save must be an object');
   assert.equal((await put(code, { nope: 1 })).status, 400);
-  assert.equal((await put(code, { save: { x: 'y'.repeat(70000) } })).status, 413);
+  assert.equal((await put(code, { save: { x: 'y'.repeat(9000) } })).status, 413);
   assert.equal((await fetch(`${base}/api/save/${code}`, { method: 'OPTIONS', headers: { origin: 'https://game.example' } })).status, 204);
   assert.equal((await fetch(`${base}/api/save/${code}`, { method: 'DELETE' })).status, 405);
 
-  let last; for (let i = 0; i < 40; i++) last = (await put(code, { save: { i } })).status;
-  assert.equal(last, 429, 'write rate limit');
+  let last; for (let i = 0; i < 130; i++) last = (await put(code, { save: { i } }, { 'x-forwarded-for': `9.9.9.${i}, 1.2.3.4` })).status;
+  assert.equal(last, 429, 'write rate limit keys on the proxy-added address, not the spoofable first entry');
 });

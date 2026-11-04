@@ -1246,7 +1246,7 @@ if (!save.mem || typeof save.mem !== 'object') save.mem = {}; // saves from befo
 for (const m of ['heroic', 'iron']) if (!save[m] || !Array.isArray(save[m])) save[m] = [0, 0, 0, 0, 0, 0]; // saves from before challenges: 1 = won
 const snapshot = () => ({ ...save, music: AU.on.music, sfx: AU.on.sfx });
 function persistLocal() { try { localStorage.setItem('immune-citadel-v4', JSON.stringify(snapshot())); } catch (e) {} }
-function persist() { save.at = Date.now(); persistLocal(); cloudQueue(); }
+function persist() { save.at = Math.max(Date.now(), (save.at || 0) + 1); persistLocal(); cloudQueue(); } // a device with a fast clock must not freeze everyone's later choices
 // Cloud save: the browser keeps the save; the API holds a copy under a 16-character code, so another device can continue it.
 // Hosts without an API (file://) play exactly as before.
 const CLOUD_API = { 'immune-citadel-v4.onrender.com': 'https://immune-citadel-v4-api.onrender.com', 'immune-citadel-v4-dev.onrender.com': 'https://immune-citadel-v4-api-dev.onrender.com', localhost: 'http://localhost:8787', '127.0.0.1': 'http://localhost:8787' }[location.hostname] || null;
@@ -1257,7 +1257,7 @@ try { const c = localStorage.getItem('immune-citadel-v4-code'); if (CODE_RE.test
 function mergeSave(a, b) {
   const arr = (o, k) => Array.isArray(o[k]) ? o[k] : [];
   const out = (a.at || 0) >= (b.at || 0) ? { ...b, ...a } : { ...a, ...b };
-  for (const k of ['stars', 'heroic', 'iron']) { const x = arr(a, k), y = arr(b, k); out[k] = Array.from({ length: Math.max(x.length, y.length, 6) }, (_, i) => Math.max(x[i] | 0, y[i] | 0)); }
+  for (const [k, top] of [['stars', 3], ['heroic', 1], ['iron', 1]]) { const x = arr(a, k), y = arr(b, k); out[k] = Array.from({ length: LEVELS.length }, (_, i) => clamp(Math.max(x[i] | 0, y[i] | 0), 0, top)); } // capped: a bad copy cannot unlock everything everywhere
   for (const k of ['seen', 'viewed', 'hints']) out[k] = [...new Set([...arr(a, k), ...arr(b, k)])].filter(v => typeof v === 'string');
   if (!out.mem || typeof out.mem !== 'object' || Array.isArray(out.mem)) out.mem = {};
   if (!DIFF[out.diff]) out.diff = 'normal';
@@ -2527,6 +2527,7 @@ async function cloudLoad() { // continue a save made on another device; this dev
     if (!r.ok) throw new Error(r.status);
   } catch (e) { return cloudShow('Cloud unreachable. Try again in a minute.'); }
   cloud.code = code; try { localStorage.setItem('immune-citadel-v4-code', code); } catch (e) {}
+  save.at = 0; // the save being continued keeps its memory and settings; this device adds only its progress
   $('#cloudIn').value = ''; sfx('up'); await cloudSync();
 }
 function cloudOpen() { const P = $('#cloudPop'); if (!P.hidden) return cloudClose(); sndClose(); P.hidden = false; cloudShow(); sfx('click'); popPlace(P, $('#cloudBtn'), 1); } // unscaled: it holds text to read and a code to type

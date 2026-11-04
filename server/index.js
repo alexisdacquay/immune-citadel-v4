@@ -3,9 +3,10 @@
 const http = require('node:http');
 
 const CODE = /^[A-HJ-NP-Z2-9]{16}$/; // the game's alphabet: no I, O, 0, 1
-const MAX_BODY = 64 * 1024;
-const WRITES_PER_MIN = 30; // per client IP; a real player saves a few times per level
+const MAX_BODY = 8 * 1024; // a full save is about 1 KB
+const WRITES_PER_MIN = 120; // per client IP; a player saves a few times per level, a classroom shares one IP
 const SCHEMA = process.env.DB_SCHEMA || 'public'; // prod and dev share one Postgres instance, one schema each
+if (process.env.DATABASE_URL && !process.env.DB_SCHEMA) throw new Error('DB_SCHEMA must be set with DATABASE_URL, or dev would write into prod');
 if (!/^[a-z_][a-z0-9_]*$/.test(SCHEMA)) throw new Error('DB_SCHEMA must be a plain lowercase identifier');
 const ORIGINS = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
 
@@ -21,11 +22,12 @@ function memoryStore() {
 function pgStore(url) {
   const { Pool } = require('pg');
   const pool = new Pool({ connectionString: url, max: 5 });
+  pool.on('error', e => console.error('postgres idle client:', e.message)); // a dropped idle connection must not kill the server
   const T = `"${SCHEMA}".saves`;
   return {
     init: async () => {
       await pool.query(`CREATE SCHEMA IF NOT EXISTS "${SCHEMA}"`);
-      await pool.query(`CREATE TABLE IF NOT EXISTS ${T} (code text PRIMARY KEY, data jsonb NOT NULL, updated_at timestamptz NOT NULL DEFAULT now())`);
+      await pool.query(`CREATE TABLE IF NOT EXISTS ${T} (code text PRIMARY KEY, data json NOT NULL, updated_at timestamptz NOT NULL DEFAULT now())`);
     },
     get: async code => {
       const r = await pool.query(`SELECT data, updated_at FROM ${T} WHERE code = $1`, [code]);
@@ -42,7 +44,10 @@ function pgStore(url) {
 const hits = new Map();
 function limited(ip) {
   const now = Date.now(), h = hits.get(ip);
-  if (!h || now - h.t > 60000) { hits.set(ip, { t: now, n: 1 }); if (hits.size > 10000) hits.clear(); return false; }
+  if (!h || now - h.t > 60000) {
+    if (hits.size > 10000) for (const [k, v] of hits) if (now - v.t > 60000) hits.delete(k); // drop expired windows, never live ones
+    hits.set(ip, { t: now, n: 1 }); return false;
+  }
   return ++h.n > WRITES_PER_MIN;
 }
 
@@ -67,7 +72,7 @@ function createServer(store) {
         return row ? send(200, { save: row.data, updatedAt: row.updatedAt }) : send(404, { error: 'no save for this code' });
       }
       if (req.method === 'PUT') {
-        const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress).split(',')[0].trim();
+        const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress).split(',').pop().trim(); // the proxy appends the real client; earlier entries are client-supplied
         if (limited(ip)) return send(429, { error: 'too many saves, slow down' });
         let size = 0; const chunks = [];
         for await (const c of req) { size += c.length; if (size > MAX_BODY) return send(413, { error: 'save too large' }); chunks.push(c); }
