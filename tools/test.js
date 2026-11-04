@@ -6,6 +6,55 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => m.type() === 'error' && !/fonts/.test(m.text()) && errs.push(m.text()));
   await p.goto('file://' + path.resolve('index.html')); await p.waitForTimeout(800);
   await p.screenshot({ path: `${out}/0-title.png` });
+  // first play (no save): specimen 01 field notes with real input, one at a time, beside their target and never over it; then the Field Guide
+  const ob = (ok, msg) => { if (!ok) errs.push('onboarding: ' + msg); }, gg = (ok, msg) => { if (!ok) errs.push('guide: ' + msg); };
+  const mid = s => p.evaluate(s => { const r = document.querySelector(s).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }, s);
+  const onMap = (x, y) => p.evaluate(([x, y]) => { const r = document.getElementById('cv').getBoundingClientRect(); return [r.left + x / 1000 * r.width, r.top + y / 620 * r.height]; }, [x, y]);
+  const note = () => p.evaluate(() => { // the visible note, and whether it keeps clear of its target ring
+    const h = document.getElementById('hint'), g = document.getElementById('hintRing'), s = document.getElementById('stage').getBoundingClientRect(); if (h.hidden) return null;
+    const r = h.getBoundingClientRect(), cx = g.offsetLeft + g.offsetWidth / 2 + s.left, cy = g.offsetTop + g.offsetHeight / 2 + s.top;
+    const nx = Math.max(r.left, Math.min(cx, r.right)), ny = Math.max(r.top, Math.min(cy, r.bottom));
+    return { id: h.dataset.id, clear: Math.hypot(nx - cx, ny - cy) >= g.offsetWidth / 2 - 1, onStage: r.left >= s.left && r.right <= s.right && r.top >= s.top && r.bottom <= s.bottom, ring: [cx, cy] };
+  });
+  const expectNote = async (id, shot) => { const n = await note(); ob(n && n.id === id, `expected note "${id}", got ${n && n.id}`); if (n) ob(n.clear && n.onStage, `note "${id}" covers its target or leaves the stage`); if (shot) await p.screenshot({ path: `${out}/${shot}.png` }); return n; };
+  ob(await p.evaluate(() => IC.save.hints.length === 0), 'a fresh save must start with every note pending');
+  await p.mouse.click(...await mid('.slide[data-i="0"]')); await p.waitForTimeout(2000);
+  const n1 = await expectNote('build', '24-note-build');
+  if (n1) { await p.mouse.click(...n1.ring); await p.waitForTimeout(250); ob(!(await note()), 'note should step aside while the radial is open'); }
+  await p.mouse.click(...await mid('#radial .rb img[alt="Neutrophil"]')); await p.waitForTimeout(300);
+  await expectNote('wave', '25-note-wave');
+  await p.mouse.click(...await mid('.wcall')); await p.waitForTimeout(300);
+  ob(await p.evaluate(() => IC.S.wave === 1), 'the wave marker click did not call the wave');
+  await expectNote('upgrade', '26-note-upgrade');
+  await p.mouse.click(...await mid('#hint .x')); await p.waitForTimeout(150);
+  ob(await p.evaluate(() => IC.save.hints.includes('upgrade') && IC.S.towers[0].lvl === 0), 'dismiss did not retire the upgrade note');
+  await p.waitForFunction(() => IC.S.enemies.length >= 3, null, { timeout: 15000 }); await p.waitForTimeout(100);
+  await expectNote('fever', '27-note-fever');
+  await p.keyboard.press('q'); await p.mouse.click(...await onMap(...await p.evaluate(() => [IC.S.enemies[0].x, IC.S.enemies[0].y]))); await p.waitForTimeout(200);
+  ob(await p.evaluate(() => IC.S.cds.fever > 0 && IC.save.hints.includes('fever')), 'casting fever did not retire its note');
+  await p.waitForFunction(() => !document.querySelector('.wcall').hidden, null, { timeout: 20000 }); await p.mouse.click(...await mid('.wcall')); await p.waitForTimeout(300);
+  await expectNote('hero', '28-note-hero');
+  await p.mouse.click(...await onMap(...await p.evaluate(() => [IC.S.hero.x, IC.S.hero.y]))); await p.waitForTimeout(150);
+  ob(await p.evaluate(() => IC.save.hints.length === IC.HINTS.length && JSON.parse(localStorage.getItem('immune-citadel-v4')).hints.length === IC.HINTS.length), 'all notes should be done and saved');
+  await p.keyboard.press('Escape'); await p.waitForTimeout(150); ob(!(await note()), 'a note is still showing after all were done');
+  // Field Guide: facts are short; pathogens locked until met, specialists until their line reaches level 3; NEW dots clear once viewed
+  gg(await p.evaluate(() => [...IC.GUIDE.cells, ...IC.GUIDE.path].every(k => IC.FACTS[k] && IC.FACTS[k].split(/\s+/).length <= 25) && Object.keys(IC.ENEMIES).every(k => IC.GUIDE.path.includes(k))), 'every plate needs a fact of at most 25 words, every pathogen a plate');
+  await p.mouse.click(...await mid('#mapBtn')); await p.waitForTimeout(200);
+  gg(await p.evaluate(() => !document.querySelector('#guideBtn .ndot').hidden), 'tray button should carry a NEW dot');
+  await p.mouse.click(...await mid('#guideBtn')); await p.waitForTimeout(300);
+  gg(await p.evaluate(() => IC.S.screen === 'guide' && !document.getElementById('guideOv').hidden && document.querySelectorAll('.gt').length === 13 && document.querySelectorAll('.gt.lock').length === 8), 'cells tab: 13 plates, the 8 specialists locked');
+  await p.screenshot({ path: `${out}/29-guide-cells.png` });
+  await p.mouse.click(...await mid('.gtab[data-tab="path"]')); await p.waitForTimeout(200);
+  gg(await p.evaluate(() => document.querySelectorAll('.gt').length === 12 && document.querySelectorAll('.gt:not(.lock)').length === 1 && !!document.querySelector('.gt[data-id="bact"]:not(.lock)')), 'pathogens tab: only E. coli observed');
+  await p.mouse.click(...await mid('.gt[data-id="rabies"]')); await p.waitForTimeout(200);
+  gg(await p.evaluate(() => /Not yet observed/.test(document.getElementById('gText').textContent) && !IC.save.viewed.includes('rabies')), 'a locked plate must not reveal its pathogen');
+  await p.screenshot({ path: `${out}/30-guide-locked.png` });
+  for (const id of ['bact']) await p.mouse.click(...await mid(`.gt[data-id="${id}"]`));
+  await p.mouse.click(...await mid('.gtab[data-tab="cells"]'));
+  for (const id of ['neutro', 'macro', 'bcell', 'killer', 'hero']) { await p.mouse.click(...await mid(`.gt[data-id="${id}"]`)); await p.waitForTimeout(60); }
+  gg(await p.evaluate(() => /E\. coli|NK Sentinel/.test(document.getElementById('gText').textContent) && document.querySelectorAll('.ndot:not([hidden])').length === 0), 'NEW dots should clear once every open plate was viewed');
+  await p.mouse.click(...await mid('#gBack')); await p.waitForTimeout(200);
+  gg(await p.evaluate(() => IC.S.screen === 'title' && document.querySelector('#guideBtn .ndot').hidden), 'back should return to the tray without a NEW dot');
   const geo = await p.evaluate(() => IC.LEVELS.map((L, li) => { const ps = L.paths.map(IC.makePath); return L.slots.map(([x, y], i) => { const d = Math.min(...ps.map(q => IC.nearestOnPath(q, x, y).dd)); const near = Math.min(...L.slots.filter((_, j) => j !== i).map(([a, c]) => Math.hypot(a - x, c - y))); const hud = (x < 320 && y < 92) || (x < 300 && y > 525) || (x > 780 && y < 88); return (d < 50 || d > 115 || near < 62 || hud) ? `L${li} slot${i} [${x},${y}] path=${d|0} neighbour=${near|0}` : null; }).filter(Boolean); }).flat());
   console.log('slot problems:', geo.length ? geo : 'none');
   // routes must not run under the bottom-left ability cluster (enemies would walk under the HUD). Cluster, worst case (HUD scale 1.05 of the map):
@@ -82,6 +131,22 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   // campaign stars may rise during the campaign runs; the challenge runs must not touch them
   if (await p.evaluate(() => JSON.stringify(IC.save.stars) !== window._camp)) errs.push('challenges changed campaign stars');
   await p.evaluate(() => { IC.save.mem = {}; IC.persist(); });
+  // Field Guide after the bot met everything: from pause, with real clicks; the specimen waits and resumes paused
+  await p.reload(); await p.waitForTimeout(500);
+  gg(await p.evaluate(() => !document.querySelector('#guideBtn .ndot').hidden), 'new pathogens and specialists should raise the NEW dot');
+  await p.evaluate(() => { IC.startLevel(3); IC.S.gold = 9999; IC.build(0, 'neutro'); IC.sendWave(); }); await p.waitForTimeout(1500);
+  await p.keyboard.press('Space'); await p.waitForTimeout(150); await p.mouse.click(...await mid('#pauseGuide')); await p.waitForTimeout(300);
+  const tg = await p.evaluate(() => IC.S.time);
+  await p.mouse.click(...await mid('.gtab[data-tab="path"]')); await p.mouse.click(...await mid('.gt[data-id="boss"]')); await p.waitForTimeout(1200);
+  gg(await p.evaluate(() => document.querySelectorAll('.gt.lock').length === 0 && /MRSA Superbug/.test(document.getElementById('gText').textContent) && /Colossal/.test(document.getElementById('gText').textContent)), 'boss plate missing or locked');
+  await p.screenshot({ path: `${out}/31-guide-boss.png` });
+  await p.mouse.click(...await mid('.gtab[data-tab="cells"]')); await p.mouse.click(...await mid('.gt[data-id="degran"]')); await p.waitForTimeout(300);
+  gg(await p.evaluate(() => document.querySelectorAll('.gt.lock').length === 0 && /Degranulator/.test(document.getElementById('gText').textContent)), 'specialist plate locked after the bot used it');
+  await p.screenshot({ path: `${out}/32-guide-specialist.png` });
+  await p.mouse.click(...await mid('#gBack')); await p.waitForTimeout(200);
+  gg(await p.evaluate(t => IC.S.screen === 'play' && IC.S.paused && IC.S.towers.length === 1 && IC.S.time - t < 1, tg), 'back from pause should return to the same paused specimen');
+  await p.keyboard.press('g'); await p.waitForTimeout(150); gg(await p.evaluate(() => IC.S.screen === 'guide'), 'G should open the guide in play');
+  await p.keyboard.press('Escape'); await p.waitForTimeout(150); gg(await p.evaluate(() => IC.S.screen === 'play'), 'Esc should close the guide');
   // visual: start level 1 for real, build, play 25s with rAF, screenshot
   await p.reload(); await p.waitForTimeout(600); await p.screenshot({ path: `${out}/0-tray.png` });
   // the last specimen slide must open its level with a real click (unlocked by the bot's wins)
@@ -199,5 +264,9 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   await p.screenshot({ path: `${out}/22-tray-oldsave.png` });
   await clickSel('#memBtn'); cc(await p.evaluate(() => document.getElementById('memAvail').textContent === '0 / 5'), 'memory bank shows a negative or wrong balance');
   await p.screenshot({ path: `${out}/23-memory-oldsave.png` });
+  // a returning player (save from before the guide): no field notes on specimen 01, specialists already catalogued
+  await clickSel('#memBack'); await clickSel('.slide[data-i="0"]'); await p.waitForTimeout(2500);
+  ob(await p.evaluate(() => IC.S.lvl === 0 && IC.S.screen === 'play' && document.getElementById('hint').hidden && IC.save.hints.length === IC.HINTS.length), 'a returning player saw field notes');
+  gg(await p.evaluate(() => Object.keys(IC.SPECS).every(k => IC.save.seen.includes(k))), 'an old save with stars should have its specialists catalogued');
   console.log('errors:', errs.length ? errs : 'none'); await b.close();
 })();

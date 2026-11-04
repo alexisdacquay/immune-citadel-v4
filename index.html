@@ -197,14 +197,16 @@ button{font:inherit;color:inherit;cursor:pointer}
 [hidden]{display:none!important}
 /* immune memory */
 #titleOv .tin{position:relative}
-.mbtn{position:absolute;right:0;top:-8px;display:flex;align-items:center;gap:10px;padding:7px 14px 7px 9px;border-radius:12px;border:1px solid var(--rim2);background:var(--glass2);font:600 12px var(--mono);letter-spacing:.14em;color:var(--txt);box-shadow:0 0 22px -6px rgba(91,140,255,.5)}
+.tbtns{position:absolute;right:0;top:-8px;display:flex;gap:8px}
+.mbtn{position:relative;display:flex;align-items:center;gap:10px;padding:7px 14px 7px 9px;border-radius:12px;border:1px solid var(--rim2);background:var(--glass2);font:600 12px var(--mono);letter-spacing:.14em;color:var(--txt);box-shadow:0 0 22px -6px rgba(91,140,255,.5)}
 .mbtn:hover{border-color:#fff;box-shadow:0 0 26px rgba(127,216,255,.4)}
 .mbtn i,.mdot{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#d6e2ff,#6f98ff 45%,rgba(40,70,210,.75));box-shadow:0 0 10px rgba(91,140,255,.8)}
 .mbtn b,.mlink b{color:var(--amber);text-shadow:0 0 10px rgba(255,194,74,.6);letter-spacing:.04em}
 .mlink{display:flex;width:100%;align-items:center;gap:10px;margin:0 0 10px;padding:9px 12px;border-radius:10px;border:1px solid var(--rim);background:rgba(91,140,255,.08);font:600 12px var(--mono);letter-spacing:.12em;text-align:left}
 .mlink span{flex:1}.mlink:hover{background:rgba(91,140,255,.16);border-color:var(--rim2)}
 .mhd{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
-.mem h1{font-size:52px!important}
+.mem h1,.guide h1{font-size:52px!important}
+.guide h1{margin-bottom:0!important}
 .mem .lede{margin:0!important;font-size:14px!important}
 .bank{flex:none;padding:12px 18px;text-align:right}
 .bank b{font:700 40px/1 var(--mono);color:var(--amber);text-shadow:0 0 18px rgba(255,194,74,.6)}
@@ -249,11 +251,62 @@ button{font:inherit;color:inherit;cursor:pointer}
 #memReset .btn{min-width:0}
 .btn.warn{border-color:#ff8a8f;color:#ffd6dc;background:rgba(255,77,94,.14)}
 .btn:disabled{opacity:.4;cursor:default}
+/* field guide: tiles left, a live specimen plate right; NEW = amber dot */
+.ndot{position:absolute;top:-4px;right:-4px;width:11px;height:11px;border-radius:50%;background:var(--amber);border:2px solid #06101a;box-shadow:0 0 10px rgba(255,194,74,.9)}
+.mbtn svg{width:20px;height:20px;stroke:var(--cyan);fill:rgba(127,216,255,.12);stroke-width:1.6;stroke-linejoin:round;filter:drop-shadow(0 0 4px rgba(127,216,255,.6))}
+#hudGuide{position:relative}#hudGuide .ndot{top:3px;right:3px;width:9px;height:9px}
+#pausePill .btn{pointer-events:auto;padding:6px 12px;font:600 11px var(--mono);letter-spacing:.12em}
+.gtabs{display:flex;gap:4px;padding:4px;flex:none}
+.gtab{position:relative;display:flex;align-items:center;gap:9px;border:1px solid transparent;background:none;border-radius:10px;padding:9px 14px;font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.gtab b{font-weight:700;color:var(--txt);letter-spacing:.04em}
+.gtab:hover{color:var(--txt);background:rgba(140,205,255,.07)}
+.gtab.on{color:#fff;background:rgba(127,216,255,.14);border-color:var(--rim2)}
+.gtab.on[data-tab="path"]{background:rgba(255,106,61,.12);border-color:rgba(255,138,143,.5)}
+#guideOv .tin{margin-top:0}
+.gbody{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;margin-top:14px;align-items:start}
+.ggrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.gt{position:relative;display:flex;align-items:center;gap:10px;padding:5px 10px 5px 5px;border-radius:12px;border:1px solid rgba(140,205,255,.13);background:rgba(140,205,255,.035);text-align:left}
+.gt:hover{border-color:var(--rim2);background:rgba(140,205,255,.09)}
+.gt.on{border-color:color-mix(in srgb,var(--c) 70%,transparent);background:color-mix(in srgb,var(--c) 9%,transparent);box-shadow:0 0 18px -6px var(--c)}
+.gt img{width:48px;height:48px;flex:none;border-radius:50%;background:radial-gradient(circle,rgba(30,50,75,.9),rgba(4,8,13,.95));border:1px solid rgba(140,205,255,.12)}
+.gt span{min-width:0}
+.gt b{display:block;font:600 13px/1.2 var(--sans);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gt small{display:block;margin-top:2px;font:600 max(8.5px,calc(8px / var(--ut,1))) var(--mono);letter-spacing:.12em;color:var(--dim);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gt.lock b{color:var(--dim)}
+.gt .ndot{top:4px;right:4px;width:9px;height:9px}
+.gcard{overflow:hidden;border-radius:8px}
+.gplate{display:grid;grid-template-columns:30px 1fr;border-bottom:1px solid rgba(180,220,255,.22);background:linear-gradient(135deg,rgba(200,230,255,.1),rgba(200,230,255,.02))}
+.gplate .lab{background:repeating-linear-gradient(45deg,rgba(255,255,255,.16) 0 2px,rgba(255,255,255,.07) 2px 5px);writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font:700 10px var(--mono);letter-spacing:.24em;color:#eef6ff}
+.gfield{position:relative;display:grid;place-items:center;padding:10px}
+.gfield::before{content:'';position:absolute;width:206px;height:206px;border-radius:50%;background:radial-gradient(circle,#070d16 55%,#020407);box-shadow:inset 0 0 34px #000,0 0 0 1px rgba(140,205,255,.16),0 0 30px -10px rgba(91,140,255,.4)}
+#gCv{position:relative;width:206px;height:206px}
+.gtext{padding:12px 18px 14px;min-height:380px} /* plates keep one height, so Back stays put */
+.gtext>small{display:block;font:600 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--c,var(--cyan))}
+.gtext h3{font:700 25px/1.05 var(--sans);letter-spacing:-.01em;color:#fff;margin:4px 0 8px}
+.gtext .rows{margin:0 0 9px}.gtext .rows div{padding:4px 0;gap:14px}.gtext .rows b{text-align:right}
+.gtext .sp{margin:0 0 9px;font-size:12.5px;line-height:1.35;color:#c9d6e3}
+.gtext .sp em{display:block;font:600 9px var(--mono);font-style:normal;letter-spacing:.16em;color:var(--dim);margin-bottom:2px}
+.gtext .fact{margin:0}.gtext .fact em{display:block;font:600 9px var(--mono);font-style:normal;letter-spacing:.16em;color:var(--dapi);margin-bottom:2px}
+.gfoot{font:500 max(12px,calc(10px / var(--ut,1))) var(--mono);color:var(--dim)}
+/* onboarding: a field note beside its target, which wears a pulsing ring; only the dismiss button takes clicks */
+#hint{position:absolute;z-index:4;width:250px;padding:10px 38px 12px 14px;pointer-events:none;transform:scale(var(--u,1));transform-origin:0 0;background:var(--glass2);border-color:var(--rim2);box-shadow:0 0 26px -8px rgba(127,216,255,.6),0 14px 30px -14px #000;animation:pop .25s ease-out}
+#hint small{display:block;font:600 9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);margin-bottom:4px}
+#hint p{margin:0;font-size:12.5px;line-height:1.4;color:var(--dim)}
+#hint p b{display:block;font:600 14.5px/1.25 var(--sans);color:#fff;margin-bottom:3px}
+#hint .x{pointer-events:auto;position:absolute;top:7px;right:7px;width:24px;height:24px;padding:0;border-radius:7px;border:1px solid var(--rim);background:rgba(140,205,255,.06);font:500 16px/1 var(--sans);color:var(--dim)}
+#hint .x:hover{color:#fff;border-color:var(--rim2);background:rgba(140,205,255,.16)}
+#hint .ar{position:absolute;width:12px;height:12px;margin:-6px;background:#122031;border:0 solid var(--rim2);transform:rotate(45deg)}
+#hint[data-side=right] .ar{left:0;border-width:0 0 1px 1px}
+#hint[data-side=left] .ar{left:100%;border-width:1px 1px 0 0}
+#hint[data-side=above] .ar{top:100%;border-width:0 1px 1px 0}
+#hint[data-side=below] .ar{top:0;border-width:1px 0 0 1px}
+#hintRing{position:absolute;z-index:3;border-radius:50%;border:2px dashed rgba(170,230,255,.95);pointer-events:none;box-shadow:0 0 18px rgba(127,216,255,.5),inset 0 0 14px rgba(127,216,255,.3);animation:hring 1.6s ease-in-out infinite}
+@keyframes hring{50%{transform:scale(1.1);opacity:.55}}
 /* below ~1700px a centred info bar would run into the bottom-left cluster (hero + 3 skills) */
 @media (max-width:1700px){#info{left:calc(330px * var(--u,1));transform:scale(var(--u,1));transform-origin:bottom left;max-width:calc(100% / var(--u,1) - 346px)}#info:not([hidden]) ~ #spec{opacity:0}}
 @media (max-width:1100px){#info .perk:not(.wide),#info .meta span:not(.xp){display:none}#info .perk.wide{flex:0 1 210px;font-size:11px}#info .skt:not(.nx) .skd{display:none}#info .s b em{display:block;margin:0}#info .meta b{font-size:16px}}
 @media (max-height:600px){.ov{padding:10px 20px}}
-@media (max-width:700px){.mgrid{grid-template-columns:repeat(3,1fr);row-gap:12px}.mroot{display:none}.mhd{display:block}.bank{display:inline-block;margin-top:10px}.mbtn{position:static;margin-top:8px}.hd{display:block}.slides{grid-template-columns:1fr}.slide .body{grid-template-columns:1fr 1fr}.tin h1{font-size:44px}}
+@media (max-width:700px){.mgrid{grid-template-columns:repeat(3,1fr);row-gap:12px}.mroot{display:none}.mhd{display:block}.bank{display:inline-block;margin-top:10px}.tbtns{position:static;margin-top:8px;flex-wrap:wrap}.gbody{grid-template-columns:1fr}.ggrid{grid-template-columns:repeat(2,minmax(0,1fr))}.gtabs{margin-top:10px}.hd{display:block}.slides{grid-template-columns:1fr}.slide .body{grid-template-columns:1fr 1fr}.tin h1{font-size:44px}}
 </style>
 </head>
 <body>
@@ -271,6 +324,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <button class="ib" id="pauseBtn" title="Pause (Space)"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button>
     <button class="ib" id="muteBtn" title="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path id="muteWave" d="M16 9c1.5 1.5 1.5 4.5 0 6M18.5 6.5c3 3 3 8 0 11"/></svg></button>
     <button class="ib" id="restartBtn" title="Restart specimen"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/></svg></button>
+    <button class="ib" id="hudGuide" title="Field guide (G)"><svg viewBox="0 0 24 24"><path d="M4 5.5c3-1.2 5.8-1 8 1 2.2-2 5-2.2 8-1v13c-3-1.2-5.8-1-8 1-2.2-2-5-2.2-8-1z"/><path d="M12 6.5v13"/></svg><em class="ndot" hidden></em></button>
     <button class="ib" id="mapBtn" title="Specimen tray"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="1.5"/><path d="M8 7v10"/></svg></button>
   </div>
   <div id="hudBL" class="ui">
@@ -282,12 +336,15 @@ button{font:inherit;color:inherit;cursor:pointer}
   <div id="info" class="ui glass" hidden></div>
   <div id="spec" class="ui"><span id="specId">SPEC-01 · DERMIS</span><b id="specName">The Splinter</b><span class="bar"><i></i>50 µm · ×400</span></div>
   <div id="topc"><div id="boss" class="glass" hidden><img alt=""><div><small>Boss <span></span></small><b></b><div class="bar"><i></i></div></div></div><div id="banner"></div></div>
-  <div id="pausePill" class="ui glass" hidden>PAUSED <small>space to resume</small></div>
+  <div id="pausePill" class="ui glass" hidden>PAUSED <small>space to resume</small><button class="btn" id="pauseGuide">FIELD GUIDE · G</button></div>
+  <div id="hintRing" hidden></div>
+  <div id="hint" class="glass" hidden><i class="ar"></i><small></small><p></p><button class="x" aria-label="Dismiss tip" title="Dismiss tip">×</button></div>
 
   <div class="ov" id="titleOv">
     <div class="tin">
       <div class="kick">IMMUNOFLUORESCENCE FIELD STUDY · 6 SPECIMENS · <span id="starN"></span></div>
-      <button class="mbtn" id="memBtn"><i></i>IMMUNE MEMORY <b id="memBtnN"></b></button>
+      <div class="tbtns"><button class="mbtn" id="guideBtn"><svg viewBox="0 0 24 24"><path d="M4 5.5c3-1.2 5.8-1 8 1 2.2-2 5-2.2 8-1v13c-3-1.2-5.8-1-8 1-2.2-2-5-2.2-8-1z"/><path d="M12 6.5v13"/></svg>FIELD GUIDE<em class="ndot" hidden></em></button>
+      <button class="mbtn" id="memBtn"><i></i>IMMUNE MEMORY <b id="memBtnN"></b></button></div>
       <div class="hd"><h1>IMMUNE<br><span>CITADEL</span></h1>
       <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p></div>
       <div class="slides" id="slides"></div>
@@ -305,6 +362,15 @@ button{font:inherit;color:inherit;cursor:pointer}
       <div class="mroot"><i class="mdot"></i><label>STEM CELL</label><svg id="memTree" viewBox="0 0 600 44" preserveAspectRatio="none"></svg></div>
       <div class="mgrid" id="memGrid"></div>
       <div class="mfoot"><div id="memReset"></div><button class="btn pri" id="memBack">Back</button></div>
+    </div>
+  </div>
+  <div class="ov" id="guideOv" hidden>
+    <div class="tin guide">
+      <div class="mhd"><div><div class="kick">REFERENCE ATLAS · STAINED SPECIMENS</div><h1>FIELD <span>GUIDE</span></h1></div>
+        <div class="gtabs glass"><button class="gtab" data-tab="cells">Immune cells <b></b><em class="ndot" hidden></em></button><button class="gtab" data-tab="path">Pathogens <b></b><em class="ndot" hidden></em></button></div></div>
+      <div class="gbody"><div class="ggrid" id="gGrid"></div>
+        <div class="gcard glass"><div class="gplate"><span class="lab" id="gLab"></span><div class="gfield"><canvas id="gCv"></canvas></div></div><div class="gtext" id="gText"></div></div></div>
+      <div class="mfoot"><span class="gfoot">Cells are catalogued once you can grow them, pathogens once they enter a specimen.</span><button class="btn pri" id="gBack">Back</button></div>
     </div>
   </div>
 </div>
@@ -619,6 +685,36 @@ const NOTES = [
   'The blood–brain barrier is sealed by tight junctions between endothelial cells, helped by star-shaped astrocytes.',
   'Rabies virus climbs nerves to reach the brain, hiding from the immune system on the way.',
 ];
+// Field Guide: plates in display order (each cell line next to its two specialists), one true fact each (max 25 words)
+const GUIDE = { cells: ['neutro', 'net', 'degran', 'macro', 'm1', 'm2', 'bcell', 'plasma', 'memory', 'killer', 'ctl', 'th1', 'hero'],
+  path: ['bact', 'virus', 'staph', 'candida', 'spore', 'flu', 'worm', 'boss', 'salmon', 'toxo', 'rabies', 'virion'] };
+const FACTS = {
+  neutro: 'Neutrophils are your most common white blood cell. Bone marrow releases around 100 billion of them every day.',
+  net: 'Neutrophils can cast out their own DNA as sticky nets studded with antimicrobial proteins, trapping bacteria. This is called NETosis.',
+  degran: 'Neutrophil granules carry myeloperoxidase, an enzyme that turns peroxide into hypochlorous acid, the germ-killing chemical of household bleach.',
+  macro: 'Macrophage is Greek for “big eater”. Besides microbes, they quietly swallow billions of your own dying cells every day.',
+  m1: 'Bacterial signals and interferon-gamma switch macrophages into the M1 state, where they flood their surroundings with toxic nitric oxide.',
+  m2: 'M2 macrophages calm inflammation and help wounds heal: they release repair signals, build new tissue and clear away dead cells.',
+  bcell: 'Each B cell makes a single antibody shape. Shuffling gene segments lets your body produce billions of different shapes.',
+  plasma: 'A plasma cell is a B cell turned antibody factory. It can release thousands of antibodies every second.',
+  memory: 'Memory B cells can persist for decades. That is why one bout of measles, or one vaccine, protects for life.',
+  killer: 'Killer T cells dock onto a target, punch holes in it with perforin, then inject granzymes that make it self-destruct.',
+  ctl: 'Cytotoxic T cells are serial killers: one can destroy an infected cell and move on to the next within minutes.',
+  th1: 'Th1 helper cells barely kill anything themselves. Their interferon-gamma supercharges the macrophages and killer cells around them.',
+  hero: 'Natural killer cells need no training. They attack cells that hide their MHC-I ID card, a trick many viruses use.',
+  bact: 'Most E. coli strains are harmless gut residents. In good conditions, a population can double every 20 minutes.',
+  virus: 'Rhinoviruses cause most common colds. They grow best in the cool air of your nose, around 33 to 35 °C.',
+  staph: 'About a third of people carry Staphylococcus aureus in their nose without ever noticing.',
+  candida: 'Candida switches between round budding yeast and long thread-like hyphae. The threads help it push into tissue.',
+  spore: 'Candida multiplies by budding: a small daughter cell swells out of its mother, then pinches off.',
+  flu: 'Flu strains are named after two surface proteins, hemagglutinin and neuraminidase: that is the H and N in H1N1.',
+  worm: 'Helminths are far too big to eat, so the body fights them with IgE antibodies, eosinophils and floods of mucus.',
+  boss: 'MRSA shrugs off methicillin by building an altered penicillin-binding protein, PBP2a, that the drug cannot grip.',
+  salmon: 'Salmonella injects its own proteins into gut cells through a needle-like syringe, forcing them to swallow the bacterium.',
+  toxo: 'Toxoplasma only breeds sexually inside cats. Infected rodents lose their fear of cat odour, which helps it get back there.',
+  rabies: 'Rabies virus creeps up nerves toward the brain. The trip takes weeks, which is why vaccination after a bite still works.',
+  virion: 'Rabies virions are bullet-shaped and about 180 nanometres long. Five hundred in a row would span the width of a human hair.',
+};
 
 
 
@@ -807,9 +903,22 @@ const portraitCache = {};
 function portrait(kind, lvl = 0, sz = 96) {
   const key = kind + lvl + sz; if (portraitCache[key]) return portraitCache[key];
   const c = document.createElement('canvas'); c.width = c.height = sz; const g = c.getContext('2d');
-  g.translate(sz / 2, sz / 2);
-  if (TOWERS[kind]) { const s = sz / 62; g.scale(s, s); drawTowerArt(g, kind, lvl, .6); }
-  else if (SPECS[kind]) { const s = sz / 84; g.scale(s, s); drawTowerArt(g, SPECS[kind].base, 2, .6, 0, kind); }
+  g.translate(sz / 2, sz / 2); paintKind(g, kind, lvl, sz, ENEMIES[kind] ? .5 : .6);
+  return portraitCache[key] = c.toDataURL();
+}
+// locked Field Guide plates: only the strong strokes (membranes, nuclei, granules) survive, as a flat slate outline; no colour, no halo
+function silhouette(kind, lvl, sz) {
+  const key = 'sil' + kind + lvl + sz; if (portraitCache[key]) return portraitCache[key];
+  const c = document.createElement('canvas'); c.width = c.height = sz; const g = c.getContext('2d');
+  g.translate(sz / 2, sz / 2); paintKind(g, kind, lvl, sz, ENEMIES[kind] ? .5 : .6);
+  const im = g.getImageData(0, 0, sz, sz), d = im.data;
+  for (let i = 0; i < d.length; i += 4) { const on = d[i + 3] > 120; d[i] = 70; d[i + 1] = 92; d[i + 2] = 115; d[i + 3] = on ? 255 : 0; }
+  g.putImageData(im, 0, 0); c.url = c.toDataURL(); return portraitCache[key] = c;
+}
+// draw any portrait subject centred at the origin, filling sz px; t = animation time (the Field Guide plate passes the clock)
+function paintKind(g, kind, lvl, sz, t) {
+  if (TOWERS[kind]) { const s = sz / 62; g.scale(s, s); drawTowerArt(g, kind, lvl, t); }
+  else if (SPECS[kind]) { const s = sz / 84; g.scale(s, s); drawTowerArt(g, SPECS[kind].base, 2, t, 0, kind); }
   else if (kind === 'fever') {
     const s = sz / 40; g.scale(s, s); halo(g, 18, '#ff8a3d', .45);
     g.beginPath(); g.moveTo(0, -14); g.bezierCurveTo(9, -5, 12, 2, 8, 9); g.bezierCurveTo(5, 14, -5, 14, -8, 9); g.bezierCurveTo(-11, 2, -6, -2, -4, -8); g.bezierCurveTo(-2, -3, 2, -4, 0, -14);
@@ -817,7 +926,7 @@ function portrait(kind, lvl = 0, sz = 96) {
   } else if (kind === 'swarm') {
     const s = sz / 44; g.scale(s, s);
     [[-7, 5], [7, 5], [0, -6]].forEach(([x, y]) => { g.save(); g.translate(x, y); drawUnitArt(g, 'swarm', 1, 0); g.restore(); });
-  } else if (kind === 'hero') { const s = sz / 50; g.scale(s, s); drawHeroArt(g, .6);
+  } else if (kind === 'hero') { const s = sz / 50; g.scale(s, s); drawHeroArt(g, t);
   } else if (kind === 'granzyme') {
     const s = sz / 44; g.scale(s, s); halo(g, 20, '#3fe0d0', .4); g.strokeStyle = rgba('#e8f6ff', .7); g.lineWidth = 1.4; g.lineCap = 'round';
     for (let i = 0; i < 10; i++) { const a = i / 10 * TAU; g.beginPath(); g.moveTo(Math.cos(a) * 8, Math.sin(a) * 8); g.lineTo(Math.cos(a) * 13, Math.sin(a) * 13); g.stroke(); g.save(); g.translate(Math.cos(a) * 16, Math.sin(a) * 16); halo(g, 5, '#8ff0ff', .8); g.fillStyle = '#f2fbff'; circ(g, 0, 0, 1.8); g.fill(); g.restore(); }
@@ -826,9 +935,8 @@ function portrait(kind, lvl = 0, sz = 96) {
     const big = kind === 'boss' || kind === 'rabies' ? 80 : kind === 'candida' || kind === 'worm' ? 46 : kind === 'virion' ? 24 : 36, s = sz / big; g.scale(s, s);
     if (kind === 'worm') g.translate(9, 0);
     if (kind === 'rabies') halo(g, 40, COL.rabies, .35);
-    drawEnemyArt(g, kind, .5, kind === 'rabies' || kind === 'virion' ? -.6 : 0);
+    drawEnemyArt(g, kind, t, kind === 'rabies' || kind === 'virion' ? -.6 : 0);
   }
-  return portraitCache[key] = c.toDataURL();
 }
 // challenge badges: a shield for Heroic, an anvil for Iron; amber once won
 const CHICON = {
@@ -840,12 +948,22 @@ function chBadge(m, big, on) { return `<span class="bdg ${m}${big ? ' big' : ''}
 // ============================================================ state
 const S = { screen: 'title', speed: 1, paused: false, mouse: { x: -99, y: -99 }, time: 0 };
 let save = { stars: [0, 0, 0, 0, 0, 0], seen: [], mem: {} };
+let firstRun = false; // no save at all: this player gets the specimen 01 field notes
+try { firstRun = localStorage.getItem('immune-citadel-v4') == null; } catch (e) {}
 try { Object.assign(save, JSON.parse(localStorage.getItem('immune-citadel-v4') || '{}')); muted = !!save.muted; } catch (e) {}
 if (!save.mem || typeof save.mem !== 'object') save.mem = {}; // saves from before Immune Memory
 for (const m of ['heroic', 'iron']) if (!save[m] || !Array.isArray(save[m])) save[m] = [0, 0, 0, 0, 0, 0]; // saves from before challenges: 1 = won
 function persist() { try { localStorage.setItem('immune-citadel-v4', JSON.stringify({ ...save, muted })); } catch (e) {} }
 const memTier = id => clamp(save.mem[id] | 0, 0, 3);
 const sum = a => a.reduce((s, b) => s + (b | 0), 0);
+// seen = observed in play (pathogen types, and specialists once a line reaches level 3); viewed = Field Guide plates opened
+if (!Array.isArray(save.seen)) save.seen = [];
+if (!Array.isArray(save.viewed)) { save.viewed = []; if (sum(save.stars)) save.seen.push(...Object.keys(SPECS).filter(k => !save.seen.includes(k))); } // saves from before the guide: a cleared specimen means the player has met the specialists
+const SPAWNS = { candida: 'spore', rabies: 'virion', boss: 'bact' }; // offspring are observed with their parent
+function observe(ids) {
+  const f = ids.filter(k => !save.seen.includes(k));
+  if (f.length) { save.seen.push(...f); persist(); guideDots(); }
+}
 function memStars() { // a save that spent more under the old tier costs keeps its purchases; avail never shows below 0
   const total = sum(save.stars) + sum(save.heroic) + sum(save.iron), spent = MEMORY.reduce((s, M) => s + sum(MEMCOST.slice(0, memTier(M.id))), 0);
   return { total, spent, avail: Math.max(0, total - spent) };
@@ -867,7 +985,7 @@ function startLevel(i, mode = 'campaign') {
     ability: null, sel: null, armed: null, preview: null, over: false, run: (S.run || 0) + 1, paused: false, shake: 0, hurt: 0, screen: 'play', noteI: i * 3, pinned: null,
   });
   S.hero = mkHero(); bgCache = null; closeRadial(); lastHud = '';
-  $('#titleOv').hidden = true; $('#endOv').hidden = true; $('#memOv').hidden = true;
+  $('#titleOv').hidden = true; $('#endOv').hidden = true; $('#memOv').hidden = true; $('#guideOv').hidden = true;
   $('#specId').textContent = `SPEC-0${i + 1} · ${L.place.toUpperCase()}${M.name ? ' · ' + M.name.toUpperCase() : ''}`; $('#specName').textContent = L.name;
   for (const k of ['fever', 'swarm']) { $('#ab-' + k).classList.toggle('off', mode === 'iron'); if (mode === 'iron') $(`#ab-${k} .tip small`).textContent = 'DISABLED · IRON CHALLENGE'; }
   showInfo(null); layoutWaveMarkers(); nextNote(); $('#banner').innerHTML = '';
@@ -891,10 +1009,9 @@ function sendWave() {
   }
   S.spawnQ.sort((a, b) => a.t - b.t);
   S.wave++; S.waveTimer = -1; sfx('horn');
-  const fresh = waveTypes(S.wave - 1).filter(t => !save.seen.includes(t));
+  const types = waveTypes(S.wave - 1), fresh = types.filter(t => !save.seen.includes(t));
+  observe(types.flatMap(t => SPAWNS[t] ? [t, SPAWNS[t]] : [t]));
   if (fresh.length) {
-    fresh.forEach(t => { save.seen.push(t); if (t === 'candida' && !save.seen.includes('spore')) save.seen.push('spore'); });
-    persist(); buildCodex();
     fresh.forEach((t, i) => setTimeout(() => banner(`<img src="${portrait(t, 0, 88)}"><div><small>New threat</small><b>${ENEMIES[t].name}</b><p>${ENEMIES[t].desc}</p></div>`, 5200), i * 600));
   } else banner(`<div><small>Incoming</small><b>Wave ${S.wave} of ${S.waves.length}</b></div>`, 1800);
   if (S.wave % 2 === 0) nextNote();
@@ -970,6 +1087,7 @@ function upgrade(t) {
   if (!t || t.lvl >= 2 || S.over) return false;
   const c = TOWERS[t.type].lv[t.lvl + 1].cost; if (S.gold < c) { flashGold(); return false; }
   S.gold -= c; t.lvl++; t.built = 0; if (t.type === 'macro') syncUnits(t, true);
+  if (t.lvl === 2) observe(Object.keys(SPECS).filter(id => SPECS[id].base === t.type)); // its specialists become available
   sfx('build'); ring(t.x, t.y - 12, '#ffd27a'); burst(t.x, t.y - 12, '#ffd27a', 16, 2.5);
   return true;
 }
@@ -1339,7 +1457,7 @@ function castAbility(x, y) {
 
 // ============================================================ rendering
 const cv = $('#cv'), ctx = cv.getContext('2d');
-let bgCache = null, viewK = 1, DPR = 1;
+let bgCache = null, viewK = 1, DPR = 1, uK = 1; // uK = HUD scale (--u)
 function resize() {
   const vw = innerWidth, vh = innerHeight;
   let w = vw, h = w * H / W; if (h > vh) { h = vh; w = h * W / H; }
@@ -1348,7 +1466,7 @@ function resize() {
   st.style.borderRadius = (w < vw - 4 || h < vh - 4) ? '10px' : '0';
   DPR = Math.min(2, window.devicePixelRatio || 1);
   cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR); viewK = w / W;
-  const u = clamp(viewK * 1.05, .62, 1.25); st.style.setProperty('--u', u.toFixed(3));
+  const u = uK = clamp(viewK * 1.05, .62, 1.25); st.style.setProperty('--u', u.toFixed(3));
   st.style.setProperty('--ut', Math.max(.62, Math.min(u, (h - 40) / 820)).toFixed(3)); // tray: three rows of slides (with challenge badges) fit the stage height
   bgCache = null; layoutWaveMarkers(); layoutTop(); if (S.sel && S.sel.slot) openRadial(S.sel.slot);
 }
@@ -1612,9 +1730,8 @@ function render() {
   if (S.hurt > 0) { const vg = g.createRadialGradient(W / 2, H / 2, H * .3, W / 2, H / 2, H * .9); vg.addColorStop(0, 'rgba(255,40,60,0)'); vg.addColorStop(1, `rgba(255,40,60,${S.hurt * .45})`); g.fillStyle = vg; g.fillRect(0, 0, W, H); }
 }
 function rangeOf(t) { return t.type === 'macro' ? 0 : stat(t).range; }
-// engine hooks this version doesn't need as panels
+// engine hook this version doesn't need as a panel
 function renderArsenal() {}
-function buildCodex() {}
 
 // ============================================================ input
 function toLogical(ev) { const r = cv.getBoundingClientRect(); return { x: (ev.clientX - r.left) / r.width * W, y: (ev.clientY - r.top) / r.height * H }; }
@@ -1647,6 +1764,7 @@ cv.addEventListener('pointerdown', ev => {
   else { S.sel = null; showInfo(null); }
 });
 addEventListener('keydown', ev => {
+  if (S.screen === 'guide' && /^(escape|g)$/i.test(ev.key)) { $('#gBack').click(); return; }
   if (S.screen !== 'play') return;
   const k = ev.key.toLowerCase();
   if (k === ' ') { ev.preventDefault(); togglePause(); }
@@ -1656,6 +1774,7 @@ addEventListener('keydown', ev => {
   else if (k === 'e') granzyme();
   else if (k === 'h') selectHero();
   else if (k === 'n') sendWave();
+  else if (k === 'g') openGuide('play');
   else if (k === 'escape') { S.ability = null; closeRadial(); S.sel = null; showInfo(null); }
 });
 
@@ -1883,6 +2002,7 @@ function endLevel(win) {
 const thumbs = [];
 function showTitle() {
   S.screen = 'title'; $('#endOv').hidden = true; $('#memOv').hidden = true; $('#titleOv').hidden = false; closeRadial(); showInfo(null); wm.forEach(b => b.hidden = true);
+  guideDots(); $('#guideOv').hidden = true;
   $('#memBtnN').textContent = '★ ' + memStars().avail; $('#starN').textContent = `★ ${memStars().total} / 30 STARS`;
   $('#slides').innerHTML = LEVELS.map((L, i) => {
     thumbs[i] = thumbs[i] || makeBg(L, 400, 248).toDataURL();
@@ -1943,13 +2063,141 @@ $('#ab-hero').onclick = () => selectHero(); $('#ab-gz').onclick = () => granzyme
 $('#ic-fever').src = portrait('fever', 0, 100); $('#ic-swarm').src = portrait('swarm', 0, 100); $('#ic-hero').src = portrait('hero', 0, 100); $('#ic-gz').src = portrait('granzyme', 0, 100);
 if (muted) { $('#muteWave').style.display = 'none'; $('#muteBtn').classList.add('on'); }
 
+// ============================================================ field guide
+// plates: the four cell lines and the hero are open from the start, specialists once their line reaches level 3, pathogens once met
+const gOpen = id => !!TOWERS[id] || id === 'hero' || save.seen.includes(id);
+const gNew = id => gOpen(id) && !save.viewed.includes(id);
+const gName = id => (TOWERS[id] || SPECS[id] || ENEMIES[id] || HERO).name;
+const gKind = id => ENEMIES[id] ? ENEMIES[id].kind + (ENEMIES[id].flying ? ' · flying' : '') : id === 'hero' ? 'Hero · Natural killer cell'
+  : SPECS[id] ? `${SPECS[id].role} · ${TOWERS[SPECS[id].base].name}` : `${TOWERS[id].role} · ${TOWERS[id].kind}`;
+const gRole = id => ENEMIES[id] ? ENEMIES[id].kind.split(' · ')[0] : id === 'hero' ? 'Hero' : (TOWERS[id] || SPECS[id]).role.replace('Tier IV · ', '').split(' · ')[0];
+let gFrom = 'title', gTab = 'cells', gSel = 'neutro';
+function guideDots() {
+  const any = tab => GUIDE[tab].some(gNew);
+  document.querySelectorAll('#guideBtn .ndot,#hudGuide .ndot').forEach(d => d.hidden = !any('cells') && !any('path'));
+  document.querySelectorAll('.gtab').forEach(b => { const ids = GUIDE[b.dataset.tab]; b.querySelector('.ndot').hidden = !any(b.dataset.tab); b.querySelector('b').textContent = `${ids.filter(gOpen).length}/${ids.length}`; });
+}
+// from = 'title' | 'play' (the specimen waits behind it; Back resumes it)
+function openGuide(from) {
+  if (from === 'play' && (S.screen !== 'play' || S.over)) return;
+  gFrom = from; S.screen = 'guide'; closeRadial(); S.ability = null; showInfo(null); sfx('click');
+  $('#titleOv').hidden = true; $('#guideOv').hidden = false; $('#gBack').textContent = from === 'play' ? 'Back to specimen' : 'Back to specimen tray';
+  guideTab(gTab);
+}
+function guideTab(tab) {
+  gTab = tab; const ids = GUIDE[tab];
+  document.querySelectorAll('.gtab').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  guideShow(ids.includes(gSel) ? gSel : ids.find(gNew) || ids.find(gOpen) || ids[0]);
+}
+// stats in plain words: a band word, then the number
+const band = (v, cuts, words) => words[cuts.filter(c => v >= c).length];
+const guard = v => v > 0 ? `${band(v, [.2, .4], ['Light', 'Medium', 'Heavy'])} · ${Math.round(v * 100)}%` : 'None';
+const hz = X => X.burst ? X.burst / (X.rate + .09 * (X.burst - 1)) : 1 / X.rate; // hits per second, as on the info card
+function guideRows(id) {
+  const E = ENEMIES[id];
+  if (E) return [['Health', `${band(E.hp, [35, 80, 200, 600], ['Fragile', 'Weak', 'Sturdy', 'Tough', 'Colossal'])} · ${E.hp}`],
+    ['Speed', band(E.speed, [20, 30, 45, 58], ['Crawls', 'Slow', 'Steady', 'Fast', 'Very fast']) + (E.flying ? ' · flies' : '')],
+    ['Armor · blunts physical', guard(E.armor)], ['Resistance · blunts magic', guard(E.mr)], ['If it breaks through', `−${E.lives} vitality`]];
+  if (id === 'hero') { const a = HERO.lv[0], z = HERO.lv[4]; return [['Health', `${a.hp} → ${z.hp}`], ['Damage', `${a.dmg} → ${z.dmg} · physical`], ['Regeneration', `${a.regen} → ${z.regen} per s`], ['Reach', `Short · ${HERO.range}`], ['Back after falling', `${HERO.resp} s`]]; }
+  const P = SPECS[id], T = TOWERS[P ? P.base : id], a = P ? P.st : T.lv[0], z = P ? a : T.lv[2], span = k => a[k] !== z[k] ? `${a[k]} → ${z[k]}` : a[k];
+  const cost = ['Cost', P ? `${P.cost} ATP to specialize` : `${a.cost} ATP`];
+  if (T === TOWERS.macro) return [['Cells', span('units') + ' blockers'], ['Health per cell', span('hp')], ['Bite', span('dmg') + ' · physical'], ['Back after falling', `${TOWERS.macro.resp} s`], cost];
+  return [['Damage', `${a.burst ? a.dmg + ' ×' + a.burst : span('dmg')} · ${T.dtype === 'magic' ? 'magic, ignores armor' : 'physical'}`],
+    ['Attack speed', `${band(hz(z), [1, 2], ['Slow', 'Steady', 'Fast'])} · ${a === z ? hz(a).toFixed(1) : hz(a).toFixed(1) + ' → ' + hz(z).toFixed(1)} per s`],
+    ['Reach', `${band(z.range, [150, 170], ['Short', 'Medium', 'Long'])} · ${span('range')}`], ['Targets', T === TOWERS.bcell ? 'Ground only · splash' : 'Ground and air'], cost];
+}
+function guideSpecial(id) {
+  if (ENEMIES[id]) return ENEMIES[id].desc;
+  if (id === 'hero') return `Holds one pathogen and stings flyers too. Granzyme Burst (E) damages and stuns everything within ${HERO.gz.r}, every ${HERO.gz.cd} s.`;
+  const P = SPECS[id]; return P ? `${P.perk}<br>★ ${P.skn}: ${P.skd(P.sk[0])}` : TOWERS[id].perk;
+}
+function guideShow(id) {
+  gSel = id; const open = gOpen(id), path = !!ENEMIES[id];
+  if (open && !save.viewed.includes(id)) { save.viewed.push(id); persist(); }
+  $('#gGrid').innerHTML = GUIDE[gTab].map(k => `<button class="gt ${k === id ? 'on' : ''} ${gOpen(k) ? '' : 'lock'}" data-id="${k}" style="--c:${COL[k]}"><img src="${gOpen(k) ? portrait(k, TOWERS[k] ? 2 : 0, 96) : silhouette(k, TOWERS[k] ? 2 : 0, 96).url}" alt="">` +
+    `<span><b>${gOpen(k) ? gName(k) : 'Unknown'}</b><small>${gOpen(k) ? gRole(k) : path ? 'Not yet observed' : 'Not yet trained'}</small></span>${gNew(k) ? '<em class="ndot"></em>' : ''}</button>`).join('');
+  $('#gLab').textContent = `${path ? 'PATHOGEN' : 'CELL'} · PLATE ${String(GUIDE[gTab].indexOf(id) + 1).padStart(2, '0')}`;
+  const T = $('#gText'); T.style.setProperty('--c', COL[id]);
+  T.innerHTML = open ? `<small>${gKind(id)}</small><h3>${gName(id)}</h3><div class="rows">${guideRows(id).map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('')}</div>` +
+      `<p class="sp"><em>SPECIAL</em>${guideSpecial(id)}</p><p class="fact"><em>FIELD NOTE</em>${FACTS[id]}</p>`
+    : `<small>${path ? 'Pathogen' : 'Specialist'} · locked</small><h3>${path ? 'Not yet observed' : 'Not yet trained'}</h3><p class="sp">${path ? 'Its plate fills in the first time it enters one of your specimens.' : `Grow a ${TOWERS[SPECS[id].base].name} to level 3 to unlock this specialist.`}</p>`;
+  guideDots();
+}
+// the plate is live: the same art function as in play, clocked, clipped to the microscope's field of view
+function drawGuide(t) {
+  const c = $('#gCv'), sz = c.clientWidth; if (!sz) return;
+  if (c.width !== sz * 2) c.width = c.height = sz * 2;
+  const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
+  g.setTransform(2, 0, 0, 2, sz, sz); circ(g, 0, 0, sz / 2); g.save(); g.clip();
+  if (gOpen(gSel)) paintKind(g, gSel, TOWERS[gSel] ? 2 : 0, sz * .9, t);
+  else { g.globalAlpha = .75 + .2 * Math.sin(t * 2); g.drawImage(silhouette(gSel, TOWERS[gSel] ? 2 : 0, Math.round(sz * 1.8)), -sz * .45, -sz * .45, sz * .9, sz * .9); }
+  g.restore();
+}
+$('#gGrid').onclick = ev => { const b = ev.target.closest('.gt'); if (b) { sfx('click'); guideShow(b.dataset.id); } };
+document.querySelectorAll('.gtab').forEach(b => b.onclick = () => { sfx('click'); guideTab(b.dataset.tab); });
+$('#gBack').onclick = () => { $('#guideOv').hidden = true; if (gFrom === 'play') { S.screen = 'play'; lastHud = ''; } else showTitle(); };
+$('#guideBtn').onclick = () => openGuide('title'); $('#hudGuide').onclick = $('#pauseGuide').onclick = () => openGuide('play');
+
+// ============================================================ onboarding
+// First-play field notes on specimen 01, one at a time, each shown once (save.hints = ids done or dismissed). A note sits beside
+// its target, never over it, and only its dismiss button takes clicks, so play goes on underneath.
+const stRel = (el, pad) => { const s = $('#stage').getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: r.left - s.left + r.width / 2, y: r.top - s.top + r.height / 2, r: r.width / 2 + pad }; };
+const onMap = (o, r) => o && { x: o.x * viewK, y: o.y * viewK, r: r * viewK };
+const upTarget = () => S.towers.find(t => t.lvl < 2 && S.gold >= TOWERS[t.type].lv[t.lvl + 1].cost);
+const hintSlot = () => { const q = posAt(S.paths[0], 160), d = s => Math.hypot(s.x - q.x, s.y - q.y); return S.slots.filter(s => !s.tower).sort((a, b) => d(a) - d(b))[0]; };
+const HINTS = [
+  { id: 'build', k: 'Grow', txt: '<b>Click a ring to grow a cell.</b> Rings are build sites beside the infection route. Hover a choice to preview its reach.',
+    when: () => S.time > 1.5, done: () => S.towers.length, at: () => onMap(hintSlot(), 30) },
+  { id: 'wave', k: 'Call', txt: '<b>Call the first wave here.</b> Pathogens wait for your signal. Later, calling a wave early pays bonus ATP.',
+    when: () => S.towers.length, done: () => S.wave, at: () => wm[0] && !wm[0].hidden && stRel(wm[0], 6) },
+  { id: 'upgrade', k: 'Upgrade', txt: '<b>You can afford an upgrade.</b> Click this cell, then the ▲ button. Each level hits harder and reaches further.',
+    when: () => S.wave && upTarget(), done: () => S.towers.some(t => t.lvl), at: () => onMap(upTarget(), 34) },
+  { id: 'fever', k: 'Fever', txt: '<b>Fever is ready.</b> Press Q or click the flame, then click a crowd of pathogens to burn them.',
+    when: () => S.wave && S.enemies.length >= 3, done: () => S.cds.fever > 0, at: () => stRel($('#ab-fever'), 5) },
+  { id: 'hero', k: 'Hero', txt: '<b>Meet your NK Sentinel.</b> Click it, then click near the path to send it there. Press E for Granzyme Burst.',
+    when: () => S.wave >= 2, done: () => S.sel && S.sel.hero, at: () => !S.hero.dead && onMap(S.hero, 26) },
+];
+if (!Array.isArray(save.hints)) save.hints = firstRun ? [] : HINTS.map(h => h.id); // returning players never see them
+let hintCur = null;
+function hintDone(id) { if (id && !save.hints.includes(id)) { save.hints.push(id); persist(); } }
+function coach() {
+  const el = $('#hint'), ring = $('#hintRing'); let h = null;
+  if (S.lvl === 0 && S.mode === 'campaign' && S.screen === 'play' && !S.over && save.hints.length < HINTS.length) {
+    for (const x of HINTS) if (x.done()) hintDone(x.id);
+    const todo = HINTS.filter(x => !save.hints.includes(x.id));
+    h = todo.find(x => x.id === hintCur) || todo.find(x => x.when());
+  }
+  hintCur = h ? h.id : null;
+  const at = h && !(S.sel && S.sel.slot) && h.at(); // an open radial owns the space around its site
+  el.hidden = ring.hidden = !at; if (!at) return;
+  if (el.dataset.id !== h.id) { el.dataset.id = h.id; el.querySelector('small').textContent = `Field note ${HINTS.indexOf(h) + 1} / ${HINTS.length} · ${h.k}`; el.querySelector('p').innerHTML = h.txt; }
+  Object.assign(ring.style, { left: at.x - at.r + 'px', top: at.y - at.r + 'px', width: at.r * 2 + 'px', height: at.r * 2 + 'px' });
+  // beside the target, on the side that stays on the stage and covers the fewest HUD panels, then build sites (preferred order breaks ties)
+  const st = $('#stage'), s0 = st.getBoundingClientRect(), SW = st.clientWidth, SH = st.clientHeight, cw = el.offsetWidth * uK, ch = el.offsetHeight * uK, gap = 14 * uK, m = 8;
+  const huds = ['#hudTL', '#hudTR', '#hudBL'].map(s => { const r = $(s).getBoundingClientRect(); return [r.left - s0.left, r.top - s0.top, r.right - s0.left, r.bottom - s0.top]; });
+  const C = { right: [at.x + at.r + gap, at.y - ch / 2], left: [at.x - at.r - gap - cw, at.y - ch / 2], above: [at.x - cw / 2, at.y - at.r - gap - ch], below: [at.x - cw / 2, at.y + at.r + gap] };
+  const order = at.y > SH * .7 ? ['above', 'right', 'left', 'below'] : at.x < SW / 2 ? ['right', 'below', 'above', 'left'] : ['left', 'below', 'above', 'right'];
+  let best = null;
+  order.forEach((sd, i) => {
+    let [x, y] = C[sd]; if (sd === 'right' || sd === 'left') y = clamp(y, m, SH - m - ch); else x = clamp(x, m, SW - m - cw);
+    const hit = (l, t, r, b) => x < r && x + cw > l && y < b && y + ch > t, q = 20 * viewK;
+    const score = (x >= m && y >= m && x + cw <= SW - m && y + ch <= SH - m ? 0 : 1000) + 100 * huds.filter(r => hit(...r)).length
+      + 10 * S.slots.filter(s => hit(s.x * viewK - q, s.y * viewK - q, s.x * viewK + q, s.y * viewK + q)).length + i;
+    if (!best || score < best[0]) best = [score, sd, x, y];
+  });
+  const [, sd, x, y] = best, vert = sd === 'right' || sd === 'left', ar = el.querySelector('.ar');
+  el.dataset.side = sd; el.style.left = x + 'px'; el.style.top = y + 'px';
+  ar.style.top = vert ? clamp(at.y - y, 16 * uK, ch - 16 * uK) / uK + 'px' : ''; ar.style.left = vert ? '' : clamp(at.x - x, 16 * uK, cw - 16 * uK) / uK + 'px';
+}
+$('#hint .x').onclick = () => { sfx('click'); hintDone(hintCur); };
+
 // ============================================================ loop
 let acc = 0, last = performance.now();
 function frame(now) {
   const real = Math.min(.1, (now - last) / 1000); last = now;
   if (S.screen === 'play' && !S.paused && !S.over) { acc += real * S.speed; let n = 0; while (acc >= DT && n < 8) { step(DT); acc -= DT; n++; } if (n === 8) acc = 0; }
   else if (S.L) { S.time += real * .3; for (const t of S.towers) t.built += real; for (const p of S.parts) { p.life -= real; p.x += p.vx * real; p.y += p.vy * real; } S.parts = S.parts.filter(p => p.life > 0); }
-  render(); hud();
+  render(); hud(); coach(); if (S.screen === 'guide') drawGuide(now / 1000);
   requestAnimationFrame(frame);
 }
 addEventListener('resize', resize);
@@ -1958,7 +2206,8 @@ requestAnimationFrame(frame);
 
 window.IC = { S, LEVELS, LVLMULT, TOWERS, ENEMIES, SPECS, startLevel, sendWave, build: (i, k) => build(S.slots[i], k), upgrade: i => upgrade(S.slots[i].tower), sell: i => sell(S.slots[i].tower),
   specialize: (i, id) => specialize(S.slots[i].tower, id), skillUp: i => skillUp(S.slots[i].tower), refund: i => refund(S.slots[i].tower), step, makePath, nearestOnPath, posAt, castAbility, armAbility,
-  HERO, heroMove, selectHero, granzyme, heroXp, hurt: (u, a) => hurtUnit(u, a), save, persist, MEMORY, AB, memStars, showMemory, endLevel, showTitle, CHAL, MODES, MEMCOST, TORDER };
+  HERO, heroMove, selectHero, granzyme, heroXp, hurt: (u, a) => hurtUnit(u, a), save, persist, MEMORY, AB, memStars, showMemory, endLevel, showTitle, CHAL, MODES, MEMCOST, TORDER,
+  GUIDE, FACTS, HINTS, openGuide };
 </script>
 </body>
 </html>
