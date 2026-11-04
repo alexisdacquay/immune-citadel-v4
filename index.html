@@ -197,7 +197,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 .stars .on{color:var(--amber);text-shadow:0 0 10px rgba(255,194,74,.7)}
 .slide{cursor:pointer}
 .slide.locked{opacity:.45;cursor:default}
-/* challenges: shield = Heroic, anvil = Iron; amber once won */
+/* challenges: shield = Acute, hourglass = Chronic; amber once won */
 .chs{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
 .short .chs{flex-wrap:nowrap;gap:4px}.short .chb{padding-right:7px;gap:4px;letter-spacing:.08em} /* one row: a second chip row pushes the third slide row off a short stage */
 .chb{display:flex;align-items:center;gap:6px;padding:2px 9px 2px 2px;border-radius:14px;border:1px solid var(--rim);background:rgba(140,205,255,.06);font:700 max(9px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--txt)}
@@ -383,7 +383,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 @keyframes hring{50%{transform:scale(1.1);opacity:.55}}
 /* below ~1700px a centred info bar would run into the bottom-left cluster (hero + 3 skills) */
 @media (max-width:1700px){#info{left:calc(330px * var(--u,1));transform:scale(var(--u,1));transform-origin:bottom left;max-width:calc(100% / var(--u,1) - 346px)}#info.up{transform-origin:top left}#info:not([hidden]) ~ #spec{opacity:0}}
-/* narrow: the mechanic line (pathogen desc, base perk) stays, clamped to 2 lines; the RESIST and LEAK chips make room */
+/* narrow: the mechanic line (pathogen desc, base perk) stays, clamped to 2 lines; the BREACH chip makes room */
 @media (max-width:1100px){#info .perk:not(.wide),#info .meta span:not(.xp){display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;white-space:normal;font-size:11px;line-height:1.3;max-width:230px}#info .s.opt{display:none}#info .perk.wide{flex:0 1 210px;font-size:11px}#info .skt:not(.nx) .skd{display:none}#info .s b em{display:block;margin:0}#info .meta b{font-size:16px}}
 /* stage under 710 px (resize sets .short): the kick must clear the tray's top-right buttons; the pager, three slide rows and keys fit 540 px with challenge badges */
 .short .ov{padding:10px 20px}.short .kick .kx{display:none}
@@ -447,8 +447,8 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
   </div>
   <div id="hudBL" class="ui">
     <button class="ab" id="ab-hero"><i class="hp"></i><img id="ic-hero" alt="NK Sentinel"><div class="cd"></div><span class="lv">1</span><kbd>H</kbd><div class="tip"><small>HERO · NATURAL KILLER CELL</small><b>NK Sentinel</b>Select it (H), then tap or click near the path to send it there. Tap it again, right-click or Esc cancels.</div></button>
-    <button class="ab" id="ab-fever"><img id="ic-fever" alt="Fever"><div class="cd"></div><kbd>Q</kbd><div class="tip"><small>ABILITY · 32 s</small><b>Fever spike</b><span class="tb">Heat burns everything in an area and slows survivors. Then tap or click the map.</span><span class="ti">Not available in the Iron challenge.</span></div></button>
-    <button class="ab" id="ab-swarm"><img id="ic-swarm" alt="Swarm"><div class="cd"></div><kbd>W</kbd><div class="tip"><small>ABILITY · 18 s</small><b>Neutrophil swarm</b><span class="tb">Drop <span id="swN">three</span> short-lived neutrophils that block the path. Then tap or click the path.</span><span class="ti">Not available in the Iron challenge.</span></div></button>
+    <button class="ab" id="ab-fever"><img id="ic-fever" alt="Fever"><div class="cd"></div><kbd>Q</kbd><div class="tip"><small>ABILITY · 32 s</small><b>Fever spike</b><span class="tb">Heat burns everything in an area and slows survivors. Then tap or click the map.</span><span class="ti">Not available in the Chronic challenge.</span></div></button>
+    <button class="ab" id="ab-swarm"><img id="ic-swarm" alt="Swarm"><div class="cd"></div><kbd>W</kbd><div class="tip"><small>ABILITY · 18 s</small><b>Neutrophil swarm</b><span class="tb">Drop <span id="swN">three</span> short-lived neutrophils that block the path. Then tap or click the path.</span><span class="ti">Not available in the Chronic challenge.</span></div></button>
     <button class="ab" id="ab-gz"><img id="ic-gz" alt="Granzyme"><div class="cd"></div><kbd>E</kbd><div class="tip"><small>HERO SKILL · 20 s</small><b>Granzyme Burst</b>The NK Sentinel sprays granzyme, damaging and stunning every pathogen around it.</div></button>
   </div>
   <div id="info" class="ui glass" hidden></div>
@@ -486,7 +486,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
   <div class="ov" id="memOv" hidden>
     <div class="tin mem">
       <div class="mhd"><div><div class="kick">LINEAGE ARCHIVE · PERMANENT TRAINING</div><h1>IMMUNE <span>MEMORY</span></h1>
-        <p class="lede">Every star trains a cell lineage for good: 3 per specimen, plus 1 each for the Heroic and Iron challenges of the six full maps. 66 stars train every lineage. Each lineage trains its tiers in order; training applies when a specimen starts.</p></div>
+        <p class="lede">Every star trains a cell lineage for good: 3 per specimen, plus 1 each for the Acute and Chronic challenges of the six full maps. 66 stars train every lineage. Each lineage trains its tiers in order; training applies when a specimen starts.</p></div>
         <div class="bank glass"><b id="memAvail">0</b><small>STARS TO SPEND</small></div></div>
       <div class="mroot"><i class="mdot"></i><label>STEM CELL</label><svg id="memTree" viewBox="0 0 600 44" preserveAspectRatio="none"></svg></div>
       <div class="mgrid" id="memGrid"></div>
@@ -762,7 +762,7 @@ function musicTick(st) {
 // ============================================================ data
 const TOWERS = {
   neutro: {
-    name: 'Neutrophil', role: 'Rapid responder', kind: 'Physical · fast', dtype: 'phys',
+    name: 'Neutrophil', role: 'Rapid responder', kind: 'Granules · fast', dtype: 'phys',
     flavor: 'First to arrive, first to die. Spits toxic granules at anything that moves.',
     lv: [{ cost: 70, dmg: 6, rate: .5, range: 140 }, { cost: 80, dmg: 12, rate: .42, range: 152 }, { cost: 140, dmg: 17, rate: .35, range: 166 }],
     perk: 'Level 3 · NETosis: every 4th shot casts a sticky DNA net that slows by 45%.', perkLv: 2,
@@ -774,78 +774,78 @@ const TOWERS = {
     perk: 'Level 3 · Phagolysosome: a third cell joins and cells regenerate fast between fights.', perkLv: 2,
   },
   bcell: {
-    name: 'B Cell', role: 'Antibody factory', kind: 'Splash · ground, tags flyers', dtype: 'phys',
+    name: 'B Cell', role: 'Antibody factory', kind: 'Antibodies · splash, tags flyers', dtype: 'phys',
     flavor: 'Lobs clouds of antibodies. Tagged pathogens take extra damage from everything.',
     lv: [{ cost: 110, dmg: 14, rate: 1.7, range: 150, splash: 52 }, { cost: 130, dmg: 30, rate: 1.6, range: 160, splash: 58 }, { cost: 190, dmg: 42, rate: 1.45, range: 175, splash: 68 }],
     perk: 'Opsonization: every hit tags enemies to take +25% damage for 3 s.', perkLv: 0,
   },
   killer: {
-    name: 'Killer T Cell', role: 'Assassin', kind: 'Magic · ignores armor', dtype: 'magic',
-    flavor: 'Reads the invader’s ID card and orders it to self-destruct. Armor means nothing.',
+    name: 'Killer T Cell', role: 'Precision killer', kind: 'Perforin · pierces coats', dtype: 'magic',
+    flavor: 'Checks the ID card on your cells and orders infected ones to self-destruct. Coats mean nothing to it.',
     lv: [{ cost: 100, dmg: 20, rate: 1.1, range: 135 }, { cost: 130, dmg: 40, rate: 1.0, range: 145 }, { cost: 190, dmg: 62, rate: .9, range: 155 }],
-    perk: 'Level 3 · Perforin chain: each bolt leaps to a second target for 60%.', perkLv: 2,
+    perk: 'Level 3 · Serial killing: after each hit it moves on to a second target for 60%.', perkLv: 2,
   },
 };
 TOWERS.macro.lv.forEach((L, i) => Object.assign(L, { rate: .9, regen: i >= 2 ? .12 : .03 }));
 TOWERS.macro.resp = 9; // seconds before a fallen macrophage cell returns
 const TORDER = ['neutro', 'macro', 'bcell', 'killer'];
-// tier IV specialists: st = stats, sk = signature skill ranks (bought after specializing)
+// specialists: st = stats, sk = signature skill ranks (bought after specializing)
 const SPECS = {
-  net: { base: 'neutro', name: 'NET Trapper', role: 'Tier IV · Controller', kind: 'Physical · every shot slows', cost: 215,
+  net: { base: 'neutro', name: 'NET Trapper', role: 'Specialist · Trapper', kind: 'Granules · every shot slows', cost: 215,
     st: { dmg: 30, rate: .3, range: 180, slow: .5 }, tag: ['SLOW', '50%'],
     perk: 'Casts DNA nets: every granule slows its target by 50%.',
     skn: 'Chromatin Snare', sk: [{ cost: 90, cd: 7, r: 75, root: 1.8 }, { cost: 120, cd: 6, r: 90, root: 2.4 }],
-    skd: r => `Every ${r.cd} s roots all ground pathogens within ${r.r} of its target for ${r.root} s (bosses half).` },
-  degran: { base: 'neutro', name: 'Degranulator', role: 'Tier IV · Shredder', kind: 'Physical · 3-shot bursts', cost: 240,
+    skd: r => `Every ${r.cd} s traps all ground pathogens within ${r.r} of its target in sticky DNA for ${r.root} s (bosses half).` },
+  degran: { base: 'neutro', name: 'Degranulator', role: 'Specialist · Coat breaker', kind: 'Granules · 3-shot bursts', cost: 240,
     st: { dmg: 30, rate: .45, range: 165, burst: 3 }, tag: ['BURST', '×3'],
     perk: 'Empties its granules in rapid bursts of three.',
     skn: 'Myeloperoxidase', sk: [{ cost: 100, shred: .05, cap: .3 }, { cost: 130, shred: .07, cap: .5 }],
-    skd: r => `Bleach-laced hits strip ${Math.round(r.shred * 100)}% armor each, stacking up to ${Math.round(r.cap * 100)}%.` },
-  m1: { base: 'macro', name: 'M1 Inflammatory', role: 'Tier IV · Brawler', kind: 'Three hard-hitting cells', cost: 205,
+    skd: r => `Bleach-laced hits wear down ${Math.round(r.shred * 100)}% of the coat each, up to ${Math.round(r.cap * 100)}%.` },
+  m1: { base: 'macro', name: 'M1 Inflammatory', role: 'Specialist · Attacker', kind: 'Three hard-hitting cells', cost: 205,
     st: { units: 3, hp: 300, dmg: 40, rate: .7, regen: .12 }, tag: ['RATE', (1 / .7).toFixed(1) + '/s'],
     perk: 'Activated by danger signals: cells bite almost three times as hard, and faster.',
-    skn: 'Acid Spit', sk: [{ cost: 80, dmg: 24, cd: .9, r: 90 }, { cost: 110, dmg: 40, cd: .7, r: 110 }],
-    skd: r => `Cells spit ${r.dmg}-damage acid every ${r.cd} s at pathogens within ${r.r}, flyers included.` },
-  m2: { base: 'macro', name: 'M2 Resolver', role: 'Tier IV · Healer', kind: 'Four tanky, healing cells', cost: 190,
+    skn: 'Nitric Oxide', sk: [{ cost: 80, dmg: 24, cd: .9, r: 90 }, { cost: 110, dmg: 40, cd: .7, r: 110 }],
+    skd: r => `Cells blast ${r.dmg}-damage nitric oxide every ${r.cd} s at pathogens within ${r.r}, flyers included.` },
+  m2: { base: 'macro', name: 'M2 Resolver', role: 'Specialist · Healer', kind: 'Four sturdy, healing cells', cost: 190,
     st: { units: 4, hp: 500, dmg: 26, rate: .9, regen: .25, heal: 16, eat: 120 }, tag: ['HEAL', '16/s'],
-    perk: 'Calms the fight: cells regenerate fast and heal nearby cells 16 HP/s.',
+    perk: 'Calms the fight: cells regenerate fast and heal nearby cells 16 health per second.',
     skn: 'Efferocytosis', sk: [{ cost: 60, atp: 4 }, { cost: 90, atp: 7 }],
     skd: r => `Eats the dead: every pathogen that dies within ${SPECS.m2.st.eat} of its cells returns +${r.atp} ATP, whoever killed it.` },
-  plasma: { base: 'bcell', name: 'Plasma Cell', role: 'Tier IV · Artillery', kind: 'Splash · rapid barrage', cost: 250,
+  plasma: { base: 'bcell', name: 'Plasma Cell', role: 'Specialist · Mass producer', kind: 'Splash · rapid barrage', cost: 250,
     st: { dmg: 46, rate: .7, range: 180, splash: 82, ops: 1.4 }, tag: ['TAG', '+40%'],
     perk: 'An antibody factory: rapid wide clouds; tagged pathogens take +40% damage.',
     skn: 'Antibody Rain', sk: [{ cost: 110, cd: 7, n: 4, dmg: 55 }, { cost: 140, cd: 5, n: 6, dmg: 65 }],
     skd: r => `Every ${r.cd} s rains ${r.n} antibody clouds of ${r.dmg} damage on pathogens in range.` },
-  memory: { base: 'bcell', name: 'Memory B Cell', role: 'Tier IV · Learner', kind: 'Splash · remembers kills', cost: 240,
+  memory: { base: 'bcell', name: 'Memory B Cell', role: 'Specialist · Learner', kind: 'Splash · remembers kills', cost: 240,
     st: { dmg: 75, rate: 1.2, range: 200, splash: 64, mem: .08, memCap: 1.2 }, tag: ['MEMORY', '+8%/kill'],
     perk: 'Each kill of a pathogen type adds +8% damage against that type for the rest of the specimen (max +120%).',
     skn: 'Recall', sk: [{ cost: 110, cd: 10, dmg: 400 }, { cost: 140, cd: 7, dmg: 600 }],
-    skd: r => `Every ${r.cd} s strikes the toughest pathogen in range for ${r.dmg}, ignoring armor.` },
-  ctl: { base: 'killer', name: 'CTL Executioner', role: 'Tier IV · Assassin', kind: 'Magic · ignores armor', cost: 275,
+    skd: r => `Every ${r.cd} s strikes the toughest pathogen in range for ${r.dmg}, ignoring its coat and toughness.` },
+  ctl: { base: 'killer', name: 'Effector CTL', role: 'Specialist · Repeat killer', kind: 'Perforin · pierces coats', cost: 275,
     st: { dmg: 125, rate: .85, range: 170 }, tag: ['CHAIN', '60%'],
-    perk: 'A seasoned killer: heavy perforin bolts that still leap to a second target.',
-    skn: 'Perforin Verdict', sk: [{ cost: 100, cd: 5, th: .3 }, { cost: 140, cd: 3.5, th: .45 }],
-    skd: r => `Every ${r.cd} s a bolt executes a non-boss pathogen below ${Math.round(r.th * 100)}% health.` },
-  th1: { base: 'killer', name: 'Th1 Helper', role: 'Tier IV · Commander', kind: 'Magic · attack-speed aura', cost: 205,
-    st: { dmg: 60, rate: .9, range: 160, aura: 200, haste: .35 }, tag: ['AURA', '+35%'],
-    perk: 'Lighter bolts that still leap, and its cytokines give every tower within 200 +35% attack speed. Auras from several Th1 do not stack.',
+    perk: 'A seasoned killer: heavy perforin hits, and it still moves on to a second target.',
+    skn: 'Death Signal', sk: [{ cost: 100, cd: 5, th: .3 }, { cost: 140, cd: 3.5, th: .45 }],
+    skd: r => `Every ${r.cd} s it orders a weakened target (below ${Math.round(r.th * 100)}% health, not bosses) to self-destruct.` },
+  th1: { base: 'killer', name: 'Th1 Helper', role: 'Specialist · Coordinator', kind: 'Cytokines · speeds nearby cells', cost: 205,
+    st: { dmg: 60, rate: .9, range: 160, aura: 200, haste: .35 }, tag: ['BOOST', '+35%'],
+    perk: 'Light hits that still move on to a second target, and its cytokines make every immune cell within 200 strike 35% faster. Boosts from several Th1 cells do not stack.',
     skn: 'Cytokine Surge', sk: [{ cost: 90, cd: 14, dur: 6, haste: .7 }, { cost: 110, cd: 11, dur: 7, haste: 1 }],
-    skd: r => `Every ${r.cd} s the aura surges to +${Math.round(r.haste * 100)}% attack speed for ${r.dur} s.` },
+    skd: r => `Every ${r.cd} s a cytokine surge makes nearby cells strike ${Math.round(r.haste * 100)}% faster for ${r.dur} s.` },
 };
 const stat = t => t.spec ? SPECS[t.spec].st : TOWERS[t.type].lv[t.lvl];
 const skill = t => t.spec && t.rank ? SPECS[t.spec].sk[t.rank - 1] : null;
 const ENEMIES = {
   bact: { name: 'E. coli', kind: 'Bacterium', hp: 40, speed: 38, armor: 0, mr: 0, gold: 7, lives: 1, atk: 4, r: 11, desc: 'Common rod bacterium. Weak alone, dangerous in numbers.' },
   virus: { name: 'Rhinovirus', kind: 'Virus', hp: 20, speed: 58, armor: 0, mr: .3, gold: 4, lives: 1, atk: 2, r: 8, desc: 'Tiny and fast. Floods past slow defenders.' },
-  staph: { name: 'Staph aureus', kind: 'Armored bacterium', hp: 100, speed: 29, armor: .55, mr: 0, gold: 16, lives: 1, atk: 7, r: 12, desc: 'A golden pigment shields it from physical damage. Hit it hard, or with magic.' },
+  staph: { name: 'Staph aureus', kind: 'Coated bacterium', hp: 100, speed: 29, armor: .55, mr: 0, gold: 16, lives: 1, atk: 7, r: 12, desc: 'A golden pigment and a tough coat blunt granules and bites. Upgraded cells hit hard enough to get through.' },
   candida: { name: 'Candida', kind: 'Fungus', hp: 150, speed: 25, armor: .25, mr: .35, gold: 18, lives: 2, atk: 7, r: 15, split: 3, desc: 'Budding yeast. Bursts into 3 fast spores when killed.' },
   spore: { name: 'Spore', kind: 'Fungal spore', hp: 26, speed: 50, armor: 0, mr: .2, gold: 2, lives: 1, atk: 2, r: 7, desc: 'Fast offspring of Candida.' },
   flu: { name: 'Influenza', kind: 'Airborne virus', hp: 50, speed: 42, armor: 0, mr: .15, gold: 11, lives: 1, atk: 0, r: 10, flying: true, desc: 'Drifts over blockers: only cells that shoot can hit it. Antibody clouds tag it but can’t hurt it.' },
-  worm: { name: 'Helminth', kind: 'Parasitic worm', hp: 430, speed: 19, armor: .35, mr: .55, gold: 45, lives: 3, atk: 16, r: 13, desc: 'Huge parasite. Resists magic. Hold it with blockers and grind it down.' },
-  boss: { name: 'MRSA Superbug', kind: 'Boss · drug-resistant', hp: 2300, speed: 14, armor: .5, mr: .35, gold: 300, lives: 10, atk: 34, r: 30, boss: true, desc: 'Grows a biofilm shield over nearby allies and buds fresh bacteria.' },
+  worm: { name: 'Helminth', kind: 'Parasitic worm', hp: 430, speed: 19, armor: .35, mr: .55, gold: 45, lives: 3, atk: 16, r: 13, desc: 'Huge parasite, too big for Killer T cells to kill. Hold it with blockers and grind it down.' },
+  boss: { name: 'MRSA Superbug', kind: 'Boss · drug-resistant', hp: 2300, speed: 14, armor: .5, mr: .35, gold: 300, lives: 10, atk: 34, r: 30, boss: true, desc: 'Grows a biofilm shield over nearby pathogens and buds fresh bacteria.' },
   salmon: { name: 'Salmonella', kind: 'Flagellated bacterium', hp: 60, speed: 64, armor: .1, mr: 0, gold: 9, lives: 1, atk: 5, r: 10, regen: .12, desc: 'Fast, flagellated. Heals itself when left unhit for 2 s.' },
   toxo: { name: 'Toxoplasma', kind: 'Parasite · stealth', hp: 130, speed: 34, armor: .2, mr: .25, gold: 15, lives: 2, atk: 8, r: 12, stealth: 85, desc: 'Hidden unless a cell is within 85. Fever reveals it for 6 s.' },
-  rabies: { name: 'Rabies Lyssavirus', kind: 'Boss · neurotropic virus', hp: 2600, speed: 13, armor: .3, mr: .45, gold: 400, lives: 10, atk: 40, r: 30, boss: true, desc: 'Every 6 s silences your most-invested immune cell in reach for 5 s. Sheds virions.' },
+  rabies: { name: 'Rabies Lyssavirus', kind: 'Boss · neurotropic virus', hp: 2600, speed: 13, armor: .3, mr: .45, gold: 400, lives: 10, atk: 40, r: 30, boss: true, desc: 'Every 6 s hijacks your most-invested immune cell in reach for 5 s. Sheds virions.' },
   virion: { name: 'Lyssa virion', kind: 'Shed virion', hp: 30, speed: 56, armor: 0, mr: .3, gold: 2, lives: 1, atk: 2, r: 7, desc: 'Bullet-shaped offspring shed by the Rabies Lyssavirus.' },
 };
 const g_ = (t, n, gap, d = 0, p = 0) => ({ t, n, gap, d, p });
@@ -920,11 +920,11 @@ MAPS.push(
 const DIFF = { easy: { hp: .7, space: 1.3, timer: 1.5 }, normal: { hp: 1, space: 1, timer: 1 }, hard: { hp: 1.2, space: .9, timer: .8 } };
 const MODES = {
   campaign: { hp: 1, spd: 1 },
-  heroic: { name: 'Heroic', hp: 1.2, spd: 1.1, gold: 1.15, rule: '6 elite waves · 3 vitality' },
-  iron: { name: 'Iron', hp: .9, spd: 1.05, gold: 2, ramp: .006, rule: 'One long wave · 1 vitality · two cell lines · no Fever or Swarm' }, // gold ×2: no wave breaks, no early-call bonus
+  heroic: { name: 'Acute', hp: 1.2, spd: 1.1, gold: 1.15, rule: '6 fierce waves · 3 vitality' },
+  iron: { name: 'Chronic', hp: .9, spd: 1.05, gold: 2, ramp: .006, rule: 'One long wave · 1 vitality · two cell lines · no Fever or Swarm' }, // gold ×2: no wave breaks, no early-call bonus
 };
 // the player's kit grows by at most one step per specimen; a specimen once reached keeps its additions everywhere (replays, challenges).
-// spec = the cell line whose two tier IV forms open there
+// spec = the cell line whose two specialist forms open there
 const UNLOCK = [{ cells: ['neutro'] }, { cells: ['macro'] }, {}, { hero: 1 }, { gz: 1 }, { ab: 'fever' }, { cells: ['killer'] }, {}, { cells: ['bcell'] },
   { spec: 'killer' }, { spec: 'bcell' }, {}, {}, { ab: 'swarm' }, { spec: 'neutro' }, {}, { spec: 'macro' }, {}];
 function kitAt(n) {
@@ -943,13 +943,14 @@ const INTRO = {
   virus: { trick: 'Tiny and fast: it runs straight past slow defenders.', beat: 'Neutrophils near the entrance, and Macrophages on the path to hold it in place.',
     bio: 'Rhinoviruses cause most colds. Each is about 30 nanometres wide, far smaller than a bacterium.',
     real: 'Rhinoviruses infect the lining of your nose, not wounds. The game sends them everywhere.' },
-  staph: { trick: 'A golden pigment shields it, so physical hits from Neutrophils and Macrophages do less than half damage.', beat: 'Upgraded Neutrophils hit hard enough to get through. Let Macrophages hold it inside their range. Later, a cell that ignores armour joins you.',
+  staph: { trick: 'A golden pigment and a tough coat blunt the granules and bites of Neutrophils and Macrophages: their hits do less than half damage.', beat: 'Upgraded Neutrophils hit hard enough to get through. Let Macrophages hold it inside their range. Later, a cell whose perforin pierces coats joins you.',
     bio: 'About a third of people carry Staph aureus in their nose. In a cut it can cause boils. Neutrophils are its real killers.' },
   flu: { trick: 'It drifts over the route, so Macrophages cannot block it.', beat: 'Neutrophils shoot flyers. Line them up along its path, and burn a crowd with Fever.',
     bio: 'Antibodies stick to flu and stop it entering your cells. That is how a flu vaccine protects you.',
     real: 'Flu does not fly through your body; it spreads from cell to cell. Antibodies are your best real weapon against it. In the game they only tag it, and that is a game bend.' },
-  worm: { trick: 'Huge and slow, with tough skin that shrugs off most Killer T bolts.', beat: 'Macrophages hold it in place while upgraded Neutrophils and Fever grind it down. Soon, antibodies will help.',
-    bio: 'Worms are too big for any cell to eat. Your body coats them in antibodies and attacks with chemicals.' },
+  worm: { trick: 'Huge and slow, and far too big for Killer T cells to kill.', beat: 'Macrophages hold it in place while upgraded Neutrophils and Fever grind it down. Soon, antibodies will help.',
+    bio: 'Worms are too big for any cell to eat. Your body covers them in antibodies and attacks with chemicals.',
+    real: 'Killer T cells never attack worms: a worm is far too big. Eosinophils and antibodies fight them.' },
   candida: { trick: 'When it dies, it bursts into three fast spores.', beat: 'B Cell clouds splash the spores the moment they pop.',
     bio: 'Candida is a yeast that lives on most people. It only causes trouble when it overgrows.', real: 'Real yeast buds new cells; it does not burst into spores when it dies.' },
   boss: { trick: 'Every 7 s it grows a biofilm: nearby pathogens take half damage, and new bacteria crawl out.', beat: 'Antibody clouds dissolve the biofilm. Then Killer T cells and a wall of Macrophages finish it.',
@@ -972,22 +973,23 @@ const INTRO = {
     beat: 'Select it (H), then tap or click near the route. Park it where fast pathogens slip past your cells.', bio: 'Natural killer cells need no training: they destroy cells that a virus has taken over.',
     real: 'Real NK cells kill your own infected cells, not bacteria. The game lets the Sentinel strike any pathogen.' },
   gz: { kick: 'New hero skill · E', name: 'Granzyme Burst', sub: 'Hero skill', img: () => $('#ic-gz').src, trick: 'Your NK Sentinel releases a burst of granzyme that hits and stuns every pathogen around it.',
-    beat: 'Press E or tap the icon when a crowd surrounds your hero. It recharges, so use it often.', bio: 'Granzymes are enzymes that NK cells inject into a target to make it self-destruct.' },
-  killer: { kick: 'New cell · Killer T Cell', trick: 'Fires bolts of magic that ignore armour, and it hits flyers.',
-    beat: 'Build it where armoured Staph walks past. One upgraded Killer T does more against armour than three Neutrophils.', bio: 'Killer T cells check an ID card, MHC-I, on every cell they touch, and destroy the ones that look wrong.',
-    real: 'Killer T cells kill infected body cells, not bacteria. Your neutrophils and antibodies fight Staph. The game bends this.' },
-  'spec-killer': { kick: 'New · Specialists', name: 'Killer T specialists', sub: 'Tier IV', img: () => portrait('ctl', 0, 152), trick: 'A level 3 Killer T Cell can now train into one of two tier IV forms: the CTL Executioner or the Th1 Helper. Each has a signature skill.',
+    beat: 'Press E or tap the icon when a crowd surrounds your hero. It recharges, so use it often.', bio: 'Granzymes are enzymes that NK cells inject into a target to make it self-destruct.',
+    real: 'Granzymes make a target cell self-destruct; nothing is stunned. NK cells deliver them by touch.' },
+  killer: { kick: 'New cell · Killer T Cell', trick: 'Punches holes with perforin, so coats mean nothing to it, and it reaches flyers.',
+    beat: 'Build it where coated Staph walks past. One upgraded Killer T does more against a coat than three Neutrophils.', bio: 'Killer T cells check an ID card, MHC-I, on every cell they touch, and destroy the ones that look wrong.',
+    real: 'Real Killer T cells kill your infected body cells by touch, not bacteria from afar. Neutrophils and antibodies fight Staph.' },
+  'spec-killer': { kick: 'New · Specialists', name: 'Killer T specialists', sub: 'Specialist forms', img: () => portrait('ctl', 0, 152), trick: 'A level 3 Killer T Cell can now specialize into one of two forms: the Effector CTL or the Th1 Helper. Each has a signature skill.',
     beat: 'Select a level 3 Killer T and pick a form. The other cell lines get theirs in later specimens.', bio: 'In lymph nodes, T cells meet their target and turn into specialists.',
-    real: 'Th1 Helpers are a different kind of T cell (CD4), not trained Killer T cells. The game puts both in one line.' },
-  'spec-bcell': { kick: 'New · Specialists', name: 'B Cell specialists', sub: 'Tier IV', img: () => portrait('plasma', 0, 152), trick: 'A level 3 B Cell can now become a Plasma Cell (antibody barrage) or a Memory B Cell (learns each pathogen it kills).',
+    real: 'Th1 Helpers are a different kind of T cell (CD4), not trained Killer T cells. The game puts both in one line. Real Th1 helpers kill nothing: their cytokines mostly fire up macrophages and Killer T cells.' },
+  'spec-bcell': { kick: 'New · Specialists', name: 'B Cell specialists', sub: 'Specialist forms', img: () => portrait('plasma', 0, 152), trick: 'A level 3 B Cell can now become a Plasma Cell (antibody barrage) or a Memory B Cell (learns each pathogen it kills).',
     beat: 'Plasma Cells win against crowds; Memory B Cells grow stronger the longer a specimen lasts.', bio: 'Memory B cells can stay in your body for decades. They are why a second infection, or a vaccine, is beaten so fast.',
     real: 'Real memory B cells do not grow stronger during one infection; they make the next one faster to beat.' },
-  'spec-neutro': { kick: 'New · Specialists', name: 'Neutrophil specialists', sub: 'Tier IV', img: () => portrait('net', 0, 152), trick: 'A level 3 Neutrophil can now become a NET Trapper (sticky nets that slow) or a Degranulator (bursts that strip armour).',
+  'spec-neutro': { kick: 'New · Specialists', name: 'Neutrophil specialists', sub: 'Specialist forms', img: () => portrait('net', 0, 152), trick: 'A level 3 Neutrophil can now become a NET Trapper (sticky nets that slow) or a Degranulator (bleach bursts that wear down coats).',
     beat: 'A NET Trapper at a bend slows a whole crowd under your other cells.', bio: 'Neutrophils can burst on purpose and cast nets of their own DNA to trap bacteria and fungi.',
     real: 'Neutrophils change behaviour out in the infected tissue, not in a training school.' },
-  'spec-macro': { kick: 'New · Specialists', name: 'Macrophage specialists', sub: 'Tier IV', img: () => portrait('m1', 0, 152), trick: 'A level 3 Macrophage can now become M1 Inflammatory (hard-biting brawlers) or M2 Resolver (tanky healers that turn kills into ATP).',
+  'spec-macro': { kick: 'New · Specialists', name: 'Macrophage specialists', sub: 'Specialist forms', img: () => portrait('m1', 0, 152), trick: 'A level 3 Macrophage can now become M1 Inflammatory (hard-biting attackers) or M2 Resolver (sturdy healers that turn kills into ATP).',
     beat: 'M1 holds the line where the route is busiest; M2 keeps a long fight going.', bio: 'In the brain, macrophages are called microglia. They switch between attack (M1) and repair (M2) modes.',
-    real: 'Real macrophages slide between many states; M1 and M2 are the two ends of that range.' },
+    real: 'Real macrophages slide between many states; M1 and M2 are the two ends of that range. Nitric oxide only works close to the macrophage.' },
   swarm: { kick: 'New ability · W', name: 'Neutrophil swarm', sub: 'Ability', img: () => $('#ic-swarm').src, trick: 'Drops neutrophils on the path to hold pathogens back for a few seconds.',
     beat: 'Press W or tap the icon, then tap the route where pathogens slip through.', bio: 'Neutrophils swarm like insects, signalling each other to gather at an infection.' },
 };
@@ -1033,15 +1035,15 @@ const MEMORY = [
   { id: 'neutro', name: 'Neutrophil', sub: 'Rapid responder', por: ['neutro'], tiers: [
     ['+10% range', () => each('neutro', mul('range', 1.1))], ['+15% damage', () => each('neutro', mul('dmg', 1.15))], ['Shoots 15% faster', () => each('neutro', mul('rate', 1 / 1.15, false))]] },
   { id: 'macro', name: 'Macrophage', sub: 'Big eater', por: ['macro'], tiers: [
-    ['+20% cell health', () => each('macro', mul('hp', 1.2))], ['Cells respawn 3 s faster', () => TOWERS.macro.resp -= 3], ['+25% bite damage', () => each('macro', mul('dmg', 1.25))]] },
+    ['+20% cell health', () => each('macro', mul('hp', 1.2))], ['Fallen cells return 3 s sooner', () => TOWERS.macro.resp -= 3], ['+25% bite damage', () => each('macro', mul('dmg', 1.25))]] },
   { id: 'bcell', name: 'B Cell', sub: 'Antibody factory', por: ['bcell'], tiers: [
     ['+10% range', () => each('bcell', mul('range', 1.1))], ['+20% splash radius', () => each('bcell', mul('splash', 1.2))], ['+15% damage', () => each('bcell', mul('dmg', 1.15))]] },
-  { id: 'killer', name: 'Killer T', sub: 'Assassin', por: ['killer'], tiers: [
+  { id: 'killer', name: 'Killer T', sub: 'Precision killer', por: ['killer'], tiers: [
     ['+15% damage', () => each('killer', mul('dmg', 1.15))], ['+10% range', () => each('killer', mul('range', 1.1))], ['Fires 15% faster', () => each('killer', mul('rate', 1 / 1.15, false))]] },
   { id: 'ab', name: 'Abilities', sub: 'Fever · swarm', por: ['fever', 'swarm'], c: '#8fb0ff', tiers: [
-    ['Fever cooldown −6 s', () => AB.fever.cd -= 6], ['Fever burns 30% hotter', () => AB.fever.dmg = Math.round(AB.fever.dmg * 1.3)], ['Swarm drops 4 neutrophils, not 3', () => AB.swarm.n = 4]] }, // Swarm comes last: it joins at specimen 14
+    ['Fever recharges 6 s sooner', () => AB.fever.cd -= 6], ['Fever burns 30% hotter', () => AB.fever.dmg = Math.round(AB.fever.dmg * 1.3)], ['Swarm drops 4 neutrophils, not 3', () => AB.swarm.n = 4]] }, // Swarm comes last: it joins at specimen 14
   { id: 'hero', name: 'NK Sentinel', sub: 'Hero', por: ['hero'], tiers: [
-    ['Hero starts at level 2', () => HERO.start = 2], ['Hero respawns 5 s faster', () => HERO.resp -= 5], ['Granzyme Burst cooldown −5 s', () => HERO.gz.cd -= 5]] },
+    ['Hero starts at level 2', () => HERO.start = 2], ['Hero returns 5 s sooner', () => HERO.resp -= 5], ['Granzyme Burst recharges 5 s sooner', () => HERO.gz.cd -= 5]] },
 ];
 const LIVE = { TOWERS, SPECS, HERO, AB }, BASE = JSON.parse(JSON.stringify(LIVE)); // functions (SPECS.skd) are not data: JSON drops them and reset skips them
 function resetData(d, s) { for (const k in s) if (s[k] && typeof s[k] === 'object') resetData(d[k], s[k]); else d[k] = s[k]; }
@@ -1118,7 +1120,7 @@ const SPECIMENS = [
   { m: 0, place: 'Dermis', name: 'Day Two', sub: 'Neutrophils came first. Now the big eaters arrive to hold the wound.', gold: 230, mult: 1, hold: 1,
     seed: 274, paths: [[[-40,250],[690,250],[790,280],[830,350],[790,420],[690,450],[520,450],[455,490],[435,560],[435,660]]], slots: [[150,330],[160,160],[420,160],[380,350],[560,350],[700,350],[700,160],[925,350],[630,545],[340,490],[535,590]],
     waves: [[g_('bact', 8, 1.1)], [g_('bact', 12, .8)], [g_('bact', 16, .6)], [g_('bact', 10, .7), g_('bact', 10, .5, 8)], [g_('bact', 20, .5)], [g_('bact', 14, .5), g_('bact', 14, .45, 10)]] },
-  { m: 0, chal: 0, place: 'Dermis', name: 'Breach at the Barrier', sub: 'A golden, armoured bacterium joins the infection.', gold: 260, mult: 1.5, hpk: 0.67,
+  { m: 0, chal: 0, place: 'Dermis', name: 'Breach at the Barrier', sub: 'A golden, coated bacterium joins the infection.', gold: 260, mult: 1.5, hpk: 0.67,
     waves: [[g_('bact', 8, 1.1)], [g_('bact', 12, .8)], [g_('staph', 2, 3)], [g_('bact', 10, .8), g_('staph', 2, 3, 4)], [g_('bact', 16, .55)], [g_('staph', 4, 2.2), g_('bact', 10, .7, 3)],
       [g_('bact', 18, .5), g_('staph', 5, 2, 4)]] },
   { m: 1, place: 'Airways', name: 'A Common Cold', sub: 'A cold virus slips down the airway. Something fast is coming.', gold: 300, mult: 1.6, hpk: 1.0,
@@ -1133,7 +1135,7 @@ const SPECIMENS = [
     waves: [[g_('bact', 8, 1.1, 0, -1)], [g_('virus', 12, .5, 0, -1)], [g_('flu', 5, 1.6, 0, 0)], [g_('staph', 4, 2, 0, 0), g_('staph', 4, 2, 1, 1), g_('bact', 6, 1, 4, -1)],
       [g_('bact', 10, .8, 0, -1), g_('virus', 10, .5, 4, -1)], [g_('flu', 7, 1.4, 0, -1)], [g_('staph', 6, 1.4, 0, -1), g_('bact', 12, .7, 3, -1)],
       [g_('staph', 4, 2.4, 0, -1), g_('flu', 6, 1.3, 5, -1)], [g_('virus', 24, .35, 0, -1)], [g_('staph', 6, 1.4, 0, -1), g_('bact', 12, .6, 4, -1), g_('flu', 6, 1.3, 9, -1)]] },
-  { m: 2, place: 'Aorta', name: 'Into the Current', sub: 'Armoured bacteria ride the blood. Time for an assassin.', gold: 380, mult: 2, hpk: 1.0,
+  { m: 2, place: 'Aorta', name: 'Into the Current', sub: 'Coated bacteria ride the blood. Time for a killer cell.', gold: 380, mult: 2, hpk: 1.0,
     seed: 414, paths: [[[-40,220],[520,220],[650,250],[730,340],[750,450],[750,660]]], slots: [[170,300],[350,300],[505,305],[300,140],[480,140],[680,165],[825,300],[840,460],[645,390],[660,530]],
     waves: [[g_('bact', 12, .9)], [g_('staph', 4, 2)], [g_('staph', 6, 1.6), g_('bact', 10, .8, 4)], [g_('virus', 16, .45)], [g_('staph', 8, 1.3)], [g_('flu', 8, 1), g_('staph', 4, 2, 4)],
       [g_('staph', 10, 1.1), g_('bact', 14, .6, 4), g_('virus', 12, .4, 10)]] },
@@ -1396,10 +1398,10 @@ function paintKind(g, kind, lvl, sz, t) {
     drawEnemyArt(g, kind, t, kind === 'rabies' || kind === 'virion' ? -.6 : 0);
   }
 }
-// challenge badges: a shield for Heroic, an anvil for Iron; amber once won
+// challenge badges: a shield for Acute, an hourglass for Chronic; amber once won
 const CHICON = {
   heroic: '<path d="M12 2.8l7.4 2.9v5.5c0 4.5-3.1 8.1-7.4 10.1-4.3-2-7.4-5.6-7.4-10.1V5.7z"/><path d="M8.6 10.4l3.4 3.1 3.4-3.1"/>',
-  iron: '<path d="M2.5 7h15v2.2c0 1.2 1.2 2 3.5 2v1.3H15l1.2 3.5H18v2.8H6V16h1.8L9 12.5H8C5 12.5 3 10.5 2.5 7z"/>',
+  iron: '<path d="M7.5 3.5h9c0 4-4.5 6-4.5 8.5s4.5 4.5 4.5 8.5h-9c0-4 4.5-6 4.5-8.5S7.5 7.5 7.5 3.5z"/><path d="M5.5 3.5h13M5.5 20.5h13"/>',
 };
 function chBadge(m, big, on) { return `<span class="bdg ${m}${big ? ' big' : ''}${on ? ' on' : ''}"><svg viewBox="0 0 24 24">${CHICON[m]}</svg></span>`; }
 
@@ -1497,7 +1499,7 @@ function startLevel(i, mode = 'campaign') {
   $('#titleOv').hidden = true; $('#endOv').hidden = true; $('#memOv').hidden = true; $('#guideOv').hidden = true;
   $('#specId').textContent = `SPEC-${sn(i)} · ${L.place.toUpperCase()}${M.name ? ' · ' + M.name.toUpperCase() : ''}`; $('#specName').textContent = L.name;
   $('#ab-hero').hidden = !kit.hero; $('#ab-gz').hidden = !kit.gz;
-  for (const k of ['fever', 'swarm']) { $('#ab-' + k).hidden = !kit.ab.includes(k); $('#ab-' + k).classList.toggle('off', mode === 'iron'); $('#ab-' + k).classList.toggle('iron', mode === 'iron'); if (mode === 'iron') $(`#ab-${k} .tip small`).textContent = 'DISABLED · IRON CHALLENGE'; }
+  for (const k of ['fever', 'swarm']) { $('#ab-' + k).hidden = !kit.ab.includes(k); $('#ab-' + k).classList.toggle('off', mode === 'iron'); $('#ab-' + k).classList.toggle('iron', mode === 'iron'); if (mode === 'iron') $(`#ab-${k} .tip small`).textContent = 'DISABLED · CHRONIC CHALLENGE'; }
   $('#wave').nextElementSibling.textContent = mode === 'iron' ? 'RELEASED' : 'WAVE';
   showInfo(null); layoutWaveMarkers(); nextNote(); hintCur = null; bannerCut(); cardClear();
   if (fresh) for (const id of unlockIds(UNLOCK[i])) cardQ(id, 'unlock');
@@ -1916,7 +1918,7 @@ function step(dt) {
         if (p.shred) { e.shred = Math.max(e.shred, Math.min(p.shred.cap, e.shred + p.shred.shred)); e.shredBy = p.src; } // a weaker Degranulator never lowers shred
         const vd = p.src && p.src.spec === 'ctl' && skill(p.src);
         if (vd && p.src.sk <= 0 && !e.dead && !e.D.boss && e.hp < e.max * vd.th) {
-          p.src.sk = vd.cd; S.fx.push({ k: 'verdict', x: e.x, y: e.y, t: 0, T: .6 }); floatText(e.x, e.y - 30, 'Verdict', '#ff7a8f', 1.1); sfx('verdict', e.x); p.src.dealt = (p.src.dealt || 0) + e.hp; kill(e, p.src);
+          p.src.sk = vd.cd; S.fx.push({ k: 'verdict', x: e.x, y: e.y, t: 0, T: .6 }); floatText(e.x, e.y - 30, 'Death signal', '#ff7a8f', 1.1); sfx('verdict', e.x); p.src.dealt = (p.src.dealt || 0) + e.hp; kill(e, p.src);
         }
         if (p.k === 'bolt') {
           for (let i = 0; i < 5; i++) S.parts.push({ x: p.lx, y: p.ly, vx: rand(-60, 60), vy: rand(-60, 60), life: .3, max: .3, c: '#ff7fb0', r: 2 });
@@ -1936,7 +1938,7 @@ function step(dt) {
     f.t += dt;
     if (f.k === 'fever' && !f.hit && f.t >= .4) {
       f.hit = true; S.shake = Math.max(S.shake, 8); sfx('fever', f.x);
-      for (const e of S.enemies) if (!e.dead && Math.hypot(e.x - f.x, e.y - f.y) < 90) { damage(e, AB.fever.dmg * LVLMULT[S.lvl], 'magic'); e.slowF = .6; e.slowT = 2.5; e.revealT = 6; }
+      for (const e of S.enemies) if (!e.dead && Math.hypot(e.x - f.x, e.y - f.y) < 90) { damage(e, AB.fever.dmg * LVLMULT[S.lvl], 'true'); e.slowF = .6; e.slowT = 2.5; e.revealT = 6; }
       S.fx.push({ k: 'reveal', x: f.x, y: f.y, r: 90, t: 0, T: 6 });
       for (let i = 0; i < 40; i++) { const a = rand(0, TAU), v = rand(40, 200); S.parts.push({ x: f.x, y: f.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, life: rand(.4, .9), max: .9, c: i % 3 ? '#f59a3c' : '#ffe08a', r: rand(2, 4.5) }); }
     }
@@ -2409,7 +2411,7 @@ function towerStats(type, L, N) {
   const dm = X => X && (X.burst ? X.dmg + '×' + X.burst : X.dmg);
   const hz = X => X && (X.burst ? X.burst / (X.rate + .09 * (X.burst - 1)) : 1 / X.rate).toFixed(1) + '/s'; // hits per second
   if (type === 'macro') return sv('CELLS', L.units, N && N.units) + sv('HEALTH', L.hp, N && N.hp) + sv('BITE', L.dmg, N && N.dmg);
-  return sv('DMG', dm(L), dm(N)) + sv('RATE', hz(L), hz(N)) + sv('RANGE', L.range, N && N.range);
+  return sv('DMG', dm(L), dm(N)) + sv('RATE', hz(L), hz(N)) + sv('REACH', L.range, N && N.range);
 }
 function skillHtml(P, rank, next) {
   const r = next ? rank + 1 : Math.max(1, rank), pips = [1, 2].map(i => `<i class="${i <= (next ? r : rank) ? 'on' : ''}"></i>`).join('');
@@ -2422,7 +2424,7 @@ function showInfo(o) {
   if (!o) { el.hidden = true; infoKey = ''; return; }
   let html = '';
   if (o.kind === 'slot') html = `<div class="meta"><small>Empty site</small><b>Grow a cell here</b><span>${lastPT === 'touch' ? 'Tap a choice to preview it, tap again to grow.' : 'Hover a choice to preview its reach.'}</span></div>`;
-  else if (o.kind === 'speclock') html = `<div class="meta"><small>Specialists · locked</small><b>Unlock at Specimen ${sn(unlockAt('spec-' + o.type))}</b><span>Reach Specimen ${sn(unlockAt('spec-' + o.type))} and a level 3 ${TOWERS[o.type].name} can train into one of two tier IV forms.</span></div>`;
+  else if (o.kind === 'speclock') html = `<div class="meta"><small>Specialists · locked</small><b>Unlock at Specimen ${sn(unlockAt('spec-' + o.type))}</b><span>Reach Specimen ${sn(unlockAt('spec-' + o.type))} and a level 3 ${TOWERS[o.type].name} can specialize into one of two forms.</span></div>`;
   else if (o.kind === 'recycle') html = `<div class="meta"><small>Recycle</small><b>Break down this cell</b><span>Returns ${refund(o.t)} ATP, 60% of what you spent.</span></div>`;
   else if (o.kind === 'spec' || (o.kind === 'tower' && o.t.spec)) {
     const id = o.id || o.t.spec, P = SPECS[id], cur = o.kind === 'spec';
@@ -2436,14 +2438,14 @@ function showInfo(o) {
       <div class="sv">${towerStats(type, T.lv[lvl], nl != null ? T.lv[nl] : null)}</div><div class="perk ${show >= T.perkLv ? 'on' : ''}">${T.perk}${o.kind === 'tower' && lvl === 2 ? '<br><span class="skn">Max level · choose a specialization</span>' : ''}</div>`;
   } else if (o.kind === 'hero') {
     const h = S.hero, L = heroLv(h.lvl), N = h.lvl < 5 && heroLv(h.lvl + 1), need = HERO.xp[h.lvl - 1], G = HERO.gz;
-    html = `<div class="por"><img src="${portrait('hero')}"></div><div class="meta"><small>Hero · Natural Killer cell</small><b>${HERO.name}</b><span class="xp">${h.dead ? `Respawning in ${Math.ceil(h.resp)} s` : need ? `Level ${h.lvl} · ${h.xp} / ${need} XP` : `Level ${h.lvl} · max`}</span><div class="pips">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= h.lvl ? 'on' : ''}"></i>`).join('')}</div></div>
+    html = `<div class="por"><img src="${portrait('hero')}"></div><div class="meta"><small>Hero · Natural Killer cell</small><b>${HERO.name}</b><span class="xp">${h.dead ? `Back in ${Math.ceil(h.resp)} s` : need ? `Level ${h.lvl} · ${h.xp} / ${need} XP` : `Level ${h.lvl} · max`}</span><div class="pips">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= h.lvl ? 'on' : ''}"></i>`).join('')}</div></div>
       <div class="sv g2">${sv('HEALTH', `${Math.ceil(Math.max(0, h.hp))}<i>/${h.max}</i>`)}${sv('DMG', L.dmg, N && N.dmg)}${sv('REGEN', L.regen + '/s', N && N.regen + '/s')}${sv('KILLS', h.kills)}</div>
       <div class="perk wide">Holds one pathogen and stings flyers too. Tap or click near the path to send it.${S.kit.gz ? `<div class="skt"><span class="skn">★ Granzyme Burst · E</span><span class="skd"><br>${Math.round(L.dmg * G.k)} damage and a ${G.stun} s stun to everything within ${G.r}. Every ${G.cd} s.</span></div>` : ''}</div>`; // Granzyme joins at specimen 05
   } else if (o.kind === 'enemy') {
     const D = ENEMIES[o.type], e = o.e;
     const hp = e ? Math.ceil(Math.max(0, e.hp)) : Math.round(D.hp * LVLMULT[S.lvl || 0] * S.M.hp * (1 + Math.max(0, S.wave - 1) * .045));
     html = `<div class="por"><img src="${portrait(o.type)}"></div><div class="meta"><small>${D.kind}${D.flying ? ' · flying' : ''}</small><b>${D.name}</b><span>${D.desc}</span></div>
-      <div class="sv">${sv('HP', e ? `${hp}<i>/${Math.round(e.max)}</i>` : hp)}${sv('ARMOR', Math.round(Math.max(0, D.armor - (e ? e.shred : 0)) * 100) + '%')}${sv('RESIST', Math.round(D.mr * 100) + '%', null, 'opt')}${sv('LEAK', '−' + D.lives, null, 'opt')}</div>`;
+      <div class="sv">${sv('HEALTH', e ? `${hp}<i>/${Math.round(e.max)}</i>` : hp)}${sv('COAT', Math.round(Math.max(0, D.armor - (e ? e.shred : 0)) * 100) + '%')}${sv('TOUGH', Math.round(D.mr * 100) + '%')}${sv('BREACH', '−' + D.lives, null, 'opt')}</div>`;
   }
   if (html !== infoKey) { el.innerHTML = html; infoKey = html; }
   el.hidden = false;
@@ -2604,7 +2606,7 @@ function endLevel(win) {
       ${win && ch ? `<div class="bigbadge">${chBadge(S.mode, true, true)}<span>${first ? '+1 ★ for Immune Memory' : 'Already won · no new star'}</span></div>` : ''}
       ${win && !ch ? `<div class="bigstars">${[0, 1, 2].map(i => `<span class="${i < stars ? 'on' : ''}" style="animation-delay:${.15 + i * .2}s">★</span>`).join('')}</div>` : ''}</div>
       ${win && !ch && stars < 3 ? `<div class="srule">★★★ at ${STAR3}+ vitality${stars < 2 ? ` · ★★ at ${STAR2}+` : ''}</div>` : ''}
-      <div class="rows">${ch ? `<div><span>Mode</span><b>${ch}${S.mode === 'iron' ? ' · ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ' · elite waves'}</b></div>` : ''}<div><span>Vitality remaining</span><b>${S.lives} / ${S.mode === 'heroic' ? 3 : ch ? 1 : 20}</b></div><div><span>Waves survived</span><b>${win ? S.wave : Math.max(0, S.wave - 1)} / ${S.waves.length}</b></div><div><span>Pathogens neutralised</span><b>${S.kills}</b></div>${breaches()}</div>
+      <div class="rows">${ch ? `<div><span>Mode</span><b>${ch}${S.mode === 'iron' ? ' · ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ' · fierce waves'}</b></div>` : ''}<div><span>Vitality remaining</span><b>${S.lives} / ${S.mode === 'heroic' ? 3 : ch ? 1 : 20}</b></div><div><span>Waves survived</span><b>${win ? S.wave : Math.max(0, S.wave - 1)} / ${S.waves.length}</b></div><div><span>Pathogens neutralised</span><b>${S.kills}</b></div>${breaches()}</div>
       <p class="fact"><em>FIELD NOTE</em>${S.note || NOTES[0]}</p>
       <button class="mlink" id="eMem"><i class="mdot"></i><span>IMMUNE MEMORY</span><b>★ ${memStars().avail} to spend</b></button>
       <div class="btns"><button class="btn" id="eMap">Specimen tray</button><button class="btn ${nxt ? '' : 'pri'}" id="eRetry">${win ? 'Replay' : 'Try again'}</button>${nxt ? '<button class="btn pri" id="eNext">Next specimen</button>' : ''}</div>`;
@@ -2804,7 +2806,7 @@ const gNew = id => gOpen(id) && !save.viewed.includes(id);
 const gName = id => (TOWERS[id] || SPECS[id] || ENEMIES[id] || HERO).name;
 const gKind = id => ENEMIES[id] ? ENEMIES[id].kind + (ENEMIES[id].flying ? ' · flying' : '') : id === 'hero' ? 'Hero · Natural killer cell'
   : SPECS[id] ? `${SPECS[id].role} · ${TOWERS[SPECS[id].base].name}` : `${TOWERS[id].role} · ${TOWERS[id].kind}`;
-const gRole = id => ENEMIES[id] ? ENEMIES[id].kind.split(' · ')[0] : id === 'hero' ? 'Hero' : (TOWERS[id] || SPECS[id]).role.replace('Tier IV · ', '').split(' · ')[0];
+const gRole = id => ENEMIES[id] ? ENEMIES[id].kind.split(' · ')[0] : id === 'hero' ? 'Hero' : (TOWERS[id] || SPECS[id]).role.replace('Specialist · ', '').split(' · ')[0];
 let gFrom = 'title', gTab = 'cells', gSel = 'neutro';
 function guideDots() {
   const any = tab => GUIDE[tab].some(gNew);
@@ -2831,12 +2833,12 @@ function guideRows(id) {
   const E = ENEMIES[id];
   if (E) return [['Base health', `${band(E.hp, [35, 80, 200, 600], ['Fragile', 'Weak', 'Sturdy', 'Tough', 'Colossal'])} · ${E.hp}`],
     ['Speed', band(E.speed, [20, 30, 45, 58], ['Crawls', 'Slow', 'Steady', 'Fast', 'Very fast']) + (E.flying ? ' · flies' : '')],
-    ['Armor · blunts physical', guard(E.armor)], ['Resistance · blunts magic', guard(E.mr)], ['If it breaks through', `−${E.lives} vitality`]];
-  if (id === 'hero') { const a = HERO.lv[0], z = HERO.lv[4]; return [['Base health', `${a.hp} → ${z.hp}`], ['Base damage', `${a.dmg} → ${z.dmg} · physical`], ['Regeneration', `${a.regen} → ${z.regen} per s`], ['Reach', `Short · ${HERO.range}`], ['Back after falling', `${HERO.resp} s`]]; }
+    ['Coat · blunts granules, bites and antibodies', guard(E.armor)], ['Toughness · blunts Killer T cells and Granzyme Burst', guard(E.mr)], ['If it breaks through', `−${E.lives} vitality`]];
+  if (id === 'hero') { const a = HERO.lv[0], z = HERO.lv[4]; return [['Base health', `${a.hp} → ${z.hp}`], ['Base damage', `${a.dmg} → ${z.dmg} · granule strike`], ['Regeneration', `${a.regen} → ${z.regen} per s`], ['Reach', `Short · ${HERO.range}`], ['Back after falling', `${HERO.resp} s`]]; }
   const P = SPECS[id], T = TOWERS[P ? P.base : id], a = P ? P.st : T.lv[0], z = P ? a : T.lv[2], span = k => a[k] !== z[k] ? `${a[k]} → ${z[k]}` : a[k];
   const cost = ['Cost', P ? `${P.cost} ATP to specialize` : `${a.cost} ATP`];
-  if (T === TOWERS.macro) return [['Cells', span('units') + ' blockers'], ['Health per cell', span('hp')], ['Bite', span('dmg') + ' · physical'], ['Back after falling', `${TOWERS.macro.resp} s`], cost];
-  return [['Damage', `${a.burst ? a.dmg + ' ×' + a.burst : span('dmg')} · ${T.dtype === 'magic' ? 'magic, ignores armor' : 'physical'}`],
+  if (T === TOWERS.macro) return [['Cells', span('units') + ' blockers'], ['Health per cell', span('hp')], ['Bite', span('dmg')], ['Back after falling', `${TOWERS.macro.resp} s`], cost];
+  return [['Damage', `${a.burst ? a.dmg + ' ×' + a.burst : span('dmg')} · ${T.dtype === 'magic' ? 'perforin, pierces coats' : T === TOWERS.bcell ? 'antibodies' : 'granules'}`],
     ['Attack speed', `${band(hz(z), [1, 2], ['Slow', 'Steady', 'Fast'])} · ${a === z ? hz(a).toFixed(1) : hz(a).toFixed(1) + ' → ' + hz(z).toFixed(1)} per s`],
     ['Reach', `${band(z.range, [150, 170], ['Short', 'Medium', 'Long'])} · ${span('range')}`], ['Targets', T === TOWERS.bcell ? 'Ground only · splash' : 'Ground and air'], cost];
 }
