@@ -37,6 +37,7 @@ module.exports = async function touch(browser, out, errs) {
     // every visible target of these selectors at least 40 px both ways (touch only; the mouse layout is unchanged)
     const sizes = async (sel, what) => {
       if (!V.touch) return;
+      await p.evaluate(() => Promise.all(document.getAnimations().filter(a => a.effect.getTiming().iterations !== Infinity).map(a => a.finished.catch(() => {})))); // measure the settled size, not a pop-in frame (slow CI caught 38 of 44 px)
       const small = await p.evaluate(sel => [...document.querySelectorAll(sel)].map(e => [e, e.getBoundingClientRect()]).filter(([e, r]) => r.width && getComputedStyle(e).visibility !== 'hidden')
         .filter(([, r]) => r.width < 40 || r.height < 40).map(([e, r]) => `${e.id || e.className.baseVal || e.className}:${r.width | 0}x${r.height | 0}`), sel);
       fail(!small.length, `${what} targets under 40 px: ${small.slice(0, 6).join(', ')}`);
