@@ -29,7 +29,10 @@ module.exports = async function touch(browser, out, errs) {
       await p.waitForTimeout(100);
     }
     const safe = V.notch ? { l: 47, r: V.w - 47, t: 0, b: V.h - 21 } : { l: 0, r: V.w, t: 0, b: V.h };
-    const tap = async (x, y) => { if (V.touch) await p.touchscreen.tap(x, y); else await p.mouse.click(x, y); await p.waitForTimeout(120); };
+    // after any input, wait for the short fades and pop-ins it started (under 1 s; not endless pulses, not the 2.6 s description flash),
+    // so checks see the settled screen on a slow CI runner too
+    const settle = () => p.evaluate(() => Promise.all(document.getAnimations().filter(a => { const t = a.effect.getTiming(); return t.iterations !== Infinity && (+t.duration || 0) + (+t.delay || 0) <= 1000; }).map(a => a.finished.catch(() => {}))));
+    const tap = async (x, y) => { if (V.touch) await p.touchscreen.tap(x, y); else await p.mouse.click(x, y); await p.waitForTimeout(120); await settle(); };
     const mid = s => p.evaluate(s => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }, s);
     const tapSel = async s => { await p.evaluate(s => { const e = document.querySelector(s); if (e && e.closest('.ov')) e.scrollIntoView({ block: 'nearest' }); }, s); const m = await mid(s); fail(m, `missing ${s}`); if (m) await tap(...m); }; // overlays scroll on a phone
     const onMap = (x, y) => p.evaluate(([x, y]) => { const r = document.getElementById('cv').getBoundingClientRect(); return [r.left + x / 1000 * r.width, r.top + y / 620 * r.height]; }, [x, y]);
@@ -37,7 +40,7 @@ module.exports = async function touch(browser, out, errs) {
     // every visible target of these selectors at least 40 px both ways (touch only; the mouse layout is unchanged)
     const sizes = async (sel, what) => {
       if (!V.touch) return;
-      await p.evaluate(() => Promise.all(document.getAnimations().filter(a => a.effect.getTiming().iterations !== Infinity).map(a => a.finished.catch(() => {})))); // measure the settled size, not a pop-in frame (slow CI caught 38 of 44 px)
+      await settle(); // measure the settled size, not a pop-in frame (slow CI caught 38 of 44 px)
       const small = await p.evaluate(sel => [...document.querySelectorAll(sel)].map(e => [e, e.getBoundingClientRect()]).filter(([e, r]) => r.width && getComputedStyle(e).visibility !== 'hidden')
         .filter(([, r]) => r.width < 40 || r.height < 40).map(([e, r]) => `${e.id || e.className.baseVal || e.className}:${r.width | 0}x${r.height | 0}`), sel);
       fail(!small.length, `${what} targets under 40 px: ${small.slice(0, 6).join(', ')}`);
