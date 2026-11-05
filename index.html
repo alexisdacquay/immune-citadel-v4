@@ -427,7 +427,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 <body>
 <div id="safe"></div>
 <div id="rotate" hidden><div class="glass"><svg viewBox="0 0 96 96"><circle cx="48" cy="48" r="44" fill="rgba(91,140,255,.08)" stroke="rgba(140,205,255,.25)" stroke-dasharray="3 5"/><g class="ph"><rect x="31" y="14" width="34" height="68" rx="7" fill="rgba(9,16,26,.9)" stroke="#7fd8ff" stroke-width="2"/><circle cx="48" cy="44" r="9" fill="rgba(127,216,255,.18)" stroke="#7fd8ff" stroke-width="1.5"/><circle cx="46" cy="43" r="3.4" fill="#5b8cff"/><path d="M42 75h12" stroke="#7fd8ff" stroke-width="2" stroke-linecap="round"/></g></svg>
-  <small>FIELD OF VIEW</small><b>Turn your device</b><p>The specimen slide is wide. Hold the phone sideways; the game waits, paused.</p></div></div>
+  <small>FIELD OF VIEW</small><b>Turn your device</b><p>The game is wide. Hold the phone sideways; it waits, paused.</p></div></div>
 <div id="stage">
   <canvas id="cv"></canvas>
   <div id="wcalls"></div>
@@ -441,9 +441,9 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
     <button class="ib" id="speedBtn" title="Speed (F)">1×</button>
     <button class="ib" id="pauseBtn" title="Pause (Space)"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button>
     <button class="ib" id="muteBtn" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="sw" d="M16 9c1.5 1.5 1.5 4.5 0 6"/><path class="sw sw2" d="M18.5 6.5c3 3 3 8 0 11"/><path class="sx" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button>
-    <button class="ib" id="restartBtn" title="Restart specimen"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/></svg></button>
+    <button class="ib" id="restartBtn" title="Restart level"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/></svg></button>
     <button class="ib" id="hudGuide" title="Field guide (G)"><svg viewBox="0 0 24 24"><path d="M4 5.5c3-1.2 5.8-1 8 1 2.2-2 5-2.2 8-1v13c-3-1.2-5.8-1-8 1-2.2-2-5-2.2-8-1z"/><path d="M12 6.5v13"/></svg><em class="ndot" hidden></em></button>
-    <button class="ib" id="mapBtn" title="Specimen tray"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="1.5"/><path d="M8 7v10"/></svg></button>
+    <button class="ib" id="mapBtn" title="Levels"><svg viewBox="0 0 24 24"><circle cx="12" cy="4.6" r="2.3"/><path d="M8.2 21v-6.5H6.5V9.8c0-1.3 1-2.3 2.3-2.3h6.4c1.3 0 2.3 1 2.3 2.3v4.7h-1.7V21z"/><path d="M12 14.5V21"/></svg></button>
   </div>
   <div id="hudBL" class="ui">
     <button class="ab" id="ab-hero"><i class="hp"></i><img id="ic-hero" alt="NK Sentinel"><div class="cd"></div><span class="lv">1</span><kbd>H</kbd><div class="tip"><small>HERO · NATURAL KILLER CELL</small><b>NK Sentinel</b>Select it (H), then tap or click near the path to send it there. Tap it again, right-click or Esc cancels.</div></button>
@@ -452,7 +452,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
     <button class="ab" id="ab-gz"><img id="ic-gz" alt="Granzyme"><div class="cd"></div><kbd>E</kbd><div class="tip"><small>HERO SKILL · 20 s</small><b>Granzyme Burst</b>The NK Sentinel sprays granzyme, damaging and stunning every pathogen around it.</div></button>
   </div>
   <div id="info" class="ui glass" hidden></div>
-  <div id="spec" class="ui"><span id="specId">SPEC-01 · DERMIS</span><b id="specName">The Splinter</b><span class="bar"><i></i>50 µm · ×400</span></div>
+  <div id="spec" class="ui"><span id="specId">LEVEL 1 · SKIN</span><b id="specName">The Splinter</b><span class="bar"><i></i>50 µm · ×400</span></div>
   <div id="topc"><div id="boss" class="glass" hidden><img alt=""><div><small>Boss <span></span></small><b></b><div class="bar"><i></i></div></div></div><div id="banner"></div></div>
   <div id="pausePill" class="ui glass" hidden>PAUSED <small>space to resume</small><button class="btn" id="pauseGuide">FIELD GUIDE · G</button></div>
   <div id="hintRing" hidden></div>
@@ -471,12 +471,12 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 
   <div class="ov" id="titleOv">
     <div class="tin">
-      <div class="kick"><span class="kx">IMMUNOFLUORESCENCE FIELD STUDY · </span>18 SPECIMENS · <span id="starN"></span></div>
+      <div class="kick"><span class="kx">IMMUNOFLUORESCENCE FIELD STUDY · </span>18 LEVELS · <span id="starN"></span></div>
       <div class="tbtns"><button class="mbtn" id="guideBtn"><svg viewBox="0 0 24 24"><path d="M4 5.5c3-1.2 5.8-1 8 1 2.2-2 5-2.2 8-1v13c-3-1.2-5.8-1-8 1-2.2-2-5-2.2-8-1z"/><path d="M12 6.5v13"/></svg>FIELD GUIDE<em class="ndot" hidden></em></button>
       <button class="mbtn" id="memBtn"><i></i>IMMUNE MEMORY <b id="memBtnN"></b></button></div>
       <div class="hd"><h1>IMMUNE<br><span>CITADEL</span></h1>
       <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p><div class="mbtn seg" id="diffSeg" role="radiogroup" aria-label="Difficulty"><button data-d="easy" role="radio">EASY</button><button data-d="normal" role="radio">NORMAL</button><button data-d="hard" role="radio">HARD</button></div><button class="mbtn" id="sndBtn" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="sw" d="M16 9c1.5 1.5 1.5 4.5 0 6"/><path class="sw sw2" d="M18.5 6.5c3 3 3 8 0 11"/><path class="sx" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button><button class="mbtn" id="cloudBtn" title="Cloud save" aria-label="Cloud save" hidden><svg viewBox="0 0 24 24"><path d="M7 18.5h10.5a4 4 0 0 0 .4-8 6 6 0 0 0-11.6-1A4.6 4.6 0 0 0 7 18.5z"/></svg></button></div>
-      <div class="pager" id="pager" role="group" aria-label="Specimen pages"></div><div class="slides" id="slides"></div>
+      <div class="pager" id="pager" role="group" aria-label="Level pages"></div><div class="slides" id="slides"></div>
       <div class="keys"><span><b>Click a ring</b> grow a cell</span><span><b>Click a cell</b> upgrade / recycle</span><span><b>Red marker</b> call the next wave</span><span id="keyAb"><b>Q W</b> abilities</span><span id="keyHero"><b>H E</b> hero · burst</span><span><b>Space</b> pause</span><span><b>F</b> speed</span></div>
     </div>
   </div>
@@ -486,7 +486,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
   <div class="ov" id="memOv" hidden>
     <div class="tin mem">
       <div class="mhd"><div><div class="kick">LINEAGE ARCHIVE · PERMANENT TRAINING</div><h1>IMMUNE <span>MEMORY</span></h1>
-        <p class="lede">Every star trains a cell lineage for good: 3 per specimen, plus 1 each for the Acute and Chronic challenges of the six full maps. 66 stars train every lineage. Each lineage trains its tiers in order; training applies when a specimen starts.</p></div>
+        <p class="lede">Every star trains a cell lineage for good: 3 per level, plus 1 each for the Acute and Chronic challenges of the six full maps. 66 stars train every lineage. Each lineage trains its tiers in order; training applies when a specimen starts.</p></div>
         <div class="bank glass"><b id="memAvail">0</b><small>STARS TO SPEND</small></div></div>
       <div class="mroot"><i class="mdot"></i><label>STEM CELL</label><svg id="memTree" viewBox="0 0 600 44" preserveAspectRatio="none"></svg></div>
       <div class="mgrid" id="memGrid"></div>
@@ -499,7 +499,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
         <div class="gtabs glass"><button class="gtab" data-tab="cells">Immune cells <b></b><em class="ndot" hidden></em></button><button class="gtab" data-tab="path">Pathogens <b></b><em class="ndot" hidden></em></button></div></div>
       <div class="gbody"><div class="ggrid" id="gGrid"></div>
         <div class="gcard glass"><div class="gplate"><span class="lab" id="gLab"></span><div class="gfield"><canvas id="gCv"></canvas></div></div><div class="gtext" id="gText"></div></div></div>
-      <div class="mfoot"><span class="gfoot">Cells are catalogued once you can grow them, pathogens once they enter a specimen.</span><button class="btn pri" id="gBack">Back</button></div>
+      <div class="mfoot"><span class="gfoot">Cells are catalogued once you can grow them, pathogens once you meet them in a level.</span><button class="btn pri" id="gBack">Back</button></div>
     </div>
   </div>
 </div>
@@ -818,7 +818,7 @@ const SPECS = {
     skd: r => `Every ${r.cd} s rains ${r.n} antibody clouds of ${r.dmg} damage on pathogens in range.` },
   memory: { base: 'bcell', name: 'Memory B Cell', role: 'Specialist · Learner', kind: 'Splash · remembers kills', cost: 240,
     st: { dmg: 75, rate: 1.2, range: 200, splash: 64, mem: .08, memCap: 1.2 }, tag: ['MEMORY', '+8%/kill'],
-    perk: 'Each kill of a pathogen type adds +8% damage against that type for the rest of the specimen (max +120%).',
+    perk: 'Each kill of a pathogen type adds +8% damage against that type for the rest of the level (max +120%).',
     skn: 'Recall', sk: [{ cost: 110, cd: 10, dmg: 400 }, { cost: 140, cd: 7, dmg: 600 }],
     skd: r => `Every ${r.cd} s strikes the toughest pathogen in range for ${r.dmg}, ignoring its coat and toughness.` },
   ctl: { base: 'killer', name: 'Effector CTL', role: 'Specialist · Repeat killer', kind: 'Perforin · pierces coats', cost: 275,
@@ -979,10 +979,10 @@ const INTRO = {
     beat: 'Build it where coated Staph walks past. One upgraded Killer T does more against a coat than three Neutrophils.', bio: 'Killer T cells check an ID card, MHC-I, on every cell they touch, and destroy the ones that look wrong.',
     real: 'Real Killer T cells kill your infected body cells by touch, not bacteria from afar. Neutrophils and antibodies fight Staph.' },
   'spec-killer': { kick: 'New · Specialists', name: 'Killer T specialists', sub: 'Specialist forms', img: () => portrait('ctl', 0, 152), trick: 'A level 3 Killer T Cell can now specialize into one of two forms: the Effector CTL or the Th1 Helper. Each has a signature skill.',
-    beat: 'Select a level 3 Killer T and pick a form. The other cell lines get theirs in later specimens.', bio: 'In lymph nodes, T cells meet their target and turn into specialists.',
+    beat: 'Select a level 3 Killer T and pick a form. The other cell lines get theirs in later levels.', bio: 'In lymph nodes, T cells meet their target and turn into specialists.',
     real: 'Th1 Helpers are a different kind of T cell (CD4), not trained Killer T cells. The game puts both in one line. Real Th1 helpers kill nothing: their cytokines mostly fire up macrophages and Killer T cells.' },
   'spec-bcell': { kick: 'New · Specialists', name: 'B Cell specialists', sub: 'Specialist forms', img: () => portrait('plasma', 0, 152), trick: 'A level 3 B Cell can now become a Plasma Cell (antibody barrage) or a Memory B Cell (learns each pathogen it kills).',
-    beat: 'Plasma Cells win against crowds; Memory B Cells grow stronger the longer a specimen lasts.', bio: 'Memory B cells can stay in your body for decades. They are why a second infection, or a vaccine, is beaten so fast.',
+    beat: 'Plasma Cells win against crowds; Memory B Cells grow stronger the longer a level lasts.', bio: 'Memory B cells can stay in your body for decades. They are why a second infection, or a vaccine, is beaten so fast.',
     real: 'Real memory B cells do not grow stronger during one infection; they make the next one faster to beat.' },
   'spec-neutro': { kick: 'New · Specialists', name: 'Neutrophil specialists', sub: 'Specialist forms', img: () => portrait('net', 0, 152), trick: 'A level 3 Neutrophil can now become a NET Trapper (sticky nets that slow) or a Degranulator (bleach bursts that wear down coats).',
     beat: 'A NET Trapper at a bend slows a whole crowd under your other cells.', bio: 'Neutrophils can burst on purpose and cast nets of their own DNA to trap bacteria and fungi.',
@@ -1497,7 +1497,7 @@ function startLevel(i, mode = 'campaign') {
   });
   S.hero = kit.hero ? mkHero() : null; bgCache = null; hudInert(false); closeRadial(); lastHud = '';
   $('#titleOv').hidden = true; $('#endOv').hidden = true; $('#memOv').hidden = true; $('#guideOv').hidden = true;
-  $('#specId').textContent = `SPEC-${sn(i)} · ${L.place.toUpperCase()}${M.name ? ' · ' + M.name.toUpperCase() : ''}`; $('#specName').textContent = L.name;
+  $('#specId').textContent = `LEVEL ${i + 1} · ${L.place.toUpperCase()}${M.name ? ' · ' + M.name.toUpperCase() : ''}`; $('#specName').textContent = L.name;
   $('#ab-hero').hidden = !kit.hero; $('#ab-gz').hidden = !kit.gz;
   for (const k of ['fever', 'swarm']) { $('#ab-' + k).hidden = !kit.ab.includes(k); $('#ab-' + k).classList.toggle('off', mode === 'iron'); $('#ab-' + k).classList.toggle('iron', mode === 'iron'); if (mode === 'iron') $(`#ab-${k} .tip small`).textContent = 'DISABLED · CHRONIC CHALLENGE'; }
   $('#wave').nextElementSibling.textContent = mode === 'iron' ? 'RELEASED' : 'WAVE';
@@ -1505,8 +1505,8 @@ function startLevel(i, mode = 'campaign') {
   if (fresh) for (const id of unlockIds(UNLOCK[i])) cardQ(id, 'unlock');
   const due = booted && mode === 'campaign' && Array.isArray(save.owe) ? save.owe.filter(id => kit.ab.includes(id)) : []; // migrated players meet what they skipped
   if (due.length) { due.forEach(id => cardQ(id, 'unlock')); save.owe = save.owe.filter(id => !due.includes(id)); persist(); }
-  cardThen(() => banner(M.name ? `${chBadge(mode, true)}<div><small>${M.name} challenge · Specimen ${sn(i)}</small><b>${L.name}</b><p>${M.rule}${mode === 'iron' ? ': ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ''}.</p></div>`
-    : `<div><small>Specimen ${sn(i)} · ${L.place}</small><b>${L.name}</b><p>${L.sub}</p></div>`, M.name ? 6000 : 4200, 'intro'));
+  cardThen(() => banner(M.name ? `${chBadge(mode, true)}<div><small>${M.name} challenge · Level ${i + 1}</small><b>${L.name}</b><p>${M.rule}${mode === 'iron' ? ': ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ''}.</p></div>`
+    : `<div><small>Level ${i + 1} · ${L.place}</small><b>${L.name}</b><p>${L.sub}</p></div>`, M.name ? 6000 : 4200, 'intro'));
 }
 
 // ============================================================ waves
@@ -2424,7 +2424,7 @@ function showInfo(o) {
   if (!o) { el.hidden = true; infoKey = ''; return; }
   let html = '';
   if (o.kind === 'slot') html = `<div class="meta"><small>Empty site</small><b>Grow a cell here</b><span>${lastPT === 'touch' ? 'Tap a choice to preview it, tap again to grow.' : 'Hover a choice to preview its reach.'}</span></div>`;
-  else if (o.kind === 'speclock') html = `<div class="meta"><small>Specialists · locked</small><b>Unlock at Specimen ${sn(unlockAt('spec-' + o.type))}</b><span>Reach Specimen ${sn(unlockAt('spec-' + o.type))} and a level 3 ${TOWERS[o.type].name} can specialize into one of two forms.</span></div>`;
+  else if (o.kind === 'speclock') html = `<div class="meta"><small>Specialists · locked</small><b>Unlock at Level ${unlockAt('spec-' + o.type) + 1}</b><span>From Level ${unlockAt('spec-' + o.type) + 1}, a fully upgraded ${TOWERS[o.type].name} can specialize into one of two forms.</span></div>`;
   else if (o.kind === 'recycle') html = `<div class="meta"><small>Recycle</small><b>Break down this cell</b><span>Returns ${refund(o.t)} ATP, 60% of what you spent.</span></div>`;
   else if (o.kind === 'spec' || (o.kind === 'tower' && o.t.spec)) {
     const id = o.id || o.t.spec, P = SPECS[id], cur = o.kind === 'spec';
@@ -2601,15 +2601,15 @@ function endLevel(win) {
   setTimeout(() => {
     if (S.run !== run) return;
     const nxt = win && !ch && S.lvl < LEVELS.length - 1;
-    $('#rep').innerHTML = `<div class="kick"><span>LAB REPORT${ch ? ' · ' + ch.toUpperCase() : ''}</span><span>SPEC-${sn(S.lvl)} · ${S.L.place.toUpperCase()}</span></div>
-      <div class="rhd"><h2 class="${win ? 'win' : 'lose'}">${win ? (ch ? `${ch} challenge won` : 'Specimen cleared') : 'Host overrun'}</h2>
+    $('#rep').innerHTML = `<div class="kick"><span>LAB REPORT${ch ? ' · ' + ch.toUpperCase() : ''}</span><span>LEVEL ${S.lvl + 1} · ${S.L.place.toUpperCase()}</span></div>
+      <div class="rhd"><h2 class="${win ? 'win' : 'lose'}">${win ? (ch ? `${ch} challenge won` : 'Level cleared') : 'Host overrun'}</h2>
       ${win && ch ? `<div class="bigbadge">${chBadge(S.mode, true, true)}<span>${first ? '+1 ★ for Immune Memory' : 'Already won · no new star'}</span></div>` : ''}
       ${win && !ch ? `<div class="bigstars">${[0, 1, 2].map(i => `<span class="${i < stars ? 'on' : ''}" style="animation-delay:${.15 + i * .2}s">★</span>`).join('')}</div>` : ''}</div>
       ${win && !ch && stars < 3 ? `<div class="srule">★★★ at ${STAR3}+ vitality${stars < 2 ? ` · ★★ at ${STAR2}+` : ''}</div>` : ''}
       <div class="rows">${ch ? `<div><span>Mode</span><b>${ch}${S.mode === 'iron' ? ' · ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ' · fierce waves'}</b></div>` : ''}<div><span>Vitality remaining</span><b>${S.lives} / ${S.mode === 'heroic' ? 3 : ch ? 1 : 20}</b></div><div><span>Waves survived</span><b>${win ? S.wave : Math.max(0, S.wave - 1)} / ${S.waves.length}</b></div><div><span>Pathogens neutralised</span><b>${S.kills}</b></div>${breaches()}</div>
       <p class="fact"><em>FIELD NOTE</em>${S.note || NOTES[0]}</p>
       <button class="mlink" id="eMem"><i class="mdot"></i><span>IMMUNE MEMORY</span><b>★ ${memStars().avail} to spend</b></button>
-      <div class="btns"><button class="btn" id="eMap">Specimen tray</button><button class="btn ${nxt ? '' : 'pri'}" id="eRetry">${win ? 'Replay' : 'Try again'}</button>${nxt ? '<button class="btn pri" id="eNext">Next specimen</button>' : ''}</div>`;
+      <div class="btns"><button class="btn" id="eMap">Levels</button><button class="btn ${nxt ? '' : 'pri'}" id="eRetry">${win ? 'Replay' : 'Try again'}</button>${nxt ? '<button class="btn pri" id="eNext">Next level</button>' : ''}</div>`;
     $('#eMap').onclick = showTitle; $('#eMem').onclick = () => showMemory('end'); $('#eRetry').onclick = () => startLevel(S.lvl, S.mode); if (nxt) $('#eNext').onclick = () => startLevel(S.lvl + 1);
     $('#endOv').hidden = false; S.screen = 'end'; hudInert(true);
   }, win ? 900 : 1200);
@@ -2634,7 +2634,7 @@ function showTitle() {
 function renderTray() {
   const pages = Math.ceil(LEVELS.length / PAGE), hadF = !!(document.activeElement && document.activeElement.closest && document.activeElement.closest('#pager'));
   $('#pager').innerHTML = Array.from({ length: pages }, (_, p) => { const a = LEVELS[p * PAGE], z = LEVELS[Math.min(LEVELS.length, p * PAGE + PAGE) - 1];
-    return `<button class="pg ${p === trayPg ? 'on' : ''}" data-p="${p}" aria-pressed="${p === trayPg}" aria-label="Specimens ${sn(p * PAGE)} to ${sn(p * PAGE + PAGE - 1)}"><b>${sn(p * PAGE)}–${sn(Math.min(LEVELS.length, p * PAGE + PAGE) - 1)}</b>${CHAPTER[a.m]} · ${CHAPTER[z.m]}</button>`; }).join('');
+    return `<button class="pg ${p === trayPg ? 'on' : ''}" data-p="${p}" aria-pressed="${p === trayPg}" aria-label="Levels ${p * PAGE + 1} to ${p * PAGE + PAGE}"><b>${sn(p * PAGE)}–${sn(Math.min(LEVELS.length, p * PAGE + PAGE) - 1)}</b>${CHAPTER[a.m]} · ${CHAPTER[z.m]}</button>`; }).join('');
   $('#pager').querySelectorAll('.pg').forEach(b => b.onclick = () => { trayPg = +b.dataset.p; sfx('click'); renderTray(); });
   if (hadF) $(`#pager .pg[data-p="${trayPg}"]`).focus();
   $('#slides').innerHTML = LEVELS.map((L, i) => {
@@ -2642,9 +2642,9 @@ function renderTray() {
     thumbs[i] = thumbs[i] || makeBg(L, 400, 248).toDataURL();
     const locked = trayLocked(i);
     // a div, not a button: it holds the challenge buttons. Challenges live on the six full maps and open once the kit is complete.
-    const chs = L.chal == null || !save.st[i] ? '' : save.rch < KITFULL ? `<div class="chs"><span class="chn">Challenges open at Specimen ${sn(KITFULL)}</span></div>`
+    const chs = L.chal == null || !save.st[i] ? '' : save.rch < KITFULL ? `<div class="chs"><span class="chn">Challenges open at Level ${KITFULL + 1}</span></div>`
       : `<div class="chs">${['heroic', 'iron'].map(m => { const w = save[m === 'heroic' ? 'hc' : 'ic'][i]; return `<button class="chb ${w ? 'won' : ''}" data-m="${m}" aria-label="${MODES[m].name} challenge${w ? ', won' : ''}">${chBadge(m)}${MODES[m].name}</button>`; }).join('')}</div>`;
-    return `<div class="slide ${locked ? 'locked' : ''}" data-i="${i}" role="button" tabindex="${locked ? -1 : 0}"><span class="lab">SPEC-${sn(i)}</span><div class="body"><div class="thumb"><img src="${thumbs[i]}" alt=""><div class="rcap" hidden></div></div><div><div class="n">${locked ? 'Locked' : L.place}</div><b>${L.name}</b><p>${L.sub}</p><div class="stars">${[0, 1, 2].map(s => `<span class="${s < save.st[i] ? 'on' : ''}">★</span>`).join('')}</div>${chs}</div></div></div>`;
+    return `<div class="slide ${locked ? 'locked' : ''}" data-i="${i}" role="button" tabindex="${locked ? -1 : 0}"><span class="lab">LEVEL ${i + 1}</span><div class="body"><div class="thumb"><img src="${thumbs[i]}" alt=""><div class="rcap" hidden></div></div><div><div class="n">${locked ? 'Locked' : L.place}</div><b>${L.name}</b><p>${L.sub}</p><div class="stars">${[0, 1, 2].map(s => `<span class="${s < save.st[i] ? 'on' : ''}">★</span>`).join('')}</div>${chs}</div></div></div>`;
   }).join('');
   $('#slides').querySelectorAll('.slide').forEach(b => {
     // a challenge chip shows its rule over the slide's thumbnail (no layout shift under the pointer) on hover or focus;
@@ -2665,7 +2665,7 @@ function renderTray() {
 let memFrom = 'title', memConfirm = false, memFresh = '';
 function memLock(M, t) { // why a Memory node cannot be trained yet, or ''
   const id = M.id === 'ab' ? (t < 2 ? 'fever' : 'swarm') : M.id === 'hero' && t === 2 ? 'gz' : M.id, at = unlockAt(id); // Abilities: two Fever tiers, then Swarm; the hero's third tier is Granzyme's
-  return at > save.rch ? 'From specimen ' + sn(at) : '';
+  return at > save.rch ? 'From level ' + sn(at) : '';
 }
 function showMemory(from) {
   hudInert(true);
@@ -2686,7 +2686,7 @@ function showMemory(from) {
   $('#memReset').innerHTML = memConfirm
     ? `<span>Refund all ${st.spent} stars?</span><button class="btn warn" id="memYes">Refund</button><button class="btn" id="memNo">Cancel</button>`
     : `<button class="btn" id="memClear" ${st.spent ? '' : 'disabled'}>Reset · refund ${st.spent} ★</button>`;
-  $('#memBack').textContent = memFrom === 'end' ? 'Back to lab report' : 'Back to specimen tray';
+  $('#memBack').textContent = memFrom === 'end' ? 'Back to lab report' : 'Back to levels';
 }
 $('#memGrid').onclick = ev => {
   const b = ev.target.closest('.mnode'); if (!b || !b.classList.contains('next')) return;
@@ -2817,7 +2817,7 @@ function guideDots() {
 function openGuide(from) {
   if (from === 'play' && (S.screen !== 'play' || S.over)) return;
   gFrom = from; S.screen = 'guide'; hudInert(true); closeRadial(); S.ability = null; showInfo(null); sfx('click');
-  $('#titleOv').hidden = true; $('#guideOv').hidden = false; $('#gBack').textContent = from === 'play' ? 'Back to specimen' : 'Back to specimen tray';
+  $('#titleOv').hidden = true; $('#guideOv').hidden = false; $('#gBack').textContent = from === 'play' ? 'Back to the level' : 'Back to levels';
   guideTab(gTab);
 }
 function guideTab(tab) {
@@ -2856,9 +2856,9 @@ function guideShow(id) {
   const T = $('#gText'); T.style.setProperty('--c', COL[id]);
   T.scrollTop = 0; T.innerHTML = open ? `<small>${gKind(id)}</small><h3>${gName(id)}</h3><div class="rows">${guideRows(id).map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('')}</div>` +
       `<p class="sp"><em>SPECIAL</em>${guideSpecial(id)}</p><p class="fact"><em>FIELD NOTE</em>${FACTS[id]}</p>`
-    : `<small>${path ? 'Pathogen' : TOWERS[id] ? 'Cell' : id === 'hero' ? 'Hero' : 'Specialist'} · locked</small><h3>${path ? 'Not yet observed' : 'Not yet trained'}</h3><p class="sp">${path ? 'Its plate fills in the first time it enters one of your specimens.'
-      : TOWERS[id] || id === 'hero' ? `It joins your cells at Specimen ${sn(unlockAt(id))}.`
-      : kitAt(save.rch).spec.includes(SPECS[id].base) ? `Grow a ${TOWERS[SPECS[id].base].name} to level 3 to unlock this specialist.` : `${TOWERS[SPECS[id].base].name} specialists unlock at Specimen ${sn(unlockAt('spec-' + SPECS[id].base))}.`}</p>`;
+    : `<small>${path ? 'Pathogen' : TOWERS[id] ? 'Cell' : id === 'hero' ? 'Hero' : 'Specialist'} · locked</small><h3>${path ? 'Not yet observed' : 'Not yet trained'}</h3><p class="sp">${path ? 'Its plate fills in the first time you meet it in a level.'
+      : TOWERS[id] || id === 'hero' ? `It joins your cells at Level ${unlockAt(id) + 1}.`
+      : kitAt(save.rch).spec.includes(SPECS[id].base) ? `Grow a ${TOWERS[SPECS[id].base].name} to level 3 to unlock this specialist.` : `${TOWERS[SPECS[id].base].name} specialists unlock at Level ${unlockAt('spec-' + SPECS[id].base) + 1}.`}</p>`;
   guideDots();
 }
 // the plate is live: the same art function as in play, clocked, clipped to the microscope's field of view
