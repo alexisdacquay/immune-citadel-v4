@@ -1,5 +1,5 @@
 // node --test server/  (in-memory store; the Postgres store is exercised by the dev deploy)
-process.env.ALLOWED_ORIGINS = 'https://game.example';
+process.env.ALLOWED_ORIGINS = 'https://game.example'; process.env.LOG_LEVEL = 'silent';
 const test = require('node:test'), assert = require('node:assert');
 const { createServer, memoryStore } = require('./index.js');
 

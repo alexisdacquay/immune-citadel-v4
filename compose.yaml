@@ -1,5 +1,6 @@
-# The whole game locally: the game page (web), the save API (api) and its database (db).
-# docker compose up  ->  play at http://localhost:8080
+# The whole game locally: the game page (web), the save API (api), its database (db),
+# and observability (otel: Grafana with traces, metrics, logs and the alert).
+# docker compose up  ->  play at http://localhost:8080, watch at http://localhost:3000
 services:
   db:
     image: postgres:16-alpine
@@ -14,6 +15,9 @@ services:
       DATABASE_URL: postgres://postgres:local-only@db:5432/postgres
       DB_SCHEMA: public
       ALLOWED_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel:4318
+      OTEL_SERVICE_NAME: immune-citadel-api
+      OTEL_METRIC_EXPORT_INTERVAL: 10000 # 10 s, so a failure shows quickly
     ports: ["8787:8787"]
     depends_on: { db: { condition: service_healthy } }
     healthcheck: { test: wget -qO- http://localhost:8787/health, interval: 2s, retries: 30 }
@@ -24,6 +28,12 @@ services:
     ports: ["8080:80"]
     healthcheck: { test: wget -qO- http://localhost/ >/dev/null, interval: 2s, retries: 30 }
     depends_on: { api: { condition: service_healthy } }
+
+  otel:
+    image: grafana/otel-lgtm:0.37.0 # one container: OpenTelemetry collector, Prometheus, Tempo, Loki, Grafana
+    ports: ["${GRAFANA_PORT:-3000}:3000"] # GRAFANA_PORT=3300 docker compose up, if 3000 is taken
+    volumes: [./observability:/otel-lgtm/grafana/conf/provisioning/alerting:ro] # alerting.yaml: the rule and its contact point
+    extra_hosts: ["host.docker.internal:host-gateway"] # the alert calls the on-call responder on this machine
 
 volumes:
   pgdata:

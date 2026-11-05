@@ -5,4 +5,4 @@ RUN npm ci --omit=dev
 COPY *.js ./
 USER node
 EXPOSE 8787
-CMD ["node", "index.js"]
+CMD ["node", "--require", "./otel.js", "index.js"]
