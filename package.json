@@ -2,6 +2,7 @@
   "name": "immune-citadel-v4",
   "private": true,
   "scripts": {
+    "postinstall": "playwright install chromium",
     "start": "docker compose up --build",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "node --test server/test.js",

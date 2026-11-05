@@ -13,7 +13,7 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:local-only@db:5432/postgres
       DB_SCHEMA: public
-      ALLOWED_ORIGINS: http://localhost:8080
+      ALLOWED_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
     ports: ["8787:8787"]
     depends_on: { db: { condition: service_healthy } }
     healthcheck: { test: wget -qO- http://localhost:8787/health, interval: 2s, retries: 30 }
@@ -22,6 +22,7 @@ services:
     image: nginx:alpine
     volumes: [./index.html:/usr/share/nginx/html/index.html:ro]
     ports: ["8080:80"]
+    healthcheck: { test: wget -qO- http://localhost/ >/dev/null, interval: 2s, retries: 30 }
     depends_on: { api: { condition: service_healthy } }
 
 volumes:
