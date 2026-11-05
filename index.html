@@ -1455,7 +1455,8 @@ function mergeSave(a, b) {
   const fa = fold(a), fb = fold(b); // capped: a bad copy cannot unlock everything everywhere; the 6-specimen keys ride along from the newer save
   for (const k of ['st', 'hc', 'ic']) out[k] = fa[k].map((v, i) => Math.max(v, fb[k][i]));
   out.rch = Math.max(fa.rch, fb.rch);
-  const owe = [...new Set([...(fa.owe || a.owe || []), ...(fb.owe || b.owe || [])])]; if (owe.length) out.owe = owe; else delete out.owe;
+  const met = new Set([...arr(a, 'seen'), ...arr(b, 'seen')]); // an owed card shown on either device stays shown: 'owed:<id>' in seen
+  const owe = [...new Set([...(fa.owe || a.owe || []), ...(fb.owe || b.owe || [])])].filter(id => !met.has('owed:' + id)); if (owe.length) out.owe = owe; else delete out.owe;
   for (const k of ['seen', 'viewed', 'hints']) out[k] = [...new Set([...arr(a, k), ...arr(b, k)])].filter(v => typeof v === 'string');
   if (!out.mem || typeof out.mem !== 'object' || Array.isArray(out.mem)) out.mem = {};
   if (!DIFF[out.diff]) out.diff = 'normal';
@@ -1504,7 +1505,7 @@ function startLevel(i, mode = 'campaign') {
   showInfo(null); layoutWaveMarkers(); nextNote(); hintCur = null; bannerCut(); cardClear();
   if (fresh) for (const id of unlockIds(UNLOCK[i])) cardQ(id, 'unlock');
   const due = booted && mode === 'campaign' && Array.isArray(save.owe) ? save.owe.filter(id => kit.ab.includes(id)) : []; // migrated players meet what they skipped
-  if (due.length) { due.forEach(id => cardQ(id, 'unlock')); save.owe = save.owe.filter(id => !due.includes(id)); persist(); }
+  if (due.length) { due.forEach(id => cardQ(id, 'unlock')); save.owe = save.owe.filter(id => !due.includes(id)); save.seen.push(...due.map(id => 'owed:' + id)); persist(); }
   cardThen(() => banner(M.name ? `${chBadge(mode, true)}<div><small>${M.name} challenge · Level ${i + 1}</small><b>${L.name}</b><p>${M.rule}${mode === 'iron' ? ': ' + S.lines.map(k => TOWERS[k].name).join(' + ') : ''}.</p></div>`
     : `<div><small>Level ${i + 1} · ${L.place}</small><b>${L.name}</b><p>${L.sub}</p></div>`, M.name ? 6000 : 4200, 'intro'));
 }
