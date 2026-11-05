@@ -22,7 +22,7 @@ When the owner says **continue**, the orchestrator runs this loop. The [`team-lo
 2. **Spec.** The top `status:ready` issue gets a **Spec** comment: why, what changes, acceptance criteria (checkable statements), out of scope. Design questions are settled here, by the orchestrator, or by a panel when the space is wide. Anything that needs the owner gets `needs-owner` and waits.
 3. **Build.** Routed by type. A `bug`: the [issue-cycle workflow](../.claude/workflows/issue-cycle.js) starts an `ic-bug-fixer` on a branch `issue/<n>-<slug>`; it posts an **Engineer report** comment. Anything else: the orchestrator builds it on that branch and posts **Build notes**.
 4. **Verify.** The same workflow starts an `ic-qa` with only the spec and the branch, not the engineer's reasoning. It posts a **QA verdict** comment: PASS or FAIL per acceptance criterion, with evidence. A FAIL goes back to whoever built it; a bug that fails twice escalates to the orchestrator.
-5. **Integrate.** The orchestrator reviews the diff, merges the branch into `dev`, pushes (the dev site deploys on push), checks the dev site serves it, and labels the issue `status:on-dev`.
+5. **Integrate.** The orchestrator reviews the diff, merges the issue's pull request into `dev` once CI is green (CI then deploys the dev site and API), checks the dev site serves it, and labels the issue `status:on-dev`.
 6. **Report.** One short message to the owner: what shipped, what is not verified, what needs them.
 
 Issues close when `dev` is promoted to `main`, which only the owner approves.
@@ -33,7 +33,7 @@ Everything the team does leaves a trace on GitHub, so the process is visible wit
 
 - **Issues** are the backlog. Labels: priority `P0`-`P4`, type (`bug`, `type:feature`, `type:content`, `type:chore`, `type:design`), status (`status:ready`, `status:in-progress`, `status:in-qa`, `status:on-dev`), and `needs-owner`.
 - **Issue comments** carry the Spec, the Engineer report and the QA verdict, in that order.
-- **Branches** `issue/<n>-<slug>` hold each issue's work until it is merged into `dev`.
+- **Pull requests** from `issue/<n>-<slug>` into `dev`, each with its CI run.
 - **Commits** on `dev` reference their issue (`(#n)`).
 
 ## Gates
