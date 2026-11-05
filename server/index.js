@@ -1,6 +1,11 @@
 // Cloud saves for Immune Citadel. A save is an opaque JSON object keyed by a 16-character save code the game generates.
 // Knowing the code is the only credential, so codes carry 80 random bits. Without DATABASE_URL it keeps saves in memory (local dev, tests).
 const http = require('node:http');
+const log = require('pino')({ level: process.env.LOG_LEVEL || 'info' }); // JSON lines; with otel.js each line carries the trace_id
+// saves_total{outcome="ok"|"failed"}: the alert's signal. Both series start at 0, so the first failure already counts as an increase.
+const saves = require('@opentelemetry/api').metrics.getMeter('immune-citadel-api').createCounter('saves', { description: 'Cloud saves by outcome' });
+saves.add(0, { outcome: 'ok' }); saves.add(0, { outcome: 'failed' });
+const route = url => url.split('?')[0].replace(/^\/api\/save\/.*/, '/api/save/:code'); // logs never hold a save code
 
 const CODE = /^[A-HJ-NP-Z2-9]{16}$/; // the game's alphabet: no I, O, 0, 1
 const MAX_BODY = 8 * 1024; // a full save is about 1 KB
@@ -22,7 +27,7 @@ function memoryStore() {
 function pgStore(url) {
   const { Pool } = require('pg');
   const pool = new Pool({ connectionString: url, max: 5 });
-  pool.on('error', e => console.error('postgres idle client:', e.message)); // a dropped idle connection must not kill the server
+  pool.on('error', e => log.error({ err: e.message }, 'postgres idle client')); // a dropped idle connection must not kill the server
   const T = `"${SCHEMA}".saves`;
   return {
     init: async () => {
@@ -53,11 +58,12 @@ function limited(ip) {
 
 function createServer(store) {
   return http.createServer(async (req, res) => {
-    const origin = req.headers.origin;
+    const origin = req.headers.origin, t0 = Date.now();
     const send = (status, body) => {
       const h = { 'content-type': 'application/json', 'cache-control': 'no-store', vary: 'Origin' };
       if (origin && (ORIGINS.includes(origin) || ORIGINS.includes('*'))) Object.assign(h, { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'GET, PUT', 'access-control-allow-headers': 'content-type', 'access-control-max-age': '86400' });
       res.writeHead(status, h); res.end(body === undefined ? '' : JSON.stringify(body));
+      if (req.url !== '/health') log[status >= 500 ? 'error' : 'info']({ method: req.method, route: route(req.url), status, ms: Date.now() - t0 }, 'request');
     };
     try {
       const url = new URL(req.url, 'http://x');
@@ -79,11 +85,13 @@ function createServer(store) {
         let body; try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return send(400, { error: 'body must be JSON' }); }
         const save = body && body.save;
         if (!save || typeof save !== 'object' || Array.isArray(save)) return send(400, { error: 'body must be {"save": {...}}' });
-        return send(200, { updatedAt: await store.put(code, save) });
+        const updatedAt = await store.put(code, save); saves.add(1, { outcome: 'ok' });
+        return send(200, { updatedAt });
       }
       send(405, { error: 'method not allowed' });
     } catch (e) {
-      console.error(e); send(500, { error: 'server error' });
+      if (req.method === 'PUT') saves.add(1, { outcome: 'failed' });
+      log.error({ err: e.message }, 'request failed'); send(500, { error: 'server error' });
     }
   });
 }
@@ -91,10 +99,10 @@ function createServer(store) {
 module.exports = { createServer, memoryStore };
 
 if (require.main === module) {
-  if (process.env.RENDER && !process.env.DATABASE_URL) { console.error('DATABASE_URL is not set: refusing to keep player saves in memory'); process.exit(1); }
+  if (process.env.RENDER && !process.env.DATABASE_URL) { log.fatal('DATABASE_URL is not set: refusing to keep player saves in memory'); process.exit(1); }
   const store = process.env.DATABASE_URL ? pgStore(process.env.DATABASE_URL) : memoryStore();
   store.init().then(() => {
     const port = +process.env.PORT || 8787;
-    createServer(store).listen(port, () => console.log(`save API on :${port}, ${process.env.DATABASE_URL ? `postgres schema ${SCHEMA}` : 'in-memory store'}, origins ${ORIGINS.join(' ') || 'none'}`));
-  }).catch(e => { console.error('startup failed:', e.message); process.exit(1); });
+    createServer(store).listen(port, () => log.info(`save API on :${port}, ${process.env.DATABASE_URL ? `postgres schema ${SCHEMA}` : 'in-memory store'}, origins ${ORIGINS.join(' ') || 'none'}`));
+  }).catch(e => { log.fatal({ err: e.message }, 'startup failed'); process.exit(1); });
 }

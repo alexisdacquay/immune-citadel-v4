@@ -2,7 +2,20 @@
   "name": "immune-citadel-v4-api",
   "private": true,
   "type": "commonjs",
-  "engines": { "node": ">=20" },
-  "scripts": { "start": "node index.js", "test": "node --test test.js" },
-  "dependencies": { "pg": "^8.13.1" }
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test test.js"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "1.10.0",
+    "@opentelemetry/instrumentation-http": "0.300.0",
+    "@opentelemetry/instrumentation-pg": "0.77.0",
+    "@opentelemetry/instrumentation-pino": "0.70.0",
+    "@opentelemetry/sdk-node": "0.300.0",
+    "pg": "^8.13.1",
+    "pino": "10.4.0"
+  }
 }
