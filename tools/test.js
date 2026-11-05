@@ -76,7 +76,7 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   for (const id of ['bact']) await p.mouse.click(...await mid(`.gt[data-id="${id}"]`));
   await p.mouse.click(...await mid('.gtab[data-tab="cells"]'));
   await p.mouse.click(...await mid('.gt[data-id="killer"]')); await p.waitForTimeout(100);
-  gg(await p.evaluate(() => IC.unlockAt('killer') === 6 && /Specimen 07/.test(document.getElementById('gText').textContent) && !IC.save.viewed.includes('killer')), 'a locked cell plate must name its unlock specimen (07) and stay unviewed');
+  gg(await p.evaluate(() => IC.unlockAt('killer') === 6 && /Level 7\b/.test(document.getElementById('gText').textContent) && !IC.save.viewed.includes('killer')), 'a locked cell plate must name its unlock specimen (07) and stay unviewed');
   for (const id of ['neutro', 'macro', 'bcell', 'killer', 'hero']) { await p.mouse.click(...await mid(`.gt[data-id="${id}"]`)); await p.waitForTimeout(60); }
   gg(await p.evaluate(() => /E\. coli|NK Sentinel/.test(document.getElementById('gText').textContent) && document.querySelectorAll('.ndot:not([hidden])').length === 0), 'NEW dots should clear once every open plate was viewed');
   await p.mouse.click(...await mid('#gBack')); await p.waitForTimeout(200);
@@ -286,9 +286,9 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   // each tray page: chips only on won full-map specimens (LMARK), and only once the kit is complete (KITFULL); before that a note
   const chipPages = async full => { const bad = []; for (let pg = 0; pg < Math.ceil(nLv / 6); pg++) { await toPage(pg * 6); bad.push(...await p.evaluate(full => [...document.querySelectorAll('.slide')].filter(e => {
     const i = +e.dataset.i, won = IC.LMARK.includes(i) && IC.save.st[i] > 0, chn = e.querySelector('.chn');
-    return e.querySelectorAll('.chb').length !== (full && won ? 2 : 0) || (!full && won) !== (!!chn && /Challenges open at Specimen 17/.test(chn.textContent)); }).map(e => e.dataset.i), full)); } return bad; };
+    return e.querySelectorAll('.chb').length !== (full && won ? 2 : 0) || (!full && won) !== (!!chn && /Challenges open at Level 17/.test(chn.textContent)); }).map(e => e.dataset.i), full)); } return bad; };
   const noKit = await (async () => { await p.evaluate(() => { window._rch = IC.save.rch; IC.save.rch = IC.KITFULL - 1; IC.showTitle(); }); const b = await chipPages(false); await p.evaluate(() => { IC.save.rch = window._rch; IC.showTitle(); }); return b; })();
-  cc(!noKit.length, 'before Specimen 17 a won full map must show the challenges note and no chips: slides ' + noKit);
+  cc(!noKit.length, 'before Level 17 a won full map must show the challenges note and no chips: slides ' + noKit);
   const chipBad = await chipPages(true);
   cc(!chipBad.length, 'every won full-map specimen (and only those) offers Acute and Chronic: slides ' + chipBad);
   const camp = await p.evaluate(() => JSON.stringify(IC.save.st));
