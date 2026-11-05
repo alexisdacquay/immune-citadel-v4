@@ -1,4 +1,4 @@
-# CI: every pull request and every push to dev or main runs the unit and integration tests.
+# CI: every pull request and every push to dev or main runs the unit and integration tests (test) and the game suite (game).
 # CD is Render's: each environment deploys its branch only after these checks pass (dev -> dev site, main -> prod).
 name: CI
 on:
@@ -23,3 +23,13 @@ jobs:
       - run: npm test
       - if: failure()
         run: docker compose logs --tail 80
+
+  game:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx playwright install-deps chromium
+      - run: npm run test:game # every level played by a bot, saves, challenges, Field Guide, phone and tablet layouts (~6 min)
