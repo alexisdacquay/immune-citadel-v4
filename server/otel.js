@@ -7,7 +7,7 @@ if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
   const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
   const { PgInstrumentation } = require('@opentelemetry/instrumentation-pg');
   const { PinoInstrumentation } = require('@opentelemetry/instrumentation-pino');
-  const route = url => (url || '').split('?')[0].replace(/^\/api\/save\/.*/, '/api/save/:code');
+  const route = require('./route');
   const sdk = new NodeSDK({
     instrumentations: [
       new HttpInstrumentation({

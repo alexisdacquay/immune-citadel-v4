@@ -2,11 +2,11 @@
   "name": "immune-citadel-v4",
   "private": true,
   "scripts": {
-    "postinstall": "playwright install chromium",
+    "postinstall": "npm ci --prefix server && playwright install chromium",
     "start": "docker compose up --build",
     "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "node --test server/test.js",
-    "test:integration": "docker compose up -d --build --wait db api web && node --test test/*.test.js",
+    "test:unit": "node --test server/test.js server/telemetry.test.js test/config.test.js",
+    "test:integration": "docker compose up -d --build --wait db api web && node --test test/integration.test.js",
     "test:game": "node tools/test.js shots/game && node tools/touch.js"
   },
   "devDependencies": {

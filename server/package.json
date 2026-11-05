@@ -17,5 +17,8 @@
     "@opentelemetry/sdk-node": "0.300.0",
     "pg": "^8.13.1",
     "pino": "10.4.0"
+  },
+  "devDependencies": {
+    "@opentelemetry/sdk-metrics": "3.0.0"
   }
 }

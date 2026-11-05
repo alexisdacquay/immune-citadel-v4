@@ -5,7 +5,7 @@ const log = require('pino')({ level: process.env.LOG_LEVEL || 'info' }); // JSON
 // saves_total{outcome="ok"|"failed"}: the alert's signal. Both series start at 0, so the first failure already counts as an increase.
 const saves = require('@opentelemetry/api').metrics.getMeter('immune-citadel-api').createCounter('saves', { description: 'Cloud saves by outcome' });
 saves.add(0, { outcome: 'ok' }); saves.add(0, { outcome: 'failed' });
-const route = url => url.split('?')[0].replace(/^\/api\/save\/.*/, '/api/save/:code'); // logs never hold a save code
+const route = require('./route');
 
 const CODE = /^[A-HJ-NP-Z2-9]{16}$/; // the game's alphabet: no I, O, 0, 1
 const MAX_BODY = 8 * 1024; // a full save is about 1 KB
