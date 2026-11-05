@@ -2521,9 +2521,9 @@ const wm = [];
 function layoutWaveMarkers() {
   const box = $('#wcalls'); box.innerHTML = ''; wm.length = 0;
   if (!S.paths) return;
-  S.paths.forEach(p => {
+  S.paths.forEach((p, i) => {
     let d = 70, q = posAt(p, d); while (((q.x < 320 && q.y > 500) || (q.y < 130 && Math.abs(q.x - W / 2) < 230)) && d < p.len / 3) q = posAt(p, d += 15); // keep clear of the bottom-left cluster and the top-centre banner
-    if (wm.some(b => Math.hypot(b.qx - q.x, b.qy - q.y) < 40)) return; // forked routes share one entry: one marker
+    const near = wm.find(b => Math.hypot(b.qx - q.x, b.qy - q.y) < 40); if (near) return near.routes.push(i); // forked routes share one entry: one marker
     const b = document.createElement('button');
     b.className = 'wcall'; b.style.left = clamp(q.x, 36, W - 36) * viewK + 'px'; b.style.top = clamp(q.y, 36, H - 36) * viewK + 'px';
     b.innerHTML = '<i class="cd"></i><svg viewBox="0 0 24 24"><path d="M6 6l6 6-6 6M12 6l6 6-6 6"/></svg><div class="tip"></div>';
@@ -2532,20 +2532,20 @@ function layoutWaveMarkers() {
       if (lastPT === 'touch' && !b.classList.contains('show')) { wm.forEach(x => x.classList.toggle('show', x === b)); sfx('click'); return; } // touch: 1st tap shows what comes, 2nd calls it
       wm.forEach(x => x.classList.remove('show')); sendWave();
     };
-    b.qx = q.x; b.qy = q.y; box.appendChild(b); wm.push(b);
+    b.qx = q.x; b.qy = q.y; b.routes = [i]; box.appendChild(b); wm.push(b);
   });
   updateChips();
 }
 function updateChips() {
   if (!S.L) return;
-  let html;
-  if (S.wave >= S.waves.length) html = '<small>FINAL WAVE</small><b>Hold the line</b>';
-  else {
-    const counts = {}, held = S.L.hold && S.mode === 'campaign'; S.waves[S.wave].forEach(g => counts[g.t] = (counts[g.t] || 0) + g.n);
-    const chips = Object.entries(counts).map(([t, n]) => `<span class="chip"><img src="${portrait(t, 0, 48)}">${n}</span>`).join('');
-    html = `<small>${S.mode === 'iron' ? 'ONE LONG WAVE' : `WAVE ${S.wave + 1} / ${S.waves.length}`}</small><b>${S.wave === 0 ? 'Call the first wave' : held ? 'Call the next wave' : 'Call early'}</b><div class="chips">${chips}</div>${S.wave > 0 && !held ? '<span class="bonus"></span>' : 'When your defences are ready.'}<span class="go"></span>`;
-  }
-  wm.forEach(b => b.querySelector('.tip').innerHTML = html);
+  if (S.wave >= S.waves.length) return wm.forEach(b => b.querySelector('.tip').innerHTML = '<small>FINAL WAVE</small><b>Hold the line</b>');
+  const held = S.L.hold && S.mode === 'campaign';
+  wm.forEach(b => { // each marker lists only what enters by its own routes
+    const counts = {}; let alt = 0;
+    for (const g of S.waves[S.wave]) for (let n = 0; n < g.n; n++) if (b.routes.includes(g.p === -1 ? (alt++) % S.paths.length : Math.min(g.p, S.paths.length - 1))) counts[g.t] = (counts[g.t] || 0) + 1; // same route rule as sendWave
+    const chips = Object.entries(counts).map(([t, n]) => `<span class="chip"><img src="${portrait(t, 0, 48)}">${n}</span>`).join('') || 'Quiet this wave';
+    b.querySelector('.tip').innerHTML = `<small>${S.mode === 'iron' ? 'ONE LONG WAVE' : `WAVE ${S.wave + 1} / ${S.waves.length}`}</small><b>${S.wave === 0 ? 'Call the first wave' : held ? 'Call the next wave' : 'Call early'}</b><div class="chips">${chips}</div>${S.wave > 0 && !held ? '<span class="bonus"></span>' : 'When your defences are ready.'}<span class="go"></span>`;
+  });
 }
 
 // ============================================================ hud
