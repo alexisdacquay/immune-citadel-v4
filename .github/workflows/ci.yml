@@ -14,6 +14,7 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10 # usually ~1 min
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
@@ -26,6 +27,7 @@ jobs:
 
   game:
     runs-on: ubuntu-latest
+    timeout-minutes: 25 # usually 6-7 min, up to ~16 on a slow runner; a hang must not block deploys for GitHub's default 6 h
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
