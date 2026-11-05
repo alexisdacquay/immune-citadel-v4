@@ -40,7 +40,7 @@ The save API sends traces, metrics and logs to [Dash0](https://www.dash0.com) ov
 - **Logs:** JSON lines, each with the `trace_id` and `span_id` of its request, so a log line opens its trace.
 - Code: [server/otel.js](../server/otel.js) (OpenTelemetry), [server/route.js](../server/route.js) (the redaction), [server/index.js](../server/index.js) (logs and the counter). Fast tests: [server/telemetry.test.js](../server/telemetry.test.js).
 
-Settings on a Render API service: `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingress.europe-west4.gcp.dash0.com`, `OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer <token>`, `OTEL_SERVICE_NAME=immune-citadel-api`, `OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=<env>`.
+Settings on a Render API service: build `cd server && npm ci --omit=dev`, start `cd server && npm start` (that is what loads OpenTelemetry; `node server/index.js` would skip it), and the variables `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingress.europe-west4.gcp.dash0.com`, `OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer <token>`, `OTEL_SERVICE_NAME=immune-citadel-api`, `OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=<env>`.
 
 ## Alert: cloud saves failing
 
