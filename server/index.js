@@ -62,7 +62,7 @@ function createServer(store) {
     try {
       const url = new URL(req.url, 'http://x');
       if (req.method === 'OPTIONS') return send(204);
-      if (url.pathname === '/health' && req.method === 'GET') return send(200, { ok: true });
+      if (url.pathname === '/health' && req.method === 'GET') return send(200, { ok: true, commit: process.env.RENDER_GIT_COMMIT || 'local' }); // deploys wait for this commit
       const m = url.pathname.match(/^\/api\/save\/([^/]+)$/);
       if (!m) return send(404, { error: 'not found' });
       const code = m[1];

@@ -1,0 +1,25 @@
+# CI: every pull request and every push to dev or main runs the unit and integration tests.
+# CD is Render's: each environment deploys its branch only after these checks pass (dev -> dev site, main -> prod).
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [dev, main]
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx playwright install-deps chromium
+      - run: npm test
+      - if: failure()
+        run: docker compose logs --tail 80
