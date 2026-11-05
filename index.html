@@ -184,7 +184,16 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 .tin h1 span{color:var(--cyan)}
 .tin .lede{color:var(--dim);font-size:15px;max-width:560px;margin:0 0 24px}
 .slides{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.pager{display:flex;gap:8px;margin:0 0 10px}.pg{flex:1;padding:5px 10px;border-radius:8px;border:1px solid rgba(180,220,255,.22);background:rgba(200,230,255,.04);color:var(--dim);font:600 max(10px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.12em;text-transform:uppercase;text-align:left}.pg b{color:var(--txt);margin-right:8px}.pg.on{border-color:var(--cyan);color:var(--txt);background:rgba(127,216,255,.1)}.pg:hover:not(.on){border-color:rgba(180,220,255,.5)}
+/* body map: the levels as places on six body biomes, with the selected level's card beside it */
+.atlas{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(240px,1fr);gap:14px;align-items:center}.atlas .slides{grid-template-columns:1fr}
+.touch .atlas{grid-template-columns:1fr}@media (max-width:900px){.atlas{grid-template-columns:1fr}}@media (min-width:901px){html:not(.touch) .atlas .slide .body{grid-template-columns:1fr}}
+.bodymap{border-radius:10px;border:1px solid rgba(180,220,255,.18);background:radial-gradient(ellipse at 50% 45%,rgba(28,46,64,.6),rgba(4,8,13,.9));overflow:hidden}.bodymap svg{display:block;width:100%;height:auto}
+.lnode,.lch{cursor:pointer;outline:none}.lnode .hit,.lch .hit{fill:transparent}.lnode .disc{fill:#0b141d;stroke:#9fd3ff;stroke-width:2}.lnode.done .disc{fill:#123047}.lnode.next .disc{stroke:#fff;stroke-width:2.5}
+.lnode text{font:700 15px var(--mono);fill:#fff;text-anchor:middle;pointer-events:none}.lnode.locked{cursor:default}.lnode.locked .disc{stroke:rgba(180,200,220,.28)}.lnode.locked text{fill:rgba(200,220,240,.35)}
+.lnode.sel .disc,.lnode:focus-visible .disc,.lch:focus-visible .dia{stroke:#ffd27a;stroke-width:3}.lnode .pulse{fill:none;stroke:#fff;transform-box:fill-box;transform-origin:center;animation:mpulse 1.8s ease-out infinite}
+@keyframes mpulse{from{transform:scale(1);opacity:.6}to{transform:scale(1.9);opacity:0}}.mstar{fill:rgba(255,255,255,.16)}.mstar.on{fill:#ffd27a}
+.lch .dia{fill:#0b141d;stroke:#ff8a8f;stroke-width:1.5}.lch.won .dia{fill:#ffd27a;stroke:#ffd27a}.lch.locked{opacity:.28;cursor:default}.mlab{font:700 15px var(--mono);letter-spacing:.22em;paint-order:stroke;stroke:#05090e;stroke-width:4px}
+.pager{display:none}.pg{flex:1;padding:5px 10px;border-radius:8px;border:1px solid rgba(180,220,255,.22);background:rgba(200,230,255,.04);color:var(--dim);font:600 max(10px,calc(9px / var(--ut,1))) var(--mono);letter-spacing:.12em;text-transform:uppercase;text-align:left}.pg b{color:var(--txt);margin-right:8px}.pg.on{border-color:var(--cyan);color:var(--txt);background:rgba(127,216,255,.1)}.pg:hover:not(.on){border-color:rgba(180,220,255,.5)}
 .slide{display:grid;grid-template-columns:44px 1fr;text-align:left;padding:0;border-radius:6px;overflow:hidden;border:1px solid rgba(180,220,255,.22);background:linear-gradient(135deg,rgba(200,230,255,.09),rgba(200,230,255,.02));box-shadow:0 18px 36px -20px #000;transition:transform .15s,border-color .15s}
 .slide:hover:not(.locked):not(:has(.chb:hover)){transform:translateY(-3px);border-color:rgba(180,220,255,.55)}
 .slide .lab{background:repeating-linear-gradient(45deg,rgba(255,255,255,.16) 0 2px,rgba(255,255,255,.07) 2px 5px);writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font:700 11px var(--mono);letter-spacing:.24em;color:#eef6ff}
@@ -476,7 +485,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
       <button class="mbtn" id="memBtn"><i></i>IMMUNE MEMORY <b id="memBtnN"></b></button></div>
       <div class="hd"><h1>IMMUNE<br><span>CITADEL</span></h1>
       <p class="lede">Pathogens are breaching the host. Grow immune cells beside the infection routes, stain the invaders, and keep them from reaching the core.</p><div class="mbtn seg" id="diffSeg" role="radiogroup" aria-label="Difficulty"><button data-d="easy" role="radio">EASY</button><button data-d="normal" role="radio">NORMAL</button><button data-d="hard" role="radio">HARD</button></div><button class="mbtn" id="sndBtn" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="sw" d="M16 9c1.5 1.5 1.5 4.5 0 6"/><path class="sw sw2" d="M18.5 6.5c3 3 3 8 0 11"/><path class="sx" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button><button class="mbtn" id="cloudBtn" title="Cloud save" aria-label="Cloud save" hidden><svg viewBox="0 0 24 24"><path d="M7 18.5h10.5a4 4 0 0 0 .4-8 6 6 0 0 0-11.6-1A4.6 4.6 0 0 0 7 18.5z"/></svg></button></div>
-      <div class="pager" id="pager" role="group" aria-label="Level pages"></div><div class="slides" id="slides"></div>
+      <div class="atlas"><div class="bodymap" id="bodymap"></div><div class="slides" id="slides"></div></div>
       <div class="keys"><span><b>Click a ring</b> grow a cell</span><span><b>Click a cell</b> upgrade / recycle</span><span><b>Red marker</b> call the next wave</span><span id="keyAb"><b>Q W</b> abilities</span><span id="keyHero"><b>H E</b> hero · burst</span><span><b>Space</b> pause</span><span><b>F</b> speed</span></div>
     </div>
   </div>
@@ -2621,25 +2630,85 @@ function breaches() {
   const B = Object.entries(S.breach).sort((a, b) => b[1].n - a[1].n); if (!B.length) return '';
   return `<div><span>Breaches</span><b>${B.map(([t, b]) => `${b.n} ${ENEMIES[t].name}${S.mode === 'iron' ? '' : ` (w${b.w.join(', w')})`}`).join(' · ')}</b></div>`;
 }
-const thumbs = [], PAGE = 6, CHAPTER = ['Skin', 'Lungs', 'Blood', 'Lymph Node', 'Gut', 'Brain']; // the tray shows six specimens (two body places, by map) per page
-let trayPg = 0;
-const trayLocked = i => i > 0 && !save.st[i - 1] && i > save.rch && !save.st[i]; // reached specimens stay open (old saves, replays)
+const thumbs = [], CHAPTER = ['Skin', 'Lungs', 'Blood', 'Lymph Node', 'Gut', 'Brain'];
+// Body map (viewBox 1000 x 620): one biome per body place, the infection's path through them, a node per level,
+// and each place's Acute and Chronic challenges as a side branch off its last level.
+const MAPXY = [[70, 545], [160, 505], [105, 425], [175, 330], [110, 230], [215, 125], [325, 175], [405, 265], [470, 355],
+  [420, 470], [530, 535], [620, 465], [705, 525], [820, 505], [880, 405], [790, 305], [845, 195], [905, 95]];
+const CHXY = { 2: [[38, 372], [40, 470]], 5: [[150, 62], [262, 58]], 8: [[548, 325], [530, 405]], 11: [[600, 390], [690, 425]], 14: [[950, 455], [955, 360]], 17: [[968, 150], [962, 45]] };
+const BIOMES = [ // where each body place sits, its colours, and what grows there
+  { c: [130, 480], r: [165, 160], fill: '#3a2420', rim: '#e8ab90', deco: 'skin', lab: [120, 606] }, { c: [170, 195], r: [165, 175], fill: '#2b2238', rim: '#e9a9cc', deco: 'lung', lab: [100, 42] },
+  { c: [415, 255], r: [175, 170], fill: '#2e1015', rim: '#ff7a86', deco: 'blood', lab: [430, 98] }, { c: [535, 505], r: [190, 115], fill: '#1d2a18', rim: '#c9d27a', deco: 'lymph', lab: [470, 606] },
+  { c: [810, 480], r: [185, 140], fill: '#2f2110', rim: '#f0a65a', deco: 'gut', lab: [880, 606] }, { c: [800, 180], r: [190, 165], fill: '#22183a', rim: '#b79bff', deco: 'brain', lab: [700, 40] },
+];
+let selLv = 0, mapArt = '';
+function bodyMapArt() { // the biomes never change: drawn once
+  if (mapArt) return mapArt;
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const inside = B => { const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()) * .78; return [B.c[0] + Math.cos(a) * B.r[0] * d, B.c[1] + Math.sin(a) * B.r[1] * d]; };
+  const f = n => n.toFixed(1);
+  mapArt = BIOMES.map((B, k) => {
+    const pts = Array.from({ length: 22 }, (_, j) => { const a = j / 22 * Math.PI * 2, w = 1 + .1 * Math.sin(3 * a + k) + .06 * Math.sin(7 * a + 2 * k); return [B.c[0] + Math.cos(a) * B.r[0] * w, B.c[1] + Math.sin(a) * B.r[1] * w]; });
+    const mid = j => { const a = pts[j % 22], b = pts[(j + 1) % 22]; return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; };
+    let d = `M${mid(0).map(f)}`; for (let j = 1; j <= 22; j++) d += `Q${pts[j % 22].map(f)} ${mid(j).map(f)}`;
+    let deco = '';
+    for (let n = 0; n < 26; n++) {
+      const [x, y] = inside(B), r = 4 + rnd() * 6;
+      if (B.deco === 'skin') deco += `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r * .45)}" fill="${B.rim}" opacity=".3"/><path d="M${f(x)} ${f(y)}q${f(4 + rnd() * 4)} -${f(6 + rnd() * 6)} ${f(1 + rnd() * 4)} -${f(12 + rnd() * 6)}" stroke="${B.rim}" stroke-width="1.2" fill="none" opacity=".35"/>`;
+      else if (B.deco === 'lung') for (let q = 0; q < 4; q++) deco += `<circle cx="${f(x + (q % 2) * r * 1.6)}" cy="${f(y + (q >> 1) * r * 1.6)}" r="${f(r)}" fill="none" stroke="${B.rim}" stroke-width="1.2" opacity=".4"/>`;
+      else if (B.deco === 'blood') deco += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(r * 1.4)}" ry="${f(r)}" transform="rotate(${f(rnd() * 180)} ${f(x)} ${f(y)})" fill="#b8323f" opacity=".75"/><ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(r * .6)}" ry="${f(r * .4)}" fill="#7a1a24" opacity=".8"/>`;
+      else if (B.deco === 'lymph') deco += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(r * 2)}" ry="${f(r * 1.2)}" transform="rotate(${f(rnd() * 180)} ${f(x)} ${f(y)})" fill="${B.rim}" opacity=".18"/><circle cx="${f(x + r)}" cy="${f(y)}" r="2.5" fill="${B.rim}" opacity=".6"/>`;
+      else if (B.deco === 'gut') deco += `<path d="M${f(x)} ${f(y + 10)}v-${f(10 + rnd() * 16)}" stroke="${B.rim}" stroke-width="7" stroke-linecap="round" opacity=".32"/>`;
+      else deco += `<path d="M${f(x - 14)} ${f(y)}c5 -10 9 10 14 0s9 10 14 0" stroke="${B.rim}" stroke-width="1.6" fill="none" opacity=".45"/>`;
+    }
+    return `<g><path d="${d}Z" fill="${B.fill}" stroke="${B.rim}" stroke-opacity=".35" stroke-width="2"/>${deco}</g>`;
+  }).join('') + BIOMES.map((B, k) => `<text class="mlab" x="${B.lab[0]}" y="${B.lab[1]}" text-anchor="middle" fill="${B.rim}">${CHAPTER[k].toUpperCase()}</text>`).join(''); // names on top of every biome
+  return mapArt;
+}
+function curve(P) { // a smooth line through the points (Catmull-Rom as cubic Beziers)
+  let d = `M${P[0]}`;
+  for (let i = 0; i < P.length - 1; i++) { const a = P[i - 1] || P[i], b = P[i], c = P[i + 1], e = P[i + 2] || c;
+    d += `C${b[0] + (c[0] - a[0]) / 6},${b[1] + (c[1] - a[1]) / 6} ${c[0] - (e[0] - b[0]) / 6},${c[1] - (e[1] - b[1]) / 6} ${c[0]},${c[1]}`; }
+  return d;
+}
+function renderMap() {
+  const reach = Math.max(0, ...LEVELS.map((L, i) => trayLocked(i) ? 0 : i)), chOpen = save.rch >= KITFULL;
+  let h = `<svg viewBox="0 0 1000 620" role="group" aria-label="Body map: choose a level">${bodyMapArt()}`;
+  h += `<path d="${curve(MAPXY)}" fill="none" stroke="rgba(200,225,255,.22)" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>`;
+  if (reach) h += `<path d="${curve(MAPXY.slice(0, reach + 1))}" fill="none" stroke="#ffd27a" stroke-width="3.5" stroke-dasharray="2 9" stroke-linecap="round"/>`;
+  for (const [i, xy] of Object.entries(CHXY)) { // challenge branches
+    const L = LEVELS[i], open = chOpen && save.st[i] > 0;
+    xy.forEach(([x, y], k) => { const m = k ? 'iron' : 'heroic', won = save[k ? 'ic' : 'hc'][i];
+      h += `<path d="M${MAPXY[i]}L${x},${y}" stroke="rgba(255,138,143,.35)" stroke-width="2" stroke-dasharray="2 6"/>`
+        + `<g class="lch ${open ? '' : 'locked'} ${won ? 'won' : ''}" data-i="${i}" data-m="${m}" transform="translate(${x},${y})" ${open ? 'role="button" tabindex="0"' : ''} aria-label="${MODES[m].name} challenge, level ${+i + 1}${won ? ', won' : ''}${open ? '' : ', locked'}"><circle class="hit" r="30"/><rect class="dia" x="-9" y="-9" width="18" height="18" rx="2" transform="rotate(45)"/></g>`; });
+    void L;
+  }
+  MAPXY.forEach(([x, y], i) => {
+    const locked = trayLocked(i), done = save.st[i] > 0, st = ['lnode', locked ? 'locked' : done ? 'done' : 'next', i === selLv ? 'sel' : ''].join(' ');
+    h += `<g class="${st}" data-i="${i}" transform="translate(${x},${y})" role="button" tabindex="${locked ? -1 : 0}" aria-label="Level ${i + 1}, ${LEVELS[i].name}${locked ? ', locked' : `, ${save.st[i]} of 3 stars`}">`
+      + `<circle class="hit" r="32"/>${!locked && !done ? '<circle class="pulse" r="18"/>' : ''}<circle class="disc" r="18"/><text y="5">${i + 1}</text>`
+      + (locked ? '' : [0, 1, 2].map(s => `<path class="mstar ${s < save.st[i] ? 'on' : ''}" transform="translate(${(s - 1) * 11},29) scale(.42)" d="M0-10l2.9 6 6.6.9-4.8 4.6 1.2 6.5L0 4.9-5.9 8l1.2-6.5-4.8-4.6 6.6-.9z"/>`).join('')) + '</g>';
+  });
+  $('#bodymap').innerHTML = h + '</svg>';
+  const pick = (i, m) => { // first press selects a level (its card comes into view), a second press on it plays it
+    sfx('click'); if (i === selLv && !m) return startLevel(i, 'campaign');
+    selLv = i; renderTray(); const card = $('#slides .slide'); if (card && card.scrollIntoView) card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    if (m) { const c = $(`#slides .chb[data-m="${m}"]`); if (c) c.focus(); } };
+  $('#bodymap').querySelectorAll('.lnode:not(.locked)').forEach(g => { g.onclick = () => pick(+g.dataset.i); g.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick(+g.dataset.i); } }; });
+  $('#bodymap').querySelectorAll('.lch:not(.locked)').forEach(g => { g.onclick = () => pick(+g.dataset.i, g.dataset.m); g.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick(+g.dataset.i, g.dataset.m); } }; });
+}
+const trayLocked = i => i > 0 && !save.st[i - 1] && i > save.rch && !save.st[i]; // reached levels stay open (old saves, replays)
 const hudInert = v => ['#hudTL', '#hudTR', '#hudBL'].forEach(q => $(q).inert = v); // overlays cover the HUD: no Tab stops behind them
 function showTitle() {
   hudInert(true); cardClear(); const kit = kitAt(save.rch), ka = $('#keyAb'), kh = $('#keyHero'); if (ka) { ka.hidden = !kit.ab.length; ka.innerHTML = `<b>${kit.ab.map(k => k === 'fever' ? 'Q' : 'W').join(' ')}</b> abilit${kit.ab.length > 1 ? 'ies' : 'y'}`; } if (kh) { kh.hidden = !kit.hero; kh.innerHTML = kit.gz ? '<b>H E</b> hero · burst' : '<b>H</b> hero'; } /* touch devices replace the key legend */ S.screen = 'title'; $('#endOv').hidden = true; $('#memOv').hidden = true; $('#titleOv').hidden = false; closeRadial(); showInfo(null); wm.forEach(b => b.hidden = true);
   guideDots(); $('#guideOv').hidden = true;
   $('#memBtnN').textContent = '★ ' + memStars().avail; $('#starN').textContent = `★ ${memStars().total} / ${LEVELS.length * 3 + LMARK.length * 2} STARS`;
-  const cur = LEVELS.findIndex((L, i) => !trayLocked(i) && !save.st[i]); // the page with the next specimen to play
-  trayPg = Math.floor((cur < 0 ? LEVELS.length - 1 : cur) / PAGE); renderTray();
+  const cur = LEVELS.findIndex((L, i) => !trayLocked(i) && !save.st[i]); // the next level to play is selected
+  selLv = cur < 0 ? LEVELS.length - 1 : cur; renderTray();
 }
 function renderTray() {
-  const pages = Math.ceil(LEVELS.length / PAGE), hadF = !!(document.activeElement && document.activeElement.closest && document.activeElement.closest('#pager'));
-  $('#pager').innerHTML = Array.from({ length: pages }, (_, p) => { const a = LEVELS[p * PAGE], z = LEVELS[Math.min(LEVELS.length, p * PAGE + PAGE) - 1];
-    return `<button class="pg ${p === trayPg ? 'on' : ''}" data-p="${p}" aria-pressed="${p === trayPg}" aria-label="Levels ${p * PAGE + 1} to ${p * PAGE + PAGE}"><b>${sn(p * PAGE)}–${sn(Math.min(LEVELS.length, p * PAGE + PAGE) - 1)}</b>${CHAPTER[a.m]} · ${CHAPTER[z.m]}</button>`; }).join('');
-  $('#pager').querySelectorAll('.pg').forEach(b => b.onclick = () => { trayPg = +b.dataset.p; sfx('click'); renderTray(); });
-  if (hadF) $(`#pager .pg[data-p="${trayPg}"]`).focus();
-  $('#slides').innerHTML = LEVELS.map((L, i) => {
-    if (Math.floor(i / PAGE) !== trayPg) return '';
+  renderMap();
+  $('#slides').innerHTML = [selLv].map(i => { const L = LEVELS[i];
     thumbs[i] = thumbs[i] || makeBg(L, 400, 248).toDataURL();
     const locked = trayLocked(i);
     // a div, not a button: it holds the challenge buttons. Challenges live on the six full maps and open once the kit is complete.
