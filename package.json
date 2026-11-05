@@ -1,16 +1,15 @@
 {
-  "name": "immune-citadel-v3",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "immune-citadel-v4",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postinstall": "playwright install chromium",
+    "start": "docker compose up --build",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "node --test server/test.js",
+    "test:integration": "docker compose up -d --build --wait && node --test test/*.test.js",
+    "test:game": "node tools/test.js shots/game && node tools/touch.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "devDependencies": {
-    "playwright": "^1.56.1"
+    "playwright": "1.64.1"
   }
 }
