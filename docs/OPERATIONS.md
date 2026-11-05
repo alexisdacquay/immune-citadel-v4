@@ -33,29 +33,17 @@ flowchart LR
 
 ## Telemetry
 
-Local only (`docker compose up`); production sends none. The key journey is the cloud save (`PUT` then `GET /api/save/:code`).
+The save API sends traces, metrics and logs to [Dash0](https://www.dash0.com) over OpenTelemetry (OTLP). Dev on Render sends them now; production will from its next release; locally only when `.env` holds the token (`.env.example`). The key journey is the cloud save (`PUT` then `GET /api/save/:code`).
 
 - **Traces:** every API request, with its Postgres query. Spans carry the route `/api/save/:code`, never the code; client addresses are redacted; queries show `$1`, not values.
-- **Metrics:** request duration by method and status; `saves_total{outcome="ok"|"failed"}`.
-- **Logs:** JSON lines, each with the `trace_id` and `span_id` of its request.
+- **Metrics:** request duration by method and status; `saves_total{outcome="ok"|"failed"}`. Every signal carries `deployment.environment.name` (local, dev, production).
+- **Logs:** JSON lines, each with the `trace_id` and `span_id` of its request, so a log line opens its trace.
 - Code: [server/otel.js](../server/otel.js) (OpenTelemetry), [server/route.js](../server/route.js) (the redaction), [server/index.js](../server/index.js) (logs and the counter). Fast tests: [server/telemetry.test.js](../server/telemetry.test.js).
 
-To follow one save from trace to logs in Grafana (http://localhost:3000): Explore → Loki → `{service_name="immune-citadel-api"}` → open a line → copy its `trace_id` → Explore → Tempo → paste it.
-
-| One save, traced | Its log line, same trace ID |
-|---|---|
-| ![trace](images/grafana-trace.png) | ![logs](images/grafana-logs.png) |
-
-`saves_total` by outcome across the test runs of this release (each API restart starts new series at 0):
-
-![saves_total](images/grafana-metric.png)
+Settings on a Render API service: `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingress.europe-west4.gcp.dash0.com`, `OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer <token>`, `OTEL_SERVICE_NAME=immune-citadel-api`, `OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=<env>`.
 
 ## Alert: cloud saves failing
 
-[observability/alerting.yaml](../observability/alerting.yaml): fires when any save in the last 5 minutes failed with a server error, so a player's progress did not reach the cloud. Evaluated every 10 s; it clears 5 minutes after the last failure.
+Defined as code in [observability/alert.js](../observability/alert.js) and created in Dash0 with `npm run alert`: fires when any save in the last 5 minutes failed with a server error, so a player's progress did not reach the cloud, and e-mails the owner. Checked every minute.
 
-Try it: `docker compose stop db`, make a save in the game (or `curl -X PUT localhost:8787/api/save/ABCDEFGHJKMNPQRS -H 'content-type: application/json' -d '{"save":{}}'`), and watch Grafana → Alerting. Measured: firing 7 s after the first failed save; cleared 291 s after the database came back. Then `docker compose start db`.
-
-The alert is sent to a webhook on this machine (`host.docker.internal:8790`), reserved for the on-call agent, which is not part of this release.
-
-![alert](images/grafana-alert.png)
+Try it locally (with `.env` set): `docker compose up`, make a save, then `docker compose stop db` and make another. Measured on 2026-11-05: three failed saves at 20:26:03 UTC, Dash0 marked the check critical at 20:27:04 (observed value 3). Then `docker compose start db`.

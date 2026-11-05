@@ -7,6 +7,7 @@
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "node --test server/test.js server/telemetry.test.js test/config.test.js",
     "test:integration": "docker compose up -d --build --wait db api web && node --test test/integration.test.js",
+    "alert": "node --env-file=.env observability/alert.js",
     "test:game": "node tools/test.js shots/game && node tools/touch.js"
   },
   "devDependencies": {

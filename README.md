@@ -24,7 +24,7 @@ Expected behaviour and acceptance criteria per player journey: [docs/SPEC.md](do
 docker compose up
 ```
 
-Game: http://localhost:8080 · Grafana (traces, metrics, logs, the alert): http://localhost:3000. If port 3000 is taken: `GRAFANA_PORT=3300 docker compose up`.
+Game: http://localhost:8080. To also send telemetry to Dash0, copy `.env.example` to `.env` and fill in the token; without it, telemetry is off.
 
 ## Test it
 
@@ -41,8 +41,8 @@ npm test
 flowchart LR
     P[Player's browser<br/>index.html, the whole game] -- "GET/PUT /api/save/:code" --> A[Save API<br/>Node, server/]
     A --> D[(Postgres)]
-    A -. "traces, metrics, logs (OTLP)" .-> O[Grafana stack<br/>local only]
-    O -- "alert: cloud saves failing" --> W[webhook]
+    A -. "traces, metrics, logs (OTLP)" .-> O[Dash0<br/>SaaS]
+    O -- "alert: cloud saves failing" --> W[owner's e-mail]
 ```
 
 | Part | Where | Local | Render |
@@ -50,7 +50,7 @@ flowchart LR
 | Game | `index.html` | nginx in Compose | static site |
 | Save API | `server/index.js` | Compose | web service |
 | Database | Postgres | Compose | Render Postgres |
-| Telemetry | `server/otel.js`, `observability/` | Compose (grafana/otel-lgtm) | off |
+| Telemetry | `server/otel.js`, `observability/alert.js` | to Dash0, if `.env` is set | dev: to Dash0; production: from its next release |
 
 ## How it is built
 
@@ -69,6 +69,6 @@ A small AI agent team works from GitHub issues: see [AGENTS.md](AGENTS.md) (wher
 | 7 | Containerization | [compose.yaml](compose.yaml), [server/Dockerfile](server/Dockerfile) |
 | 8 | Deployment | the URLs at the top |
 | 9 | CI/CD | [CI](.github/workflows/ci.yml) on every PR and push; Render deploys `dev` after CI passes; production moves only when the owner merges `dev` into `main`: [docs/OPERATIONS.md](docs/OPERATIONS.md#releases) |
-| 10 | Observability | the cloud-save journey: traces, metrics and logs sharing a trace ID, no save codes: [docs/OPERATIONS.md](docs/OPERATIONS.md#telemetry) |
-| 11 | Alerting on user impact | "Cloud saves failing": [observability/alerting.yaml](observability/alerting.yaml) |
+| 10 | Observability | the cloud-save journey in Dash0: traces, metrics and logs sharing a trace ID, no save codes: [docs/OPERATIONS.md](docs/OPERATIONS.md#telemetry) |
+| 11 | Alerting on user impact | "Cloud saves failing" in Dash0, as code: [observability/alert.js](observability/alert.js) |
 | 12 | On-call agent | not done yet |

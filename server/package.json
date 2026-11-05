@@ -6,7 +6,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node index.js",
+    "start": "node --require ./otel.js index.js",
     "test": "node --test test.js"
   },
   "dependencies": {
