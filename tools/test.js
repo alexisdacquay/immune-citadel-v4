@@ -99,6 +99,9 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
     for (const m of [IC.mergeSave(a, b), IC.mergeSave(b, a)]) { for (const k of ['st', 'hc', 'ic']) a[k].forEach((v, i) => m[k][i] < v && bad.push(`${k}[${i}]`)); if (m.st[2] !== 3 || m.rch !== 12) bad.push(`st[2]=${m.st[2]} rch=${m.rch}`); }
     return bad; });
   if (stale.length) errs.push('merging a stale old-format save lowered progress: ' + stale.join(', '));
+  // an owed card shown on one device must not come back from the other device's copy (it did: "Fever spike" shown as new at every level)
+  const owed = await p.evaluate(() => { const shown = { owe: [], seen: ['owed:fever'], at: 2 }, cloud = { owe: ['fever'], seen: [], at: 1 }; return [IC.mergeSave(shown, cloud), IC.mergeSave(cloud, shown)].map(m => (m.owe || []).join()).join('|'); });
+  if (owed !== '|') errs.push('an owed card shown on one device came back from the other: ' + owed);
   console.log('route problems:', route.length ? route : 'none'); errs.push(...route);
   const results = []; let used = {}; // specialists bought by the bot, across all runs
   const nLv = await p.evaluate(() => IC.LEVELS.length), lmark = await p.evaluate(() => IC.LMARK);
