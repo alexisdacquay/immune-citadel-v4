@@ -2543,7 +2543,7 @@ function updateChips() {
   wm.forEach(b => { // each marker lists only what enters by its own routes
     const counts = {}; let alt = 0;
     for (const g of S.waves[S.wave]) for (let n = 0; n < g.n; n++) if (b.routes.includes(g.p === -1 ? (alt++) % S.paths.length : Math.min(g.p, S.paths.length - 1))) counts[g.t] = (counts[g.t] || 0) + 1; // same route rule as sendWave
-    const chips = Object.entries(counts).map(([t, n]) => `<span class="chip"><img src="${portrait(t, 0, 48)}">${n}</span>`).join('') || 'Quiet this wave: nothing enters here.';
+    const chips = Object.entries(counts).map(([t, n]) => `<span class="chip"><img src="${portrait(t, 0, 48)}">${n}</span>`).join('') || 'Quiet this wave';
     b.querySelector('.tip').innerHTML = `<small>${S.mode === 'iron' ? 'ONE LONG WAVE' : `WAVE ${S.wave + 1} / ${S.waves.length}`}</small><b>${S.wave === 0 ? 'Call the first wave' : held ? 'Call the next wave' : 'Call early'}</b><div class="chips">${chips}</div>${S.wave > 0 && !held ? '<span class="bonus"></span>' : 'When your defences are ready.'}<span class="go"></span>`;
   });
 }
