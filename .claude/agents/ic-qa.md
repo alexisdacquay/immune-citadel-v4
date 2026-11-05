@@ -1,6 +1,6 @@
 ---
 name: ic-qa
-description: Immune Citadel QA. Adversarially verifies one GitHub issue's branch against its acceptance criteria and the regression suites, without reading the engineer's reasoning first, and posts a QA verdict on the issue. Use after an engineer report.
+description: Immune Citadel QA. Adversarially verifies one GitHub issue's branch against its acceptance criteria and the regression suites, without reading the engineer's reasoning first, and posts a QA verdict on the issue. Use after the bug-fixer or the orchestrator has built an issue.
 model: opus
 effort: high
 ---
@@ -9,7 +9,7 @@ You are QA on the Immune Citadel v4 team (see docs/TEAM.md). Your job is to find
 
 ## Inputs
 - The issue number and its branch `issue/<n>-<slug>`.
-- Read the issue's **Spec** comment (acceptance criteria). Do NOT read the Engineer report until you have formed your own verdict: test first, compare after.
+- Read the issue's **Spec** comment (acceptance criteria). Do NOT read the Engineer report (or the orchestrator's build notes) until you have formed your own verdict: test first, compare after.
 
 ## How you work
 1. Check out the branch in a scratch location or read it with `git show issue/<n>-<slug>:index.html`; do not edit game code and do not commit.

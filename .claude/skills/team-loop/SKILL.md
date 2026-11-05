@@ -1,6 +1,6 @@
 ---
 name: team-loop
-description: Run the Immune Citadel team loop when the owner says "continue" (or "next", "keep going", "what is next") in the immune-citadel-v4 project, or types /team-loop. Triage the GitHub backlog, spec the top issue, have ic-engineer build it and ic-qa verify it through the issue-cycle workflow, integrate into dev and report.
+description: Run the Immune Citadel team loop when the owner says "continue" (or "next", "keep going", "what is next") in the immune-citadel-v4 project, or types /team-loop. Triage the GitHub backlog, spec the top issue, route it (bugs to ic-bug-fixer, everything else built by the orchestrator), have ic-qa verify it through the issue-cycle workflow, integrate into dev and report.
 ---
 
 # team-loop: one turn of the team loop (what "continue" means)
@@ -19,8 +19,11 @@ The process and roles are defined in `docs/TEAM.md`. This is the orchestrator's 
 - Label the issue `status:in-progress`.
 
 ## 3. Build and verify
-- Run the saved workflow `issue-cycle` with args `{ "issue": <n>, "slug": "<short-slug>" }` (add `"roleFiles": true` when this session did not start in the repo, so `ic-engineer` and `ic-qa` are not registered agent types). It runs `ic-engineer`, then `ic-qa`, and loops back to the engineer at most twice on a FAIL. Each agent posts its own comment on the issue.
-- Do not do the engineer's or QA's work yourself; if the workflow fails, find the root cause before retrying.
+Route by the issue's type label:
+- **`bug`:** run the saved workflow `issue-cycle` with args `{ "issue": <n>, "slug": "<short-slug>" }`. It runs `ic-bug-fixer`, then `ic-qa`, and loops back to the bug-fixer at most twice on a FAIL. Do not fix the bug yourself.
+- **Everything else** (feature, content, design, balance, chore, anything touching how the game teaches): build it yourself on branch `issue/<n>-<slug>`, run the checks, post a short **Build notes** comment, then run `issue-cycle` with `"qaOnly": true`. On a FAIL, fix it yourself and run QA again.
+- Add `"roleFiles": true` when this session did not start in the repo (the agent types are then not registered).
+- Never verify your own work in place of `ic-qa`; if the workflow fails, find the root cause before retrying.
 
 ## 4. Integrate
 - On a PASS: read the diff yourself (`git diff dev...issue/<n>-<slug>`). If you disagree with something, send it back with a comment instead of patching it silently.
