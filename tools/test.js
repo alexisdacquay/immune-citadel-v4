@@ -9,7 +9,7 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   // first play (no save): field notes on specimens 01, 02 and 04 with real input, one at a time, beside their target and never over it; then the Field Guide
   const ob = (ok, msg) => { if (!ok) errs.push('onboarding: ' + msg); }, gg = (ok, msg) => { if (!ok) errs.push('guide: ' + msg); };
   const mid = s => p.evaluate(s => { const r = document.querySelector(s).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }, s);
-  const toPage = async i => { const q = `.pg[data-p="${Math.floor(i / 6)}"]`; if (await p.evaluate(q => !document.querySelector(q).classList.contains('on'), q)) { await p.mouse.click(...await mid(q)); await p.waitForTimeout(100); } }; // the tray shows the page of specimen i (6 per page)
+  const toPage = async i => { const q = `.lnode[data-i="${i}"]`; if (await p.evaluate(q => !document.querySelector(q).classList.contains('sel'), q)) { await p.mouse.click(...await mid(q)); await p.waitForTimeout(100); } }; // select level i on the body map: its card shows beside the map
   const onMap = (x, y) => p.evaluate(([x, y]) => { const r = document.getElementById('cv').getBoundingClientRect(); return [r.left + x / 1000 * r.width, r.top + y / 620 * r.height]; }, [x, y]);
   const note = () => p.evaluate(() => { // the visible note, and whether it keeps clear of its target ring
     const h = document.getElementById('hint'), g = document.getElementById('hintRing'), s = document.getElementById('stage').getBoundingClientRect(); if (h.hidden) return null;
@@ -284,7 +284,7 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   cc(await p.evaluate(() => IC.MEMORY.length * IC.MEMCOST.reduce((a, b) => a + b) === 66 && IC.LEVELS.length * 3 + IC.LMARK.length * 2 === 66), 'buying every memory tier must cost exactly the 66 stars there are');
   await p.evaluate(() => IC.showTitle()); await p.waitForTimeout(200);
   // each tray page: chips only on won full-map specimens (LMARK), and only once the kit is complete (KITFULL); before that a note
-  const chipPages = async full => { const bad = []; for (let pg = 0; pg < Math.ceil(nLv / 6); pg++) { await toPage(pg * 6); bad.push(...await p.evaluate(full => [...document.querySelectorAll('.slide')].filter(e => {
+  const chipPages = async full => { const bad = []; for (let i = 0; i < nLv; i++) { await toPage(i); bad.push(...await p.evaluate(full => [...document.querySelectorAll('.slide')].filter(e => {
     const i = +e.dataset.i, won = IC.LMARK.includes(i) && IC.save.st[i] > 0, chn = e.querySelector('.chn');
     return e.querySelectorAll('.chb').length !== (full && won ? 2 : 0) || (!full && won) !== (!!chn && /Challenges open at Level 17/.test(chn.textContent)); }).map(e => e.dataset.i), full)); } return bad; };
   const noKit = await (async () => { await p.evaluate(() => { window._rch = IC.save.rch; IC.save.rch = IC.KITFULL - 1; IC.showTitle(); }); const b = await chipPages(false); await p.evaluate(() => { IC.save.rch = window._rch; IC.showTitle(); }); return b; })();

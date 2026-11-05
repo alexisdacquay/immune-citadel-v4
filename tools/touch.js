@@ -38,6 +38,8 @@ module.exports = async function touch(browser, out, errs) {
     const onMap = (x, y) => p.evaluate(([x, y]) => { const r = document.getElementById('cv').getBoundingClientRect(); return [r.left + x / 1000 * r.width, r.top + y / 620 * r.height]; }, [x, y]);
     const ev = f => p.evaluate(f);
     // every visible target of these selectors at least 40 px both ways (touch only; the mouse layout is unchanged)
+    // the body map shows one level's card: select level i on the map (unless it already is), then tap its card
+    const openLevel = async i => { if (!(await ev(`document.querySelector('.lnode[data-i="${i}"]').classList.contains('sel')`))) await tapSel(`.lnode[data-i="${i}"]`); await tapSel(`.slide[data-i="${i}"]`); };
     const sizes = async (sel, what) => {
       if (!V.touch) return;
       await settle(); // measure the settled size, not a pop-in frame (slow CI caught 38 of 44 px)
@@ -49,8 +51,8 @@ module.exports = async function touch(browser, out, errs) {
 
     // tray
     await shot('tray');
-    await sizes('.slide:not(.locked),.chb,.mbtn', 'tray');
-    await tapSel('.slide[data-i="0"]'); await p.waitForTimeout(300);
+    await sizes('.slide:not(.locked),.chb,.mbtn,.lnode:not(.locked) .hit,.lch:not(.locked) .hit', 'tray');
+    await openLevel(0); await p.waitForTimeout(300);
     fail(await ev(() => IC.S.screen === 'play' && IC.S.lvl === 0), 'tap on the first slide did not start it');
 
     // layout: inside the safe area, HUD panels apart, map coverage no worse than the baseline
@@ -147,7 +149,7 @@ module.exports = async function touch(browser, out, errs) {
     await tapSel('.mnode[data-c="0"][data-t="0"]'); fail(await ev(() => IC.save.mem.neutro === 1), 'memory node tap did not train');
     await shot('memory'); await tapSel('#memBack'); fail(await ev(() => IC.S.screen === 'title'), 'memory back');
     // lab report
-    await tapSel('.slide[data-i="1"]'); await ev(() => IC.endLevel(true)); await p.waitForTimeout(1300);
+    await openLevel(1); await ev(() => IC.endLevel(true)); await p.waitForTimeout(1300);
     await sizes('#endOv .btn,#endOv .mlink', 'lab report'); await shot('report');
     await tapSel('#eRetry'); fail(await ev(() => IC.S.screen === 'play' && IC.S.lvl === 1), 'report retry');
     if (V.touch) { // portrait: rotate card over the paused game; back to landscape keeps it paused until a tap
