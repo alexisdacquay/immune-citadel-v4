@@ -354,4 +354,5 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   console.log('audio offline 40 s:', JSON.stringify(off));
   await require('./touch.js')(b, out, errs); // phones, tablet and both mouse sizes: taps, two-tap buy, target sizes, layout, rotate card
   console.log('errors:', errs.length ? errs : 'none'); await b.close();
+  process.exitCode = errs.length ? 1 : 0; // CI must go red when the game breaks
 })();

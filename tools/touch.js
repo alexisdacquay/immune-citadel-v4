@@ -163,4 +163,5 @@ if (require.main === module) (async () => {
   const { chromium } = require('playwright'); const b = await chromium.launch(), errs = [];
   await module.exports(b, process.argv[2] || 'shots', errs); await b.close();
   console.log('errors:', errs.length ? errs : 'none');
+  process.exitCode = errs.length ? 1 : 0;
 })();
