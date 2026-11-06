@@ -62,7 +62,7 @@ flowchart LR
 | game errors and load speed | Sentry, project `immune-citadel-game` | dev and production sites only; release = the commit in `/version.txt`; save codes scrubbed |
 | site up | Better Stack | HEAD on both game sites every 5 min; apply changes with `node observability/betterstack.js` (`BETTERSTACK_API_TOKEN`) |
 
-Sentry organisation `myown-76`, EU region (de.sentry.io). Environments: `local`, `dev`, `production`.
+Sentry organisation `myown-76`, EU region (de.sentry.io). Environments: `local`, `dev`, `production`. Organisation privacy settings: IP addresses not stored; location (`$user.geo`) removed by an Advanced Data Scrubbing rule, because Sentry derives it from the IP even when IP storage is off.
 
 **Children's data:** [server/sentry.js](../server/sentry.js) sends no IP, headers, cookies, bodies, query strings, database parameters or local variables, and replaces any save code (the player's only credential) with `:code` in errors and traces. Proof: [server/sentry.test.js](../server/sentry.test.js). Logs use the route `/api/save/:code` ([server/route.js](../server/route.js), [server/telemetry.test.js](../server/telemetry.test.js)).
 

@@ -44,16 +44,14 @@ All of it runs on dev today; production gets it at the next promotion ([OBSERVAB
 
 | # | Work | Why this order |
 |---|---|---|
-| 1 | turn on "Prevent Storing of IP Addresses" in Sentry (owner, one click) | Sentry derives a city from players' IPs today |
-| 2 | bug #37 (fever spike card shows as new at several levels) | the only open P1 bug |
-| 3 | observability step 5 (gameplay events) | needs the event list approved |
-| 4 | owner playtest (#18), then promotion to production (#19) with observability step 6 | production is two days behind dev |
+| 1 | bug #37 (fever spike card shows as new at several levels) | the only open P1 bug |
+| 2 | observability step 5 (gameplay events) | needs the event list approved |
+| 3 | owner playtest (#18), then promotion to production (#19) with observability step 6 | production is two days behind dev |
 
 ## Waiting on the owner
 
 | Item | When |
 |---|---|
-| Sentry → Settings → Security & Privacy → "Prevent Storing of IP Addresses" (organisation level) | now |
 | approve the gameplay event list | step 5 |
 | playtest (#18), approve the promotion (#19) and a paid production API instance | before step 6 |
 | `immune-citadel-dev-db` and `immune-citadel-prod-db` (v3 leftovers, paid): keep or delete | any time |
