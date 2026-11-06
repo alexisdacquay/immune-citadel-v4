@@ -4,6 +4,28 @@ One page: where the project stands and what comes next. Updated at the end of ev
 
 Last update: 2026-11-06 18:00 UTC.
 
+## How it fits together
+
+```mermaid
+flowchart LR
+    DEV["code on GitHub"] -- "pull request: CI tests,<br/>then auto-merge" --> RENDER
+    subgraph RENDER["Render (hosting): dev and production"]
+      SITE["game site<br/>index.html"]
+      API["save API"] --> DB[("Postgres<br/>saves")]
+    end
+    PLAYER["player's browser"] -- plays --> SITE
+    PLAYER -- "cloud saves" --> API
+    PLAYER -. "crashes, load speed<br/>(step 3)" .-> SENTRY["Sentry<br/>errors, traces"]
+    API -- "errors, traces" --> SENTRY
+    CI["CI job 'deployed'"] -- "right version live?" --> RENDER
+    BETTER["Better Stack<br/>(step 4)"] -. "site up?" .-> SITE
+    SENTRY -- email --> OWNER(("owner"))
+    CI -- "email if red" --> OWNER
+    BETTER -. email .-> OWNER
+```
+
+Solid: running on dev today. Dashed: next steps of [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md). Gameplay events (step 5) will go player → save API → Postgres. Dash0 is no longer used by this project.
+
 ## Where things run
 
 | | Commit | What it has |
@@ -16,13 +38,13 @@ Last update: 2026-11-06 18:00 UTC.
 | Plan | Done | Now | Next |
 |---|---|---|---|
 | [PIPELINE-PLAN.md](PIPELINE-PLAN.md): trustworthy deploys | 1-4: site publishes only the game; rules on `dev`/`main`; deploy on commit + `deployed` proof; auto-merge | — | closed (step 5 moved to the observability plan) |
-| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | 1: save API errors → Sentry → email (proven, live on dev) | 2: remove Dash0 (PR open) | 3: Sentry in the game · 4: Better Stack on the sites · 5: gameplay events · 6: production at promotion |
+| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | 1: save API errors → Sentry → email (proven, live on dev) | 2: remove Dash0 (PR #49) · 3: Sentry in the game (PR next) | 4: Better Stack on the sites · 5: gameplay events · 6: production at promotion |
 
 ## Order of work
 
 | # | Work | Why this order |
 |---|---|---|
-| 1 | observability steps 2-4 | small, on dev, no owner decision left except cancelling Dash0 |
+| 1 | observability steps 2-4 | small, on dev; step 4 needs the Better Stack token |
 | 2 | bug #37 (fever spike card shows as new at several levels) | the only open P1 bug |
 | 3 | observability step 5 (gameplay events) | needs the event list approved |
 | 4 | owner playtest (#18), then promotion to production (#19) with observability step 6 | production is two days behind dev |
@@ -31,7 +53,6 @@ Last update: 2026-11-06 18:00 UTC.
 
 | Item | When |
 |---|---|
-| cancel Dash0 | after step 2 is merged |
 | a Better Stack API token in `~/.config/immune-citadel/secrets.env` as `BETTERSTACK_API_TOKEN` (monitors defined as code) | before step 4 |
 | approve the gameplay event list | step 5 |
 | playtest (#18), approve the promotion (#19) and a paid production API instance | before step 6 |
@@ -49,7 +70,7 @@ Last update: 2026-11-06 18:00 UTC.
 
 | Decision | Instead of |
 |---|---|
-| Sentry for errors in the game and the save API; Dash0 removed | Dash0, Grafana, PostHog |
+| Sentry for errors in the game and the save API; Dash0 removed from this project (account kept for another) | Dash0, Grafana, PostHog |
 | own gameplay events in our Postgres (children's data stays first-party) | a third-party analytics tool |
 | Better Stack for uptime; the `deployed` CI job for "right commit live" | Checkly as an outside observer |
 | alerts by email only | a phone pager |
