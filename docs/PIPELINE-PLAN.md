@@ -1,0 +1,22 @@
+# Pipeline plan: trustworthy deploys
+
+Agreed with the owner on 2026-11-06. One step at a time; each step is verified before the next starts. Tick a box only when its proof is recorded.
+
+## Why
+- The pipeline can fail silently: CI never runs, a deploy never lands, the wrong commit is live, telemetry stops. Push-based signals (CI traces, Render notifications) only report what ran, never what did not happen.
+- Practice: prove inside the pipeline that the new commit is live (the job that ships goes red otherwise), plus one observer outside GitHub, Render and Dash0 that compares the wanted commit with the live one (the GitOps reconcile idea).
+- Research behind this (two runs, each claim fact-checked): GitHub has no native OTLP export; Render's "After CI checks pass" deploys nothing, silently, when a commit has no or failing checks; any extra check on a commit becomes a Render deploy gate; GitHub scheduled workflows can run hours late.
+
+## Steps
+- [ ] **1. Static sites publish only the game.** Today both publish the whole checkout (`publishPath ./`, Render's automatic `npm install` adds `node_modules`): server code, docs, CI and agent files are public. Build: `mkdir -p public && cp index.html public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt`, publish `public`, env `SKIP_INSTALL_DEPS=true`. Dev first, then prod, before the next promotion. Proof: `/version.txt` shows the commit, `/server/index.js`, `/node_modules/…`, `/docs/…`, `/.claude/…` return 404, the game loads.
+- [ ] **2. GitHub Pro (owner buys it), then rulesets on `dev` and `main`.** Changes only via pull request; checks `test` and `game` required; branch up to date before merging; no bypass.
+- [ ] **3. Deploy on commit, verify in CI.** Render `autoDeployTrigger` → `commit` on all four services (Render's advice once checks run before the branch). New CI job on pushes to `dev`/`main`: wait until the API `/health` and the site `/version.txt` show `GITHUB_SHA` (timeout about 10 min), else fail, so the owner gets GitHub's failure email. No deploy hooks: they add four secret URLs, and re-running an old run would redeploy an old commit.
+- [ ] **4. Auto-merge.** Repository setting on; merges enabled by a person's token, never by `GITHUB_TOKEN` (its merges start no workflows).
+- [ ] **5. Outside observer: Checkly (free Hobby plan).** One multistep check every 6 h: GitHub heads of `dev` and `main` (read-only token, contents:read, this repo only) against `/version.txt` and `/health` per environment; email on mismatch. Catches CI never running, a dashboard rollback, a dead pipeline, and works when Dash0 is down. Not more often: each `/health` call wakes a Free API for about 16 min; 750 Free hours a month are shared by the workspace and running out suspends every Free service.
+
+## The two findings
+- [ ] **Prod sends no telemetry.** Add the four `OTEL_*` variables to the prod API now (the current prod code ignores them, `otel.js` does nothing without the endpoint); add `service.version` = `RENDER_GIT_COMMIT` to the telemetry; prod reports from the next promotion. At promotion, move the prod API to a paid instance (a sleeping API costs players a ~1 min cold start and makes absence alerts noise). Fix the line in OPERATIONS.md that says prod `/health` shows the commit (false until promotion).
+- [ ] **Dash0 is a single point of failure.** Owner to confirm the Dash0 plan (no free tier, 14-day trial: a lapsed account stops all telemetry and alerts silently). Subscribe to Dash0's status page. Step 5 covers "live and correct" without Dash0. Deferred: a Dash0 watchdog alert feeding an outside heartbeat (fragile; covers dev only until prod sends telemetry).
+
+## Checked and cleared
+- Postgres expiry: the v4 database is on a paid plan (`basic_256mb`), not Free. Owner to decide on `immune-citadel-dev-db` and `immune-citadel-prod-db` (15 GB each, paid, created 2026-10-29), which look like v3 leftovers.
