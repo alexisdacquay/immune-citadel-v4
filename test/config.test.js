@@ -27,3 +27,12 @@ test('the alert emails the owner on every save API error', () => {
   assert.equal(alert.triggers.conditions[0].type, 'every_event');
   assert.equal(alert.actionFilters[0].actions[0].type, 'email');
 });
+
+test('the game loads Sentry only on the dev and production sites, pinned and checked, with save codes scrubbed', () => {
+  const html = read('index.html'), block = html.slice(html.indexOf('// Sentry: game crashes'), html.indexOf('</head>'));
+  assert.match(block, /\{ 'immune-citadel-v4\.onrender\.com': 'production', 'immune-citadel-v4-dev\.onrender\.com': 'dev' \}\[location\.hostname\];\n\s*if \(!env\) return;/);
+  assert.match(block, /browser\.sentry-cdn\.com\/\d+\.\d+\.\d+\//, 'a pinned SDK version');
+  assert.match(block, /integrity = 'sha384-/, 'subresource integrity');
+  assert.match(block, /beforeSend: scrub, beforeSendSpan: scrub, beforeBreadcrumb: scrub/);
+  assert.doesNotMatch(block, /replayIntegration/, 'no session replay');
+});

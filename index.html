@@ -460,6 +460,27 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 #rotate p{margin:0;font-size:13px;line-height:1.45;color:var(--dim)}
 @media (max-width:700px){.mgrid{grid-template-columns:repeat(3,1fr);row-gap:12px}.mroot{display:none}.mhd{display:block}.bank{display:inline-block;margin-top:10px}.tbtns{position:static;margin-top:8px;flex-wrap:wrap}.gbody{grid-template-columns:1fr}.ggrid{grid-template-columns:repeat(2,minmax(0,1fr))}.gtabs{margin-top:10px}.hd{display:block}.slides{grid-template-columns:1fr}.slide .body{grid-template-columns:1fr 1fr}.tin h1{font-size:44px}}
 </style>
+<script>
+// Sentry: game crashes and load speed (docs/OBSERVABILITY-PLAN.md, step 3). Only on the dev and production sites, never locally or in tests.
+// Children's data stays home: no IP, cookies, headers or replay, and any save code is replaced before a report leaves the browser.
+// If the script is blocked (ad blockers, school filters), the game runs exactly the same.
+(() => {
+  const env = { 'immune-citadel-v4.onrender.com': 'production', 'immune-citadel-v4-dev.onrender.com': 'dev' }[location.hostname];
+  if (!env) return;
+  const scrub = x => JSON.parse(JSON.stringify(x).replace(/[A-HJ-NP-Z2-9]{16}/g, ':code'));
+  const s = document.createElement('script');
+  s.src = 'https://browser.sentry-cdn.com/11.9.0/bundle.tracing.min.js';
+  s.integrity = 'sha384-cpMO6Dm2uco5jrSeSdsOuINfaahIkSnKggH/HUa3fvjv4pqg0Ps+c7LPK6/ZF1wL'; s.crossOrigin = 'anonymous';
+  s.onload = () => fetch('/version.txt').then(r => (r.ok ? r.text() : '')).catch(() => '').then(v => Sentry.init({
+    dsn: 'https://8a64357620418627c0ad9b402c812e8e@o4512385980235776.ingest.de.sentry.io/4512386038628432', // public by design: it only lets a browser send reports
+    environment: env, release: v.trim() || undefined,
+    integrations: [Sentry.browserTracingIntegration()], tracesSampleRate: 1, // every page load: a few thousand a month
+    dataCollection: { userInfo: false, cookies: false, httpHeaders: false, httpBodies: [], urlQueryParams: false },
+    beforeSend: scrub, beforeSendSpan: scrub, beforeBreadcrumb: scrub,
+  }));
+  document.head.appendChild(s);
+})();
+</script>
 </head>
 <body>
 <div id="safe"></div>
