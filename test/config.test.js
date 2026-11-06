@@ -1,4 +1,4 @@
-// Fast checks that the pieces are wired to each other: game -> API -> Compose -> telemetry -> alert.
+// Fast checks that the pieces are wired to each other: game -> API -> Compose -> Sentry -> alert.
 // Each one stands for a mistake that would otherwise only show up on a full run.
 const test = require('node:test'), assert = require('node:assert');
 const fs = require('node:fs'), path = require('node:path');
@@ -13,19 +13,17 @@ test('the game served by Compose calls the API port Compose publishes, and the A
   assert.match(compose, /ALLOWED_ORIGINS: .*http:\/\/127\.0\.0\.1:8080/);
 });
 
-test('the API loads telemetry wherever it starts, and Compose takes the Dash0 settings from .env only', () => {
-  assert.equal(JSON.parse(read('server/package.json')).scripts.start, 'node --require ./otel.js index.js');
+test('the API starts the same way everywhere, and Compose takes the Sentry DSN from .env only', () => {
+  assert.equal(JSON.parse(read('server/package.json')).scripts.start, 'node index.js');
   assert.match(read('server/Dockerfile'), /CMD \["npm", "start"\]/);
-  assert.match(compose, /OTEL_EXPORTER_OTLP_HEADERS: \$\{OTEL_EXPORTER_OTLP_HEADERS:-\}/);
-  assert.doesNotMatch(compose + read('.env.example'), /auth_[A-Za-z0-9]{10,}/, 'no real token in tracked files');
+  assert.match(compose, /SENTRY_DSN: \$\{SENTRY_DSN:-\}/);
+  assert.doesNotMatch(compose + read('.env.example'), /ingest\.[a-z.]*sentry\.io/, 'no real DSN in tracked files');
   assert.match(read('.gitignore'), /^\.env$/m);
 });
 
-test('the alert counts failed saves and notifies a channel it also creates', () => {
-  const alert = read('observability/alert.js');
-  assert.match(alert, /saves_total\{[^}]*outcome="failed"/);
-  const channel = alert.match(/const CHANNEL = '([^']+)'/)[1];
-  assert.match(alert, /'dash0.com\/notification-channel-ids': CHANNEL/);
-  assert.match(alert, /notification-channels\/\$\{CHANNEL\}/);
-  assert.ok(channel);
+test('the alert emails the owner on every save API error', () => {
+  const alert = JSON.parse(read('observability/sentry-alert.json'));
+  assert.deepEqual(alert.projectSlugs, ['immune-citadel-api']);
+  assert.equal(alert.triggers.conditions[0].type, 'every_event');
+  assert.equal(alert.actionFilters[0].actions[0].type, 'email');
 });

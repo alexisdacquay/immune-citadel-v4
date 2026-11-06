@@ -6,20 +6,12 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node --require ./otel.js index.js",
+    "start": "node index.js",
     "test": "node --test test.js"
   },
   "dependencies": {
-    "@opentelemetry/api": "1.10.0",
-    "@opentelemetry/instrumentation-http": "0.300.0",
-    "@opentelemetry/instrumentation-pg": "0.77.0",
-    "@opentelemetry/instrumentation-pino": "0.70.0",
-    "@opentelemetry/sdk-node": "0.300.0",
     "@sentry/node": "11.9.0",
     "pg": "^8.13.1",
     "pino": "10.4.0"
-  },
-  "devDependencies": {
-    "@opentelemetry/sdk-metrics": "3.0.0"
   }
 }
