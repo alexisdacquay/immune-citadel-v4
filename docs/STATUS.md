@@ -15,16 +15,16 @@ flowchart LR
     end
     PLAYER["player's browser"] -- plays --> SITE
     PLAYER -- "cloud saves" --> API
-    PLAYER -. "crashes, load speed<br/>(step 3)" .-> SENTRY["Sentry<br/>errors, traces"]
+    PLAYER -- "crashes, load speed" --> SENTRY["Sentry<br/>errors, traces"]
     API -- "errors, traces" --> SENTRY
     CI["CI job 'deployed'"] -- "right version live?" --> RENDER
-    BETTER["Better Stack<br/>(step 4)"] -. "site up?" .-> SITE
+    BETTER["Better Stack"] -- "site up?" --> SITE
     SENTRY -- email --> OWNER(("owner"))
     CI -- "email if red" --> OWNER
-    BETTER -. email .-> OWNER
+    BETTER -- email --> OWNER
 ```
 
-Solid: running on dev today. Dashed: next steps of [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md). Gameplay events (step 5) will go player → save API → Postgres. Dash0 is no longer used by this project.
+All of it runs on dev today; production gets it at the next promotion ([OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 6). Gameplay events (step 5) will go player → save API → Postgres. Dash0 is no longer used by this project.
 
 ## Where things run
 
@@ -38,22 +38,20 @@ Solid: running on dev today. Dashed: next steps of [OBSERVABILITY-PLAN.md](OBSER
 | Plan | Done | Now | Next |
 |---|---|---|---|
 | [PIPELINE-PLAN.md](PIPELINE-PLAN.md): trustworthy deploys | 1-4: site publishes only the game; rules on `dev`/`main`; deploy on commit + `deployed` proof; auto-merge | — | closed (step 5 moved to the observability plan) |
-| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | 1: save API errors → Sentry → email (proven, live on dev) | 2: remove Dash0 (PR #49) · 3: Sentry in the game (PR next) | 4: Better Stack on the sites · 5: gameplay events · 6: production at promotion |
+| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | 1-4: Sentry on the save API and in the game, Dash0 removed, Better Stack on both sites, all proven on dev | — | 5: gameplay events (event list to approve) · 6: production at promotion |
 
 ## Order of work
 
 | # | Work | Why this order |
 |---|---|---|
-| 1 | observability steps 2-4 | small, on dev; step 4 needs the Better Stack token |
-| 2 | bug #37 (fever spike card shows as new at several levels) | the only open P1 bug |
-| 3 | observability step 5 (gameplay events) | needs the event list approved |
-| 4 | owner playtest (#18), then promotion to production (#19) with observability step 6 | production is two days behind dev |
+| 1 | bug #37 (fever spike card shows as new at several levels) | the only open P1 bug |
+| 2 | observability step 5 (gameplay events) | needs the event list approved |
+| 3 | owner playtest (#18), then promotion to production (#19) with observability step 6 | production is two days behind dev |
 
 ## Waiting on the owner
 
 | Item | When |
 |---|---|
-| a Better Stack API token in `~/.config/immune-citadel/secrets.env` as `BETTERSTACK_API_TOKEN` (monitors defined as code) | before step 4 |
 | approve the gameplay event list | step 5 |
 | playtest (#18), approve the promotion (#19) and a paid production API instance | before step 6 |
 | `immune-citadel-dev-db` and `immune-citadel-prod-db` (v3 leftovers, paid): keep or delete | any time |

@@ -1,0 +1,12 @@
+{
+  "_comment": "Sentry alert 1464194 (org myown-76, de.sentry.io), applied by the agent through the Sentry MCP. A new, regressed or returning game error emails the owner, at most once per 30 min per issue. Sentry's default 'high priority issues' alert (1463992) is disabled: it duplicated the save API emails.",
+  "name": "Game error (new or returning): email owner",
+  "projectSlugs": ["immune-citadel-game"],
+  "triggers": { "logicType": "any-short", "conditions": [
+    { "type": "first_seen_event", "comparison": true, "conditionResult": true },
+    { "type": "regression_event", "comparison": true, "conditionResult": true },
+    { "type": "reappeared_event", "comparison": true, "conditionResult": true }
+  ] },
+  "actionFilters": [{ "logicType": "all", "conditions": [], "actions": [{ "type": "email", "config": { "targetType": "user", "targetIdentifier": "5157255" }, "data": {} }] }],
+  "frequencyMinutes": 30
+}

@@ -26,6 +26,9 @@ test('the alert emails the owner on every save API error', () => {
   assert.deepEqual(alert.projectSlugs, ['immune-citadel-api']);
   assert.equal(alert.triggers.conditions[0].type, 'every_event');
   assert.equal(alert.actionFilters[0].actions[0].type, 'email');
+  const game = JSON.parse(read('observability/sentry-game-alert.json'));
+  assert.deepEqual(game.projectSlugs, ['immune-citadel-game'], 'game errors email too');
+  assert.equal(game.actionFilters[0].actions[0].type, 'email');
 });
 
 test('the game loads Sentry only on the dev and production sites, pinned and checked, with save codes scrubbed', () => {
