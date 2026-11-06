@@ -284,15 +284,16 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 #sndBtn{padding:9px;margin:0 0 14px auto;flex:none}#sndBtn svg{fill:none;stroke-linecap:round}
 #cloudBtn{padding:9px;margin:0 0 14px 6px;flex:none}#cloudBtn svg{stroke-linecap:round}#cloudBtn.busy svg{animation:cpulse 1s ease-in-out infinite alternate}#cloudBtn.err svg{stroke:#ffb15c;fill:rgba(255,177,92,.14);filter:none}
 @keyframes cpulse{to{opacity:.35}}
-#cloudPop p{margin:0 0 10px;font:400 13px/1.4 var(--sans);color:var(--dim)}
+#dataBtn{padding:9px;margin:0 0 14px 6px;flex:none}#dataBtn svg{fill:none;stroke-linecap:round;stroke-linejoin:round}
+#cloudPop p,#dataPop p{margin:0 0 10px;font:400 13px/1.4 var(--sans);color:var(--dim)}#dataPop p b{color:var(--txt);font-weight:600}#dataPop .tg{padding:8px 0}.tg:disabled{cursor:default;opacity:.7}
 #cloudPop .cc{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-bottom:12px}#cloudPop .cc span,#cloudPop .ci span{flex:1 0 100%;font:600 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 #cloudPop .cc b{flex:1;font:600 15px var(--mono);letter-spacing:.06em;color:var(--txt);user-select:all}
 #cloudPop .btn{padding:7px 12px;font-size:12px}#cloudPop .cc .btn{flex:none}#cloudGo{width:100%;margin-top:8px}
 #cloudPop .ci{display:block}#cloudPop input{display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:8px 10px;border-radius:9px;border:1px solid var(--rim2);background:rgba(2,4,7,.5);color:var(--txt);font:600 14px var(--mono);letter-spacing:.06em;text-transform:uppercase}
 #cloudPop input:focus{outline:2px solid var(--cyan);outline-offset:1px}
-#sndPop,#cloudPop{position:absolute;z-index:12;width:240px;padding:8px 6px 6px;transform:scale(var(--u,1));transform-origin:0 0;background:var(--glass2);border-color:var(--rim2);box-shadow:0 0 26px -8px rgba(127,216,255,.5),0 14px 30px -14px #000;animation:hpop .2s ease-out}
-#sndPop small,#cloudPop small{display:block;padding:0 10px 4px;font:600 max(9px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.18em;color:var(--cyan)}
-#cloudPop{width:290px;max-width:calc(100vw - 16px);box-sizing:border-box;padding:8px 14px 12px;transform:none;animation:cpop .2s ease-out}@keyframes cpop{from{transform:scale(.6);opacity:0}}#cloudPop small{padding:0 0 6px;font-size:10px}
+#sndPop,#cloudPop,#dataPop{position:absolute;z-index:12;width:240px;padding:8px 6px 6px;transform:scale(var(--u,1));transform-origin:0 0;background:var(--glass2);border-color:var(--rim2);box-shadow:0 0 26px -8px rgba(127,216,255,.5),0 14px 30px -14px #000;animation:hpop .2s ease-out}
+#sndPop small,#cloudPop small,#dataPop small{display:block;padding:0 10px 4px;font:600 max(9px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.18em;color:var(--cyan)}
+#cloudPop,#dataPop{width:290px;max-width:calc(100vw - 16px);box-sizing:border-box;padding:8px 14px 12px;transform:none;animation:cpop .2s ease-out}@keyframes cpop{from{transform:scale(.6);opacity:0}}#cloudPop small,#dataPop small{padding:0 0 6px;font-size:10px}
 .tg{display:flex;align-items:center;gap:11px;width:100%;padding:8px 10px;border:0;border-radius:9px;background:none;text-align:left;color:var(--dim)}
 .tg:hover{background:rgba(140,205,255,.08)}
 .tg svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -474,9 +475,9 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
   s.onload = () => fetch('/version.txt').then(r => (r.ok ? r.text() : '')).catch(() => '').then(v => Sentry.init({
     dsn: 'https://8a64357620418627c0ad9b402c812e8e@o4512385980235776.ingest.de.sentry.io/4512386038628432', // public by design: it only lets a browser send reports
     environment: env, release: v.trim() || undefined,
-    integrations: [Sentry.browserTracingIntegration()], tracesSampleRate: 1, // every page load: a few thousand a month
+    integrations: [Sentry.browserTracingIntegration({ shouldCreateSpanForRequest: u => !u.includes('/api/play') })], tracesSampleRate: 1, // every page load: a few thousand a month; gameplay events never become spans
     dataCollection: { userInfo: false, cookies: false, httpHeaders: false, httpBodies: [], urlQueryParams: false },
-    beforeSend: scrub, beforeSendSpan: scrub, beforeBreadcrumb: scrub,
+    beforeSend: scrub, beforeSendSpan: scrub, beforeBreadcrumb: b => (/\/api\/play/.test(JSON.stringify(b.data || {})) ? null : scrub(b)), // no third party sees play
   }));
   document.head.appendChild(s);
 })();
@@ -525,6 +526,11 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
     <label class="ci"><span>Continue a save from another device</span><input id="cloudIn" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24"></label>
     <button class="btn" id="cloudGo">Load that save</button>
   </div>
+  <div id="dataPop" class="glass" hidden><small>YOUR DATA</small>
+    <p>The game sends a few <b>anonymous</b> play stats to our own server: which level you play, how it ends, how long you read each card. No name, no save code, nothing that says who you are. They help us make levels fairer. They are deleted after 13 months.</p>
+    <p>Each time the game loads, and if it crashes, a report goes to Sentry, a company in the EU that helps us find bugs. It gets no name and no internet address. Your cloud save stays on our server (Render, in Frankfurt) under your save code. Our server forgets your internet address within two minutes and never saves it.</p>
+    <button class="tg" id="statsTg" role="switch"><svg viewBox="0 0 24 24"><path d="M5 19V11M12 19V5M19 19v-6"/></svg><span>Play stats<em id="statsEm"></em></span><i></i></button>
+  </div>
   <div id="hint" class="glass" hidden><i class="ar"></i><small></small><p></p><button class="x" aria-label="Dismiss tip" title="Dismiss tip">×</button></div>
 
   <div class="ov" id="titleOv">
@@ -533,7 +539,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
       <div class="prog"><span class="cl"><b id="clearN"></b>/18 cleared</span><span id="starN"></span></div>
       <button class="mbtn" id="guideBtn" aria-label="Field Guide"><svg viewBox="0 0 24 24"><path d="M4 5.5c3-1.2 5.8-1 8 1 2.2-2 5-2.2 8-1v13c-3-1.2-5.8-1-8 1-2.2-2-5-2.2-8-1z"/><path d="M12 6.5v13"/></svg><span class="bl">FIELD GUIDE</span><em class="ndot" hidden></em></button>
       <button class="mbtn" id="memBtn" aria-label="Immune Memory"><i></i><span class="bl">IMMUNE MEMORY</span> <b id="memBtnN"></b></button>
-      <div class="mbtn seg" id="diffSeg" role="radiogroup" aria-label="Difficulty"><button data-d="easy" role="radio">EASY</button><button data-d="normal" role="radio">NORMAL</button><button data-d="hard" role="radio">HARD</button></div><button class="mbtn" id="sndBtn" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="sw" d="M16 9c1.5 1.5 1.5 4.5 0 6"/><path class="sw sw2" d="M18.5 6.5c3 3 3 8 0 11"/><path class="sx" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button><button class="mbtn" id="cloudBtn" title="Cloud save" aria-label="Cloud save" hidden><svg viewBox="0 0 24 24"><path d="M7 18.5h10.5a4 4 0 0 0 .4-8 6 6 0 0 0-11.6-1A4.6 4.6 0 0 0 7 18.5z"/></svg></button>
+      <div class="mbtn seg" id="diffSeg" role="radiogroup" aria-label="Difficulty"><button data-d="easy" role="radio">EASY</button><button data-d="normal" role="radio">NORMAL</button><button data-d="hard" role="radio">HARD</button></div><button class="mbtn" id="sndBtn" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="sw" d="M16 9c1.5 1.5 1.5 4.5 0 6"/><path class="sw sw2" d="M18.5 6.5c3 3 3 8 0 11"/><path class="sx" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg></button><button class="mbtn" id="dataBtn" title="Your data" aria-label="Your data"><svg viewBox="0 0 24 24"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.2-7.5 9.5-4.3-1.3-7.5-4.9-7.5-9.5V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg></button><button class="mbtn" id="cloudBtn" title="Cloud save" aria-label="Cloud save" hidden><svg viewBox="0 0 24 24"><path d="M7 18.5h10.5a4 4 0 0 0 .4-8 6 6 0 0 0-11.6-1A4.6 4.6 0 0 0 7 18.5z"/></svg></button>
     </div>
     <div id="mapv"><div id="mstage"><canvas id="mapCv"></canvas>
       <div class="mhud" aria-hidden="true">WHOLE-BODY FLUORESCENCE · SCAN 04
@@ -1528,6 +1534,28 @@ function mergeSave(a, b) {
   return out;
 }
 function cloudQueue() { if (!CLOUD_API) return; clearTimeout(cloud.timer); cloud.timer = setTimeout(cloudSync, 1500); }
+// Gameplay events (docs/EVENTS.md): anonymous, to our own save API, only from the dev and production sites. No save code, no name, nothing kept
+// on the device but the player's on/off choice (its own key: never in the cloud save, so another device cannot turn it back on). The page id lives in memory:
+// a reload is a new id. Off with the stats switch or Global Privacy Control.
+const PLAY_API = /^immune-citadel-v4(-dev)?\.onrender\.com$/.test(location.hostname) ? CLOUD_API : null; // elsewhere events queue but are never sent (tests read the queue)
+const play = { q: [], page: Array.from(crypto.getRandomValues(new Uint8Array(8)), b => b.toString(16).padStart(2, '0')).join(''), release: '', run: null, vis: 0, from: document.hidden ? null : performance.now() };
+const STATS_KEY = 'immune-citadel-v4-stats'; let statsPref = true; try { statsPref = localStorage.getItem(STATS_KEY) !== 'off'; } catch (e) {}
+const statsOn = () => statsPref && navigator.globalPrivacyControl !== true;
+addEventListener('storage', ev => { if (ev.key === STATS_KEY) { statsPref = ev.newValue !== 'off'; if (!statsPref) play.q.length = 0; } }); // switched off in another tab: off here too
+const visT = () => Math.floor((play.vis + (play.from == null ? 0 : performance.now() - play.from)) / 1000); // seconds the tab was visible since load
+function playEv(name, f = {}) { if (!statsOn()) return; play.q.push({ name, t: visT(), ...f }); if (play.q.length > 200) play.q.shift(); }
+function playFlush() { // fire and forget: plain text needs no CORS preflight; keepalive lets it finish while the tab closes; the answer is never read
+  if (!PLAY_API || !statsOn()) return;
+  while (play.q.length) fetch(PLAY_API + '/api/play', { method: 'POST', keepalive: true, body: JSON.stringify({ page: play.page, release: play.release, events: play.q.splice(0, 20) }) }).catch(() => {});
+}
+function runEnd(outcome, f) { // a level run ends once: won, lost, restarted or left for the map; a tab closed mid-level just has no end
+  const r = play.run; if (!r) return; play.run = null;
+  playEv('level_end', { ...r, outcome, first: false, stars: null, wave: S.wave, ...f }); playFlush();
+}
+addEventListener('visibilitychange', () => {
+  if (document.hidden) { if (play.from != null) play.vis += performance.now() - play.from; play.from = null; playEv('hide'); playFlush(); }
+  else play.from = performance.now();
+});
 const memTier = id => clamp(save.mem[id] | 0, 0, 3);
 const sum = a => a.reduce((s, b) => s + (b | 0), 0);
 // seen = observed in play (pathogen types, and specialists once a line reaches level 3); viewed = Field Guide plates opened
@@ -1551,6 +1579,7 @@ function applyMemory() {
 }
 // mode: 'campaign' | 'heroic' | 'iron'
 function startLevel(i, mode = 'campaign') {
+  runEnd('restart'); if (booted) { play.run = { level: i + 1, mode, difficulty: DIFF[save.diff] ? save.diff : 'normal' }; playEv('level_start', play.run); } // the scenery level behind the title is no run
   const L = LEVELS[i], C = CHAL[L.chal], M = { ...MODES[mode], hp: MODES[mode].hp * (mode === 'campaign' ? 1 : C.hp[mode === 'iron' ? 1 : 0]) }; applyMemory();
   const fresh = mode === 'campaign' && i > save.rch, kit = kitAt(mode === 'campaign' ? Math.max(i, save.rch) : LEVELS.length - 1); if (fresh) { save.rch = i; persist(); }
   Object.assign(S, {
@@ -2535,7 +2564,7 @@ function cardQ(id, kind) { CQ.push({ id, kind }); if (!cardCur) cardNext(); }
 function cardNext() {
   const q = cardCur = CQ.shift() || null, el = $('#cardOv');
   if (!q) { el.hidden = true; if (S.screen === 'card') S.screen = 'play'; lastHud = ''; CAFTER.splice(0).forEach(f => f()); return; }
-  q.at = performance.now();
+  q.at = performance.now(); q.vt = visT();
   const I = INTRO[q.id], E = ENEMIES[q.id], T = TOWERS[q.id], un = q.kind === 'unlock', c = el.firstElementChild;
   const kick = un ? I.kick : q.kind === 'boss' ? 'Boss · first encounter' : 'New pathogen';
   c.className = 'icard glass ' + q.kind;
@@ -2543,7 +2572,7 @@ function cardNext() {
     <dl><dt>${un ? 'What it does' : 'Its trick'}</dt><dd>${I.trick}</dd><dt>${un ? 'How to use it' : 'How to beat it'}</dt><dd>${I.beat}</dd><dt>Biology</dt><dd>${I.bio}</dd>${I.real ? `<dt>In reality</dt><dd class="real">${I.real}</dd>` : ''}</dl>
     <button class="btn" id="cardGo">GOT IT${CQ.length ? ` · ${CQ.length} MORE` : ''}</button>`;
   el.hidden = false; S.screen = 'card'; S.ability = null; closeRadial(); showInfo(null);
-  $('#cardGo').onclick = () => { sfx('click'); cardNext(); };
+  $('#cardGo').onclick = () => { sfx('click'); playEv('card', { card: q.id, secs: visT() - q.vt }); cardNext(); };
 }
 function cardClear() { CQ.length = 0; CAFTER.length = 0; cardCur = null; $('#cardOv').hidden = true; if (S.screen === 'card') S.screen = 'play'; }
 function bannerNext() {
@@ -2662,10 +2691,11 @@ function endLevel(win) {
   if (S.over) return; S.over = true; closeRadial(); S.ability = null; S.sel = null; showInfo(null); const run = S.run;
   wm.forEach(b => b.hidden = true);
   const ch = S.M.name, stars = win ? (S.lives >= STAR3 ? 3 : S.lives >= STAR2 ? 2 : 1) : 0, ck = S.mode === 'heroic' ? 'hc' : 'ic', first = ch && win && !save[ck][S.lvl];
+  runEnd(win ? 'won' : 'lost', { first: ch ? !!first : win && !save.st[S.lvl], stars: win && !ch ? stars : null });
   if (ch) { if (first) { save[ck][S.lvl] = 1; persist(); } } // a challenge never touches campaign stars
   else if (win && stars > save.st[S.lvl]) { save.st[S.lvl] = stars; persist(); }
   setTimeout(() => {
-    if (S.run !== run) return;
+    if (S.run !== run || S.screen === 'title') return; // left for the map before the report came up
     const nxt = win && !ch && S.lvl < LEVELS.length - 1;
     $('#rep').innerHTML = `<div class="kick"><span>LAB REPORT${ch ? ' · ' + ch.toUpperCase() : ''}</span><span>LEVEL ${S.lvl + 1} · ${S.L.place.toUpperCase()}</span></div>
       <div class="rhd"><h2 class="${win ? 'win' : 'lose'}">${win ? (ch ? `${ch} challenge won` : 'Level cleared') : 'Host overrun'}</h2>
@@ -3071,7 +3101,7 @@ $('#memReset').onclick = ev => {
 };
 $('#memBack').onclick = () => { if (memFrom === 'end') { $('#memOv').hidden = true; $('#endOv').hidden = false; S.screen = 'end'; $('#eMem b').textContent = `★ ${memStars().avail} to spend`; } else showTitle(); };
 $('#memBtn').onclick = () => { sfx('click'); showMemory('title'); };
-$('#mapBtn').onclick = showTitle;
+$('#mapBtn').onclick = () => { runEnd('quit'); showTitle(); };
 $('#restartBtn').onclick = () => { if (S.L) startLevel(S.lvl, S.mode); };
 // sound popover: Music and Effects toggles, opened from the HUD speaker or the tray's; it sits below its button, or beside it in a gutter column
 let sndAt = null;
@@ -3095,7 +3125,7 @@ document.querySelectorAll('#diffSeg button').forEach(b => b.onclick = () => { sa
 $('#muteBtn').onclick = () => sndOpen($('#muteBtn')); $('#sndBtn').onclick = () => sndOpen($('#sndBtn'));
 $('#sndPop').onclick = ev => { const b = ev.target.closest('.tg'); if (!b) return; AU.on[b.dataset.k] = !AU.on[b.dataset.k]; persist(); auUnlock(); auApply(); sndRefresh(); sfx('click'); };
 addEventListener('pointerdown', ev => { if (!$('#sndPop').hidden && !ev.target.closest('#sndPop,#muteBtn,#sndBtn')) sndClose(); }, true);
-addEventListener('keydown', ev => { if (ev.key === 'Escape') { sndClose(); cloudClose(); } });
+addEventListener('keydown', ev => { if (ev.key === 'Escape') { sndClose(); cloudClose(); dataClose(); } });
 // cloud save: pull, merge, push, so two devices never overwrite each other's progress
 async function cloudSync() {
   if (!CLOUD_API) return;
@@ -3149,6 +3179,16 @@ async function cloudLoad() { // continue a save made on another device; this dev
 function cloudOpen() { const P = $('#cloudPop'); if (!P.hidden) return cloudClose(); sndClose(); P.hidden = false; cloudShow(); sfx('click'); popPlace(P, $('#cloudBtn'), 1); } // unscaled: it holds text to read and a code to type
 function cloudClose() { $('#cloudPop').hidden = true; }
 $('#cloudBtn').onclick = cloudOpen;
+// Your data: what leaves the browser, in words a 12-year-old can read, and the stats switch (docs/EVENTS.md)
+function dataRefresh() {
+  const gpc = navigator.globalPrivacyControl === true, b = $('#statsTg'); b.setAttribute('aria-checked', statsOn()); b.disabled = gpc;
+  $('#statsEm').textContent = gpc ? 'Off: your browser asks sites not to track' : statsOn() ? 'On · anonymous' : 'Off';
+}
+function dataOpen() { const P = $('#dataPop'); if (!P.hidden) return dataClose(); sndClose(); cloudClose(); P.hidden = false; dataRefresh(); sfx('click'); popPlace(P, $('#dataBtn'), 1); }
+function dataClose() { $('#dataPop').hidden = true; }
+$('#dataBtn').onclick = dataOpen;
+$('#statsTg').onclick = () => { statsPref = !statsOn(); try { localStorage.setItem(STATS_KEY, statsPref ? 'on' : 'off'); } catch (e) {} if (!statsPref) play.q.length = 0; dataRefresh(); sfx('click'); };
+addEventListener('pointerdown', ev => { if (!$('#dataPop').hidden && !ev.target.closest('#dataPop,#dataBtn')) dataClose(); }, true);
 $('#cloudGo').onclick = cloudLoad;
 $('#cloudIn').onkeydown = ev => { if (ev.key === 'Enter') cloudLoad(); };
 $('#cloudCopy').onclick = () => navigator.clipboard.writeText(cloud.code).then(() => cloudShow('Code copied.'), () => {});
@@ -3321,12 +3361,14 @@ function frame(now) {
 }
 addEventListener('resize', resize);
 startLevel(0); S.screen = 'title'; showTitle(); resize(); booted = true; // the specimen behind the title is scenery: it must not use up owed cards
+(PLAY_API ? fetch('/version.txt').then(r => (r.ok ? r.text() : '')).catch(() => '') : Promise.resolve('')).then(v => { // open also wakes a sleeping API
+  if (/^[0-9a-f]{7,40}$/.test(v.trim())) play.release = v.trim(); playEv('open', { new: firstRun }); playFlush(); });
 requestAnimationFrame(frame);
 
 window.IC = { S, LEVELS, MAPS, LMARK, KITFULL, unlockAt, fold, LVLMULT, CAMPHP, TOWERS, ENEMIES, SPECS, startLevel, sendWave, build: (i, k) => build(S.slots[i], k), upgrade: i => upgrade(S.slots[i].tower), sell: i => sell(S.slots[i].tower),
   specialize: (i, id) => specialize(S.slots[i].tower, id), skillUp: i => skillUp(S.slots[i].tower), refund: i => refund(S.slots[i].tower), step, makePath, nearestOnPath, posAt, castAbility, armAbility,
   HERO, mergeSave, heroMove, selectHero, granzyme, heroXp, hurt: (u, a) => hurtUnit(u, a), save, persist, MEMORY, AB, memStars, showMemory, endLevel, showTitle, CHAL, MODES, MEMCOST, TORDER,
-  GUIDE, FACTS, HINTS, INTRO, UNLOCK, kitAt, cardNext, openGuide, AU, auInit, auApply, musicTick, musicState, M, THEMES, sfx, SFX };
+  GUIDE, FACTS, HINTS, INTRO, UNLOCK, kitAt, cardNext, openGuide, AU, auInit, auApply, musicTick, musicState, M, THEMES, sfx, SFX, play, statsOn };
 </script>
 </body>
 </html>
