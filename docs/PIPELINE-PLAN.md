@@ -4,7 +4,7 @@ Agreed with the owner on 2026-11-06. One step at a time; each step is verified b
 
 ## Why
 - The pipeline can fail silently: CI never runs, a deploy never lands, the wrong commit is live, telemetry stops. Push-based signals (CI traces, Render notifications) only report what ran, never what did not happen.
-- Practice: prove inside the pipeline that the new commit is live (the job that ships goes red otherwise), plus one observer outside GitHub, Render and Dash0 that compares the wanted commit with the live one (the GitOps reconcile idea).
+- Practice: prove inside the pipeline that the new commit is live (the job that ships goes red otherwise), plus one observer outside GitHub, Render and Dash0 that compares the wanted commit with the live one (the GitOps reconcile idea). Outside observer dropped 2026-11-06: see [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md), Open.
 - Research behind this (two runs, each claim fact-checked): GitHub has no native OTLP export; Render's "After CI checks pass" deploys nothing, silently, when a commit has no or failing checks; any extra check on a commit becomes a Render deploy gate; GitHub scheduled workflows can run hours late.
 
 ## Steps
@@ -18,11 +18,10 @@ Agreed with the owner on 2026-11-06. One step at a time; each step is verified b
   - Done 2026-11-06: PR #45 merged into `dev` 12:58:21 UTC (merge commit d5f2fff); push run [42221746028](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42221746028) `test`, `game`, `deployed` all green; `deployed` logged `live: API and site serve d5f2fff…` at 12:59:19 (58 s after the merge). Not yet seen: a red `deployed` run (its 4 fast tests cover it) and a run on `main` (first at the next promotion).
 - [x] **4. Auto-merge.** Repository setting on; merges enabled by a person's token, never by `GITHUB_TOKEN` (its merges start no workflows).
   - Done 2026-11-06: repository setting `allow_auto_merge` on. PR #45: auto-merge enabled 12:49:41 UTC by `alexisdacquay` (merge commit method) while CI ran; GitHub merged it 12:58:21 once `test` and `game` passed on an up-to-date branch; the merge started the `dev` push run 3 s later (12:58:24), so a person's merge does start workflows.
-- [ ] **5. Outside observer: Checkly (free Hobby plan).** One multistep check every 6 h: GitHub heads of `dev` and `main` (read-only token, contents:read, this repo only) against `/version.txt` and `/health` per environment; email on mismatch. Catches CI never running, a dashboard rollback, a dead pipeline, and works when Dash0 is down. Not more often: each `/health` call wakes a Free API for about 16 min; 750 Free hours a month are shared by the workspace and running out suspends every Free service.
+- ~~**5. Outside observer: Checkly.**~~ Superseded 2026-11-06 by [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Better Stack checks that the game sites (and the production API once paid) are up; the `deployed` job (step 3) checks the commit.
 
-## The two findings
-- [ ] **Prod sends no telemetry.** Add the four `OTEL_*` variables to the prod API now (the current prod code ignores them, `otel.js` does nothing without the endpoint); add `service.version` = `RENDER_GIT_COMMIT` to the telemetry; prod reports from the next promotion. At promotion, move the prod API to a paid instance (a sleeping API costs players a ~1 min cold start and makes absence alerts noise). ~~Fix the line in OPERATIONS.md that says prod `/health` shows the commit~~ (done 2026-11-06).
-- [ ] **Dash0 is a single point of failure.** Owner to confirm the Dash0 plan (no free tier, 14-day trial: a lapsed account stops all telemetry and alerts silently). Subscribe to Dash0's status page. Step 5 covers "live and correct" without Dash0. Deferred: a Dash0 watchdog alert feeding an outside heartbeat (fragile; covers dev only until prod sends telemetry).
+## Findings
+- Prod sends no telemetry, and Dash0 is a single point of failure: both superseded 2026-11-06 by [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) (Sentry replaces Dash0; production joins at the next promotion).
 
 ## Checked and cleared
 - Postgres expiry: the v4 database is on a paid plan (`basic_256mb`), not Free. Owner to decide on `immune-citadel-dev-db` and `immune-citadel-prod-db` (15 GB each, paid, created 2026-10-29), which look like v3 leftovers.

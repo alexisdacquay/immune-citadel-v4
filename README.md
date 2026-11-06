@@ -50,7 +50,7 @@ flowchart LR
 | Game | `index.html` | nginx in Compose | static site |
 | Save API | `server/index.js` | Compose | web service |
 | Database | Postgres | Compose | Render Postgres |
-| Telemetry | `server/otel.js`, `observability/alert.js` | to Dash0, if `.env` is set | dev: to Dash0; production: from its next release |
+| Telemetry | `server/otel.js`, `observability/alert.js` | to Dash0, if `.env` is set | dev: to Dash0; production: none (Sentry replaces Dash0: [docs/OBSERVABILITY-PLAN.md](docs/OBSERVABILITY-PLAN.md)) |
 
 ## How it is built
 
