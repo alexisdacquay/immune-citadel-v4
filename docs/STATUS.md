@@ -2,7 +2,7 @@
 
 One page: where the project stands and what comes next. Updated at the end of every step. Details live in the linked plans; the backlog is [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues).
 
-Last update: 2026-11-06 23:30 UTC.
+Last update: 2026-11-06 22:32 UTC.
 
 ## How it fits together
 
@@ -31,20 +31,20 @@ All of it runs on dev today; production gets it at the next promotion ([OBSERVAB
 | | Commit | What it has |
 |---|---|---|
 | production (`main`) | 8792a17, 2026-11-04 | the game before the body map; cloud saves; no telemetry |
-| dev (`dev`) | ahead of `main` | body map (#39, #40), P0 bug fixes (#1-#9), the owed-card fix (#37), intro cards (#10), the pipeline below, Sentry on the save API |
+| dev (`dev`) | ahead of `main` | body map (#39, #40), P0 bug fixes (#1-#9), the owed-card fix (#37), intro cards (#10), the pipeline below, Sentry on the save API and in the game, gameplay events |
 
 ## Plans
 
 | Plan | Done | Now | Next |
 |---|---|---|---|
 | [PIPELINE-PLAN.md](PIPELINE-PLAN.md): trustworthy deploys | 1-4: site publishes only the game; rules on `dev`/`main`; deploy on commit + `deployed` proof; auto-merge | — | closed (step 5 moved to the observability plan) |
-| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | 1-4: Sentry on the save API and in the game, Dash0 removed, Better Stack on both sites, all proven on dev | 5: gameplay events, built, proof on dev | 6: production at promotion |
+| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | 1-5: Sentry on the save API and in the game, Dash0 removed, Better Stack on both sites, gameplay events, all proven on dev | — | 6: production at promotion |
 
 ## Order of work
 
 | # | Work | Why this order |
 |---|---|---|
-| 1 | observability step 5: prove gameplay events on dev | real players are expected; events must be live at promotion |
+| 1 | CI: stop depending on the slow Ubuntu package mirror (two `test` runs on `dev` timed out installing browser fonts) | a silent red check hides real failures |
 | 2 | P3 bugs #22, #23 (wave marker and build sites under the HUD on small screens) | the only open bugs not yet fixed |
 | 3 | owner playtest (#18), then promotion to production (#19) with observability step 6 | production is two days behind dev |
 
