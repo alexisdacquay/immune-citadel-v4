@@ -60,7 +60,7 @@ flowchart LR
 | save API traces | same | every request except `/health` and `/api/play`, with its Postgres queries (query text with `$1`, no values) |
 | logs | Render, the service's Logs tab | JSON lines with method, route, status, duration; never the save code |
 | game errors and load speed | Sentry, project `immune-citadel-game` | dev and production sites only; release = the commit in `/version.txt`; save codes scrubbed |
-| gameplay events | the save API's Postgres, table `events`, views `funnel`, `level_stats`, `card_reads`, `sittings` | dev and production sites only; anonymous; what and why in [EVENTS.md](EVENTS.md); read with `SELECT * FROM <schema>.funnel` (Render → the database → Connect → PSQL) |
+| gameplay events | the save API's Postgres, table `events`, views `funnel`, `level_stats`, `card_reads`, `sittings` | dev and production sites only; anonymous; what and why in [EVENTS.md](EVENTS.md); read below |
 | site up | Better Stack | HEAD on both game sites every 5 min; apply changes with `node observability/betterstack.js` (`BETTERSTACK_API_TOKEN`) |
 
 Sentry organisation `myown-76`, EU region (de.sentry.io). Environments: `local`, `dev`, `production`. Organisation privacy settings: IP addresses not stored; location (`$user.geo`) removed by an Advanced Data Scrubbing rule, because Sentry derives it from the IP even when IP storage is off.
@@ -68,6 +68,16 @@ Sentry organisation `myown-76`, EU region (de.sentry.io). Environments: `local`,
 **Children's data:** [server/sentry.js](../server/sentry.js) sends no IP, headers, cookies, bodies, query strings, database parameters or local variables, and replaces any save code (the player's only credential) with `:code` in errors and traces. Proof: [server/sentry.test.js](../server/sentry.test.js). Logs use the route `/api/save/:code` ([server/route.js](../server/route.js), [server/telemetry.test.js](../server/telemetry.test.js)).
 
 Settings on a Render API service: build `cd server && npm ci --omit=dev`, start `cd server && npm start`, and the variables `SENTRY_DSN` (Sentry → project → Client Keys) and `SENTRY_ENVIRONMENT` (`dev` or `production`). Without `SENTRY_DSN`, Sentry is off. Locally: `SENTRY_DSN` in `.env` (see `.env.example`).
+
+## Reading gameplay events
+
+The database accepts outside connections only from its IP allowlist: the owner's machine, `[owner IP removed]/32` (G.Network home line), set 2026-11-06 on the owner's instruction. If that IP changes, update it: Render → `immune-citadel-v4-db` → Networking, or `PATCH /v1/postgres/<id>` with `ipAllowList`. The Render MCP query tool connects from Render's servers and cannot use the allowlist.
+
+```bash
+docker run --rm -it -e U="$URL?sslmode=require" postgres:18-alpine sh -c 'psql "$U" -c "SELECT * FROM dev.level_stats"'
+```
+
+`$URL`: the external connection string (Render → the database → Connect, or `GET /v1/postgres/<id>/connection-info`); never commit or paste it. Schemas: `dev`, and the production schema from step 6. Views: `funnel`, `level_stats`, `card_reads`, `sittings` ([EVENTS.md](EVENTS.md)).
 
 ## Alert: save API error
 
