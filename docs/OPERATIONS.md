@@ -31,6 +31,8 @@ flowchart LR
 | CD to dev | Render's auto-deploy trigger "after CI checks pass" on the dev services | [#25](https://github.com/alexisdacquay/immune-citadel-v4/issues/25#issuecomment-6667755969): CI passed 19:51:17, Render started the deploy at 19:51:20, `/health` showed the commit 115 s after the merge |
 | Production | the same trigger on `main`; only the owner merges `dev` into `main` | `/health` on the production API and `/version.txt` on the site show the commit (from the next release: production's current build predates both) |
 
+**Rules on `dev` and `main`** ([.github/rulesets/dev-main.json](../.github/rulesets/dev-main.json), GitHub ruleset 26693579, needs GitHub Pro on a private repo): changes only through a pull request; `test` and `game` (from GitHub Actions) must pass on a branch that is up to date; no force push, no deletion, nobody bypasses. Re-apply after an edit: `gh api -X PUT repos/alexisdacquay/immune-citadel-v4/rulesets/26693579 --input .github/rulesets/dev-main.json`.
+
 **Rollback:** Render dashboard → the service → Events → Rollback on the last good deploy, or revert the change on `main` (CI, then Render, redeploy).
 
 ## Telemetry
