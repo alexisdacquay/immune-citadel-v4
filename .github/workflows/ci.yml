@@ -20,8 +20,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
-      - run: npm ci
-      - run: npx playwright install-deps chromium
+      - run: npm ci # its postinstall downloads Chromium; no install-deps: the runner image ships Chrome's libraries, and the extra fonts it adds come from an Ubuntu mirror that stalled two runs past their timeout (2026-11-06)
       - run: npm test
       - if: failure()
         run: docker compose logs --tail 80
@@ -33,8 +32,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
-      - run: npm ci
-      - run: npx playwright install-deps chromium
+      - run: npm ci # its postinstall downloads Chromium; no install-deps: the runner image ships Chrome's libraries, and the extra fonts it adds come from an Ubuntu mirror that stalled two runs past their timeout (2026-11-06)
       - run: npm run test:game # every level played by a bot, saves, challenges, Field Guide, phone and tablet layouts (~6 min)
 
   deployed: # after a push to dev or main: proof that Render now serves this commit (API /health and site /version.txt), red otherwise
