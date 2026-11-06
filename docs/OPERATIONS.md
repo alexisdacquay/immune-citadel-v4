@@ -44,14 +44,19 @@ flowchart LR
 | a commit bypasses CI | ruleset (pull request + checks required, no bypass) | push rejected (`GH013`) |
 | a broken API build | Render health check on `/health` | the old deploy keeps traffic; `deployed` red after 15 min |
 | Render never deploys, or deploys the wrong commit | `deployed` | red run; GitHub emails whoever triggered it (the person who enabled auto-merge, today the owner) if Actions email notifications are on |
-| CI itself never runs, a dashboard rollback, a dead pipeline | nothing yet | [PIPELINE-PLAN.md](PIPELINE-PLAN.md) step 5 (outside observer) |
-| cloud saves fail | Dash0 alert (below), dev only until production sends telemetry | email |
+| game site down | nothing yet | Better Stack, [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 4 |
+| production API down | nothing yet | Better Stack once the API is on a paid instance, step 6; the dev API is not monitored (a check keeps a Free API awake, see the plan) |
+| the game crashes on players' devices | nothing yet | Sentry, [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 3 |
+| CI never runs after a merge, or a dashboard rollback leaves an old commit live | not covered | accepted: see [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md), Open |
+| cloud saves fail | Dash0 alert (below), dev only; Sentry from [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 1, production from step 6 | email |
 
 **Rollback:** Render dashboard → the service → Events → Rollback on the last good deploy (reuses its build; a dashboard rollback turns auto-deploy off: turn it back on after), or merge a revert pull request (CI, then Render, redeploy).
 
 ## Telemetry
 
-The save API sends traces, metrics and logs to [Dash0](https://www.dash0.com) over OpenTelemetry (OTLP). Dev on Render sends them now; production will from its next release; locally only when `.env` holds the token (`.env.example`). The key journey is the cloud save (`PUT` then `GET /api/save/:code`).
+Being replaced: Sentry instead of Dash0, see [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md). Until its step 2, this section describes what runs.
+
+The save API sends traces, metrics and logs to [Dash0](https://www.dash0.com) over OpenTelemetry (OTLP). Dev on Render sends them now; production never will (Sentry replaces Dash0); locally only when `.env` holds the token (`.env.example`). The key journey is the cloud save (`PUT` then `GET /api/save/:code`).
 
 - **Traces:** every API request, with its Postgres query. Spans carry the route `/api/save/:code`, never the code; client addresses are redacted; queries show `$1`, not values.
 - **Metrics:** request duration by method and status; `saves_total{outcome="ok"|"failed"}`. Every signal carries `deployment.environment.name` (local, dev, production).
