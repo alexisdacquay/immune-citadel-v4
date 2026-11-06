@@ -17,19 +17,21 @@ Settings on a Render static site: build `mkdir -p public && cp index.html public
 ```mermaid
 flowchart LR
     B["issue branch"] --> PR["pull request into dev"]
-    PR --> CI{"CI: npm test"}
+    PR --> CI{"CI: test + game"}
     CI -- red --> B
-    CI -- green --> M["merge into dev"]
-    M --> CI2{"CI on dev"} -- green --> DEV["Render deploys dev"]
-    DEV --> P["owner merges dev into main<br/>(the production gate)"]
-    P --> CI3{"CI on main"} -- green --> PROD["Render deploys production"]
+    CI -- green --> M["merge into dev<br/>(the only way in)"]
+    M --> DEV["Render deploys dev"] --> V{"CI: deployed"}
+    V -- red --> E["GitHub emails the owner"]
+    V -- green --> P["owner merges dev into main<br/>(a pull request: the production gate)"]
+    P --> PROD["Render deploys production"] --> V2{"CI: deployed"}
 ```
 
 | Step | What | Proof |
 |---|---|---|
-| CI | [ci.yml](../.github/workflows/ci.yml): unit and integration tests on every pull request and every push to `dev` and `main` | PR [#30](https://github.com/alexisdacquay/immune-citadel-v4/pull/30) and [#31](https://github.com/alexisdacquay/immune-citadel-v4/pull/31) checks |
-| CD to dev | Render's auto-deploy trigger "after CI checks pass" on the dev services | [#25](https://github.com/alexisdacquay/immune-citadel-v4/issues/25#issuecomment-6667755969): CI passed 19:51:17, Render started the deploy at 19:51:20, `/health` showed the commit 115 s after the merge |
-| Production | the same trigger on `main`; only the owner merges `dev` into `main` | `/health` on the production API and `/version.txt` on the site show the commit (from the next release: production's current build predates both) |
+| CI | [ci.yml](../.github/workflows/ci.yml): `test` (unit and integration) and `game` on every pull request and every push to `dev` and `main`; the rules below make both required | PR [#30](https://github.com/alexisdacquay/immune-citadel-v4/pull/30) and [#31](https://github.com/alexisdacquay/immune-citadel-v4/pull/31) checks |
+| CD | Render's auto-deploy trigger "on commit" on all four services: every commit on `dev` (or `main`) deploys, and only green pull requests can put one there | see [PIPELINE-PLAN.md](PIPELINE-PLAN.md) step 3 |
+| Deploy proof | CI job `deployed` on each push to `dev`/`main`: [tools/verify-deploy.js](../tools/verify-deploy.js) waits until the API `/health` and the site `/version.txt` serve the pushed commit, else the run goes red after 15 min (a newer push on the branch takes over the check) | see [PIPELINE-PLAN.md](PIPELINE-PLAN.md) step 3 |
+| Production | the same on `main`; only the owner merges `dev` into `main` | the `deployed` job on `main` (from the next release: production's current build has no commit in `/health`) |
 
 **Rules on `dev` and `main`** ([.github/rulesets/dev-main.json](../.github/rulesets/dev-main.json), GitHub ruleset 26693579, needs GitHub Pro on a private repo): changes only through a pull request; `test` and `game` (from GitHub Actions) must pass on a branch that is up to date; no force push, no deletion, nobody bypasses. Re-apply after an edit: `gh api -X PUT repos/alexisdacquay/immune-citadel-v4/rulesets/26693579 --input .github/rulesets/dev-main.json`.
 
