@@ -2977,7 +2977,8 @@ function showTitle() {
 }
 function centerSel() { // a phone scrolls the map: bring the selected level and its card into view, centred under the bar
   const ov = $('#titleOv'), n = $(`.lnode[data-i="${selLv}"]`), c = $('#slides .slide'); if (!n || !c || ov.scrollHeight <= ov.clientHeight) return;
-  const a = n.getBoundingClientRect(), b = c.getBoundingClientRect(), o = ov.getBoundingClientRect(), bar = $('#titleOv .mbar').offsetHeight;
+  const a = n.getBoundingClientRect(), m = $('#mapv').getBoundingClientRect(), o = ov.getBoundingClientRect(), bar = $('#titleOv .mbar').offsetHeight;
+  const b = { top: m.top + c.offsetTop, bottom: m.top + c.offsetTop + c.offsetHeight }; // the card's layout box: its rect is scaled while it pops in
   const top = Math.min(a.top, b.top), h = Math.max(a.bottom, b.bottom) - top, room = ov.clientHeight - bar;
   ov.scrollTop += top - o.top - bar - Math.max(0, (room - h) / 2);
 }
