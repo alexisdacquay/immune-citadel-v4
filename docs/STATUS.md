@@ -53,8 +53,7 @@ All of it runs on dev today; production gets it at the next promotion ([OBSERVAB
 | Item | When |
 |---|---|
 | sign [DPIA.md](DPIA.md) | before step 6 (production) |
-| playtest (#18), approve the promotion (#19) and a paid production API instance | before step 6 |
-| `immune-citadel-dev-db` and `immune-citadel-prod-db` (v3 leftovers, paid): keep or delete | any time |
+| playtest (#18), approve the promotion (#19) | before step 6 |
 
 ## Parked by the owner
 

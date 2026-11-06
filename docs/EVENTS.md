@@ -80,14 +80,14 @@ flowchart LR
 | Rule | Detail | Why |
 |---|---|---|
 | send | `fetch` with `keepalive`, plain-text JSON body, path `/api/play` | `sendBeacon` and the path `/api/events` match ad-block lists (EasyPrivacy); plain text needs no CORS preflight |
-| when | `open` at once (it wakes a sleeping Free API); the rest at each `level_end` and on `hide` | `pagehide` often never fires on phones ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)); small batches stay under the 8 KB body limit |
+| when | `open` at once; the rest at each `level_end` and on `hide` | `pagehide` often never fires on phones ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)); small batches stay under the 8 KB body limit |
 | validate | every field checked against the sets above; `page` `^[0-9a-f]{16}$`, `release` `^[0-9a-f]{7,40}$`, `t` and `secs` integers 0-86400; an event with a bad value or an unknown key is dropped alone, the rest of the request is kept | no free-text channel into the table |
 | cap | at most 20 events per request; at most 2,000 rows a day per server, counted in the table (survives restarts), one batch at a time; a batch that does not fit is dropped whole (no start without its end); its own rate limit per IP, separate from saves | the table sits in the 1 GB Postgres that production and dev share, disk autoscaling off (Render API, 2026-11-06); a full disk suspends it, and saves with it. Budget: 2,000 rows × 395 days × ~150 B ≈ 120 MB per server, ≈ 240 MB for both. 2,000 rows ≈ 130 sittings a day; raise it with the disk |
 | keep | rows deleted after 13 months, at server start and daily | storage limit; the CNIL exemption allows at most 25 months |
 | Sentry | server: `/api/play` not traced, an insert error logged, not reported. Game: no span for `/api/play` (`shouldCreateSpanForRequest`), its breadcrumbs dropped (`beforeBreadcrumb`); a failed send is caught and never reported; `page` never sent to Sentry | no third party sees play; the save-failure alert stays about saves |
 | origin | a request from a site other than the game is dropped | stops other web pages posting; the caps stop scripts |
 | local, tests | off, like Sentry; a test keeps the server's card list equal to the game's 21 intro cards | no real players there; tests stay deterministic |
-| not doing | events lost when `open` hits a sleeping Free API on dev (accepted; production gets a paid API in step 6); win rate before the first clear (tries over several page loads cannot be linked) | |
+| not doing | win rate before the first clear (tries over several page loads cannot be linked) | |
 
 ## Views
 

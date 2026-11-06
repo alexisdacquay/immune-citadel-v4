@@ -8,7 +8,7 @@
 | Dev | https://immune-citadel-v4-dev.onrender.com | https://immune-citadel-v4-api-dev.onrender.com | every commit on `dev` |
 | Local | http://localhost:8080 | http://localhost:8787 | `docker compose up` |
 
-All on Render: two static sites, two Node web services, one Postgres with one schema per environment. `GET /health` on an API returns the commit it runs (production from its next release), e.g. `{"ok":true,"commit":"13c5715…"}`; Render uses it as the health check, so a broken API deploy never takes traffic.
+All on Render, Frankfurt. Dev mirrors production: the same services on the same plans, and only data, secrets, branch and alert routing differ (owner, 2026-11-06: everything is production grade). Per environment: a static site, a Node web service on the Starter plan (always on, health-check gated deploys), and its own Postgres 18 on `basic_256mb` (point-in-time recovery and daily backups): `immune-citadel-v4-prod-db` with schema `prod`, `immune-citadel-v4-dev-db` with schema `dev`. `GET /health` on an API returns the commit it runs (production from its next release), e.g. `{"ok":true,"commit":"13c5715…"}`; Render uses it as the health check, so a broken API deploy never takes traffic.
 
 Settings on a Render static site: build `mkdir -p public && cp index.html public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt`, publish directory `public`, variable `SKIP_INSTALL_DEPS=true`. Only the game is public (the default would publish the whole checkout, server code and `node_modules` included), and `/version.txt` shows the commit the site runs.
 
@@ -45,7 +45,7 @@ flowchart LR
 | a broken API build | Render health check on `/health` | the old deploy keeps traffic; `deployed` red after 15 min |
 | Render never deploys, or deploys the wrong commit | `deployed` | red run; GitHub emails whoever triggered it (the person who enabled auto-merge, today the owner) if Actions email notifications are on |
 | game site down | Better Stack: HEAD on both sites every 5 min ([observability/betterstack.js](../observability/betterstack.js)) | email |
-| production API down | nothing yet | Better Stack once the API is on a paid instance, step 6; the dev API is not monitored (a check keeps a Free API awake, see the plan) |
+| production or dev API down | nothing yet | Better Stack check on each API's `/health`, to add now that both APIs are paid instances (step 6) |
 | the game crashes on players' devices (dev and production sites) | Sentry, project `immune-citadel-game` | email when an issue is new or returns ([observability/sentry-game-alert.json](../observability/sentry-game-alert.json)) |
 | CI never runs after a merge, or a dashboard rollback leaves an old commit live | not covered | accepted: see [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md), Open |
 | a save or load fails with a server error | Sentry alert (below); production from [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 6 | email |
