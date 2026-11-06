@@ -27,7 +27,7 @@ Route by the issue's type label:
 
 ## 4. Integrate
 - On a PASS: read the diff yourself (`git diff dev...issue/<n>-<slug>`). If you disagree with something, send it back with a comment instead of patching it silently.
-- Open (or reuse) the pull request from `issue/<n>-<slug>` into `dev`, wait for CI to pass, merge it (`gh pr merge --merge`), confirm the dev site serves the change, label `status:on-dev`, and post a one-line **Integrated** comment with the commit.
+- Open (or reuse) the pull request from `issue/<n>-<slug>` into `dev`, turn on auto-merge (`gh pr merge <n> --auto --merge`; if `dev` moves first: `gh pr update-branch <n>`); once CI's `deployed` job is green on `dev`, label `status:on-dev` and post a one-line **Integrated** comment with the commit.
 - On a second FAIL: label `needs-owner` or re-spec; never merge a failing issue.
 
 ## 5. Report
@@ -35,4 +35,3 @@ Tell the owner in a few lines: what shipped (issue links), what is not verified,
 
 ## Gates
 - Never touch `main` without the owner's explicit approval in the current conversation.
-- Pushing `dev` is allowed after a PASS when the owner has pre-approved dev pushes; otherwise ask.

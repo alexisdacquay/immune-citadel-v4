@@ -4,11 +4,11 @@
 
 | | Game | Save API | Deploys |
 |---|---|---|---|
-| Production | https://immune-citadel-v4.onrender.com | https://immune-citadel-v4-api.onrender.com | branch `main`, after CI passes |
-| Dev | https://immune-citadel-v4-dev.onrender.com | https://immune-citadel-v4-api-dev.onrender.com | branch `dev`, after CI passes |
+| Production | https://immune-citadel-v4.onrender.com | https://immune-citadel-v4-api.onrender.com | every commit on `main` |
+| Dev | https://immune-citadel-v4-dev.onrender.com | https://immune-citadel-v4-api-dev.onrender.com | every commit on `dev` |
 | Local | http://localhost:8080 | http://localhost:8787 | `docker compose up` |
 
-All on Render: two static sites, two Node web services, one Postgres with one schema per environment. `GET /health` on an API returns the commit it runs, e.g. `{"ok":true,"commit":"13c5715…"}`; Render uses it as the health check, so a broken API deploy never takes traffic.
+All on Render: two static sites, two Node web services, one Postgres with one schema per environment. `GET /health` on an API returns the commit it runs (production from its next release), e.g. `{"ok":true,"commit":"13c5715…"}`; Render uses it as the health check, so a broken API deploy never takes traffic.
 
 Settings on a Render static site: build `mkdir -p public && cp index.html public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt`, publish directory `public`, variable `SKIP_INSTALL_DEPS=true`. Only the game is public (the default would publish the whole checkout, server code and `node_modules` included), and `/version.txt` shows the commit the site runs.
 
@@ -19,7 +19,7 @@ flowchart LR
     B["issue branch"] --> PR["pull request into dev"]
     PR --> CI{"CI: test + game"}
     CI -- red --> B
-    CI -- green --> M["merge into dev<br/>(the only way in)"]
+    CI -- green --> M["GitHub auto-merges into dev<br/>(the only way in)"]
     M --> DEV["Render deploys dev"] --> V{"CI: deployed"}
     V -- red --> E["GitHub emails the owner"]
     V -- green --> P["owner merges dev into main<br/>(a pull request: the production gate)"]
@@ -29,13 +29,25 @@ flowchart LR
 | Step | What | Proof |
 |---|---|---|
 | CI | [ci.yml](../.github/workflows/ci.yml): `test` (unit and integration) and `game` on every pull request and every push to `dev` and `main`; the rules below make both required | PR [#30](https://github.com/alexisdacquay/immune-citadel-v4/pull/30) and [#31](https://github.com/alexisdacquay/immune-citadel-v4/pull/31) checks |
-| CD | Render's auto-deploy trigger "on commit" on all four services: every commit on `dev` (or `main`) deploys, and only green pull requests can put one there | see [PIPELINE-PLAN.md](PIPELINE-PLAN.md) step 3 |
-| Deploy proof | CI job `deployed` on each push to `dev`/`main`: [tools/verify-deploy.js](../tools/verify-deploy.js) waits until the API `/health` and the site `/version.txt` serve the pushed commit, else the run goes red after 15 min (a newer push on the branch takes over the check) | see [PIPELINE-PLAN.md](PIPELINE-PLAN.md) step 3 |
+| Auto-merge | `gh pr merge <n> --auto --merge` on the pull request: GitHub merges it once `test` and `game` pass on a branch up to date with `dev`; if `dev` moved meanwhile, it waits: `gh pr update-branch <n>`. Enabled with a person's token: a merge by `GITHUB_TOKEN` would start no workflows, so no deploy proof | PR [#45](https://github.com/alexisdacquay/immune-citadel-v4/pull/45) |
+| CD | Render's auto-deploy trigger "on commit" on all four services: every commit on `dev` (or `main`) deploys, and only green pull requests can put one there | [PIPELINE-PLAN.md](PIPELINE-PLAN.md) step 3 |
+| Deploy proof | CI job `deployed` on each push to `dev`/`main`: [tools/verify-deploy.js](../tools/verify-deploy.js) waits until the API `/health` and the site `/version.txt` serve the pushed commit, else the run goes red after 15 min (a newer push on the branch takes over the check) | [run 42221746028](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42221746028): live 58 s after the merge |
 | Production | the same on `main`; only the owner merges `dev` into `main` | the `deployed` job on `main` (from the next release: production's current build has no commit in `/health`) |
 
 **Rules on `dev` and `main`** ([.github/rulesets/dev-main.json](../.github/rulesets/dev-main.json), GitHub ruleset 26693579, needs GitHub Pro on a private repo): changes only through a pull request; `test` and `game` (from GitHub Actions) must pass on a branch that is up to date; no force push, no deletion, nobody bypasses. Re-apply after an edit: `gh api -X PUT repos/alexisdacquay/immune-citadel-v4/rulesets/26693579 --input .github/rulesets/dev-main.json`.
 
-**Rollback:** Render dashboard → the service → Events → Rollback on the last good deploy, or revert the change on `main` (CI, then Render, redeploy).
+**What goes wrong, and who notices:**
+
+| Failure | Caught by | Signal |
+|---|---|---|
+| a test or game check fails | `test` / `game` on the pull request | red check, no merge |
+| a commit bypasses CI | ruleset (pull request + checks required, no bypass) | push rejected (`GH013`) |
+| a broken API build | Render health check on `/health` | the old deploy keeps traffic; `deployed` red after 15 min |
+| Render never deploys, or deploys the wrong commit | `deployed` | red run; GitHub emails whoever triggered it (the person who enabled auto-merge, today the owner) if Actions email notifications are on |
+| CI itself never runs, a dashboard rollback, a dead pipeline | nothing yet | [PIPELINE-PLAN.md](PIPELINE-PLAN.md) step 5 (outside observer) |
+| cloud saves fail | Dash0 alert (below), dev only until production sends telemetry | email |
+
+**Rollback:** Render dashboard → the service → Events → Rollback on the last good deploy (reuses its build; a dashboard rollback turns auto-deploy off: turn it back on after), or merge a revert pull request (CI, then Render, redeploy).
 
 ## Telemetry
 

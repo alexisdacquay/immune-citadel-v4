@@ -68,7 +68,7 @@ A small AI agent team works from GitHub issues: see [AGENTS.md](AGENTS.md) (wher
 | 6 | Testing | `npm test`: unit + integration ([server/](server), [test/](test)) |
 | 7 | Containerization | [compose.yaml](compose.yaml), [server/Dockerfile](server/Dockerfile) |
 | 8 | Deployment | the URLs at the top |
-| 9 | CI/CD | [CI](.github/workflows/ci.yml) on every PR and push; Render deploys `dev` after CI passes; production moves only when the owner merges `dev` into `main`: [docs/OPERATIONS.md](docs/OPERATIONS.md#releases) |
+| 9 | CI/CD | [CI](.github/workflows/ci.yml) on every PR and push; Render deploys every commit on `dev` (only green pull requests get there); production moves only when the owner merges `dev` into `main`: [docs/OPERATIONS.md](docs/OPERATIONS.md#releases) |
 | 10 | Observability | the cloud-save journey in Dash0: traces, metrics and logs sharing a trace ID, no save codes: [docs/OPERATIONS.md](docs/OPERATIONS.md#telemetry) |
 | 11 | Alerting on user impact | "Cloud saves failing" in Dash0, as code: [observability/alert.js](observability/alert.js) |
 | 12 | On-call agent | not done yet |
