@@ -24,7 +24,7 @@ Expected behaviour and acceptance criteria per player journey: [docs/SPEC.md](do
 docker compose up
 ```
 
-Game: http://localhost:8080. To also send telemetry to Dash0, copy `.env.example` to `.env` and fill in the token; without it, telemetry is off.
+Game: http://localhost:8080. To also send save API errors to Sentry, copy `.env.example` to `.env` and fill in the DSN; without it, Sentry is off.
 
 ## Test it
 
@@ -41,8 +41,8 @@ npm test
 flowchart LR
     P[Player's browser<br/>index.html, the whole game] -- "GET/PUT /api/save/:code" --> A[Save API<br/>Node, server/]
     A --> D[(Postgres)]
-    A -. "traces, metrics, logs (OTLP)" .-> O[Dash0<br/>SaaS]
-    O -- "alert: cloud saves failing" --> W[owner's e-mail]
+    A -. "errors, traces" .-> O[Sentry<br/>EU]
+    O -- "alert: save API error" --> W[owner's e-mail]
 ```
 
 | Part | Where | Local | Render |
@@ -50,11 +50,11 @@ flowchart LR
 | Game | `index.html` | nginx in Compose | static site |
 | Save API | `server/index.js` | Compose | web service |
 | Database | Postgres | Compose | Render Postgres |
-| Telemetry | `server/otel.js`, `observability/alert.js` | to Dash0, if `.env` is set | dev: to Dash0; production: none (Sentry replaces Dash0: [docs/OBSERVABILITY-PLAN.md](docs/OBSERVABILITY-PLAN.md)) |
+| Telemetry | `server/sentry.js`, `observability/sentry-alert.json` | to Sentry, if `.env` is set | dev: to Sentry; production: from its next release ([docs/OBSERVABILITY-PLAN.md](docs/OBSERVABILITY-PLAN.md)) |
 
 ## How it is built
 
-A small AI agent team works from GitHub issues: see [AGENTS.md](AGENTS.md) (where everything is) and [docs/TEAM.md](docs/TEAM.md) (roles and the loop). Deploys, telemetry and the alert: [docs/OPERATIONS.md](docs/OPERATIONS.md).
+A small AI agent team works from GitHub issues: see [AGENTS.md](AGENTS.md) (where everything is) and [docs/TEAM.md](docs/TEAM.md) (roles and the loop). Deploys, telemetry and the alert: [docs/OPERATIONS.md](docs/OPERATIONS.md). Where things stand: [docs/STATUS.md](docs/STATUS.md).
 
 ## For reviewers
 
@@ -69,6 +69,6 @@ A small AI agent team works from GitHub issues: see [AGENTS.md](AGENTS.md) (wher
 | 7 | Containerization | [compose.yaml](compose.yaml), [server/Dockerfile](server/Dockerfile) |
 | 8 | Deployment | the URLs at the top |
 | 9 | CI/CD | [CI](.github/workflows/ci.yml) on every PR and push; Render deploys every commit on `dev` (only green pull requests get there); production moves only when the owner merges `dev` into `main`: [docs/OPERATIONS.md](docs/OPERATIONS.md#releases) |
-| 10 | Observability | the cloud-save journey in Dash0: traces, metrics and logs sharing a trace ID, no save codes: [docs/OPERATIONS.md](docs/OPERATIONS.md#telemetry) |
-| 11 | Alerting on user impact | "Cloud saves failing" in Dash0, as code: [observability/alert.js](observability/alert.js) |
+| 10 | Observability | save API errors and traces in Sentry (EU), no player data; logs in Render: [docs/OPERATIONS.md](docs/OPERATIONS.md#telemetry), plan: [docs/OBSERVABILITY-PLAN.md](docs/OBSERVABILITY-PLAN.md) |
+| 11 | Alerting on user impact | "Save API error" in Sentry emails the owner, as code: [observability/sentry-alert.json](observability/sentry-alert.json) |
 | 12 | On-call agent | not done yet |

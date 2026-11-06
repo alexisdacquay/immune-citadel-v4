@@ -1,40 +1,9 @@
-// Fast checks on what the API tells telemetry: the alert's counter, and that no save code leaks into logs or routes.
+// Fast checks on what the API tells its logs: no save code leaks into logs or routes.
 const test = require('node:test'), assert = require('node:assert');
 const { spawn } = require('node:child_process');
-const { metrics } = require('@opentelemetry/api');
-const { MeterProvider, MetricReader } = require('@opentelemetry/sdk-metrics');
-
-class Reader extends MetricReader { onForceFlush() {} onShutdown() {} }
-const reader = new Reader();
-metrics.setGlobalMeterProvider(new MeterProvider({ readers: [reader] })); // before index.js creates its counter
-process.env.LOG_LEVEL = 'silent';
-const { createServer, memoryStore } = require('./index.js');
 const route = require('./route.js');
 
 const CODE = 'ABCDEFGHJKMNPQRS';
-async function saves() { // { ok: n, failed: n } as the alert sees it
-  const { resourceMetrics } = await reader.collect(), out = {};
-  for (const sm of resourceMetrics.scopeMetrics) for (const m of sm.metrics) if (m.descriptor.name === 'saves')
-    for (const p of m.dataPoints) out[p.attributes.outcome] = p.value;
-  return out;
-}
-async function serve(store) {
-  const srv = createServer(store); await new Promise(r => srv.listen(0, r));
-  return { srv, put: body => fetch(`http://localhost:${srv.address().port}/api/save/${CODE}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }) };
-}
-
-test('both saves_total series exist at 0 before any save, so the first failure fires the alert', async () => {
-  assert.deepEqual(await saves(), { ok: 0, failed: 0 });
-});
-
-test('a save counts as ok; a save the database rejects counts as failed', async t => {
-  const good = await serve(memoryStore()); t.after(() => good.srv.close());
-  assert.equal((await good.put({ save: { a: 1 } })).status, 200);
-  const broken = await serve({ ...memoryStore(), put: async () => { throw new Error('column "updated" does not exist'); } }); t.after(() => broken.srv.close());
-  assert.equal((await broken.put({ save: { a: 1 } })).status, 500);
-  assert.deepEqual(await saves(), { ok: 1, failed: 1 });
-});
-
 test('routes hide the save code', () => {
   assert.equal(route(`/api/save/${CODE}`), '/api/save/:code');
   assert.equal(route(`/api/save/${CODE}?x=1`), '/api/save/:code');

@@ -48,27 +48,27 @@ flowchart LR
 | production API down | nothing yet | Better Stack once the API is on a paid instance, step 6; the dev API is not monitored (a check keeps a Free API awake, see the plan) |
 | the game crashes on players' devices | nothing yet | Sentry, [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 3 |
 | CI never runs after a merge, or a dashboard rollback leaves an old commit live | not covered | accepted: see [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md), Open |
-| cloud saves fail | Dash0 alert (below), dev only; Sentry from [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 1, production from step 6 | email |
+| a save or load fails with a server error | Sentry alert (below); production from [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 6 | email |
 
 **Rollback:** Render dashboard → the service → Events → Rollback on the last good deploy (reuses its build; a dashboard rollback turns auto-deploy off: turn it back on after), or merge a revert pull request (CI, then Render, redeploy).
 
 ## Telemetry
 
-Being replaced: Sentry instead of Dash0, see [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md). Until its step 2, this section describes what runs.
+| What | Where | Detail |
+|---|---|---|
+| save API errors | Sentry, project `immune-citadel-api` | every request that fails with a server error, with its stack trace and route |
+| save API traces | same | every request except `/health`, with its Postgres queries (query text with `$1`, no values) |
+| logs | Render, the service's Logs tab | JSON lines with method, route, status, duration; never the save code |
+| game errors and load speed | Sentry, project `immune-citadel-game` | from [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 3 |
 
-**Sentry (save API errors):** organisation `myown-76`, EU region (de.sentry.io), project `immune-citadel-api`. [server/sentry.js](../server/sentry.js) reports every request that fails with a server error; it sends no IP, headers, cookies, bodies, query strings, database parameters or local variables, and replaces any save code with `:code` ([server/sentry.test.js](../server/sentry.test.js)). Alert "Save API error (a save or load failed): email owner": every error, at most one email per 30 min. Settings: `SENTRY_DSN` (project Client Keys) and `SENTRY_ENVIRONMENT` (`dev`, `production`; `local` by default); without the DSN it is off.
+Sentry organisation `myown-76`, EU region (de.sentry.io). Environments: `local`, `dev`, `production`.
 
-The save API sends traces, metrics and logs to [Dash0](https://www.dash0.com) over OpenTelemetry (OTLP). Dev on Render sends them now; production never will (Sentry replaces Dash0); locally only when `.env` holds the token (`.env.example`). The key journey is the cloud save (`PUT` then `GET /api/save/:code`).
+**Children's data:** [server/sentry.js](../server/sentry.js) sends no IP, headers, cookies, bodies, query strings, database parameters or local variables, and replaces any save code (the player's only credential) with `:code` in errors and traces. Proof: [server/sentry.test.js](../server/sentry.test.js). Logs use the route `/api/save/:code` ([server/route.js](../server/route.js), [server/telemetry.test.js](../server/telemetry.test.js)).
 
-- **Traces:** every API request, with its Postgres query. Spans carry the route `/api/save/:code`, never the code; client addresses are redacted; queries show `$1`, not values.
-- **Metrics:** request duration by method and status; `saves_total{outcome="ok"|"failed"}`. Every signal carries `deployment.environment.name` (local, dev, production).
-- **Logs:** JSON lines, each with the `trace_id` and `span_id` of its request, so a log line opens its trace.
-- Code: [server/otel.js](../server/otel.js) (OpenTelemetry), [server/route.js](../server/route.js) (the redaction), [server/index.js](../server/index.js) (logs and the counter). Fast tests: [server/telemetry.test.js](../server/telemetry.test.js).
+Settings on a Render API service: build `cd server && npm ci --omit=dev`, start `cd server && npm start`, and the variables `SENTRY_DSN` (Sentry → project → Client Keys) and `SENTRY_ENVIRONMENT` (`dev` or `production`). Without `SENTRY_DSN`, Sentry is off. Locally: `SENTRY_DSN` in `.env` (see `.env.example`).
 
-Settings on a Render API service: build `cd server && npm ci --omit=dev`, start `cd server && npm start` (that is what loads OpenTelemetry; `node server/index.js` would skip it), and the variables `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingress.europe-west4.gcp.dash0.com`, `OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer <token>`, `OTEL_SERVICE_NAME=immune-citadel-api`, `OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=<env>`.
+## Alert: save API error
 
-## Alert: cloud saves failing
+"Save API error (a save or load failed): email owner": every error in `immune-citadel-api` emails the owner, at most once per 30 min per issue. Defined in [observability/sentry-alert.json](../observability/sentry-alert.json) (Sentry alert 1464000), applied through the Sentry MCP.
 
-Defined as code in [observability/alert.js](../observability/alert.js) and created in Dash0 with `npm run alert`: fires when any save in the last 5 minutes failed with a server error, so a player's progress did not reach the cloud, and e-mails the owner. Checked every minute.
-
-Try it locally (with `.env` set): `docker compose up`, make a save, then `docker compose stop db` and make another. Measured on 2026-11-05: three failed saves at 20:26:03 UTC, Dash0 marked the check critical at 20:27:04 (observed value 3). Then `docker compose start db`.
+Try it locally (with `SENTRY_DSN` in `.env`): `docker compose up`, make a save, `docker compose stop db`, make another, then `docker compose start db`. Measured 2026-11-06: failed save 17:42:21 UTC, issue IMMUNE-CITADEL-API-1, alert fired 17:42:33, email received.

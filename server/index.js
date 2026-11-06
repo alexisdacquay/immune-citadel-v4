@@ -1,10 +1,7 @@
 // Cloud saves for Immune Citadel. A save is an opaque JSON object keyed by a 16-character save code the game generates.
 // Knowing the code is the only credential, so codes carry 80 random bits. Without DATABASE_URL it keeps saves in memory (local dev, tests).
 const http = require('node:http');
-const log = require('pino')({ level: process.env.LOG_LEVEL || 'info' }); // JSON lines; with otel.js each line carries the trace_id
-// saves_total{outcome="ok"|"failed"}: the alert's signal. Both series start at 0, so the first failure already counts as an increase.
-const saves = require('@opentelemetry/api').metrics.getMeter('immune-citadel-api').createCounter('saves', { description: 'Cloud saves by outcome' });
-saves.add(0, { outcome: 'ok' }); saves.add(0, { outcome: 'failed' });
+const log = require('pino')({ level: process.env.LOG_LEVEL || 'info' }); // JSON lines, read in Render's logs
 const route = require('./route');
 const { initSentry, Sentry } = require('./sentry');
 
@@ -86,12 +83,11 @@ function createServer(store) {
         let body; try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return send(400, { error: 'body must be JSON' }); }
         const save = body && body.save;
         if (!save || typeof save !== 'object' || Array.isArray(save)) return send(400, { error: 'body must be {"save": {...}}' });
-        const updatedAt = await store.put(code, save); saves.add(1, { outcome: 'ok' });
+        const updatedAt = await store.put(code, save);
         return send(200, { updatedAt });
       }
       send(405, { error: 'method not allowed' });
     } catch (e) {
-      if (req.method === 'PUT') saves.add(1, { outcome: 'failed' });
       Sentry.captureException(e, { tags: { method: req.method, route: route(req.url) } }); // a failed save emails the owner (alert rule in Sentry)
       log.error({ err: e.message }, 'request failed'); send(500, { error: 'server error' });
     }

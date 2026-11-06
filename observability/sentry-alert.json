@@ -1,0 +1,8 @@
+{
+  "_comment": "Sentry alert 1464000 (org myown-76, de.sentry.io), applied by the agent through the Sentry MCP (create_alert_rule / update_alert_rule). Every save API error emails the owner, at most once per 30 min per issue.",
+  "name": "Save API error (a save or load failed): email owner",
+  "projectSlugs": ["immune-citadel-api"],
+  "triggers": { "logicType": "any-short", "conditions": [{ "type": "every_event", "comparison": true, "conditionResult": true }] },
+  "actionFilters": [{ "logicType": "all", "conditions": [], "actions": [{ "type": "email", "config": { "targetType": "user", "targetIdentifier": "5157255" }, "data": {} }] }],
+  "frequencyMinutes": 30
+}
