@@ -10,6 +10,8 @@
 
 All on Render: two static sites, two Node web services, one Postgres with one schema per environment. `GET /health` on an API returns the commit it runs, e.g. `{"ok":true,"commit":"13c5715…"}`; Render uses it as the health check, so a broken API deploy never takes traffic.
 
+Settings on a Render static site: build `mkdir -p public && cp index.html public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt`, publish directory `public`, variable `SKIP_INSTALL_DEPS=true`. Only the game is public (the default would publish the whole checkout, server code and `node_modules` included), and `/version.txt` shows the commit the site runs.
+
 ## Releases
 
 ```mermaid
@@ -27,7 +29,7 @@ flowchart LR
 |---|---|---|
 | CI | [ci.yml](../.github/workflows/ci.yml): unit and integration tests on every pull request and every push to `dev` and `main` | PR [#30](https://github.com/alexisdacquay/immune-citadel-v4/pull/30) and [#31](https://github.com/alexisdacquay/immune-citadel-v4/pull/31) checks |
 | CD to dev | Render's auto-deploy trigger "after CI checks pass" on the dev services | [#25](https://github.com/alexisdacquay/immune-citadel-v4/issues/25#issuecomment-6667755969): CI passed 19:51:17, Render started the deploy at 19:51:20, `/health` showed the commit 115 s after the merge |
-| Production | the same trigger on `main`; only the owner merges `dev` into `main` | `/health` on the production API shows the commit |
+| Production | the same trigger on `main`; only the owner merges `dev` into `main` | `/health` on the production API and `/version.txt` on the site show the commit (from the next release: production's current build predates both) |
 
 **Rollback:** Render dashboard → the service → Events → Rollback on the last good deploy, or revert the change on `main` (CI, then Render, redeploy).
 
