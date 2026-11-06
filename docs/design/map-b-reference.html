@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Immune Citadel · Slide Atlas (prototype B)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#020407;--glass:rgba(9,16,26,.74);--glass2:rgba(14,24,37,.88);--rim:rgba(140,205,255,.22);--rim2:rgba(140,205,255,.45);
+  --txt:#dce8f3;--dim:#8ea3b8;--cyan:#7fd8ff;--dapi:#5b8cff;--red:#ff4d5e;--amber:#ffc24a;--lime:#a6ff4d;
+  --sans:'Space Grotesk',system-ui,-apple-system,Segoe UI,sans-serif;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--void);color:var(--txt);font:14px/1.4 var(--sans);overflow:hidden}
+#map{position:fixed;inset:0;width:1440px;height:900px}
+#map>canvas,#map>svg{position:absolute;inset:0;width:1440px;height:900px}
+/* top overlay bar */
+#bar{position:fixed;left:0;right:0;top:0;height:56px;display:flex;align-items:center;gap:14px;padding:0 14px 0 18px;
+  background:linear-gradient(180deg,rgba(6,11,18,.86),rgba(6,11,18,.62));border-bottom:1px solid var(--rim);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:5}
+.brand{display:flex;align-items:center;gap:11px}
+.brand svg{width:30px;height:30px}
+.brand b{font:700 17px/1 var(--sans);letter-spacing:.24em}
+.brand small{display:block;font:500 9.5px/1 var(--mono);letter-spacing:.2em;color:var(--dim);margin-top:5px}
+.sp{flex:1}
+.stars{font:700 13px var(--mono);color:var(--amber);display:flex;align-items:center;gap:6px;padding:0 12px;border-right:1px solid rgba(140,205,255,.14);height:30px}
+.stars span{color:var(--dim);font-weight:500}
+.btn{height:36px;display:flex;align-items:center;gap:8px;padding:0 13px;border-radius:10px;border:1px solid var(--rim);background:rgba(127,216,255,.06);color:var(--txt);font:600 13px var(--sans);cursor:pointer}
+.btn svg,.ib svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.btn:hover,.ib:hover{background:rgba(127,216,255,.14);border-color:var(--rim2)}
+.seg{display:flex;border:1px solid var(--rim);border-radius:10px;overflow:hidden;height:36px}
+.seg button{border:0;background:none;color:var(--dim);font:600 11px var(--mono);letter-spacing:.12em;padding:0 11px;cursor:pointer}
+.seg button.on{background:rgba(127,216,255,.18);color:#fff}
+.ib{width:38px;height:36px;border-radius:10px;border:1px solid var(--rim);background:rgba(127,216,255,.06);display:grid;place-items:center;color:var(--txt);position:relative;cursor:pointer}
+.ib i{position:absolute;right:6px;top:6px;width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 6px var(--lime)}
+/* region labels */
+.rl{position:absolute;pointer-events:none;padding:10px 18px 10px 14px;margin:-10px 0 0 -14px;border-radius:40px;background:radial-gradient(ellipse at 40% 50%,rgba(2,5,9,.72),rgba(2,5,9,.45) 55%,rgba(2,5,9,0) 75%);text-shadow:0 0 10px #000,0 0 3px #000,0 1px 2px #000}
+.rl small{display:block;font:600 9.5px/1 var(--mono);letter-spacing:.26em;color:rgba(220,232,243,.62)}
+.rl b{display:block;font:700 25px/1.05 var(--sans);letter-spacing:.3em;margin:5px 0 4px;color:#eef6ff}
+.rl i{display:flex;align-items:center;gap:8px;font:500 9.5px/1 var(--mono);font-style:normal;letter-spacing:.1em;color:rgba(220,232,243,.58)}
+.rl i:before{content:'';width:22px;height:1px;background:currentColor}
+.rl em{font-style:normal;color:var(--amber)}
+.rl.lock b{color:rgba(220,232,243,.5)}
+/* level card */
+#card{position:absolute;width:318px;padding:16px 18px 18px;background:var(--glass2);border:1px solid var(--rim2);border-radius:16px;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 24px 60px -18px #000,0 0 0 1px rgba(0,0,0,.4),0 0 40px -10px rgba(255,194,74,.25);z-index:4}
+#card:before{content:'';position:absolute;left:36px;top:-8px;width:14px;height:14px;background:var(--glass2);border-left:1px solid var(--rim2);border-top:1px solid var(--rim2);transform:rotate(45deg)}
+#card .k{font:600 10px var(--mono);letter-spacing:.22em;color:var(--cyan);display:flex;justify-content:space-between}
+#card .k span{color:var(--dim)}
+#card h2{margin:6px 0 6px;font:700 25px/1.1 var(--sans);letter-spacing:.01em;color:#fff}
+#card p{margin:0 0 14px;color:var(--dim);font-size:13.5px;line-height:1.45}
+#card .row{display:flex;align-items:center;gap:12px}
+#card .st{display:flex;gap:3px}
+#card .st svg{width:20px;height:20px}
+#card .st small{font:600 10px var(--mono);color:var(--dim);letter-spacing:.12em;margin-left:6px;align-self:center}
+#card .play{margin-left:auto;height:44px;padding:0 22px 0 18px;border-radius:12px;border:1px solid rgba(255,214,140,.7);display:flex;align-items:center;gap:9px;cursor:pointer;
+  background:linear-gradient(180deg,#ffd37a,#f2a531);color:#1a1004;font:700 16px var(--sans);letter-spacing:.04em;box-shadow:0 0 22px -4px rgba(255,194,74,.7),inset 0 1px 0 rgba(255,255,255,.5)}
+#card .play svg{width:14px;height:14px;fill:#1a1004}
+/* microscope overlay */
+#hud{position:absolute;right:18px;bottom:14px;display:flex;align-items:center;gap:14px;font:500 10px var(--mono);letter-spacing:.14em;color:rgba(220,232,243,.6);text-shadow:0 1px 3px #000}
+#hud .ch{display:flex;align-items:center;gap:5px}
+#hud .ch:before{content:'';width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c)}
+#hud .sb{display:flex;flex-direction:column;align-items:center;gap:3px}
+#hud .sb:before{content:'';width:70px;height:3px;background:#dce8f3;box-shadow:0 0 4px #000}
+.node{cursor:pointer}
+</style>
+</head>
+<body>
+<div id="map">
+  <canvas id="bg"></canvas>
+  <canvas id="fx"></canvas>
+  <svg id="ov" viewBox="0 0 1440 900"></svg>
+  <div id="labels"></div>
+  <div id="card">
+    <div class="k">LEVEL 09 · AORTA <span>BLOOD III</span></div>
+    <h2>The Current</h2>
+    <p>A long, fast artery. Parasites ride it away from the heart, out to the whole body.</p>
+    <div class="row">
+      <div class="st" id="cardStars"></div>
+      <button class="play"><svg viewBox="0 0 14 14"><path d="M2 1.2v11.6c0 .6.6.9 1.1.6l9.2-5.8c.5-.3.5-.9 0-1.2L3.1.6C2.6.3 2 .6 2 1.2z"/></svg>Play</button>
+    </div>
+  </div>
+  <div id="hud">
+    <span class="ch" style="--c:#5b8cff">DAPI</span><span class="ch" style="--c:#7cf08c">FITC</span><span class="ch" style="--c:#ff4fa8">TRITC</span><span class="ch" style="--c:#c77dff">Cy5</span>
+    <span class="sb">100 µm</span>
+  </div>
+</div>
+<header id="bar">
+  <div class="brand">
+    <svg viewBox="0 0 30 30"><defs><radialGradient id="lg" cx=".4" cy=".35"><stop offset="0" stop-color="#d9e6ff"/><stop offset=".55" stop-color="#5b8cff"/><stop offset="1" stop-color="#1c2f8a"/></radialGradient></defs><circle cx="15" cy="15" r="13" fill="none" stroke="#7fd8ff" stroke-opacity=".5" stroke-dasharray="2 3"/><path d="M15 5.5c5 0 9.3 3.6 9.3 9s-4 9.8-9.6 9.8S5.8 20.4 5.8 15 10 5.5 15 5.5z" fill="url(#lg)"/><circle cx="12" cy="12" r="1.6" fill="#fff" opacity=".6"/><circle cx="18" cy="17" r="1.3" fill="#fff" opacity=".4"/></svg>
+    <div><b>IMMUNE CITADEL</b><small>WHOLE-BODY SLIDE ATLAS</small></div>
+  </div>
+  <div class="sp"></div>
+  <div class="stars">★ 19 <span>/ 54</span></div>
+  <button class="btn"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>Field Guide</button>
+  <button class="btn"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/></svg>Immune Memory</button>
+  <div class="seg"><button>EASY</button><button class="on">NORMAL</button><button>HARD</button></div>
+  <button class="ib" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+  <button class="ib" aria-label="Cloud save"><svg viewBox="0 0 24 24"><path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.1 4.7 4.7 0 0 0 7 18.5z"/></svg><i></i></button>
+</header>
+<script>
+'use strict';
+const W = 1440, H = 900, D = Math.min(2, window.devicePixelRatio || 1), TAU = Math.PI * 2;
+function rng(s) { return () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hash(x, y) { let h = Math.imul(x, 374761393) + Math.imul(y, 668265263) | 0; h = Math.imul(h ^ h >>> 13, 1274126177); return ((h ^ h >>> 16) >>> 0) / 4294967296; }
+function vn(x, y) { const xi = Math.floor(x), yi = Math.floor(y), u0 = x - xi, v0 = y - yi, u = u0 * u0 * (3 - 2 * u0), v = v0 * v0 * (3 - 2 * v0), a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1); return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v; }
+const fbm = (x, y) => vn(x, y) * .55 + vn(x * 2.1 + 7, y * 2.1) * .3 + vn(x * 4.7, y * 4.7 + 3) * .15;
+function rgba(h, a) { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; }
+function mk() { const c = document.createElement('canvas'); c.width = W * D; c.height = H * D; const g = c.getContext('2d'); g.scale(D, D); g.globalCompositeOperation = 'lighter'; g.lineCap = 'round'; g.lineJoin = 'round'; return { c, g }; }
+function glow(g, x, y, r, col, a) { const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, rgba(col, a)); gr.addColorStop(1, rgba(col, 0)); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); }
+// DAPI-stained nucleus: bright core, soft edge
+function nuc(g, x, y, rx, ry, rot, a, col = '#5b8cff') {
+  g.save(); g.translate(x, y); g.rotate(rot); g.scale(1, ry / rx);
+  const gr = g.createRadialGradient(-rx * .2, -rx * .2, 0, 0, 0, rx); gr.addColorStop(0, rgba('#b8ccff', a)); gr.addColorStop(.6, rgba(col, a * .8)); gr.addColorStop(1, rgba(col, 0));
+  g.fillStyle = gr; g.beginPath(); g.arc(0, 0, rx, 0, TAU); g.fill(); g.restore();
+}
+function blobPath(g, x, y, r, R, k = .12) { const n = 14, ph = R() * 9; g.beginPath(); for (let i = 0; i <= n; i++) { const a = i / n * TAU, q = r * (1 + Math.sin(a * 3 + ph) * k * .6 + (R() - .5) * k); i ? g.lineTo(x + Math.cos(a) * q, y + Math.sin(a) * q) : g.moveTo(x + Math.cos(a) * q, y + Math.sin(a) * q); } g.closePath(); }
+function spline(P, n = 22) {
+  const o = [];
+  for (let i = 0; i < P.length - 1; i++) {
+    const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || P[i + 1];
+    for (let k = 0; k < n; k++) { const t = k / n, t2 = t * t, t3 = t2 * t, f = j => .5 * (2 * p1[j] + (-p0[j] + p2[j]) * t + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * t2 + (-p0[j] + 3 * p1[j] - 3 * p2[j] + p3[j]) * t3); o.push([f(0), f(1)]); }
+  }
+  o.push(P[P.length - 1]); return o;
+}
+function poly(pts) { const s = [0]; for (let i = 1; i < pts.length; i++) s.push(s[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])); return { pts, s, len: s[s.length - 1] }; }
+function at(P, d) {
+  d = Math.max(0, Math.min(P.len, d)); let lo = 0, hi = P.s.length - 1; while (hi - lo > 1) { const m = lo + hi >> 1; if (P.s[m] <= d) lo = m; else hi = m; }
+  const a = P.pts[lo], b = P.pts[hi], t = (d - P.s[lo]) / (P.s[hi] - P.s[lo] || 1), ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
+  return { x: a[0] + (b[0] - a[0]) * t, y: a[1] + (b[1] - a[1]) * t, a: ang, nx: -Math.sin(ang), ny: Math.cos(ang) };
+}
+function offStroke(g, P, off, amp, lam, ph, step = 6) { g.beginPath(); for (let d = 0, i = 0; d <= P.len; d += step, i++) { const q = at(P, d), o = off + amp * Math.sin(d / lam + ph); const x = q.x + q.nx * o, y = q.y + q.ny * o; i ? g.lineTo(x, y) : g.moveTo(x, y); } }
+function distPoly(x, y, pts) { let m = 1e9; for (let i = 1; i < pts.length; i++) { const [ax, ay] = pts[i - 1], [bx, by] = pts[i], dx = bx - ax, dy = by - ay, t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy))); m = Math.min(m, Math.hypot(x - ax - dx * t, y - ay - dy * t)); } return m; }
+
+// ---------------------------------------------------------------- layout
+const NODES = [[105, 800], [245, 826], [362, 702], [408, 535], [262, 428], [312, 252], [470, 270], [600, 352], [748, 448], [612, 605], [492, 704], [566, 838], [880, 806], [1022, 848], [1168, 770], [1186, 594], [1080, 424], [1250, 232]];
+const FORKS = { 3: [[234, 668], [270, 590]], 6: [[178, 196], [170, 300]], 9: [[856, 376], [910, 448]], 12: [[436, 852], [416, 778]], 15: [[1300, 852], [1326, 760]], 18: [[1374, 168], [1384, 290]] };
+const STARS = [3, 3, 2, 3, 2, 3, 1, 2];
+const AORTA = poly(spline([[425, -90], [462, 50], [565, 182], [720, 236], [875, 182], [968, 50], [1005, -90]], 30));
+const REG = [
+  { k: 'skin', c: [130, 760], b: 0 }, { k: 'lung', c: [215, 300], b: 0 }, { k: 'blood', b: 20 },
+  { k: 'lymph', c: [600, 740], b: 0 }, { k: 'gut', c: [1130, 790], b: 0 }, { k: 'brain', c: [1190, 300], b: 0 }];
+
+// ---------------------------------------------------------------- tissues
+const KR = '#5cf0a0', COL = '#ff4fa8', AM = '#ffc24a', RED = '#ff4d5e', EL = '#7cf08c', CY = '#7fd8ff', LIME = '#a6ff4d', ROSE = '#ff5c9d', VIO = '#c77dff';
+
+function skin(g, R) {
+  g.save(); g.translate(130, 800); g.rotate(.74);
+  const basal = x => -150 + 24 * Math.sin(x / 36) + 9 * Math.sin(x / 15 + 1), surf = x => 150 + 7 * Math.sin(x / 70);
+  // dermis: collagen bundles, fibroblasts
+  for (let i = 0; i < 420; i++) { let x = -900 + R() * 1800, y = -760 + R() * 660, a = (R() - .5) * .9; g.beginPath(); g.moveTo(x, y); for (let j = 0; j < 9; j++) { a += (R() - .5) * .45; x += Math.cos(a) * 16; y += Math.sin(a) * 16; g.lineTo(x, y); } g.strokeStyle = rgba(COL, .04 + R() * .08); g.lineWidth = 1 + R() * 3.5; g.stroke(); }
+  for (let i = 0; i < 260; i++) { const x = -900 + R() * 1800, y = -760 + R() * 640; nuc(g, x, y, 5 + R() * 2, 1.7, (R() - .5) * .8, .35 + R() * .2); }
+  // papillary capillary loops
+  for (let x = -880; x < 880; x += 72) { const b = basal(x); g.strokeStyle = rgba(RED, .32); g.lineWidth = 1.6; g.beginPath(); g.moveTo(x - 7, b - 120); g.bezierCurveTo(x - 9, b - 10, x + 9, b - 10, x + 7, b - 120); g.stroke(); for (let k = 0; k < 4; k++) glow(g, x + (R() - .5) * 12, b - 30 - R() * 80, 3, RED, .5); }
+  // sweat glands
+  for (const [sx, sy] of [[-330, -560], [300, -610], [-30, -700], [620, -520]]) for (let k = 0; k < 10; k++) { const x = sx + (R() - .5) * 90, y = sy + (R() - .5) * 70; g.strokeStyle = rgba(KR, .22); g.lineWidth = 1.4; g.beginPath(); g.arc(x, y, 12, 0, TAU); g.stroke(); for (let q = 0; q < 8; q++) { const a = q / 8 * TAU; nuc(g, x + Math.cos(a) * 9, y + Math.sin(a) * 9, 2.6, 1.8, a, .5); } }
+  // hair follicles with sebaceous glands and arrector pili
+  for (const [fx, fa] of [[-470, .28], [-180, .2], [140, .3], [430, .24], [700, .27]]) {
+    g.save(); g.translate(fx, surf(fx) - 4); g.rotate(fa); const L = 560;
+    g.strokeStyle = rgba(KR, .05); g.lineWidth = 50; g.beginPath(); g.moveTo(0, -30); g.lineTo(0, -L + 40); g.stroke();
+    for (const sd of [-1, 1]) { g.strokeStyle = rgba(KR, .3); g.lineWidth = 1.3; g.beginPath(); g.moveTo(sd * 24, -40); g.lineTo(sd * 22, -L + 50); g.stroke(); for (let y = -50; y > -L + 50; y -= 7) { nuc(g, sd * 19, y, 3.2, 1.8, Math.PI / 2, .5); nuc(g, sd * 12, y - 3, 2.8, 1.6, Math.PI / 2, .35); } }
+    g.strokeStyle = rgba(COL, .14); g.lineWidth = 6; g.beginPath(); g.arc(0, -L, 48, 0, TAU); g.stroke();
+    for (let k = 0; k < 46; k++) { const a = R() * TAU, q = 22 + R() * 22; nuc(g, Math.cos(a) * q, -L + Math.sin(a) * q, 3.4, 2.6, a, .55); }
+    glow(g, 0, -L, 22, COL, .45);
+    const hg = g.createLinearGradient(0, -L, 0, 110); hg.addColorStop(0, rgba(AM, .06)); hg.addColorStop(.5, rgba(AM, .3)); hg.addColorStop(1, rgba(AM, .45));
+    g.strokeStyle = hg; g.lineWidth = 5; g.beginPath(); g.moveTo(0, -L + 20); g.quadraticCurveTo(4, 0, 12, 60); g.stroke();
+    g.strokeStyle = rgba('#fff3d0', .25); g.lineWidth = 1.2; g.stroke();
+    for (let k = 0; k < 8; k++) { const x = 46 + (k % 3) * 16 + R() * 4, y = -170 - (k / 3 | 0) * 18 + R() * 5; g.fillStyle = rgba(AM, .06); g.strokeStyle = rgba(AM, .26); g.lineWidth = 1.1; blobPath(g, x, y, 11, R); g.fill(); g.stroke(); nuc(g, x, y, 3.4, 3.2, 0, .5); }
+    g.strokeStyle = rgba(EL, .1); g.lineWidth = 8; g.beginPath(); g.moveTo(28, -300); g.lineTo(160, -110); g.stroke();
+    for (let k = 0; k < 9; k++) nuc(g, 28 + k * 15, -300 + k * 21, 5, 1.4, .97, .35);
+    g.restore();
+  }
+  // epidermis: basal columns, spinous polygons, granular, cornified sheets
+  for (let x = -900; x < 900; x += 6.5) { const b = basal(x), b2 = basal(x + 1); nuc(g, x, b + 6, 4.6, 2.1, Math.atan2(b2 - b, 1) + Math.PI / 2, .85); }
+  g.strokeStyle = rgba(CY, .35); g.lineWidth = 1.2; g.beginPath(); for (let x = -900; x < 900; x += 4) x === -900 ? g.moveTo(x, basal(x)) : g.lineTo(x, basal(x)); g.stroke();
+  for (let x = -900; x < 900; x += 17) for (let y0 = -190; y0 < 170; y0 += 15) {
+    const x1 = x + (R() - .5) * 6, y = y0 + (R() - .5) * 5, b = basal(x1) + 12, s = surf(x1) - 30; if (y < b || y > s) continue;
+    const f = (y - b) / (s - b), r = 8.5 + f * 4;
+    g.save(); g.translate(x1, y); g.rotate((R() - .5) * .3); g.scale(1, 1 - f * .55); blobPath(g, 0, 0, r, R, .16); g.restore();
+    g.fillStyle = rgba(KR, .04 + f * .03); g.fill(); g.strokeStyle = rgba(KR, .2 + f * .22); g.lineWidth = 1; g.stroke();
+    if (f < .82) nuc(g, x1, y, r * .42, r * .42 * (1 - f * .5), 0, .55 - f * .3);
+    if (f > .68) for (let k = 0; k < 4; k++) glow(g, x1 + (R() - .5) * r * 1.4, y + (R() - .5) * 5, 2.2, AM, .55);
+  }
+  for (let k = 0; k < 16; k++) { let x = -900; while (x < 900) { const len = 30 + R() * 140, gap = 4 + R() * 18; g.strokeStyle = rgba(KR, .16 + R() * .3); g.lineWidth = 1; g.beginPath(); for (let q = x; q < x + len; q += 6) { const yy = surf(q) - 28 + k * 1.9 + Math.sin(q / 23 + k) * 1.2; q === x ? g.moveTo(q, yy) : g.lineTo(q, yy); } g.stroke(); x += len + gap; } }
+  g.strokeStyle = rgba('#d8fff0', .4); g.lineWidth = 1.8; g.beginPath(); for (let x = -900; x < 900; x += 5) x === -900 ? g.moveTo(x, surf(x) + 2) : g.lineTo(x, surf(x) + 2); g.stroke();
+  for (let i = 0; i < 26; i++) { const x = -900 + R() * 1800, y = surf(x) + 14 + R() * 60; g.strokeStyle = rgba(KR, .22); g.lineWidth = 1.2; g.beginPath(); g.ellipse(x, y, 14 + R() * 10, 2.5, (R() - .5) * .5, 0, TAU); g.stroke(); }
+  g.restore();
+}
+
+function lung(g, R) {
+  const br = [{ x: 150, y: 185, r: 64 }, { x: 440, y: 395, r: 46 }, { x: 80, y: 470, r: 34 }], C = [];
+  for (let t = 0; t < 9000 && C.length < 420; t++) { const r = 14 + R() * 22, x = -30 + R() * 720, y = 10 + R() * 700; if (br.some(b => Math.hypot(x - b.x, y - b.y) < b.r * 1.9 + r)) continue; if (C.some(c => Math.hypot(x - c.x, y - c.y) < (c.r + r) * .93)) continue; C.push({ x, y, r }); }
+  // capillary bed in the septa: red speckle under everything
+  for (let i = 0; i < 900; i++) glow(g, R() * 700 - 20, R() * 700, 2.2, RED, .25);
+  for (const c of C) {
+    blobPath(g, c.x, c.y, c.r, R, .1); g.fillStyle = rgba(ROSE, .035); g.fill(); g.strokeStyle = rgba(ROSE, .08); g.lineWidth = 6; g.stroke(); g.strokeStyle = rgba(ROSE, .4 + R() * .3); g.lineWidth = 1.5; g.stroke();
+    const n = 1 + (R() * 3 | 0); for (let k = 0; k < n; k++) { const a = R() * TAU; nuc(g, c.x + Math.cos(a) * c.r, c.y + Math.sin(a) * c.r, 3.4, 1.7, a + Math.PI / 2, .6); }
+    if (R() < .4) { const a = R() * TAU; glow(g, c.x + Math.cos(a) * c.r * .92, c.y + Math.sin(a) * c.r * .92, 6, LIME, .45); nuc(g, c.x + Math.cos(a) * c.r * .9, c.y + Math.sin(a) * c.r * .9, 2.6, 2.4, 0, .5); }
+    if (R() < .07) { const x = c.x + (R() - .5) * c.r * .6, y = c.y + (R() - .5) * c.r * .6; blobPath(g, x, y, 7, R, .35); g.fillStyle = rgba(AM, .14); g.fill(); g.strokeStyle = rgba(AM, .4); g.lineWidth = 1; g.stroke(); nuc(g, x + 1, y, 3, 2.4, 0, .55); }
+  }
+  for (const b of br) {
+    // pulmonary artery companion
+    const ax = b.x + b.r * 1.45, ay = b.y + b.r * .55, ar = b.r * .5;
+    for (let k = 0; k < 3; k++) { g.strokeStyle = rgba(EL, .32 - k * .08); g.lineWidth = 1.2; g.beginPath(); for (let i = 0; i <= 60; i++) { const a = i / 60 * TAU, q = ar + k * 3 + Math.sin(a * 22) * 1.2; i ? g.lineTo(ax + Math.cos(a) * q, ay + Math.sin(a) * q) : g.moveTo(ax + Math.cos(a) * q, ay + Math.sin(a) * q); } g.stroke(); }
+    for (let k = 0; k < 18; k++) { const a = R() * TAU, q = R() * ar * .8; g.strokeStyle = rgba(RED, .45); g.lineWidth = 2; g.beginPath(); g.ellipse(ax + Math.cos(a) * q, ay + Math.sin(a) * q, 4.5, 4.5 * (.5 + R() * .5), R() * 3, 0, TAU); g.stroke(); }
+    // airway: muscle, folded epithelium, cilia
+    g.strokeStyle = rgba(LIME, .14); g.lineWidth = 9; g.beginPath(); g.arc(b.x, b.y, b.r * 1.08, 0, TAU); g.stroke();
+    for (let k = 0; k < 40; k++) { const a = k / 40 * TAU; nuc(g, b.x + Math.cos(a) * b.r * 1.08, b.y + Math.sin(a) * b.r * 1.08, 4.5, 1.3, a + Math.PI / 2, .35); }
+    const fold = a => b.r * (.78 + .07 * Math.sin(a * 11));
+    g.fillStyle = rgba(ROSE, .04); g.beginPath(); for (let i = 0; i <= 120; i++) { const a = i / 120 * TAU; g.lineTo(b.x + Math.cos(a) * b.r, b.y + Math.sin(a) * b.r); } g.fill();
+    for (let i = 0; i < 150; i++) { const a = i / 150 * TAU, q = fold(a); nuc(g, b.x + Math.cos(a) * (q + 6), b.y + Math.sin(a) * (q + 6), 4, 1.6, a, .6); }
+    g.strokeStyle = rgba(CY, .55); g.lineWidth = 1.3; g.beginPath(); for (let i = 0; i <= 160; i++) { const a = i / 160 * TAU, q = fold(a); i ? g.lineTo(b.x + Math.cos(a) * q, b.y + Math.sin(a) * q) : g.moveTo(b.x + Math.cos(a) * q, b.y + Math.sin(a) * q); } g.stroke();
+    g.strokeStyle = rgba(CY, .22); g.lineWidth = .8; for (let i = 0; i < 220; i++) { const a = i / 220 * TAU, q = fold(a); g.beginPath(); g.moveTo(b.x + Math.cos(a) * q, b.y + Math.sin(a) * q); g.lineTo(b.x + Math.cos(a) * (q - 5), b.y + Math.sin(a) * (q - 5)); g.stroke(); }
+    for (let k = 0; k < 4; k++) { const x = b.x + (R() - .5) * b.r * .6, y = b.y + (R() - .5) * b.r * .6; g.strokeStyle = rgba(KR, .12); g.lineWidth = 2; g.beginPath(); g.moveTo(x, y); g.bezierCurveTo(x + 10, y - 8, x + 20, y + 8, x + 30, y); g.stroke(); }
+  }
+}
+
+function blood(g, R) {
+  const P = AORTA;
+  // loose tissue inside and around the arch, vasa vasorum
+  for (let i = 0; i < 520; i++) { let x = 360 + R() * 760, y = -20 + R() * 620, a = R() * TAU; g.beginPath(); g.moveTo(x, y); for (let j = 0; j < 7; j++) { a += (R() - .5) * .6; x += Math.cos(a) * 14; y += Math.sin(a) * 14; g.lineTo(x, y); } g.strokeStyle = rgba(COL, .04 + R() * .06); g.lineWidth = 1 + R() * 2; g.stroke(); }
+  for (let i = 0; i < 420; i++) nuc(g, 360 + R() * 760, -20 + R() * 640, 3 + R() * 2, 2.2, R() * 3, .3);
+  for (let i = 0; i < 40; i++) { const x = 380 + R() * 720, y = 20 + R() * 600, r = 6 + R() * 9; if (distPoly(x, y, P.pts) < 120) continue; g.strokeStyle = rgba(EL, .3); g.lineWidth = 1.2; g.beginPath(); g.arc(x, y, r, 0, TAU); g.stroke(); g.strokeStyle = rgba(RED, .5); g.lineWidth = 1.8; g.beginPath(); g.ellipse(x, y, 3, 2.4, 0, 0, TAU); g.stroke(); nuc(g, x + r, y, 2.6, 1.3, Math.PI / 2, .5); }
+  // adventitia
+  for (const sd of [-1, 1]) for (let k = 0; k < 18; k++) { g.strokeStyle = rgba(COL, .05 + R() * .07); g.lineWidth = 1 + R() * 3; offStroke(g, P, sd * (98 + k * 3.2 + R() * 5), 2.5, 30 + R() * 30, R() * 9, 8); g.stroke(); }
+  for (let d = 0; d < P.len; d += 7) { const q = at(P, d), sd = R() > .5 ? 1 : -1, o = sd * (100 + R() * 50); nuc(g, q.x + q.nx * o, q.y + q.ny * o, 4, 1.6, q.a, .35); }
+  // media: wavy elastic lamellae with smooth muscle nuclei between
+  for (const sd of [-1, 1]) for (let k = 0; k < 9; k++) { g.strokeStyle = rgba(EL, .22 + R() * .16); g.lineWidth = 1.1; offStroke(g, P, sd * (65 + k * 3.4), 1.4, 3.2 + R(), R() * 9, 3); g.stroke(); }
+  for (let d = 0; d < P.len; d += 3.2) { const q = at(P, d), o = (R() > .5 ? 1 : -1) * (66 + R() * 28); nuc(g, q.x + q.nx * o, q.y + q.ny * o, 4.4, 1.3, q.a, .45); }
+  // intima / endothelium
+  for (const sd of [-1, 1]) { g.strokeStyle = rgba(CY, .5); g.lineWidth = 1.4; offStroke(g, P, sd * 62, .6, 12, 0, 4); g.stroke(); for (let d = 0; d < P.len; d += 18) { const q = at(P, d + R() * 8); nuc(g, q.x + q.nx * sd * 63, q.y + q.ny * sd * 63, 5.5, 1.4, q.a, .65); } }
+  // lumen: plasma haze, red cells, leukocytes, platelets
+  g.strokeStyle = rgba(RED, .035); g.lineWidth = 120; offStroke(g, P, 0, 0, 1, 0, 10); g.stroke();
+  for (let i = 0; i < 700; i++) { const q = at(P, R() * P.len), o = (R() - .5) * 114; rbc(g, q.x + q.nx * o, q.y + q.ny * o, 5.6 + R() * 1.2, R() * 3, .35 + R() * .65, .3 + R() * .35); }
+  for (let i = 0; i < 18; i++) { const q = at(P, R() * P.len), o = (R() - .5) * 96, x = q.x + q.nx * o, y = q.y + q.ny * o; g.strokeStyle = rgba(EL, .4); g.lineWidth = 1.2; g.beginPath(); g.arc(x, y, 9, 0, TAU); g.stroke(); for (let k = 0; k < 3; k++) nuc(g, x + Math.cos(k * 2.1) * 3.5, y + Math.sin(k * 2.1) * 3.5, 3, 2.6, 0, .75); }
+  for (let i = 0; i < 160; i++) { const q = at(P, R() * P.len), o = (R() - .5) * 116; glow(g, q.x + q.nx * o, q.y + q.ny * o, 2.2, AM, .6); }
+}
+function rbc(g, x, y, r, rot, tilt, a) { g.save(); g.translate(x, y); g.rotate(rot); g.scale(1, tilt); g.fillStyle = rgba(RED, a * .3); g.beginPath(); g.arc(0, 0, r, 0, TAU); g.fill(); g.strokeStyle = rgba(RED, a); g.lineWidth = 2.2; g.beginPath(); g.arc(0, 0, r - 1, 0, TAU); g.stroke(); g.restore(); }
+
+function lymph(g, R) {
+  const cx = 600, cy = 760, rx = 270, ry = 175;
+  g.save(); g.translate(cx, cy); g.rotate(-.06);
+  // fat cells around the capsule
+  for (let t = 0, n = 0; t < 2500 && n < 120; t++) { const a = R() * TAU, q = 1.06 + R() * .7, x = Math.cos(a) * rx * q, y = Math.sin(a) * ry * q, r = 18 + R() * 14; n++; g.strokeStyle = rgba(AM, .1 + R() * .08); g.lineWidth = 1.1; blobPath(g, x, y, r, R, .14); g.stroke(); if (R() < .3) nuc(g, x + r * .8, y, 3.6, 1.5, Math.PI / 2, .4); }
+  // afferent lymphatics with valves
+  for (const a0 of [-2.5, -1.7, -.9, -.2]) { const x0 = Math.cos(a0) * rx * 1.5, y0 = Math.sin(a0) * ry * 1.5, x1 = Math.cos(a0) * rx, y1 = Math.sin(a0) * ry; g.strokeStyle = rgba(CY, .25); g.lineWidth = 7; g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo((x0 + x1) / 2 + 20, (y0 + y1) / 2, x1, y1); g.stroke(); g.strokeStyle = rgba(CY, .06); g.lineWidth = 3; g.stroke(); }
+  const fol = []; for (let i = 0; i < 9; i++) { const a = -Math.PI * 1.05 + i * Math.PI * 1.1 / 8 + (R() - .5) * .1; fol.push({ x: Math.cos(a) * rx * .73, y: Math.sin(a) * ry * .7, r: 42 + R() * 16 }); }
+  fol.push({ x: -rx * .78, y: ry * .3, r: 40 }, { x: rx * .78, y: ry * .32, r: 44 });
+  // paracortex T zone haze, medulla cords
+  for (let i = 0; i < 16; i++) { const a = R() * TAU, q = .3 + R() * .25; glow(g, Math.cos(a) * rx * q, Math.sin(a) * ry * q, 70, CY, .06); }
+  for (let i = 0; i < 26; i++) { let x = (R() - .5) * rx * .6, y = ry * (.05 + R() * .5), a = Math.PI / 2 + (R() - .5); g.beginPath(); g.moveTo(x, y); for (let j = 0; j < 6; j++) { a += (R() - .5) * .8; x += Math.cos(a) * 14; y += Math.sin(a) * 14; g.lineTo(x, y); } g.strokeStyle = rgba(COL, .12); g.lineWidth = 6; g.stroke(); }
+  // lymphocytes
+  for (let i = 0; i < 9000; i++) {
+    const a = R() * TAU, q = Math.sqrt(R()) * .96, x = Math.cos(a) * rx * q, y = Math.sin(a) * ry * q;
+    let al = .2 + R() * .2, r = 1.6 + R() * .8, col = '#5b8cff';
+    const f = fol.find(f => Math.hypot(x - f.x, y - f.y) < f.r * 1.15);
+    if (f) { const d = Math.hypot(x - f.x, y - f.y) / f.r; if (d < .62) { if (R() < .6) continue; r = 2.6 + R(); al = .3; col = '#7fa6ff'; } else al = .45 + R() * .25; }
+    else if (q < .45 && y > 0 && R() < .5) continue;
+    g.fillStyle = rgba(col, al); g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
+  }
+  // germinal centres
+  for (const f of fol) { glow(g, f.x, f.y, f.r * .75, LIME, .2); glow(g, f.x + f.r * .12, f.y - f.r * .1, f.r * .45, AM, .14); for (let k = 0; k < 4; k++) { const a = R() * TAU, q = R() * f.r * .4; blobPath(g, f.x + Math.cos(a) * q, f.y + Math.sin(a) * q, 5, R, .3); g.fillStyle = rgba(AM, .28); g.fill(); } g.strokeStyle = rgba('#7fa6ff', .12); g.lineWidth = 1; g.beginPath(); g.arc(f.x, f.y, f.r * 1.12, 0, TAU); g.stroke(); }
+  // high endothelial venules
+  for (let i = 0; i < 12; i++) { const a = R() * TAU, q = .38 + R() * .2, x = Math.cos(a) * rx * q, y = Math.sin(a) * ry * q; g.strokeStyle = rgba(VIO, .45); g.lineWidth = 1.5; g.beginPath(); g.arc(x, y, 8, 0, TAU); g.stroke(); for (let k = 0; k < 7; k++) { const b = k / 7 * TAU; nuc(g, x + Math.cos(b) * 6, y + Math.sin(b) * 6, 2.8, 2.2, b, .6); } }
+  // capsule and subcapsular sinus
+  g.strokeStyle = rgba(COL, .1); g.lineWidth = 12; g.beginPath(); g.ellipse(0, 0, rx * 1.01, ry * 1.01, 0, 0, TAU); g.stroke();
+  g.strokeStyle = rgba(COL, .5); g.lineWidth = 2; g.stroke();
+  g.strokeStyle = rgba(CY, .16); g.lineWidth = 1; g.beginPath(); g.ellipse(0, 0, rx * .965, ry * .955, 0, 0, TAU); g.stroke();
+  for (let i = 0; i < 90; i++) { const a = R() * TAU; nuc(g, Math.cos(a) * rx * 1.01, Math.sin(a) * ry * 1.01, 4.6, 1.4, Math.atan2(Math.cos(a) * ry, -Math.sin(a) * rx) + Math.PI / 2, .45); }
+  g.restore();
+}
+
+function gut(g, R) {
+  // lumen: mucus wisps and the microbiome
+  for (let i = 0; i < 40; i++) { let x = 760 + R() * 700, y = 470 + R() * 260, a = (R() - .5) * .6; g.beginPath(); g.moveTo(x, y); for (let j = 0; j < 10; j++) { a += (R() - .5) * .4; x += Math.cos(a) * 16; y += Math.sin(a) * 16; g.lineTo(x, y); } g.strokeStyle = rgba(KR, .05); g.lineWidth = 4 + R() * 8; g.stroke(); }
+  for (let i = 0; i < 700; i++) { const x = 760 + R() * 700, y = 460 + R() * 300, a = R() * TAU, l = 2 + R() * 3, c = R() < .5 ? AM : R() < .5 ? LIME : VIO; g.strokeStyle = rgba(c, .3 + R() * .35); g.lineWidth = 1.8; g.beginPath(); g.moveTo(x - Math.cos(a) * l, y - Math.sin(a) * l); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke(); }
+  for (let x = 780, i = 0; x < 1480; x += 38 + R() * 10, i++) {
+    const h = 180 + R() * 110, w = 28 + R() * 8, sw = (R() - .5) * .3;
+    g.save(); g.translate(x, 912); g.rotate(sw);
+    const path = () => { g.beginPath(); g.moveTo(-w / 2, 0); g.lineTo(-w / 2, -h + w / 2); g.arc(0, -h + w / 2, w / 2, Math.PI, 0); g.lineTo(w / 2, 0); };
+    path(); g.fillStyle = rgba(COL, .035); g.fill();
+    g.strokeStyle = rgba(RED, .22); g.lineWidth = 1; g.beginPath(); for (let k = 0; k < 2; k++) { const s = k ? 1 : -1; g.moveTo(s * 4, 0); for (let y = 0; y > -h + w; y -= 8) g.lineTo(s * (4 + Math.sin(y / 9) * 3), y); } g.stroke();
+    g.strokeStyle = rgba('#e8f6ff', .07); g.lineWidth = 5; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, -h + w); g.stroke();
+    for (let k = 0; k < 8; k++) nuc(g, (R() - .5) * (w - 16), -R() * (h - w), 2.4, 2, 0, .35);
+    for (let y = -6; y > -h + w / 2; y -= 4.6) for (const s of [-1, 1]) nuc(g, s * (w / 2 - 6), y, 3.6, 1.4, 0, .6);
+    for (let k = 0; k <= 10; k++) { const a = Math.PI + k / 10 * Math.PI; nuc(g, Math.cos(a) * (w / 2 - 6), -h + w / 2 + Math.sin(a) * (w / 2 - 6), 3.6, 1.4, a, .6); }
+    for (let y = -16 - R() * 10; y > -h + w; y -= 18 + R() * 14) { const s = R() > .5 ? 1 : -1; g.fillStyle = rgba(COL, .32); g.beginPath(); g.ellipse(s * (w / 2 - 4.5), y, 3, 5.5, 0, 0, TAU); g.fill(); }
+    path(); g.strokeStyle = rgba(EL, .08); g.lineWidth = 7; g.stroke(); g.strokeStyle = rgba(EL, .6); g.lineWidth = 1.6; g.stroke();
+    g.restore();
+  }
+}
+
+function brain(g, R) {
+  const X0 = 860, X1 = 1460, Y0 = 0, Y1 = 700;
+  // myelinated tract sweeping across
+  for (let k = 0; k < 40; k++) { const o = k * 3.2; g.strokeStyle = rgba(AM, .04 + R() * .05); g.lineWidth = 1.2; g.beginPath(); for (let x = X0; x <= X1; x += 10) { const y = 520 + o - (x - X0) * .32 + Math.sin(x / 70 + k * .1) * 14; x === X0 ? g.moveTo(x, y) : g.lineTo(x, y); } g.stroke(); }
+  // capillaries
+  for (let i = 0; i < 4; i++) { let x = X0 + R() * 600, y = Y0 + R() * 650, a = R() * TAU; g.beginPath(); g.moveTo(x, y); for (let j = 0; j < 30; j++) { a += (R() - .5) * .5; x += Math.cos(a) * 12; y += Math.sin(a) * 12; g.lineTo(x, y); } g.strokeStyle = rgba(RED, .16); g.lineWidth = 6; g.stroke(); g.strokeStyle = rgba(RED, .4); g.lineWidth = 1.2; g.stroke(); }
+  for (let i = 0; i < 520; i++) nuc(g, X0 + R() * 600, Y0 + R() * 700, 3 + R() * 1.5, 2.6, R() * 3, .35 + R() * .2);
+  // astrocytes
+  for (let i = 0; i < 46; i++) {
+    const x = X0 + R() * 600, y = Y0 + R() * 700, n = 9 + (R() * 7 | 0);
+    for (let k = 0; k < n; k++) { let a = k / n * TAU + R() * .4, px = x, py = y, l = 18 + R() * 26; g.beginPath(); g.moveTo(px, py); for (let j = 0; j < 6; j++) { a += (R() - .5) * .7; px += Math.cos(a) * l / 6; py += Math.sin(a) * l / 6; g.lineTo(px, py); } g.strokeStyle = rgba(CY, .26); g.lineWidth = 1.2; g.stroke(); if (R() < .4) { g.beginPath(); g.moveTo(px, py); g.lineTo(px + Math.cos(a + .8) * 7, py + Math.sin(a + .8) * 7); g.lineWidth = .8; g.stroke(); } }
+    glow(g, x, y, 9, CY, .5); nuc(g, x, y, 3.6, 3, R() * 3, .6);
+  }
+  // pyramidal neurons
+  const dend = (x, y, a, len, w, depth) => {
+    let px = x, py = y; const pts = [], n = Math.max(4, len / 7 | 0); g.beginPath(); g.moveTo(px, py);
+    for (let i = 0; i < n; i++) { a += (R() - .5) * .28; px += Math.cos(a) * len / n; py += Math.sin(a) * len / n; g.lineTo(px, py); pts.push([px, py, a]); }
+    g.strokeStyle = rgba(VIO, .38 + depth * .1); g.lineWidth = w; g.stroke();
+    g.strokeStyle = rgba(VIO, .35); g.lineWidth = .8; for (const [sx, sy, sa] of pts) if (R() < .7) { const s = R() > .5 ? 1 : -1; g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + Math.cos(sa + s * 1.4) * 3, sy + Math.sin(sa + s * 1.4) * 3); g.stroke(); }
+    if (depth > 0) { const m = pts[n / 2 | 0]; dend(m[0], m[1], m[2] + (R() > .5 ? .7 : -.7), len * .55, w * .7, depth - 1); const e = pts[n - 1]; dend(e[0], e[1], e[2] + .45, len * .5, w * .6, depth - 1); dend(e[0], e[1], e[2] - .45, len * .5, w * .6, depth - 1); }
+  };
+  for (let i = 0; i < 30; i++) {
+    const x = X0 + 20 + R() * 580, y = Y0 + 60 + R() * 640, s = 9 + R() * 5, tilt = (R() - .5) * .5;
+    dend(x, y - s, -Math.PI / 2 + tilt, 110 + R() * 90, 2.6, 2);
+    for (let k = 0; k < 4; k++) dend(x + (k - 1.5) * s * .5, y + s * .4, Math.PI / 2 + (k - 1.5) * .7 + tilt, 30 + R() * 30, 1.6, 1);
+    g.strokeStyle = rgba(AM, .2); g.lineWidth = .9; g.beginPath(); g.moveTo(x, y + s); let ax = x, ay = y + s; for (let j = 0; j < 20; j++) { ax += (R() - .5) * 6; ay += 9; g.lineTo(ax, ay); } g.stroke();
+    g.save(); g.translate(x, y); g.rotate(tilt); g.beginPath(); g.moveTo(0, -s * 1.4); g.quadraticCurveTo(s * 1.05, s * .2, s * .8, s * .7); g.quadraticCurveTo(0, s * 1.05, -s * .8, s * .7); g.quadraticCurveTo(-s * 1.05, s * .2, 0, -s * 1.4); g.restore();
+    g.fillStyle = rgba(VIO, .35); g.fill(); g.strokeStyle = rgba('#efd2ff', .5); g.lineWidth = 1; g.stroke();
+    glow(g, x, y, s * 2.4, VIO, .3); nuc(g, x, y + 1, s * .45, s * .42, 0, .8);
+  }
+}
+
+// ---------------------------------------------------------------- compose
+const TIS = { skin, lung, blood, lymph, gut, brain };
+function regionMasks() {
+  const gs = 6, cw = Math.ceil(W / gs), ch = Math.ceil(H / gs), owner = new Uint8Array(cw * ch);
+  for (let j = 0; j < ch; j++) for (let i = 0; i < cw; i++) {
+    const x0 = i * gs, y0 = j * gs, wx = x0 + (fbm(x0 / 170, y0 / 170) - .5) * 210, wy = y0 + (fbm(x0 / 170 + 40, y0 / 170 + 9) - .5) * 210;
+    let best = 1e9, bi = 0;
+    REG.forEach((r, k) => { const d = (r.c ? Math.hypot(wx - r.c[0], wy - r.c[1]) : distPoly(wx, wy, AORTA.pts) + 70) + r.b; if (d < best) { best = d; bi = k; } });
+    owner[j * cw + i] = bi;
+  }
+  return REG.map((r, k) => {
+    const s = document.createElement('canvas'); s.width = cw; s.height = ch; const sg = s.getContext('2d'), id = sg.createImageData(cw, ch);
+    for (let p = 0; p < owner.length; p++) id.data[p * 4 + 3] = owner[p] === k ? 255 : 0; sg.putImageData(id, 0, 0);
+    const m = document.createElement('canvas'); m.width = W * D; m.height = H * D; const mg = m.getContext('2d'); mg.filter = `blur(${22 * D}px)`; mg.imageSmoothingEnabled = true; mg.drawImage(s, 0, 0, W * D, H * D); return m;
+  });
+}
+function bake() {
+  const masks = regionMasks(), base = mk();
+  base.g.globalCompositeOperation = 'source-over'; base.g.fillStyle = '#03060b'; base.g.fillRect(0, 0, W, H); base.g.globalCompositeOperation = 'lighter';
+  const R = rng(11);
+  // out-of-focus depth: stained tissue above and below the focal plane
+  for (let i = 0; i < 60; i++) glow(base.g, R() * W, R() * H, 80 + R() * 220, [CY, '#5b8cff', COL, EL, VIO][i % 5], .03 + R() * .03);
+  REG.forEach((r, k) => { const t = mk(); TIS[r.k](t.g, rng(100 + k)); t.g.setTransform(1, 0, 0, 1, 0, 0); t.g.globalCompositeOperation = 'destination-in'; t.g.drawImage(masks[k], 0, 0); base.g.setTransform(1, 0, 0, 1, 0, 0); base.g.drawImage(t.c, 0, 0); base.g.setTransform(D, 0, 0, D, 0, 0); });
+  // bloom
+  const cv = document.getElementById('bg'); cv.width = W * D; cv.height = H * D; const g = cv.getContext('2d');
+  g.drawImage(base.c, 0, 0); g.globalCompositeOperation = 'lighter';
+  g.filter = `blur(${3 * D}px)`; g.globalAlpha = .55; g.drawImage(base.c, 0, 0);
+  g.filter = `blur(${16 * D}px)`; g.globalAlpha = .5; g.drawImage(base.c, 0, 0);
+  g.filter = 'none'; g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; g.scale(D, D);
+  // stitched-tile seams, very faint
+  g.strokeStyle = 'rgba(160,200,255,.035)'; g.lineWidth = 1; for (let x = 240; x < W; x += 240) { g.beginPath(); g.moveTo(x + .5, 0); g.lineTo(x + .5, H); g.stroke(); } for (let y = 225; y < H; y += 225) { g.beginPath(); g.moveTo(0, y + .5); g.lineTo(W, y + .5); g.stroke(); }
+  drawRoute(g);
+  const vg = g.createRadialGradient(W / 2, H / 2, H * .42, W / 2, H / 2, W * .64); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.6)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
+}
+
+// ---------------------------------------------------------------- the route: a capillary
+let ROUTE, DONE_S;
+function capillary(g, P, s0, s1, lit, w) {
+  const seg = (lw, col, blur) => { g.beginPath(); for (let d = s0, i = 0; d <= s1 + .1; d += 4, i++) { const q = at(P, Math.min(d, s1)); i ? g.lineTo(q.x, q.y) : g.moveTo(q.x, q.y); } g.lineWidth = lw; g.strokeStyle = col; g.shadowColor = blur ? col : 'transparent'; g.shadowBlur = blur || 0; g.stroke(); g.shadowBlur = 0; };
+  const wall = lit ? '#9fe8ff' : '#44566a';
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  seg(w + 14, lit ? 'rgba(127,216,255,.16)' : 'rgba(150,172,198,.08)', lit ? 22 : 6);
+  seg(w + 5, lit ? 'rgba(0,0,0,.55)' : 'rgba(0,0,0,.4)');
+  seg(w + 3, lit ? 'rgba(159,232,255,.85)' : 'rgba(150,172,198,.62)');
+  seg(w - 1, lit ? '#060c14' : 'rgba(6,12,20,.78)');
+  seg(w - 8, lit ? 'rgba(255,77,94,.07)' : 'rgba(80,100,122,.05)');
+  // endothelial nuclei lining the wall
+  const R = rng(s0 | 0 + 3);
+  for (let d = s0 + 6; d < s1 - 4; d += 15 + R() * 8) { const q = at(P, d), sd = R() > .5 ? 1 : -1, o = sd * (w / 2 + .5); nuc(g, q.x + q.nx * o, q.y + q.ny * o, 5, 1.5, q.a, lit ? .9 : .35, lit ? '#5b8cff' : '#4a5a70'); }
+}
+function drawRoute(g) {
+  const pts = spline(NODES, 26); ROUTE = poly(pts);
+  // arc length at each node
+  ROUTE.ns = NODES.map((n, i) => ROUTE.s[i * 26]);
+  DONE_S = ROUTE.ns[8];
+  for (const [b, fk] of Object.entries(FORKS)) for (const f of fk) { const n = NODES[b - 1], m = [(n[0] + f[0]) / 2 + (f[1] - n[1]) * .18, (n[1] + f[1]) / 2 - (f[0] - n[0]) * .18], P = poly(spline([n, m, f], 14)); capillary(g, P, 0, P.len, b <= 6, 15); }
+  capillary(g, ROUTE, DONE_S, ROUTE.len, false, 22);
+  capillary(g, ROUTE, 0, DONE_S, true, 22);
+}
+
+// ---------------------------------------------------------------- nodes (SVG)
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, at, parent) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); if (parent) parent.appendChild(e); return e; };
+const STAR = 'M0,-1 L.235,-.324 .951,-.309 .38,.124 .588,.809 0,.4 -.588,.809 -.38,.124 -.951,-.309 -.235,-.324Z';
+function nucleusD(r, seed) { const R = rng(seed), n = 18, ph = R() * 6; let d = ''; const P = []; for (let i = 0; i < n; i++) { const a = i / n * TAU, q = r * (1 + Math.sin(a * 2 + ph) * .06 + (R() - .5) * .05); P.push([Math.cos(a) * q, Math.sin(a) * q]); } for (let i = 0; i < n; i++) { const p = P[i], nx = P[(i + 1) % n], mx = (p[0] + nx[0]) / 2, my = (p[1] + nx[1]) / 2; d += i ? `Q${p[0].toFixed(1)},${p[1].toFixed(1)} ${mx.toFixed(1)},${my.toFixed(1)}` : `M${mx.toFixed(1)},${my.toFixed(1)}`; } return d + 'Z'; }
+function buildSvg() {
+  const sv = document.getElementById('ov');
+  sv.innerHTML = `<defs>
+    <radialGradient id="gD" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#e6eeff"/><stop offset=".35" stop-color="#8eaeff"/><stop offset=".8" stop-color="#3556d8"/><stop offset="1" stop-color="#1a2a7a"/></radialGradient>
+    <radialGradient id="gN" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#fffbea"/><stop offset=".4" stop-color="#ffdf8a"/><stop offset=".85" stop-color="#e8921c"/><stop offset="1" stop-color="#8a4a08"/></radialGradient>
+    <radialGradient id="gL" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#5b6a7c"/><stop offset=".7" stop-color="#28323f"/><stop offset="1" stop-color="#151b24"/></radialGradient>
+    <radialGradient id="gA" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#ffd6da"/><stop offset=".5" stop-color="#ff5468"/><stop offset="1" stop-color="#7a0f1e"/></radialGradient>
+    <radialGradient id="gC" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#f0e0ff"/><stop offset=".5" stop-color="#b07dff"/><stop offset="1" stop-color="#3f1a86"/></radialGradient>
+    <radialGradient id="halo"><stop offset="0" stop-color="#ffc24a" stop-opacity=".55"/><stop offset="1" stop-color="#ffc24a" stop-opacity="0"/></radialGradient>
+    <radialGradient id="haloB"><stop offset="0" stop-color="#7fa6ff" stop-opacity=".45"/><stop offset="1" stop-color="#7fa6ff" stop-opacity="0"/></radialGradient>
+    <filter id="sh" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity=".8"/></filter>
+    <path id="aortaTxt" d=""/>
+  </defs>`;
+  // river label along the aorta
+  const ap = AORTA, pts = []; for (let d = 120; d < ap.len - 120; d += 10) { const q = at(ap, d); pts.push(`${(q.x + q.nx * -2).toFixed(1)},${(q.y + q.ny * -2).toFixed(1)}`); }
+  sv.querySelector('#aortaTxt').setAttribute('d', 'M' + pts.join(' L'));
+  if (0) { const tx = el('text', { 'font-family': 'JetBrains Mono, monospace', 'font-size': 11, 'font-weight': 600, 'letter-spacing': 9, fill: 'rgba(255,220,225,.6)', style: 'paint-order:stroke;stroke:rgba(0,0,0,.6);stroke-width:3px' }, sv);
+  const tp = el('textPath', { href: '#aortaTxt', startOffset: '50%', 'text-anchor': 'middle' }, tx); tp.textContent = 'AORTIC ARCH · ELASTIC ARTERY'; }
+  // forks
+  for (const [b, fk] of Object.entries(FORKS)) fk.forEach((f, i) => chal(sv, f[0], f[1], i ? 'C' : 'A', b <= 6));
+  NODES.forEach(([x, y], i) => node(sv, x, y, i + 1));
+}
+function chal(sv, x, y, kind, open) {
+  const g = el('g', { class: 'node', transform: `translate(${x},${y})` }, sv);
+  el('circle', { r: 23, fill: 'transparent' }, g);
+  if (open) el('circle', { r: 30, fill: kind === 'A' ? 'url(#halo)' : 'url(#haloB)', opacity: .7 }, g);
+  el('rect', { x: -15, y: -15, width: 30, height: 30, rx: 8, transform: 'rotate(45)', fill: open ? (kind === 'A' ? 'url(#gA)' : 'url(#gC)') : 'url(#gL)', stroke: open ? 'rgba(255,255,255,.75)' : 'rgba(150,170,190,.35)', 'stroke-width': 1.5, filter: 'url(#sh)' }, g);
+  const ic = el('g', { fill: 'none', stroke: open ? '#fff' : 'rgba(190,205,220,.6)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+  if (!open) { el('rect', { x: -5.5, y: -1.5, width: 11, height: 8.5, rx: 2, fill: 'rgba(190,205,220,.6)', stroke: 'none' }, ic); el('path', { d: 'M-3.5,-1.5 V-4 a3.5,3.5 0 0 1 7,0 V-1.5' }, ic); }
+  else if (kind === 'A') el('path', { d: 'M1.5,-8 L-4,1 H1 L-1.5,8 L4.5,-1.5 H-.5 Z', fill: '#fff', stroke: 'none' }, ic);
+  else { el('path', { d: 'M-5,-7 H5 M-5,7 H5 M-4,-7 C-4,-2 4,2 4,7 M4,-7 C4,-2 -4,2 -4,7' }, ic); }
+  if (open) { const t = el('text', { y: 32, 'text-anchor': 'middle', 'font-family': 'JetBrains Mono, monospace', 'font-size': 9, 'font-weight': 700, 'letter-spacing': 1.6, fill: kind === 'A' ? '#ffb3bb' : '#d8c2ff', style: 'paint-order:stroke;stroke:#000;stroke-width:3px' }, g); t.textContent = kind === 'A' ? 'ACUTE' : 'CHRONIC'; }
+}
+function node(sv, x, y, n) {
+  const boss = n % 3 === 0, done = n <= 8, next = n === 9, r = boss ? 25 : 21;
+  const g = el('g', { class: 'node', transform: `translate(${x},${y})` }, sv);
+  el('circle', { r: Math.max(24, r + 4), fill: 'transparent' }, g);
+  if (next) {
+    el('circle', { r: 56, fill: 'url(#halo)' }, g);
+    for (const d of [0, 1.1]) { const c = el('circle', { r: r, fill: 'none', stroke: '#ffd37a', 'stroke-width': 2 }, g); el('animate', { attributeName: 'r', values: `${r};${r + 26}`, dur: '2.2s', begin: d + 's', repeatCount: 'indefinite' }, c); el('animate', { attributeName: 'opacity', values: '.9;0', dur: '2.2s', begin: d + 's', repeatCount: 'indefinite' }, c); }
+  } else if (done) el('circle', { r: r + 16, fill: 'url(#haloB)' }, g);
+  if (boss) { const ring = el('circle', { r: r + 7, fill: 'none', stroke: next ? '#ffd37a' : done ? '#9fd0ff' : 'rgba(140,160,180,.4)', 'stroke-width': 2, 'stroke-dasharray': '2 4.2', opacity: .9 }, g); el('animateTransform', { attributeName: 'transform', type: 'rotate', from: '0', to: '360', dur: '30s', repeatCount: 'indefinite' }, ring); }
+  // the nucleus itself, with chromatin speckle
+  el('path', { d: nucleusD(r, n * 7), fill: next ? 'url(#gN)' : done ? 'url(#gD)' : 'url(#gL)', stroke: next ? '#fff3cf' : done ? '#cfe0ff' : 'rgba(150,170,190,.35)', 'stroke-width': 1.6, filter: 'url(#sh)' }, g);
+  const R = rng(n * 13); for (let k = 0; k < 9; k++) { const a = R() * TAU, q = R() * r * .7; el('circle', { cx: Math.cos(a) * q, cy: Math.sin(a) * q, r: 1.2 + R() * 2.2, fill: '#fff', opacity: done || next ? .13 + R() * .12 : .05 }, g); }
+  el('circle', { cx: r * .3, cy: -r * .1, r: r * .16, fill: '#fff', opacity: done || next ? .22 : .06 }, g); // nucleolus
+  const t = el('text', { y: 6, 'text-anchor': 'middle', 'font-family': 'JetBrains Mono, monospace', 'font-size': boss ? 18 : 16, 'font-weight': 700, fill: next ? '#2a1600' : done ? '#fff' : 'rgba(200,214,228,.55)', style: next ? '' : 'paint-order:stroke;stroke:rgba(10,20,60,.55);stroke-width:3px' }, g); t.textContent = n;
+  if (!done && !next) { const lk = el('g', { transform: `translate(${r * .72},${-r * .72})` }, g); el('circle', { r: 8, fill: '#0b121b', stroke: 'rgba(150,170,190,.5)', 'stroke-width': 1 }, lk); el('rect', { x: -3.5, y: -1, width: 7, height: 5.5, rx: 1.2, fill: 'rgba(190,205,220,.75)' }, lk); el('path', { d: 'M-2.2,-1 V-2.8 a2.2,2.2 0 0 1 4.4,0 V-1', fill: 'none', stroke: 'rgba(190,205,220,.75)', 'stroke-width': 1.4 }, lk); }
+  if (done || next) { const st = done ? STARS[n - 1] : 0; for (let k = 0; k < 3; k++) { const on = k < st; el('path', { d: STAR, transform: `translate(${(k - 1) * 15},${r + 11 - (k === 1 ? 3 : 0)}) scale(7)`, fill: on ? '#ffc24a' : 'rgba(20,28,40,.85)', stroke: on ? '#fff0c2' : 'rgba(220,232,243,.45)', 'stroke-width': .14, filter: on ? 'url(#sh)' : '' }, g); } }
+}
+
+// ---------------------------------------------------------------- labels, card
+function labels() {
+  const L = [
+    ['skin', 26, 534, 'REGION I · 01–03', 'SKIN', 'epidermis', '8/9'],
+    ['lung', 30, 82, 'REGION II · 04–06', 'LUNGS', 'alveoli', '8/9'],
+    ['blood', 640, 72, 'REGION III · 07–09', 'BLOOD', 'aortic arch', '3/9'],
+    ['lymph', 690, 714, 'REGION IV · 10–12', 'LYMPH NODE', 'germinal centres', ''],
+    ['gut', 1218, 640, 'REGION V · 13–15', 'GUT', 'intestinal villi', ''],
+    ['brain', 1070, 76, 'REGION VI · 16–18', 'BRAIN', 'cortex neurons', ''],
+  ];
+  const box = document.getElementById('labels');
+  for (const [k, x, y, sm, name, tis, st] of L) box.insertAdjacentHTML('beforeend', `<div class="rl ${st ? '' : 'lock'}" style="left:${x}px;top:${y}px"><small>${sm}</small><b>${name}</b><i>${tis}${st ? ` · <em>★ ${st}</em>` : ''}</i></div>`);
+  const [nx, ny] = NODES[8], c = document.getElementById('card'); c.style.left = (nx - 43) + 'px'; c.style.top = (ny + 62) + 'px';
+  document.getElementById('cardStars').innerHTML = [0, 1, 2].map(() => `<svg viewBox="-1.2 -1.2 2.4 2.4"><path d="${STAR}" fill="rgba(255,194,74,.08)" stroke="rgba(255,214,140,.7)" stroke-width=".1"/></svg>`).join('') + '<small>0 / 3</small>';
+}
+
+// ---------------------------------------------------------------- live layer: red cells in the arch and the capillary
+function live() {
+  const cv = document.getElementById('fx'); cv.width = W * D; cv.height = H * D; const g = cv.getContext('2d');
+  const R = rng(5), cells = Array.from({ length: 70 }, () => ({ s: R() * AORTA.len, o: (R() - .5) * 104, v: 50 + R() * 40, rot: R() * 3, t: .4 + R() * .6 }));
+  let last = performance.now();
+  const frame = now => {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    g.setTransform(D, 0, 0, D, 0, 0); g.clearRect(0, 0, W, H); g.globalCompositeOperation = 'lighter';
+    for (const c of cells) { c.s = (c.s + c.v * dt * (1 - Math.abs(c.o) / 80)) % AORTA.len; c.rot += dt; const q = at(AORTA, c.s); rbc(g, q.x + q.nx * c.o, q.y + q.ny * c.o, 6, c.rot, c.t, .55); }
+    const T = now / 1000; for (let s = (T * 40) % 30; s < DONE_S - 10; s += 30) { const q = at(ROUTE, s); g.save(); g.translate(q.x, q.y); g.rotate(q.a); g.scale(.55, 1); g.fillStyle = rgba(RED, .22); g.beginPath(); g.arc(0, 0, 7, 0, TAU); g.fill(); g.strokeStyle = rgba(RED, .85); g.lineWidth = 2.4; g.beginPath(); g.arc(0, 0, 6, 0, TAU); g.stroke(); g.restore(); }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+bake(); buildSvg(); labels(); live();
+</script>
+</body>
+</html>
