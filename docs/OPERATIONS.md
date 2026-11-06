@@ -44,9 +44,9 @@ flowchart LR
 | a commit bypasses CI | ruleset (pull request + checks required, no bypass) | push rejected (`GH013`) |
 | a broken API build | Render health check on `/health` | the old deploy keeps traffic; `deployed` red after 15 min |
 | Render never deploys, or deploys the wrong commit | `deployed` | red run; GitHub emails whoever triggered it (the person who enabled auto-merge, today the owner) if Actions email notifications are on |
-| game site down | nothing yet | Better Stack, [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 4 |
+| game site down | Better Stack: HEAD on both sites every 5 min ([observability/betterstack.js](../observability/betterstack.js)) | email |
 | production API down | nothing yet | Better Stack once the API is on a paid instance, step 6; the dev API is not monitored (a check keeps a Free API awake, see the plan) |
-| the game crashes on players' devices | nothing yet | Sentry, [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 3 |
+| the game crashes on players' devices (dev and production sites) | Sentry, project `immune-citadel-game` | email when an issue is new or returns ([observability/sentry-game-alert.json](../observability/sentry-game-alert.json)) |
 | CI never runs after a merge, or a dashboard rollback leaves an old commit live | not covered | accepted: see [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md), Open |
 | a save or load fails with a server error | Sentry alert (below); production from [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 6 | email |
 
@@ -59,7 +59,8 @@ flowchart LR
 | save API errors | Sentry, project `immune-citadel-api` | every request that fails with a server error, with its stack trace and route |
 | save API traces | same | every request except `/health`, with its Postgres queries (query text with `$1`, no values) |
 | logs | Render, the service's Logs tab | JSON lines with method, route, status, duration; never the save code |
-| game errors and load speed | Sentry, project `immune-citadel-game` | from [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 3 |
+| game errors and load speed | Sentry, project `immune-citadel-game` | dev and production sites only; release = the commit in `/version.txt`; save codes scrubbed |
+| site up | Better Stack | HEAD on both game sites every 5 min; apply changes with `node observability/betterstack.js` (`BETTERSTACK_API_TOKEN`) |
 
 Sentry organisation `myown-76`, EU region (de.sentry.io). Environments: `local`, `dev`, `production`.
 
