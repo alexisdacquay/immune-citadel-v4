@@ -355,6 +355,30 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   });
   au(off.live === 0 && off.max < 150 && off.pk < .9, 'offline render: ' + JSON.stringify(off));
   console.log('audio offline 40 s:', JSON.stringify(off));
+  // gameplay events (docs/EVENTS.md): the right events at the right moments, each one the save API accepts, none with the switch off
+  const evs = (ok, msg) => { if (!ok) errs.push('events: ' + msg); }, PLAY = require('../server/play');
+  const q = await b.newContext().then(c => c.newPage({ viewport: { width: 1440, height: 900 } }));
+  await q.goto('file://' + path.resolve('index.html')); await q.waitForTimeout(600);
+  evs(await q.evaluate(c => JSON.stringify(Object.keys(IC.INTRO)) === JSON.stringify(c), PLAY.CARDS), 'server/play.js CARDS differs from the game\'s intro cards');
+  const flow = await q.evaluate(() => {
+    IC.startLevel(0); document.getElementById('restartBtn').click(); IC.sendWave();
+    const card = IC.S.screen === 'card'; document.getElementById('cardGo').click();
+    document.getElementById('mapBtn').click(); IC.startLevel(0); IC.endLevel(true); document.getElementById('mapBtn').click(); // the map after a win is no quit
+    return { card, q: IC.play.q.map(({ t, ...e }) => e), page: IC.play.page };
+  });
+  evs(flow.card, 'the first wave did not open a card');
+  const want = [{ name: 'open', new: true }, { name: 'level_start', level: 1, mode: 'campaign', difficulty: 'normal' },
+    { name: 'level_end', level: 1, mode: 'campaign', difficulty: 'normal', outcome: 'restart', first: false, stars: null, wave: 0 }, { name: 'level_start', level: 1, mode: 'campaign', difficulty: 'normal' },
+    { name: 'card', card: 'bact', secs: 0 }, { name: 'level_end', level: 1, mode: 'campaign', difficulty: 'normal', outcome: 'quit', first: false, stars: null, wave: 1 },
+    { name: 'level_start', level: 1, mode: 'campaign', difficulty: 'normal' }, { name: 'level_end', level: 1, mode: 'campaign', difficulty: 'normal', outcome: 'won', first: true, stars: 3, wave: 0 }];
+  evs(JSON.stringify(flow.q) === JSON.stringify(want), 'event sequence: ' + JSON.stringify(flow.q));
+  const sent = await q.evaluate(() => IC.play.q);
+  evs(PLAY.parse({ page: flow.page, release: '', events: sent.slice(0, 20) }).rows.length === sent.length, 'the save API would drop some of these events');
+  await q.click('#dataBtn'); await q.waitForTimeout(250); await q.screenshot({ path: `${out}/29-your-data.png` });
+  await q.click('#statsTg');
+  evs(await q.evaluate(() => { IC.startLevel(1); return !IC.statsOn() && IC.play.q.length === 0 && JSON.parse(localStorage.getItem('immune-citadel-v4')).stats === false; }), 'stats switch off must clear the queue, stop events and be saved');
+  await q.click('#statsTg'); evs(await q.evaluate(() => IC.statsOn()), 'stats switch did not turn back on');
+  await q.context().close();
   await require('./touch.js')(b, out, errs); // phones, tablet and both mouse sizes: taps, two-tap buy, target sizes, layout, rotate card
   console.log('errors:', errs.length ? errs : 'none'); await b.close();
   process.exitCode = errs.length ? 1 : 0; // CI must go red when the game breaks

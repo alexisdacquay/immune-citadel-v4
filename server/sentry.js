@@ -12,7 +12,7 @@ function initSentry(extra = {}) {
     environment: process.env.SENTRY_ENVIRONMENT || 'local',
     release: process.env.RENDER_GIT_COMMIT,
     dataCollection: { userInfo: false, cookies: false, httpHeaders: false, httpBodies: [], urlQueryParams: false, databaseQueryData: false, stackFrameVariables: false },
-    tracesSampler: ({ attributes }) => (attributes?.['url.path'] === '/health' ? 0 : 1), // every request (a few thousand a month), not Render's health checks
+    tracesSampler: ({ attributes }) => (['/health', '/api/play'].includes(attributes?.['url.path']) ? 0 : 1), // every request (a few thousand a month); not Render's health checks, not gameplay events (no third party sees play)
     beforeSend: scrub, beforeSendSpan: scrub, // v11 streams spans: beforeSendSpan covers traces
     ...extra,
   });

@@ -16,6 +16,14 @@ test('a save sent to the API is stored in Postgres and read back', async () => {
   assert.deepEqual((await (await fetch(`${API}/api/save/${code}`)).json()).save, { st: [3, 1] });
 });
 
+test('gameplay events reach the events table and its views', async () => {
+  const page = Array.from({ length: 16 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
+  const r = await fetch(`${API}/api/play`, { method: 'POST', body: JSON.stringify({ page, release: '', events: [{ name: 'level_start', t: 1, level: 18, mode: 'iron', difficulty: 'hard' }, { name: 'hide', t: 2 }] }) });
+  assert.equal(r.status, 204);
+  assert.equal(sql(`SELECT name || ':' || coalesce(mode, '') FROM events WHERE page = '${page}' ORDER BY id`), 'level_start:iron\nhide:', 'rows in Postgres');
+  assert.ok(+sql(`SELECT runs FROM level_stats WHERE level = 18 AND mode = 'iron' AND difficulty = 'hard'`) >= 1, 'counted in level_stats');
+});
+
 test('progress saved on one device continues on another through its save code', async () => {
   const browser = await chromium.launch();
   try {

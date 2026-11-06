@@ -57,9 +57,10 @@ flowchart LR
 | What | Where | Detail |
 |---|---|---|
 | save API errors | Sentry, project `immune-citadel-api` | every request that fails with a server error, with its stack trace and route |
-| save API traces | same | every request except `/health`, with its Postgres queries (query text with `$1`, no values) |
+| save API traces | same | every request except `/health` and `/api/play`, with its Postgres queries (query text with `$1`, no values) |
 | logs | Render, the service's Logs tab | JSON lines with method, route, status, duration; never the save code |
 | game errors and load speed | Sentry, project `immune-citadel-game` | dev and production sites only; release = the commit in `/version.txt`; save codes scrubbed |
+| gameplay events | the save API's Postgres, table `events`, views `funnel`, `level_stats`, `card_reads`, `sittings` | dev and production sites only; anonymous; what and why in [EVENTS.md](EVENTS.md); read with `SELECT * FROM <schema>.funnel` (Render → the database → Connect → PSQL) |
 | site up | Better Stack | HEAD on both game sites every 5 min; apply changes with `node observability/betterstack.js` (`BETTERSTACK_API_TOKEN`) |
 
 Sentry organisation `myown-76`, EU region (de.sentry.io). Environments: `local`, `dev`, `production`. Organisation privacy settings: IP addresses not stored; location (`$user.geo`) removed by an Advanced Data Scrubbing rule, because Sentry derives it from the IP even when IP storage is off.

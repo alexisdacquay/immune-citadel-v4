@@ -36,6 +36,7 @@ test('the game loads Sentry only on the dev and production sites, pinned and che
   assert.match(block, /\{ 'immune-citadel-v4\.onrender\.com': 'production', 'immune-citadel-v4-dev\.onrender\.com': 'dev' \}\[location\.hostname\];\n\s*if \(!env\) return;/);
   assert.match(block, /browser\.sentry-cdn\.com\/\d+\.\d+\.\d+\//, 'a pinned SDK version');
   assert.match(block, /integrity = 'sha384-/, 'subresource integrity');
-  assert.match(block, /beforeSend: scrub, beforeSendSpan: scrub, beforeBreadcrumb: scrub/);
+  assert.match(block, /beforeSend: scrub, beforeSendSpan: scrub, beforeBreadcrumb: b => \(\/\\\/api\\\/play\/\.test\(JSON\.stringify\(b\.data \|\| \{\}\)\) \? null : scrub\(b\)\)/);
+  assert.match(block, /shouldCreateSpanForRequest: u => !u\.includes\('\/api\/play'\)/, 'gameplay events never reach Sentry');
   assert.doesNotMatch(block, /replayIntegration/, 'no session replay');
 });

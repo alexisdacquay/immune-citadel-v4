@@ -1,6 +1,6 @@
 # Gameplay events
 
-Status: **proposed, waiting for owner approval** ([OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 5). No code exists until it is approved.
+Status: **approved by the owner 2026-11-06** (stats on by default); built in [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 5. Code: [server/play.js](../server/play.js) (accepted shapes), [server/index.js](../server/index.js) (`/api/play`, table, views), `index.html` (`playEv`, `runEnd`, "Your data").
 Review 2026-11-06: draft checked by 4 independent reviewers (code accuracy, children's privacy, usefulness, abuse and cost); this version re-checked against their findings and the code.
 
 ## What it answers
@@ -64,9 +64,9 @@ The server adds the **date** it received the request (no time of day): one day i
 
 | Item | Detail | Why |
 |---|---|---|
-| "Your data" card | opened from the title screen; about 6 lines a 12-year-old can read: what is sent, why, where (Render, Frankfurt; Sentry, EU, for crashes; cloud saves), how long it is kept, how to turn stats off | sending data from the browser counts as access to the device under EU ePrivacy, even with nothing stored ([EDPB Guidelines 2/2023](https://www.edpb.europa.eu/system/files/2024-10/edpb_guidelines_202302_technical_scope_art_53_eprivacydirective_v2_en_0.pdf), paras 33, 38). The game has no privacy notice today, although Sentry and cloud saves already send data |
+| "Your data" popover | the shield button on the title screen; about 6 lines a 12-year-old can read: what is sent, why, where (Render, Frankfurt; Sentry, EU, for crashes; cloud saves), how long it is kept, how to turn stats off | sending data from the browser counts as access to the device under EU ePrivacy, even with nothing stored ([EDPB Guidelines 2/2023](https://www.edpb.europa.eu/system/files/2024-10/edpb_guidelines_202302_technical_scope_art_53_eprivacydirective_v2_en_0.pdf), paras 33, 38). The game has no privacy notice today, although Sentry and cloud saves already send data |
 | "Send anonymous play stats" switch | on by default; the choice is kept on the device; a browser's Global Privacy Control signal counts as off | the analytics exemptions need a notice and an easy way to object: UK statistical-purposes exception ([Data (Use and Access) Act 2025, s.112](https://www.legislation.gov.uk/ukpga/2025/18/section/112), in force 5 Feb 2026); French audience-measurement exemption ([CNIL](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies-solutions-pour-les-outils-de-mesure-daudience)). Opt-in is not workable: under GDPR Art 8 a child consents alone only from 15 in France and 16 in Germany, so most players could not say yes |
-| `docs/DPIA.md` | one page: data flows, lawful basis, the default-on decision, retention, risks; the owner signs it before step 5 ships | a service likely used by children needs a data protection impact assessment ([ICO Children's Code, standard 2](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/childrens-information/childrens-code-guidance-and-resources/age-appropriate-design-a-code-of-practice-for-online-services/2-data-protection-impact-assessments/)) |
+| [DPIA.md](DPIA.md) | one page: data flows, lawful basis, the default-on decision, retention, risks; the owner signs it before step 5 ships | a service likely used by children needs a data protection impact assessment ([ICO Children's Code, standard 2](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/childrens-information/childrens-code-guidance-and-resources/age-appropriate-design-a-code-of-practice-for-online-services/2-data-protection-impact-assessments/)) |
 
 ## How events travel
 
@@ -94,6 +94,6 @@ flowchart LR
 | View | Shows |
 |---|---|
 | `funnel` | per campaign level: first wins, abandoned runs; top: `open` with `new` |
-| `level_stats` | per level × mode × difficulty: runs, share won / lost / quit / restart / abandoned, median wave on a loss |
+| `level_stats` | per level × mode × difficulty: runs, won, lost, quit, restart, abandoned (counts), median wave on a loss |
 | `card_reads` | per card: times closed, median seconds open, share closed in under 3 s |
 | `sittings` | per day: page loads, median and 90th-percentile sitting length |

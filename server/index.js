@@ -4,10 +4,12 @@ const http = require('node:http');
 const log = require('pino')({ level: process.env.LOG_LEVEL || 'info' }); // JSON lines, read in Render's logs
 const route = require('./route');
 const { initSentry, Sentry } = require('./sentry');
+const play = require('./play');
 
 const CODE = /^[A-HJ-NP-Z2-9]{16}$/; // the game's alphabet: no I, O, 0, 1
 const MAX_BODY = 8 * 1024; // a full save is about 1 KB
 const WRITES_PER_MIN = 120; // per client IP; a player saves a few times per level, a classroom shares one IP
+const PLAY_PER_MIN = 60; // gameplay event batches per client IP: one per level end or hidden tab; never counted against saves
 const SCHEMA = process.env.DB_SCHEMA || 'public'; // prod and dev share one Postgres instance, one schema each
 if (process.env.DATABASE_URL && !process.env.DB_SCHEMA) throw new Error('DB_SCHEMA must be set with DATABASE_URL, or dev would write into prod');
 if (!/^[a-z_][a-z0-9_]*$/.test(SCHEMA)) throw new Error('DB_SCHEMA must be a plain lowercase identifier');
@@ -19,6 +21,9 @@ function memoryStore() {
     init: async () => {},
     get: async code => m.get(code) || null,
     put: async (code, data) => { const row = { data, updatedAt: new Date().toISOString() }; m.set(code, row); return row.updatedAt; },
+    events: [],
+    play: async function (page, release, rows) { const take = rows.slice(0, Math.max(0, play.DAILY_CAP - this.events.length)); this.events.push(...take.map(r => ({ page, release, ...r }))); return take.length; },
+    prune: async () => {},
   };
 }
 
@@ -26,12 +31,41 @@ function pgStore(url) {
   const { Pool } = require('pg');
   const pool = new Pool({ connectionString: url, max: 5 });
   pool.on('error', e => log.error({ err: e.message }, 'postgres idle client')); // a dropped idle connection must not kill the server
-  const T = `"${SCHEMA}".saves`;
+  const T = `"${SCHEMA}".saves`, E = `"${SCHEMA}".events`, V = n => `"${SCHEMA}".${n}`;
+  const COLS = ['page', 'release', 'name', 't', 'level', 'mode', 'difficulty', 'outcome', 'first', 'stars', 'wave', 'card', 'secs', 'is_new'];
   return {
     init: async () => {
       await pool.query(`CREATE SCHEMA IF NOT EXISTS "${SCHEMA}"`);
       await pool.query(`CREATE TABLE IF NOT EXISTS ${T} (code text PRIMARY KEY, data json NOT NULL, updated_at timestamptz NOT NULL DEFAULT now())`);
+      // gameplay events (docs/EVENTS.md): the date only, no time of day, no IP; rows go after KEEP_DAYS
+      await pool.query(`CREATE TABLE IF NOT EXISTS ${E} (id bigserial PRIMARY KEY, day date NOT NULL DEFAULT current_date, page text NOT NULL, release text, name text NOT NULL, t integer NOT NULL,
+        level smallint, mode text, difficulty text, outcome text, first boolean, stars smallint, wave smallint, card text, secs integer, is_new boolean)`);
+      await pool.query(`CREATE INDEX IF NOT EXISTS events_day ON ${E} (day)`);
+      const runs = `count(*) FILTER (WHERE name = 'level_start')`, ends = `count(*) FILTER (WHERE name = 'level_end')`; // a start with no end: the tab was closed mid-level
+      await pool.query(`CREATE OR REPLACE VIEW ${V('funnel')} AS
+        SELECT 0 AS level, 'new browser' AS step, count(*) FILTER (WHERE name = 'open' AND is_new) AS players, NULL::bigint AS abandoned FROM ${E}
+        UNION ALL SELECT level, 'first win', count(*) FILTER (WHERE name = 'level_end' AND outcome = 'won' AND first), ${runs} - ${ends} FROM ${E} WHERE mode = 'campaign' GROUP BY level
+        ORDER BY level`);
+      await pool.query(`CREATE OR REPLACE VIEW ${V('level_stats')} AS
+        SELECT level, mode, difficulty, ${runs} AS runs, count(*) FILTER (WHERE outcome = 'won') AS won, count(*) FILTER (WHERE outcome = 'lost') AS lost,
+          count(*) FILTER (WHERE outcome = 'quit') AS quit, count(*) FILTER (WHERE outcome = 'restart') AS restart, ${runs} - ${ends} AS abandoned,
+          percentile_cont(0.5) WITHIN GROUP (ORDER BY wave) FILTER (WHERE outcome = 'lost') AS median_wave_lost
+        FROM ${E} WHERE name IN ('level_start', 'level_end') GROUP BY level, mode, difficulty ORDER BY level, mode, difficulty`);
+      await pool.query(`CREATE OR REPLACE VIEW ${V('card_reads')} AS
+        SELECT card, count(*) AS closed, percentile_cont(0.5) WITHIN GROUP (ORDER BY secs) AS median_secs, round(avg((secs < 3)::int), 2) AS share_under_3s
+        FROM ${E} WHERE name = 'card' GROUP BY card ORDER BY card`);
+      await pool.query(`CREATE OR REPLACE VIEW ${V('sittings')} AS
+        SELECT day, count(*) AS page_loads, percentile_cont(0.5) WITHIN GROUP (ORDER BY secs) AS median_secs, percentile_cont(0.9) WITHIN GROUP (ORDER BY secs) AS p90_secs
+        FROM (SELECT min(day) AS day, max(t) AS secs FROM ${E} GROUP BY page) s GROUP BY day ORDER BY day`);
     },
+    play: async (page, release, rows) => { // stops at DAILY_CAP rows a day, counted in the table so a restart does not reset it
+      const n = (await pool.query(`SELECT count(*)::int AS n FROM ${E} WHERE day = current_date`)).rows[0].n;
+      const take = rows.slice(0, Math.max(0, play.DAILY_CAP - n)); if (!take.length) return 0;
+      const vals = take.flatMap(r => [page, release, ...COLS.slice(2).map(k => r[k])]);
+      await pool.query(`INSERT INTO ${E} (${COLS.join(', ')}) VALUES ${take.map((_, i) => `(${COLS.map((_, j) => '$' + (i * COLS.length + j + 1)).join(', ')})`).join(', ')}`, vals);
+      return take.length;
+    },
+    prune: async () => (await pool.query(`DELETE FROM ${E} WHERE day < current_date - ${play.KEEP_DAYS}`)).rowCount,
     get: async code => {
       const r = await pool.query(`SELECT data, updated_at FROM ${T} WHERE code = $1`, [code]);
       return r.rows[0] ? { data: r.rows[0].data, updatedAt: r.rows[0].updated_at.toISOString() } : null;
@@ -44,14 +78,36 @@ function pgStore(url) {
 }
 
 // shortcut: per-process fixed-window limit, resets on restart; move to the database if the API ever runs on several instances
-const hits = new Map();
-function limited(ip) {
-  const now = Date.now(), h = hits.get(ip);
-  if (!h || now - h.t > 60000) {
-    if (hits.size > 10000) for (const [k, v] of hits) if (now - v.t > 60000) hits.delete(k); // drop expired windows, never live ones
-    hits.set(ip, { t: now, n: 1 }); return false;
-  }
-  return ++h.n > WRITES_PER_MIN;
+function limiter(max) {
+  const hits = new Map(); // IPs live here only, never on disk or in logs
+  return ip => {
+    const now = Date.now(), h = hits.get(ip);
+    if (!h || now - h.t > 60000) {
+      if (hits.size > 10000) for (const [k, v] of hits) if (now - v.t > 60000) hits.delete(k); // drop expired windows, never live ones
+      hits.set(ip, { t: now, n: 1 }); return false;
+    }
+    return ++h.n > max;
+  };
+}
+const limited = limiter(WRITES_PER_MIN), playLimited = limiter(PLAY_PER_MIN);
+const clientIp = req => req.headers['cf-connecting-ip'] || req.socket.remoteAddress; // Render sits behind Cloudflare, which overwrites this header with the real client; X-Forwarded-For starts with whatever the client sent
+async function readBody(req) { // the body as text, or null past MAX_BODY
+  let size = 0; const chunks = [];
+  for await (const c of req) { size += c.length; if (size > MAX_BODY) return null; chunks.push(c); }
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+// POST /api/play: gameplay events, plain-text JSON so a browser sends it without a CORS preflight. The game never reads the answer.
+// A failure here is logged, not sent to Sentry: the save-failure alert stays about saves, and no third party sees play.
+async function playRoute(req, origin, send, store) {
+  if (req.method !== 'POST') return send(405, { error: 'method not allowed' });
+  if (origin && !ORIGINS.includes(origin) && !ORIGINS.includes('*')) return send(204); // another site's page: dropped
+  if (playLimited(clientIp(req))) return send(429, { error: 'too many events' });
+  const text = await readBody(req); if (text === null) return send(413, { error: 'too large' });
+  let body; try { body = play.parse(JSON.parse(text)); } catch { body = null; }
+  if (!body) return send(400, { error: 'bad events' });
+  try { await store.play(body.page, body.release, body.rows); } catch (e) { log.warn({ err: e.message }, 'events not stored'); }
+  send(204);
 }
 
 function createServer(store) {
@@ -67,6 +123,7 @@ function createServer(store) {
       const url = new URL(req.url, 'http://x');
       if (req.method === 'OPTIONS') return send(204);
       if (url.pathname === '/health' && req.method === 'GET') return send(200, { ok: true, commit: process.env.RENDER_GIT_COMMIT || 'local' }); // deploys wait for this commit
+      if (url.pathname === '/api/play') return await playRoute(req, origin, send, store);
       const m = url.pathname.match(/^\/api\/save\/([^/]+)$/);
       if (!m) return send(404, { error: 'not found' });
       const code = m[1];
@@ -76,11 +133,9 @@ function createServer(store) {
         return row ? send(200, { save: row.data, updatedAt: row.updatedAt }) : send(404, { error: 'no save for this code' });
       }
       if (req.method === 'PUT') {
-        const ip = req.headers['cf-connecting-ip'] || req.socket.remoteAddress; // Render sits behind Cloudflare, which overwrites this header with the real client; X-Forwarded-For starts with whatever the client sent
-        if (limited(ip)) return send(429, { error: 'too many saves, slow down' });
-        let size = 0; const chunks = [];
-        for await (const c of req) { size += c.length; if (size > MAX_BODY) return send(413, { error: 'save too large' }); chunks.push(c); }
-        let body; try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return send(400, { error: 'body must be JSON' }); }
+        if (limited(clientIp(req))) return send(429, { error: 'too many saves, slow down' });
+        const text = await readBody(req); if (text === null) return send(413, { error: 'save too large' });
+        let body; try { body = JSON.parse(text); } catch { return send(400, { error: 'body must be JSON' }); }
         const save = body && body.save;
         if (!save || typeof save !== 'object' || Array.isArray(save)) return send(400, { error: 'body must be {"save": {...}}' });
         const updatedAt = await store.put(code, save);
@@ -100,7 +155,9 @@ if (require.main === module) {
   initSentry();
   if (process.env.RENDER && !process.env.DATABASE_URL) { log.fatal('DATABASE_URL is not set: refusing to keep player saves in memory'); process.exit(1); }
   const store = process.env.DATABASE_URL ? pgStore(process.env.DATABASE_URL) : memoryStore();
-  store.init().then(() => {
+  store.init().then(async () => {
+    const prune = () => store.prune().then(n => n && log.info({ rows: n }, 'old events deleted')).catch(e => log.warn({ err: e.message }, 'event pruning failed'));
+    await prune(); setInterval(prune, 864e5).unref(); // daily
     const port = +process.env.PORT || 8787;
     createServer(store).listen(port, () => log.info(`save API on :${port}, ${process.env.DATABASE_URL ? `postgres schema ${SCHEMA}` : 'in-memory store'}, origins ${ORIGINS.join(' ') || 'none'}`));
   }).catch(e => { log.fatal({ err: e.message }, 'startup failed'); process.exit(1); });
