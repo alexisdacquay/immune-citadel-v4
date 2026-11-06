@@ -19,6 +19,8 @@ services:
       OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
       OTEL_SERVICE_NAME: immune-citadel-api
       OTEL_RESOURCE_ATTRIBUTES: deployment.environment.name=local
+      SENTRY_DSN: ${SENTRY_DSN:-} # errors to Sentry when .env sets it; off otherwise
+      SENTRY_ENVIRONMENT: local
     ports: ["8787:8787"]
     depends_on: { db: { condition: service_healthy } }
     healthcheck: { test: wget -qO- http://localhost:8787/health, interval: 2s, retries: 30 }

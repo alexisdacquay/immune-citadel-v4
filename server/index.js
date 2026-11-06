@@ -6,6 +6,7 @@ const log = require('pino')({ level: process.env.LOG_LEVEL || 'info' }); // JSON
 const saves = require('@opentelemetry/api').metrics.getMeter('immune-citadel-api').createCounter('saves', { description: 'Cloud saves by outcome' });
 saves.add(0, { outcome: 'ok' }); saves.add(0, { outcome: 'failed' });
 const route = require('./route');
+const { initSentry, Sentry } = require('./sentry');
 
 const CODE = /^[A-HJ-NP-Z2-9]{16}$/; // the game's alphabet: no I, O, 0, 1
 const MAX_BODY = 8 * 1024; // a full save is about 1 KB
@@ -91,6 +92,7 @@ function createServer(store) {
       send(405, { error: 'method not allowed' });
     } catch (e) {
       if (req.method === 'PUT') saves.add(1, { outcome: 'failed' });
+      Sentry.captureException(e, { tags: { method: req.method, route: route(req.url) } }); // a failed save emails the owner (alert rule in Sentry)
       log.error({ err: e.message }, 'request failed'); send(500, { error: 'server error' });
     }
   });
@@ -99,6 +101,7 @@ function createServer(store) {
 module.exports = { createServer, memoryStore };
 
 if (require.main === module) {
+  initSentry();
   if (process.env.RENDER && !process.env.DATABASE_URL) { log.fatal('DATABASE_URL is not set: refusing to keep player saves in memory'); process.exit(1); }
   const store = process.env.DATABASE_URL ? pgStore(process.env.DATABASE_URL) : memoryStore();
   store.init().then(() => {

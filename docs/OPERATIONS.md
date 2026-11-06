@@ -56,6 +56,8 @@ flowchart LR
 
 Being replaced: Sentry instead of Dash0, see [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md). Until its step 2, this section describes what runs.
 
+**Sentry (save API errors):** organisation `myown-76`, EU region (de.sentry.io), project `immune-citadel-api`. [server/sentry.js](../server/sentry.js) reports every request that fails with a server error; it sends no IP, headers, cookies, bodies, query strings, database parameters or local variables, and replaces any save code with `:code` ([server/sentry.test.js](../server/sentry.test.js)). Alert "Save API error (a save or load failed): email owner": every error, at most one email per 30 min. Settings: `SENTRY_DSN` (project Client Keys) and `SENTRY_ENVIRONMENT` (`dev`, `production`; `local` by default); without the DSN it is off.
+
 The save API sends traces, metrics and logs to [Dash0](https://www.dash0.com) over OpenTelemetry (OTLP). Dev on Render sends them now; production never will (Sentry replaces Dash0); locally only when `.env` holds the token (`.env.example`). The key journey is the cloud save (`PUT` then `GET /api/save/:code`).
 
 - **Traces:** every API request, with its Postgres query. Spans carry the route `/api/save/:code`, never the code; client addresses are redacted; queries show `$1`, not values.
