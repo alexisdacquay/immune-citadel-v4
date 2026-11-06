@@ -2,7 +2,7 @@
 
 One page: where the project stands and what comes next. Updated at the end of every step. Details live in the linked plans; the backlog is [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues).
 
-Last update: 2026-11-06 18:00 UTC.
+Last update: 2026-11-06 19:20 UTC.
 
 ## How it fits together
 
@@ -31,7 +31,7 @@ All of it runs on dev today; production gets it at the next promotion ([OBSERVAB
 | | Commit | What it has |
 |---|---|---|
 | production (`main`) | 8792a17, 2026-11-04 | the game before the body map; cloud saves; no telemetry |
-| dev (`dev`) | ahead of `main` | body map (#39, #40), P0 bug fixes (#3-#9), intro cards (#10), the pipeline below, Sentry on the save API |
+| dev (`dev`) | ahead of `main` | body map (#39, #40), P0 bug fixes (#1-#9), the owed-card fix (#37), intro cards (#10), the pipeline below, Sentry on the save API |
 
 ## Plans
 
@@ -44,8 +44,8 @@ All of it runs on dev today; production gets it at the next promotion ([OBSERVAB
 
 | # | Work | Why this order |
 |---|---|---|
-| 1 | bug #37 (fever spike card shows as new at several levels) | the only open P1 bug |
-| 2 | observability step 5 (gameplay events) | needs the event list approved |
+| 1 | observability step 5 (gameplay events): propose the event list | the owner approves it before any code |
+| 2 | P3 bugs #22, #23 (wave marker and build sites under the HUD on small screens) | the only open bugs not yet fixed |
 | 3 | owner playtest (#18), then promotion to production (#19) with observability step 6 | production is two days behind dev |
 
 ## Waiting on the owner
