@@ -22,7 +22,7 @@ function memoryStore() {
     get: async code => m.get(code) || null,
     put: async (code, data) => { const row = { data, updatedAt: new Date().toISOString() }; m.set(code, row); return row.updatedAt; },
     events: [],
-    play: async function (page, release, rows) { const take = rows.slice(0, Math.max(0, play.DAILY_CAP - this.events.length)); this.events.push(...take.map(r => ({ page, release, ...r }))); return take.length; },
+    play: async function (page, release, rows) { if (this.events.length + rows.length > play.DAILY_CAP) return 0; this.events.push(...rows.map(r => ({ page, release, ...r }))); return rows.length; },
     prune: async () => {},
   };
 }
@@ -32,25 +32,29 @@ function pgStore(url) {
   const pool = new Pool({ connectionString: url, max: 5 });
   pool.on('error', e => log.error({ err: e.message }, 'postgres idle client')); // a dropped idle connection must not kill the server
   const T = `"${SCHEMA}".saves`, E = `"${SCHEMA}".events`, V = n => `"${SCHEMA}".${n}`;
+  let playQ = Promise.resolve(), capDay = null;
   const COLS = ['page', 'release', 'name', 't', 'level', 'mode', 'difficulty', 'outcome', 'first', 'stars', 'wave', 'card', 'secs', 'is_new'];
   return {
     init: async () => {
       await pool.query(`CREATE SCHEMA IF NOT EXISTS "${SCHEMA}"`);
       await pool.query(`CREATE TABLE IF NOT EXISTS ${T} (code text PRIMARY KEY, data json NOT NULL, updated_at timestamptz NOT NULL DEFAULT now())`);
-      // gameplay events (docs/EVENTS.md): the date only, no time of day, no IP; rows go after KEEP_DAYS
-      await pool.query(`CREATE TABLE IF NOT EXISTS ${E} (id bigserial PRIMARY KEY, day date NOT NULL DEFAULT current_date, page text NOT NULL, release text, name text NOT NULL, t integer NOT NULL,
+      // gameplay events (docs/EVENTS.md): the date only, no time of day, no arrival order, no IP; rows go after KEEP_DAYS
+      await pool.query(`CREATE TABLE IF NOT EXISTS ${E} (day date NOT NULL DEFAULT current_date, page text NOT NULL, release text, name text NOT NULL, t integer NOT NULL,
         level smallint, mode text, difficulty text, outcome text, first boolean, stars smallint, wave smallint, card text, secs integer, is_new boolean)`);
       await pool.query(`CREATE INDEX IF NOT EXISTS events_day ON ${E} (day)`);
-      const runs = `count(*) FILTER (WHERE name = 'level_start')`, ends = `count(*) FILTER (WHERE name = 'level_end')`; // a start with no end: the tab was closed mid-level
+      // per page load: a start with no end is a level left by closing the tab; an end whose start was lost still counts as a run
+      const perPage = `SELECT page, level, mode, difficulty, count(*) FILTER (WHERE name = 'level_start') AS s, count(*) FILTER (WHERE name = 'level_end') AS e,
+          count(*) FILTER (WHERE outcome = 'won') AS won, count(*) FILTER (WHERE outcome = 'lost') AS lost, count(*) FILTER (WHERE outcome = 'quit') AS quit,
+          count(*) FILTER (WHERE outcome = 'restart') AS restart, count(*) FILTER (WHERE outcome = 'won' AND first) AS first_wins
+        FROM ${E} WHERE name IN ('level_start', 'level_end') GROUP BY page, level, mode, difficulty`;
       await pool.query(`CREATE OR REPLACE VIEW ${V('funnel')} AS
-        SELECT 0 AS level, 'new browser' AS step, count(*) FILTER (WHERE name = 'open' AND is_new) AS players, NULL::bigint AS abandoned FROM ${E}
-        UNION ALL SELECT level, 'first win', count(*) FILTER (WHERE name = 'level_end' AND outcome = 'won' AND first), ${runs} - ${ends} FROM ${E} WHERE mode = 'campaign' GROUP BY level
+        SELECT 0 AS level, 'new browser' AS step, count(*) AS players, NULL::numeric AS abandoned FROM ${E} WHERE name = 'open' AND is_new
+        UNION ALL SELECT level, 'first win', sum(first_wins), sum(greatest(s - e, 0)) FROM (${perPage}) p WHERE mode = 'campaign' GROUP BY level
         ORDER BY level`);
       await pool.query(`CREATE OR REPLACE VIEW ${V('level_stats')} AS
-        SELECT level, mode, difficulty, ${runs} AS runs, count(*) FILTER (WHERE outcome = 'won') AS won, count(*) FILTER (WHERE outcome = 'lost') AS lost,
-          count(*) FILTER (WHERE outcome = 'quit') AS quit, count(*) FILTER (WHERE outcome = 'restart') AS restart, ${runs} - ${ends} AS abandoned,
-          percentile_cont(0.5) WITHIN GROUP (ORDER BY wave) FILTER (WHERE outcome = 'lost') AS median_wave_lost
-        FROM ${E} WHERE name IN ('level_start', 'level_end') GROUP BY level, mode, difficulty ORDER BY level, mode, difficulty`);
+        SELECT p.level, p.mode, p.difficulty, sum(greatest(s, e)) AS runs, sum(won) AS won, sum(lost) AS lost, sum(quit) AS quit, sum(restart) AS restart, sum(greatest(s - e, 0)) AS abandoned,
+          (SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY wave) FROM ${E} l WHERE l.outcome = 'lost' AND l.level = p.level AND l.mode = p.mode AND l.difficulty = p.difficulty) AS median_wave_lost
+        FROM (${perPage}) p GROUP BY p.level, p.mode, p.difficulty ORDER BY p.level, p.mode, p.difficulty`);
       await pool.query(`CREATE OR REPLACE VIEW ${V('card_reads')} AS
         SELECT card, count(*) AS closed, percentile_cont(0.5) WITHIN GROUP (ORDER BY secs) AS median_secs, round(avg((secs < 3)::int), 2) AS share_under_3s
         FROM ${E} WHERE name = 'card' GROUP BY card ORDER BY card`);
@@ -58,13 +62,14 @@ function pgStore(url) {
         SELECT day, count(*) AS page_loads, percentile_cont(0.5) WITHIN GROUP (ORDER BY secs) AS median_secs, percentile_cont(0.9) WITHIN GROUP (ORDER BY secs) AS p90_secs
         FROM (SELECT min(day) AS day, max(t) AS secs FROM ${E} GROUP BY page) s GROUP BY day ORDER BY day`);
     },
-    play: async (page, release, rows) => { // stops at DAILY_CAP rows a day, counted in the table so a restart does not reset it
-      const n = (await pool.query(`SELECT count(*)::int AS n FROM ${E} WHERE day = current_date`)).rows[0].n;
-      const take = rows.slice(0, Math.max(0, play.DAILY_CAP - n)); if (!take.length) return 0;
-      const vals = take.flatMap(r => [page, release, ...COLS.slice(2).map(k => r[k])]);
-      await pool.query(`INSERT INTO ${E} (${COLS.join(', ')}) VALUES ${take.map((_, i) => `(${COLS.map((_, j) => '$' + (i * COLS.length + j + 1)).join(', ')})`).join(', ')}`, vals);
-      return take.length;
-    },
+    play: (page, release, rows) => (playQ = playQ.catch(() => {}).then(async () => { // one at a time, so the count and the insert cannot race (one API process per schema)
+      if (!rows.length) return 0;
+      const n = (await pool.query(`SELECT count(*)::int AS n FROM ${E} WHERE day = current_date`)).rows[0].n; // counted in the table: a restart does not reset it
+      if (n + rows.length > play.DAILY_CAP) { const d = new Date().toDateString(); if (capDay !== d) { capDay = d; log.warn({ rows: n }, 'events daily cap reached'); } return 0; } // a whole batch or nothing: no start without its end
+      const vals = rows.flatMap(r => [page, release, ...COLS.slice(2).map(k => r[k])]);
+      await pool.query(`INSERT INTO ${E} (${COLS.join(', ')}) VALUES ${rows.map((_, i) => `(${COLS.map((_, j) => '$' + (i * COLS.length + j + 1)).join(', ')})`).join(', ')}`, vals);
+      return rows.length;
+    })),
     prune: async () => (await pool.query(`DELETE FROM ${E} WHERE day < current_date - ${play.KEEP_DAYS}`)).rowCount,
     get: async code => {
       const r = await pool.query(`SELECT data, updated_at FROM ${T} WHERE code = $1`, [code]);
@@ -79,7 +84,8 @@ function pgStore(url) {
 
 // shortcut: per-process fixed-window limit, resets on restart; move to the database if the API ever runs on several instances
 function limiter(max) {
-  const hits = new Map(); // IPs live here only, never on disk or in logs
+  const hits = new Map(); // IPs live here only, never on disk or in logs, and are forgotten within two minutes
+  setInterval(() => { const now = Date.now(); for (const [k, v] of hits) if (now - v.t > 60000) hits.delete(k); }, 60000).unref();
   return ip => {
     const now = Date.now(), h = hits.get(ip);
     if (!h || now - h.t > 60000) {
@@ -99,15 +105,17 @@ async function readBody(req) { // the body as text, or null past MAX_BODY
 
 // POST /api/play: gameplay events, plain-text JSON so a browser sends it without a CORS preflight. The game never reads the answer.
 // A failure here is logged, not sent to Sentry: the save-failure alert stays about saves, and no third party sees play.
-async function playRoute(req, origin, send, store) {
-  if (req.method !== 'POST') return send(405, { error: 'method not allowed' });
-  if (origin && !ORIGINS.includes(origin) && !ORIGINS.includes('*')) return send(204); // another site's page: dropped
-  if (playLimited(clientIp(req))) return send(429, { error: 'too many events' });
-  const text = await readBody(req); if (text === null) return send(413, { error: 'too large' });
-  let body; try { body = play.parse(JSON.parse(text)); } catch { body = null; }
-  if (!body) return send(400, { error: 'bad events' });
-  try { await store.play(body.page, body.release, body.rows); } catch (e) { log.warn({ err: e.message }, 'events not stored'); }
-  send(204);
+async function playRoute(req, res, origin, send, store) {
+  try {
+    if (req.method !== 'POST') return send(405, { error: 'method not allowed' });
+    if (origin && !ORIGINS.includes(origin) && !ORIGINS.includes('*')) return send(204); // another site's page: dropped
+    if (playLimited(clientIp(req))) return send(429, { error: 'too many events' });
+    const text = await readBody(req); if (text === null) return send(413, { error: 'too large' });
+    let body; try { body = play.parse(JSON.parse(text)); } catch { body = null; }
+    if (!body) return send(400, { error: 'bad events' });
+    await store.play(body.page, body.release, body.rows);
+    send(204);
+  } catch (e) { log.warn({ err: e.message }, 'events not stored'); if (!res.headersSent) send(204); } // aborted upload, database down: never Sentry
 }
 
 function createServer(store) {
@@ -123,7 +131,7 @@ function createServer(store) {
       const url = new URL(req.url, 'http://x');
       if (req.method === 'OPTIONS') return send(204);
       if (url.pathname === '/health' && req.method === 'GET') return send(200, { ok: true, commit: process.env.RENDER_GIT_COMMIT || 'local' }); // deploys wait for this commit
-      if (url.pathname === '/api/play') return await playRoute(req, origin, send, store);
+      if (url.pathname === '/api/play') return await playRoute(req, res, origin, send, store);
       const m = url.pathname.match(/^\/api\/save\/([^/]+)$/);
       if (!m) return send(404, { error: 'not found' });
       const code = m[1];

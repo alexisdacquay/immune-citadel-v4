@@ -35,11 +35,13 @@ test('request traces name the route, never the save code', async () => {
     await fetch(url, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ save: { marker: SECRET } }) });
     await fetch(url); await fetch(`http://localhost:${srv.address().port}/health`);
     await fetch(`http://localhost:${srv.address().port}/api/play`, { method: 'POST', body: JSON.stringify({ page: '0123456789abcdef', release: '', events: [{ name: 'hide', t: 1 }] }) });
+    await new Promise(r => { const s = require('node:net').connect(srv.address().port, 'localhost', () => { // an events upload cut off mid-body
+      s.write('POST /api/play HTTP/1.1\r\nHost: x\r\nContent-Length: 500\r\n\r\n{"page":'); setTimeout(() => { s.destroy(); setTimeout(r, 100); }, 100); }); });
     await Sentry.flush(2000);
     const out = JSON.stringify(sent);
     assert.match(out, /\/api\/save\/:code/, 'a trace was sent, named by route');
     assert.doesNotMatch(out, new RegExp(`${CODE}|${SECRET}`), 'no save code or content');
     assert.doesNotMatch(out, /\/health/, 'health checks are not traced');
-    assert.doesNotMatch(out, /\/api\/play/, 'gameplay events are not traced: no third party sees play');
+    assert.doesNotMatch(out, /\/api\/play/, 'gameplay events are not traced, and a failed upload is not reported: no third party sees play');
   } finally { srv.close(); await Sentry.close(); }
 });

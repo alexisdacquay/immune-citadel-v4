@@ -2,7 +2,7 @@
 
 One page: where the project stands and what comes next. Updated at the end of every step. Details live in the linked plans; the backlog is [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues).
 
-Last update: 2026-11-06 21:45 UTC.
+Last update: 2026-11-06 23:30 UTC.
 
 ## How it fits together
 
@@ -24,7 +24,7 @@ flowchart LR
     BETTER -- email --> OWNER
 ```
 
-All of it runs on dev today; production gets it at the next promotion ([OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 6). Gameplay events (step 5) will go player → save API → Postgres. Dash0 is no longer used by this project.
+All of it runs on dev today; production gets it at the next promotion ([OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 6). Gameplay events (step 5, [EVENTS.md](EVENTS.md)) go player → save API → Postgres, dev first. Dash0 is no longer used by this project.
 
 ## Where things run
 
@@ -38,13 +38,13 @@ All of it runs on dev today; production gets it at the next promotion ([OBSERVAB
 | Plan | Done | Now | Next |
 |---|---|---|---|
 | [PIPELINE-PLAN.md](PIPELINE-PLAN.md): trustworthy deploys | 1-4: site publishes only the game; rules on `dev`/`main`; deploy on commit + `deployed` proof; auto-merge | — | closed (step 5 moved to the observability plan) |
-| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | 1-4: Sentry on the save API and in the game, Dash0 removed, Better Stack on both sites, all proven on dev | — | 5: gameplay events ([EVENTS.md](EVENTS.md) to approve) · 6: production at promotion |
+| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | 1-4: Sentry on the save API and in the game, Dash0 removed, Better Stack on both sites, all proven on dev | 5: gameplay events, built, proof on dev | 6: production at promotion |
 
 ## Order of work
 
 | # | Work | Why this order |
 |---|---|---|
-| 1 | observability step 5 (gameplay events): build [EVENTS.md](EVENTS.md) once approved | real players are expected; events must be live at promotion |
+| 1 | observability step 5: prove gameplay events on dev | real players are expected; events must be live at promotion |
 | 2 | P3 bugs #22, #23 (wave marker and build sites under the HUD on small screens) | the only open bugs not yet fixed |
 | 3 | owner playtest (#18), then promotion to production (#19) with observability step 6 | production is two days behind dev |
 
@@ -52,8 +52,7 @@ All of it runs on dev today; production gets it at the next promotion ([OBSERVAB
 
 | Item | When |
 |---|---|
-| approve [EVENTS.md](EVENTS.md): the 5 events, stats on by default with a switch, a "Your data" card | step 5 |
-| sign `docs/DPIA.md` (written in step 5) | before step 5 ships |
+| sign [DPIA.md](DPIA.md) | before step 6 (production) |
 | playtest (#18), approve the promotion (#19) and a paid production API instance | before step 6 |
 | `immune-citadel-dev-db` and `immune-citadel-prod-db` (v3 leftovers, paid): keep or delete | any time |
 

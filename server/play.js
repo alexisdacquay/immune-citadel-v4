@@ -18,10 +18,10 @@ const SHAPES = {
 // one event -> a table row, or null. Every key must be known and valid; level events need a mode that exists on that level.
 function row(e) {
   if (!e || typeof e !== 'object' || Array.isArray(e)) return null;
-  const shape = SHAPES[e.name];
+  const shape = typeof e.name === 'string' && Object.hasOwn(SHAPES, e.name) && SHAPES[e.name]; // own keys only: 'constructor' or '__proto__' is no event
   if (!shape || !int(e.t, 0, 86400)) return null;
   const keys = Object.keys(e).filter(k => k !== 'name' && k !== 't');
-  if (keys.length !== Object.keys(shape).length || !keys.every(k => shape[k] && shape[k](e[k]))) return null;
+  if (keys.length !== Object.keys(shape).length || !keys.every(k => Object.hasOwn(shape, k) && shape[k](e[k]))) return null;
   if (e.mode && e.mode !== 'campaign' && !CHALLENGE_LEVELS.includes(e.level)) return null;
   if (e.name === 'level_end' && (e.stars !== null) !== (e.mode === 'campaign' && e.outcome === 'won')) return null; // stars only on a campaign win
   return { name: e.name, t: e.t, level: e.level ?? null, mode: e.mode ?? null, difficulty: e.difficulty ?? null, outcome: e.outcome ?? null,
@@ -30,8 +30,8 @@ function row(e) {
 
 // the request body -> { page, release, rows }, or null when the envelope itself is wrong
 function parse(body) {
-  if (!body || typeof body !== 'object' || !/^[0-9a-f]{16}$/.test(body.page)) return null;
-  if (body.release !== '' && !/^[0-9a-f]{7,40}$/.test(body.release)) return null;
+  if (!body || typeof body !== 'object' || typeof body.page !== 'string' || !/^[0-9a-f]{16}$/.test(body.page)) return null;
+  if (typeof body.release !== 'string' || (body.release !== '' && !/^[0-9a-f]{7,40}$/.test(body.release))) return null;
   if (!Array.isArray(body.events) || body.events.length > MAX_EVENTS) return null;
   return { page: body.page, release: body.release || null, rows: body.events.map(row).filter(Boolean) };
 }

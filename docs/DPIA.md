@@ -1,6 +1,6 @@
 # Data protection impact assessment
 
-Status: **draft, to be signed by the owner before gameplay events go live on dev**. Headings follow the ICO template ([Children's Code, standard 2](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/childrens-information/childrens-code-guidance-and-resources/age-appropriate-design-a-code-of-practice-for-online-services/2-data-protection-impact-assessments/)). Review it when anything that leaves the browser changes.
+Status: **draft, to be signed by the owner before gameplay events reach production** (step 6). Dev runs them first: it has no real players, only the owner and the team, and its data proves the design this assessment describes. Headings follow the ICO template ([Children's Code, standard 2](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/childrens-information/childrens-code-guidance-and-resources/age-appropriate-design-a-code-of-practice-for-online-services/2-data-protection-impact-assessments/)). Review it when anything that leaves the browser changes.
 
 ## The service
 
@@ -26,8 +26,8 @@ flowchart LR
 | save (stars, settings, cards seen) under a save code | continue on another device | Postgres | until deleted on request (no automatic expiry yet) | no name; the code is a credential, never logged or sent to Sentry |
 | gameplay events ([EVENTS.md](EVENTS.md)) | make levels fairer, cards clearer | Postgres | 13 months, deleted automatically | no: random id per page load, date only, fixed values |
 | crash reports, load speed | fix bugs | Sentry (processor, EU) | 30 days on the free plan, 90 on paid plans ([Sentry](https://docs.sentry.io/security-legal-pii/security/data-retention-periods/)) | no: IP not stored, location removed, save codes scrubbed, no replay |
-| IP address | rate limiting | save API memory only | until the server restarts; never written or logged | used, not stored |
-| on/off choices (sound, difficulty, stats) | remember the player's settings | the browser (localStorage) | until the player clears it | no |
+| IP address | rate limiting | save API memory only | forgotten within two minutes; never written or logged by our code (Render's edge may log it under its own policy) | used, not stored |
+| on/off choices (sound, difficulty in the save; stats under its own key, never uploaded) | remember the player's settings | the browser (localStorage) | until the player clears it | no |
 
 ## Lawful basis
 

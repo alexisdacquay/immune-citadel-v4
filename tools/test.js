@@ -376,7 +376,7 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   evs(PLAY.parse({ page: flow.page, release: '', events: sent.slice(0, 20) }).rows.length === sent.length, 'the save API would drop some of these events');
   await q.click('#dataBtn'); await q.waitForTimeout(250); await q.screenshot({ path: `${out}/29-your-data.png` });
   await q.click('#statsTg');
-  evs(await q.evaluate(() => { IC.startLevel(1); return !IC.statsOn() && IC.play.q.length === 0 && JSON.parse(localStorage.getItem('immune-citadel-v4')).stats === false; }), 'stats switch off must clear the queue, stop events and be saved');
+  evs(await q.evaluate(() => { IC.startLevel(1); return !IC.statsOn() && IC.play.q.length === 0 && localStorage.getItem('immune-citadel-v4-stats') === 'off' && !('stats' in IC.save); }), 'stats switch off must clear the queue, stop events, be saved on this device only (never in the cloud save)');
   await q.click('#statsTg'); evs(await q.evaluate(() => IC.statsOn()), 'stats switch did not turn back on');
   await q.context().close();
   await require('./touch.js')(b, out, errs); // phones, tablet and both mouse sizes: taps, two-tap buy, target sizes, layout, rotate card

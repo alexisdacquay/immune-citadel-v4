@@ -527,8 +527,8 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
     <button class="btn" id="cloudGo">Load that save</button>
   </div>
   <div id="dataPop" class="glass" hidden><small>YOUR DATA</small>
-    <p>Playing sends a few <b>anonymous</b> stats to our own server: which level, whether you won, how long you read each card. No name, no save code, nothing that says who you are. They help us make levels fairer, and are deleted after 13 months.</p>
-    <p>If the game crashes, a crash report goes to Sentry, in the EU, without your name or internet address. Your cloud save stays on our server (Render, in Frankfurt) under your save code. Your internet address is only used for a moment, to stop abuse, and is never saved.</p>
+    <p>The game sends a few <b>anonymous</b> play stats to our own server: which level you play, how it ends, how long you read each card. No name, no save code, nothing that says who you are. They help us make levels fairer. They are deleted after 13 months.</p>
+    <p>Each time the game loads, and if it crashes, a report goes to Sentry, a company in the EU that helps us find bugs. It gets no name and no internet address. Your cloud save stays on our server (Render, in Frankfurt) under your save code. Our server forgets your internet address within two minutes and never saves it.</p>
     <button class="tg" id="statsTg" role="switch"><svg viewBox="0 0 24 24"><path d="M5 19V11M12 19V5M19 19v-6"/></svg><span>Play stats<em id="statsEm"></em></span><i></i></button>
   </div>
   <div id="hint" class="glass" hidden><i class="ar"></i><small></small><p></p><button class="x" aria-label="Dismiss tip" title="Dismiss tip">×</button></div>
@@ -1535,10 +1535,13 @@ function mergeSave(a, b) {
 }
 function cloudQueue() { if (!CLOUD_API) return; clearTimeout(cloud.timer); cloud.timer = setTimeout(cloudSync, 1500); }
 // Gameplay events (docs/EVENTS.md): anonymous, to our own save API, only from the dev and production sites. No save code, no name, nothing kept
-// on the device but the player's on/off choice. The page id lives in memory: a reload is a new id. Off with the stats switch or Global Privacy Control.
+// on the device but the player's on/off choice (its own key: never in the cloud save, so another device cannot turn it back on). The page id lives in memory:
+// a reload is a new id. Off with the stats switch or Global Privacy Control.
 const PLAY_API = /^immune-citadel-v4(-dev)?\.onrender\.com$/.test(location.hostname) ? CLOUD_API : null; // elsewhere events queue but are never sent (tests read the queue)
 const play = { q: [], page: Array.from(crypto.getRandomValues(new Uint8Array(8)), b => b.toString(16).padStart(2, '0')).join(''), release: '', run: null, vis: 0, from: document.hidden ? null : performance.now() };
-const statsOn = () => save.stats !== false && navigator.globalPrivacyControl !== true;
+const STATS_KEY = 'immune-citadel-v4-stats'; let statsPref = true; try { statsPref = localStorage.getItem(STATS_KEY) !== 'off'; } catch (e) {}
+const statsOn = () => statsPref && navigator.globalPrivacyControl !== true;
+addEventListener('storage', ev => { if (ev.key === STATS_KEY) { statsPref = ev.newValue !== 'off'; if (!statsPref) play.q.length = 0; } }); // switched off in another tab: off here too
 const visT = () => Math.floor((play.vis + (play.from == null ? 0 : performance.now() - play.from)) / 1000); // seconds the tab was visible since load
 function playEv(name, f = {}) { if (!statsOn()) return; play.q.push({ name, t: visT(), ...f }); if (play.q.length > 200) play.q.shift(); }
 function playFlush() { // fire and forget: plain text needs no CORS preflight; keepalive lets it finish while the tab closes; the answer is never read
@@ -2692,7 +2695,7 @@ function endLevel(win) {
   if (ch) { if (first) { save[ck][S.lvl] = 1; persist(); } } // a challenge never touches campaign stars
   else if (win && stars > save.st[S.lvl]) { save.st[S.lvl] = stars; persist(); }
   setTimeout(() => {
-    if (S.run !== run) return;
+    if (S.run !== run || S.screen === 'title') return; // left for the map before the report came up
     const nxt = win && !ch && S.lvl < LEVELS.length - 1;
     $('#rep').innerHTML = `<div class="kick"><span>LAB REPORT${ch ? ' · ' + ch.toUpperCase() : ''}</span><span>LEVEL ${S.lvl + 1} · ${S.L.place.toUpperCase()}</span></div>
       <div class="rhd"><h2 class="${win ? 'win' : 'lose'}">${win ? (ch ? `${ch} challenge won` : 'Level cleared') : 'Host overrun'}</h2>
@@ -3184,7 +3187,7 @@ function dataRefresh() {
 function dataOpen() { const P = $('#dataPop'); if (!P.hidden) return dataClose(); sndClose(); cloudClose(); P.hidden = false; dataRefresh(); sfx('click'); popPlace(P, $('#dataBtn'), 1); }
 function dataClose() { $('#dataPop').hidden = true; }
 $('#dataBtn').onclick = dataOpen;
-$('#statsTg').onclick = () => { save.stats = !statsOn(); if (!save.stats) play.q.length = 0; persist(); dataRefresh(); sfx('click'); };
+$('#statsTg').onclick = () => { statsPref = !statsOn(); try { localStorage.setItem(STATS_KEY, statsPref ? 'on' : 'off'); } catch (e) {} if (!statsPref) play.q.length = 0; dataRefresh(); sfx('click'); };
 addEventListener('pointerdown', ev => { if (!$('#dataPop').hidden && !ev.target.closest('#dataPop,#dataBtn')) dataClose(); }, true);
 $('#cloudGo').onclick = cloudLoad;
 $('#cloudIn').onkeydown = ev => { if (ev.key === 'Enter') cloudLoad(); };
