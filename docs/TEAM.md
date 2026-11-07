@@ -9,7 +9,7 @@ Immune Citadel v4 is built by a small team of AI agents and one human owner. Thi
 | **Owner** | the human | | priorities, approvals, playtests, production releases | |
 | **Orchestrator** (PM, game designer, builder, integrator) | the main Claude Code session | the session's model | the backlog, issue specs and acceptance criteria, design decisions, building every non-bug issue, the final diff review, auto-merge into `dev`, reports to the owner | merge to `main` (production) without the owner's word |
 | **Bug-fixer** | subagent `ic-bug-fixer` ([role](../.claude/agents/ic-bug-fixer.md)) | Opus | fixing one `bug` issue on its own branch, running the test suites, an engineer report | build anything that is not a bug, choose priorities, change scope, merge |
-| **QA** | subagent `ic-qa` ([role](../.claude/agents/ic-qa.md)) | Opus | adversarial verification of one issue against its acceptance criteria and the regression suites, a QA verdict | edit game code, read the engineer's reasoning before testing |
+| **QA** | CI job `qa` ([tools/qa.js](../tools/qa.js)), on every pull request after `test` and `game` | DeepSeek `deepseek-flash` | independent verification of the diff against the acceptance criteria of the issues the pull request names; a **QA verdict** comment; a required check, so a FAIL blocks the merge | edit code, see the builder's reasoning |
 | **Panels** | groups of short-lived subagents run as a workflow | Opus | wide questions one agent should not answer alone: design options (designers + judges), audits (finders + independent verifiers) | decide; a panel returns options and evidence, the orchestrator decides |
 
 Why this split: a bug has an objective pass/fail, so handing it to a bug-fixer and checking it with independent QA is safe. Design, content and balance carry intent that is lost in a handoff, so the orchestrator builds them, and QA still verifies them independently. The game is one file, so parallel builders would collide.
@@ -21,8 +21,8 @@ When the owner says **continue**, the orchestrator runs this loop. The [`team-lo
 1. **Triage.** Read the open issues and anything learned since the last cycle (test output, QA findings, owner feedback). New work becomes an issue. Every issue gets a priority (`P0` bug that breaks play or teaches wrong biology, `P1` next feature the owner asked for, `P2` planned, `P3` polish, `P4` someday), a type, and a status.
 2. **Spec.** The top `status:ready` issue gets a **Spec** comment: why, what changes, acceptance criteria (checkable statements), out of scope. Design questions are settled here, by the orchestrator, or by a panel when the space is wide. Anything that needs the owner gets `needs-owner` and waits.
 3. **Build.** Routed by type. A `bug`: the [issue-cycle workflow](../.claude/workflows/issue-cycle.js) starts an `ic-bug-fixer` on a branch `issue/<n>-<slug>`; it posts an **Engineer report** comment. Anything else: the orchestrator builds it on that branch and posts **Build notes**.
-4. **Verify.** The same workflow starts an `ic-qa` with only the spec and the branch, not the engineer's reasoning. It posts a **QA verdict** comment: PASS or FAIL per acceptance criterion, with evidence. A FAIL goes back to whoever built it; a bug that fails twice escalates to the orchestrator.
-5. **Integrate.** The orchestrator reviews the diff, turns on auto-merge for the issue's pull request; when CI's `deployed` job is green on `dev`, labels the issue `status:on-dev`.
+4. **Verify.** CI's `qa` job reads only the spec and the diff, not the builder's reasoning, and posts a **QA verdict** comment: PASS or FAIL per acceptance criterion, with evidence. A FAIL blocks the merge and goes back to whoever built it.
+5. **Integrate.** The orchestrator arms auto-merge as soon as it opens the pull request (`sh tools/automerge.sh <n>`); GitHub merges when `test`, `game` and `qa` pass, with no human. When CI's `deployed` job is green on `dev`, the issue gets `status:on-dev`.
 6. **Report.** One short message to the owner: what shipped, what is not verified, what needs them.
 
 Issues close when `dev` is promoted to `main`, which only the owner approves.
@@ -39,7 +39,7 @@ Everything the team does leaves a trace on GitHub, so the process is visible wit
 ## Gates
 
 - Production (`main`) changes only with the owner's explicit approval.
-- `dev` changes only through a pull request with auto-merge, once QA passes.
+- `dev` changes only through a pull request that GitHub auto-merges once `test`, `game` and `qa` pass; no human merges into `dev`.
 - Every gameplay change runs the balance bot (`node tools/balance.js`); every change runs `node tools/test.js` and `node tools/touch.js`.
 - Biology text follows Rule #1: fun first, honest always. A bend of the real biology carries an "In reality" note.
 
