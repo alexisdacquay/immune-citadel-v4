@@ -1,5 +1,5 @@
 # CI: every pull request and every push to dev or main runs the unit and integration tests (test) and the game suite (game);
-# every pull request then gets an independent QA verdict (qa).
+# every pull request into dev also gets an independent QA agent in two stages: qa (closed checks, required) and qa-review (open review, advisory).
 # CD is Render's: each environment deploys every commit on its branch (dev -> dev, main -> prod); the rules on dev and main
 # let a commit in only through a pull request whose test and game passed. On those pushes, "deployed" proves the commit went live.
 name: CI
@@ -36,13 +36,14 @@ jobs:
       - run: npm ci # its postinstall downloads Chromium; no install-deps: the runner image ships Chrome's libraries, and the extra fonts it adds come from an Ubuntu mirror that stalled two runs past their timeout (2026-11-06)
       - run: npm run test:game # every level played by a bot, saves, challenges, Field Guide, phone and tablet layouts (~6 min)
 
-  qa: # stage 1, required on dev: a quick independent check of each change against its issues' acceptance criteria (tools/qa.js).
+  qa: # stage 1, required on dev: an independent QA agent answers closed questions, YES or NO at low effort (tools/qa.js):
+    # the pull request's own "## QA checks" and the past failures in the files it changes (test/past-failures.md).
     # Not on promotions into main (owner, 2026-11-07): each change already passed it into dev, and judging the whole release
     # diff at once produced false alarms (#73); main is gated by test, game, dev-green and the owner.
+    # No "needs": it reads code, not test results, so it runs beside test and game and adds no wait.
     if: github.event_name == 'pull_request' && github.base_ref == 'dev'
-    needs: [test, game]
     runs-on: ubuntu-latest
-    timeout-minutes: 15 # usually 1-4 min; the model call gives up after 12
+    timeout-minutes: 15 # each question takes seconds; a model call gives up after 12 min
     permissions: { contents: read, issues: write, pull-requests: write }
     steps:
       - uses: actions/checkout@v5
@@ -60,7 +61,7 @@ jobs:
           HEAD: ${{ github.event.pull_request.head.sha }}
           GITHUB_TOKEN: ${{ github.token }}
 
-  # Stage 2 (owner, 2026-11-07): today's open review, unchanged, advisory. It comments on the pull request and never blocks
+  # Stage 2 (owner, 2026-11-07): the open review, unchanged, advisory. It comments on the pull request and never blocks
   # (not a required check, and tools/qa.js exits 0); before a promotion every finding it raises is fixed or answered.
   qa-review: # stage 2, advisory: the open review (tools/qa.js, QA_MODE=review); not required.
     # Not on promotions into main (owner, 2026-11-07): each change already passed it into dev, and judging the whole release
