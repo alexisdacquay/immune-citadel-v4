@@ -61,7 +61,6 @@ All of it runs on dev today; production gets it at the next promotion ([OBSERVAB
 |---|---|
 | public repo (#28) | "not yet" |
 | on-call agent (#27) | stopped |
-| independent QA agent | later; CI tests are the QA today |
 
 ## Decisions (2026-11-06)
 

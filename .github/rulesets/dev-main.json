@@ -1,5 +1,5 @@
 {
-  "name": "dev and main: pull request with green CI",
+  "name": "dev and main: pull request with green CI and QA",
   "target": "branch",
   "enforcement": "active",
   "conditions": { "ref_name": { "include": ["refs/heads/dev", "refs/heads/main"], "exclude": [] } },
@@ -9,6 +9,6 @@
     { "type": "non_fast_forward" },
     { "type": "pull_request", "parameters": { "required_approving_review_count": 0, "dismiss_stale_reviews_on_push": false, "require_code_owner_review": false, "require_last_push_approval": false, "required_review_thread_resolution": false } },
     { "type": "required_status_checks", "parameters": { "strict_required_status_checks_policy": true, "do_not_enforce_on_create": false,
-      "required_status_checks": [{ "context": "test", "integration_id": 15368 }, { "context": "game", "integration_id": 15368 }] } }
+      "required_status_checks": [{ "context": "test", "integration_id": 15368 }, { "context": "game", "integration_id": 15368 }, { "context": "qa", "integration_id": 15368 }] } }
   ]
 }

@@ -1,4 +1,5 @@
-# CI: every pull request and every push to dev or main runs the unit and integration tests (test) and the game suite (game).
+# CI: every pull request and every push to dev or main runs the unit and integration tests (test) and the game suite (game);
+# every pull request then gets an independent QA verdict (qa).
 # CD is Render's: each environment deploys every commit on its branch (dev -> dev, main -> prod); the rules on dev and main
 # let a commit in only through a pull request whose test and game passed. On those pushes, "deployed" proves the commit went live.
 name: CI
@@ -34,6 +35,25 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci # its postinstall downloads Chromium; no install-deps: the runner image ships Chrome's libraries, and the extra fonts it adds come from an Ubuntu mirror that stalled two runs past their timeout (2026-11-06)
       - run: npm run test:game # every level played by a bot, saves, challenges, Field Guide, phone and tablet layouts (~6 min)
+
+  qa: # an independent QA agent judges the pull request against its issues' acceptance criteria (tools/qa.js); required on dev and main
+    if: github.event_name == 'pull_request'
+    needs: [test, game]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10 # usually under 2 min
+    permissions: { contents: read, issues: write, pull-requests: write }
+    steps:
+      - uses: actions/checkout@v5
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node tools/qa.js
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          PR: ${{ github.event.pull_request.number }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          GITHUB_TOKEN: ${{ github.token }}
 
   deployed: # after a push to dev or main: proof that Render now serves this commit (API /health and site /version.txt), red otherwise
     if: github.event_name == 'push'
