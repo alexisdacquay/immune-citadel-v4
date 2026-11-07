@@ -47,7 +47,10 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - run: node tools/qa.js
+      # The judge comes from the base branch, never from the pull request it judges: a pull request cannot rewrite its own QA.
+      # Only the pull request that first adds tools/qa.js (none on the base yet) runs its own copy.
+      - run: git show "${{ github.event.pull_request.base.sha }}:tools/qa.js" > "$RUNNER_TEMP/qa.js" 2>/dev/null || cp tools/qa.js "$RUNNER_TEMP/qa.js"
+      - run: node "$RUNNER_TEMP/qa.js"
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           PR: ${{ github.event.pull_request.number }}

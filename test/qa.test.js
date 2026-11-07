@@ -8,7 +8,10 @@ test('issues come from the branch, title, body and commits, without the pull req
 });
 
 test('only a well-formed PASS passes', () => {
-  assert.equal(readVerdict('{"verdict":"PASS","criteria":[],"defects":[]}').verdict, 'PASS');
+  assert.equal(readVerdict('{"verdict":"PASS","criteria":[],"defects":[]}').verdict, 'PASS'); // no issue named: judged on the description
+  assert.equal(readVerdict('{"verdict":"PASS","criteria":[],"defects":[]}', { needCriteria: true }).verdict, 'FAIL');
+  assert.equal(readVerdict('{"verdict":"PASS","criteria":[{"criterion":"a","result":"FAIL"}]}').verdict, 'FAIL');
+  assert.equal(readVerdict('{"verdict":"PASS","criteria":[{"criterion":"a","result":"PASS"}]}', { needCriteria: true }).verdict, 'PASS');
   assert.equal(readVerdict('{"verdict":"pass"}').verdict, 'FAIL');
   assert.equal(readVerdict('not json').verdict, 'FAIL');
   assert.equal(readVerdict('{}').verdict, 'FAIL');

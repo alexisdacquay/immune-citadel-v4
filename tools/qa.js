@@ -12,11 +12,15 @@ function issueNumbers({ branch = '', title = '', body = '', commits = [], self }
   return [...ns].sort((a, z) => a - z);
 }
 
-// The model's JSON, reduced to what the job acts on; anything malformed is a FAIL.
-function readVerdict(text) {
+// The model's JSON, reduced to what the job acts on. FAIL when it is malformed, when a criterion is marked FAIL,
+// or when issues were read but no criterion was judged: a bare PASS proves nothing.
+function readVerdict(text, { needCriteria = false } = {}) {
   let v; try { v = JSON.parse(text); } catch { return { verdict: 'FAIL', summary: 'QA returned no readable verdict', criteria: [], defects: [] }; }
-  const verdict = v && v.verdict === 'PASS' ? 'PASS' : 'FAIL';
-  return { verdict, summary: String(v && v.summary || ''), criteria: Array.isArray(v && v.criteria) ? v.criteria : [], defects: Array.isArray(v && v.defects) ? v.defects : [] };
+  const criteria = Array.isArray(v && v.criteria) ? v.criteria : [], defects = Array.isArray(v && v.defects) ? v.defects : [];
+  let verdict = v && v.verdict === 'PASS' ? 'PASS' : 'FAIL', summary = String(v && v.summary || '');
+  if (criteria.some(c => String(c && c.result).toUpperCase() === 'FAIL')) verdict = 'FAIL';
+  if (needCriteria && !criteria.length) { verdict = 'FAIL'; summary = 'QA judged no acceptance criterion. ' + summary; }
+  return { verdict, summary, criteria, defects };
 }
 
 function report(v, issues) {
@@ -34,9 +38,9 @@ async function main() {
   const commits = git('log', '--format=%s', `${env.BASE}..${env.HEAD}`).split('\n').filter(Boolean);
   const issues = issueNumbers({ branch: pr.head.ref, title: pr.title, body: pr.body || '', commits, self: env.PR });
   const specs = [];
-  for (const n of issues) {
-    try { const i = await gh(`/issues/${n}`); if (i.pull_request) continue; const cs = await gh(`/issues/${n}/comments?per_page=100`);
-      specs.push(`### Issue #${n}: ${i.title}\n${i.body || ''}\n${cs.filter(c => /acceptance|spec/i.test(c.body)).map(c => c.body).join('\n\n')}`); } catch { /* a number that is not an issue */ }
+  for (const n of issues) { // a number that is a pull request is skipped; any other failure to load an issue fails the job
+    const i = await gh(`/issues/${n}`); if (i.pull_request) continue; const cs = await gh(`/issues/${n}/comments?per_page=100`);
+    specs.push(`### Issue #${n}: ${i.title}\n${i.body || ''}\n${cs.filter(c => /acceptance|spec/i.test(c.body)).map(c => c.body).join('\n\n')}`);
   }
   // Generated files (diagram exports, lockfiles) carry no reviewable logic; their names stay in the diff header.
   const diff = git('diff', '--unified=3', `${env.BASE}...${env.HEAD}`, '--', '.', ':!package-lock.json', ':!server/package-lock.json', ':!docs/diagrams/*.svg');
@@ -45,7 +49,7 @@ async function main() {
   const r = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST', headers: { authorization: `Bearer ${env.DEEPSEEK_API_KEY}`, 'content-type': 'application/json' },
     body: JSON.stringify({ model: env.QA_MODEL || 'deepseek-flash', temperature: 0, response_format: { type: 'json_object' }, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] }), signal: AbortSignal.timeout(300000) });
   if (!r.ok) throw new Error(`DeepSeek: HTTP ${r.status}`);
-  const v = readVerdict((await r.json()).choices?.[0]?.message?.content);
+  const v = readVerdict((await r.json()).choices?.[0]?.message?.content, { needCriteria: specs.length > 0 });
   const md = report(v, issues);
   if (env.GITHUB_STEP_SUMMARY) fs.appendFileSync(env.GITHUB_STEP_SUMMARY, md + '\n');
   await gh(`/issues/${env.PR}/comments`, { method: 'POST', body: JSON.stringify({ body: md }) });
