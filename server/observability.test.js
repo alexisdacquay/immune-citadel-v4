@@ -36,6 +36,7 @@ test('one save: trace, log line and metric share one trace ID with the Render lo
   try {
     const res = await fetch(`${a.base}/api/save/${CODE}?note=${SECRET}`, { method: 'PUT', headers: { 'content-type': 'application/json', 'user-agent': UA, 'cf-connecting-ip': IP, 'x-forwarded-for': IP }, body: JSON.stringify({ save: { marker: SECRET } }) });
     assert.equal(res.status, 200);
+    assert.equal((await fetch(`${a.base}/api/save/${CODE}`)).status, 200, 'a load');
     await fetch(`${a.base}/api/play`, { method: 'POST', body: JSON.stringify({ page: '0123456789abcdef', release: '', events: [{ name: 'hide', t: 1 }] }) });
     await new Promise(r => { const s = net.connect(a.port, '127.0.0.1', () => { // a child closes the tab mid-save
       s.write(`PUT /api/save/${CODE} HTTP/1.1\r\nHost: x\r\nContent-Type: application/json\r\nContent-Length: 500\r\n\r\n{"save":`); setTimeout(() => { s.destroy(); setTimeout(r, 200); }, 100); }); });
@@ -50,6 +51,10 @@ test('one save: trace, log line and metric share one trace ID with the Render lo
     assert.equal(metrics.length, 1, 'one metric point for the save, delivered before exit');
     assert.equal(metrics[0].name, 'http.server.request.duration');
     assert.equal(metrics[0].attributes['http.response.status_code'].value, 200);
+    assert.equal(metrics[0].attributes['http.request.method'].value, 'PUT'); assert.equal(metrics[0].attributes['http.route'].value, '/api/save/:code');
+    const load = lines(a.out.text).find(l => l.msg === 'request' && l.method === 'GET' && l.status === 200);
+    assert.equal(of('log').filter(l => l.trace_id === load?.trace_id).length, 1, 'one Sentry log line for the load');
+    assert.deepEqual(of('trace_metric').filter(m => m.trace_id === load?.trace_id).map(m => m.attributes['http.request.method'].value), ['GET'], 'one metric point for the load');
     assert.equal(metrics[0].unit, 'second'); assert.ok(metrics[0].value > 0 && metrics[0].value < 5, 'the duration, in seconds');
     assert.ok(sentry.items.some(i => i.type === 'span' && i.raw.includes(render.trace_id)), 'the trace itself');
 

@@ -34,7 +34,7 @@ test('a failed load is reported even when the player has already left; a malform
     const gone = new AbortController(); setTimeout(() => gone.abort(), 50);
     await fetch(`http://localhost:${srv.address().port}/api/save/${CODE}`, { signal: gone.signal }).catch(() => {});
     await new Promise(r => setTimeout(r, 300));
-    assert.equal((await fetch(`http://localhost:${srv.address().port}//`)).status, 404);
+    assert.equal((await fetch(`http://localhost:${srv.address().port}//`)).status, 400);
     await Sentry.flush(2000);
     const out = JSON.stringify(sent);
     assert.match(out, /database down while loading/, 'a closed tab hides no database error');
@@ -42,9 +42,12 @@ test('a failed load is reported even when the player has already left; a malform
   } finally { srv.close(); }
 });
 
-test('the scrub replaces save codes but leaves trace IDs whole', () => {
-  const { beforeSendLog } = Sentry.getClient().getOptions(), id = '2345678923456789abcdef0123456789';
-  assert.deepEqual(beforeSendLog({ trace_id: id, body: `saved ${CODE}` }), { trace_id: id, body: 'saved :code' });
+test('every kind of data sent to Sentry is scrubbed: save codes (even all digits) and user agents go, trace IDs stay whole', () => {
+  const o = Sentry.getClient().getOptions(), id = '2345678923456789abcdef0123456789', span = '2345678923456789', DIGITS = '2345678923456789';
+  for (const hook of ['beforeSend', 'beforeSendSpan', 'beforeSendLog', 'beforeSendMetric']) {
+    const out = o[hook]({ trace_id: id, span_id: span, body: `saved ${CODE} and ${DIGITS}`, attributes: { 'user_agent.original': { value: 'KidTablet' }, route: { value: `/api/save/${CODE}` } } });
+    assert.deepEqual(out, { trace_id: id, span_id: span, body: 'saved :code and :code', attributes: { route: { value: '/api/save/:code' } } }, hook);
+  }
 });
 
 test('request traces name the route, never the save code', async () => {

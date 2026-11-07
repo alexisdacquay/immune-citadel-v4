@@ -134,7 +134,7 @@ function createServer(store) {
       }
     };
     try {
-      const url = new URL('http://x' + req.url); // a path like // is not a server error
+      let url; try { url = new URL(req.url, 'http://x'); } catch { return send(400, { error: 'bad request' }); } // a path like // is the caller's error, not a server error
       if (req.method === 'OPTIONS') return send(204);
       if (url.pathname === '/health' && req.method === 'GET') return send(200, { ok: true, commit: process.env.RENDER_GIT_COMMIT || 'local' }); // deploys wait for this commit
       if (url.pathname === '/api/play') return await playRoute(req, res, origin, send, store);

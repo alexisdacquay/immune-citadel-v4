@@ -2,9 +2,10 @@
 // Children's data stays home: no IP, headers, cookies, bodies, query strings, query parameters, local variables or browser identifier (user agent),
 // and any save code (the player's only credential) is replaced before anything leaves the process.
 const Sentry = require('@sentry/node');
-const CODE_ANYWHERE = /(?![2-9]{16})[A-HJ-NP-Z2-9]{16}/g; // the save-code alphabet, as in index.js; not 16 digits in a row, which occur in hex trace IDs
-// shortcut: an all-digit save code (about 1 in 4 billion) is not replaced; hex IDs are lowercase, so they never contain one of its letters
-const scrub = item => JSON.parse(JSON.stringify(item, (k, v) => (/user.?agent/i.test(k) ? undefined : v)).replace(CODE_ANYWHERE, ':code')); // the span keeps user_agent.original even with httpHeaders off
+const CODE_ANYWHERE = /[A-HJ-NP-Z2-9]{16}/g; // the save-code alphabet, as in index.js
+const IDS = new Set(['trace_id', 'span_id', 'parent_span_id']); // Sentry's own hex IDs, never a save code: kept whole, or 16 digits in a row would break the link to Render's log line
+const scrub = item => JSON.parse(JSON.stringify(item, (k, v) => (/user.?agent/i.test(k) ? undefined // the span keeps user_agent.original even with httpHeaders off
+  : typeof v === 'string' && !IDS.has(k) ? v.replace(CODE_ANYWHERE, ':code') : v)));
 
 function initSentry(extra = {}) {
   if (!process.env.SENTRY_DSN && !extra.dsn) return;
