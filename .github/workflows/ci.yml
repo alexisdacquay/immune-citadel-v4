@@ -42,7 +42,7 @@ jobs:
     if: github.event_name == 'pull_request' && github.base_ref == 'dev'
     needs: [test, game]
     runs-on: ubuntu-latest
-    timeout-minutes: 10 # usually under 2 min
+    timeout-minutes: 15 # usually 1-4 min; the model call gives up after 12
     permissions: { contents: read, issues: write, pull-requests: write }
     steps:
       - uses: actions/checkout@v5
