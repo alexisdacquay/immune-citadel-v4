@@ -70,11 +70,9 @@ Settings on a Render API service: build `cd server && npm ci --omit=dev`, start 
 
 ### Follow one save
 
-One save on dev, followed through every signal by its trace ID:
+One save, followed through every signal by its trace ID.
 
-<!-- FOLLOW-ONE-SAVE -->
-
-Without a Sentry login, rebuild the same chain on any machine: `node --test server/observability.test.js` runs the API against a fake Sentry and checks that one save gives one trace, one log line and one metric under the trace ID of its Render log line; that no save code, save, IP or browser identifier leaves; that gameplay events stay home; that a closed tab is no error; that a deploy finishes a save in flight; and that a Sentry outage never fails a save. Each check was proven able to fail by removing the code it guards (18 removals, 2026-11-07, 13 of them by an independent reviewer). One removal changes nothing on its own: the scrub on logs and metrics, a second guard behind the save-route filter.
+Without a Sentry login, rebuild the same chain on any machine: `node --test server/observability.test.js` runs the API against a fake Sentry and checks that one save gives one trace, one log line and one metric under the trace ID of its Render log line; that no save code, save, IP or browser identifier leaves; that gameplay events stay home; that a closed tab is no error; that a deploy finishes a save in flight; and that a Sentry outage never fails a save. Each check was proven able to fail by removing the code it guards (25 removals, 2026-11-07, 13 of them by an independent reviewer). Two removals change nothing on their own: the scrub on logs and metrics, a second guard behind the save-route filter; and the route attribute, which is fixed inside that filter.
 
 ## Reading gameplay events
 

@@ -37,6 +37,7 @@ test('one save: trace, log line and metric share one trace ID with the Render lo
     const res = await fetch(`${a.base}/api/save/${CODE}?note=${SECRET}`, { method: 'PUT', headers: { 'content-type': 'application/json', 'user-agent': UA, 'cf-connecting-ip': IP, 'x-forwarded-for': IP }, body: JSON.stringify({ save: { marker: SECRET } }) });
     assert.equal(res.status, 200);
     assert.equal((await fetch(`${a.base}/api/save/${CODE}`)).status, 200, 'a load');
+    assert.equal((await fetch(`${a.base}/api/save/${CODE}`, { method: 'OPTIONS', headers: { origin: 'https://example.org', 'access-control-request-method': 'PUT' } })).status, 204, 'a CORS preflight');
     await fetch(`${a.base}/api/play`, { method: 'POST', body: JSON.stringify({ page: '0123456789abcdef', release: '', events: [{ name: 'hide', t: 1 }] }) });
     await new Promise(r => { const s = net.connect(a.port, '127.0.0.1', () => { // a child closes the tab mid-save
       s.write(`PUT /api/save/${CODE} HTTP/1.1\r\nHost: x\r\nContent-Type: application/json\r\nContent-Length: 500\r\n\r\n{"save":`); setTimeout(() => { s.destroy(); setTimeout(r, 200); }, 100); }); });
@@ -62,6 +63,7 @@ test('one save: trace, log line and metric share one trace ID with the Render lo
     assert.doesNotMatch(all, new RegExp(`${CODE}|${SECRET}|${IP.replace(/\./g, '\\.')}|${UA.replace('.', '\\.')}`), 'no save code, save, IP or browser identifier');
     assert.doesNotMatch(all, /user_agent|\/api\/play/, 'no user agent field at all, and play never leaves');
     assert.ok(!sentry.items.some(i => i.type === 'client_report'), 'not even a count of the gameplay requests left out');
+    assert.deepEqual([...of('log'), ...of('trace_metric')].map(x => (x.attributes.method || x.attributes['http.request.method']).value).sort(), ['GET', 'GET', 'PUT', 'PUT'], 'one log line and one metric per save and load; none for the preflight');
     assert.equal(of('event').length, 0, 'a closed tab is not reported as an error');
     assert.ok(lines(a.out.text).some(l => l.msg === 'client left mid-upload'), 'but it is logged in Render');
   } finally { a.api.kill('SIGKILL'); sentry.close(); }
