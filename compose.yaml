@@ -1,0 +1,32 @@
+# The whole game locally: the game page (web), the save API (api) and its database (db).
+# docker compose up  ->  play at http://localhost:8080
+# Errors go to Sentry when .env sets SENTRY_DSN (see .env.example); without it, Sentry is off.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: local-only # this database never leaves your machine
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: pg_isready -U postgres, interval: 2s, retries: 30 }
+
+  api:
+    build: server
+    environment:
+      DATABASE_URL: postgres://postgres:local-only@db:5432/postgres
+      DB_SCHEMA: public
+      ALLOWED_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+      SENTRY_DSN: ${SENTRY_DSN:-} # errors to Sentry when .env sets it; off otherwise
+      SENTRY_ENVIRONMENT: local
+    ports: ["8787:8787"]
+    depends_on: { db: { condition: service_healthy } }
+    healthcheck: { test: wget -qO- http://localhost:8787/health, interval: 2s, retries: 30 }
+
+  web:
+    image: nginx:alpine
+    volumes: [./index.html:/usr/share/nginx/html/index.html:ro]
+    ports: ["8080:80"]
+    healthcheck: { test: wget -qO- http://localhost/ >/dev/null, interval: 2s, retries: 30 }
+    depends_on: { api: { condition: service_healthy } }
+
+volumes:
+  pgdata:

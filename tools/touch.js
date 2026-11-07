@@ -11,7 +11,8 @@ const VIEWS = [
   { n: 'phone-xl', w: 932, h: 430, touch: true },
   { n: 'tablet', w: 1024, h: 768, touch: true },
 ];
-const SAVE = JSON.stringify({ stars: [3, 2, 0, 0, 0, 0], hints: ['build', 'wave', 'upgrade', 'fever', 'hero'], seen: [], viewed: [] });
+const z18 = () => Array(18).fill(0), ST = z18(); ST[0] = 3; ST[1] = 2;
+const SAVE = JSON.stringify({ st: ST, hc: z18(), ic: z18(), rch: 17, hints: ['build', 'wave', 'upgrade', 'hero'], seen: ['bact', 'virus', 'staph', 'candida', 'spore', 'flu', 'worm', 'boss', 'salmon', 'toxo', 'rabies', 'virion'], viewed: [] }); // full kit (rch 17), every pathogen met: no intro or unlock card covers the layout checks
 
 module.exports = async function touch(browser, out, errs) {
   fs.mkdirSync(out, { recursive: true });
@@ -28,14 +29,20 @@ module.exports = async function touch(browser, out, errs) {
       await p.waitForTimeout(100);
     }
     const safe = V.notch ? { l: 47, r: V.w - 47, t: 0, b: V.h - 21 } : { l: 0, r: V.w, t: 0, b: V.h };
-    const tap = async (x, y) => { if (V.touch) await p.touchscreen.tap(x, y); else await p.mouse.click(x, y); await p.waitForTimeout(120); };
+    // after any input, wait for the short fades and pop-ins it started (under 1 s; not endless pulses, not the 2.6 s description flash),
+    // so checks see the settled screen on a slow CI runner too
+    const settle = () => p.evaluate(() => Promise.all(document.getAnimations().filter(a => { const t = a.effect.getTiming(); return t.iterations !== Infinity && (+t.duration || 0) + (+t.delay || 0) <= 1000; }).map(a => a.finished.catch(() => {}))));
+    const tap = async (x, y) => { if (V.touch) await p.touchscreen.tap(x, y); else await p.mouse.click(x, y); await p.waitForTimeout(120); await settle(); };
     const mid = s => p.evaluate(s => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }, s);
     const tapSel = async s => { await p.evaluate(s => { const e = document.querySelector(s); if (e && e.closest('.ov')) e.scrollIntoView({ block: 'nearest' }); }, s); const m = await mid(s); fail(m, `missing ${s}`); if (m) await tap(...m); }; // overlays scroll on a phone
     const onMap = (x, y) => p.evaluate(([x, y]) => { const r = document.getElementById('cv').getBoundingClientRect(); return [r.left + x / 1000 * r.width, r.top + y / 620 * r.height]; }, [x, y]);
     const ev = f => p.evaluate(f);
     // every visible target of these selectors at least 40 px both ways (touch only; the mouse layout is unchanged)
+    // the body map shows one level's card: select level i on the map (unless it already is), then tap its card
+    const openLevel = async i => { if (!(await ev(`document.querySelector('.lnode[data-i="${i}"]').classList.contains('sel')`))) await tapSel(`.lnode[data-i="${i}"]`); await tapSel(`.slide[data-i="${i}"]`); };
     const sizes = async (sel, what) => {
       if (!V.touch) return;
+      await settle(); // measure the settled size, not a pop-in frame (slow CI caught 38 of 44 px)
       const small = await p.evaluate(sel => [...document.querySelectorAll(sel)].map(e => [e, e.getBoundingClientRect()]).filter(([e, r]) => r.width && getComputedStyle(e).visibility !== 'hidden')
         .filter(([, r]) => r.width < 40 || r.height < 40).map(([e, r]) => `${e.id || e.className.baseVal || e.className}:${r.width | 0}x${r.height | 0}`), sel);
       fail(!small.length, `${what} targets under 40 px: ${small.slice(0, 6).join(', ')}`);
@@ -44,8 +51,8 @@ module.exports = async function touch(browser, out, errs) {
 
     // tray
     await shot('tray');
-    await sizes('.slide:not(.locked),.chb,.mbtn', 'tray');
-    await tapSel('.slide[data-i="0"]'); await p.waitForTimeout(300);
+    await sizes('.slide:not(.locked),.chb,.mbtn,.lnode:not(.locked) .hit,.lch:not(.locked) .hit', 'tray');
+    await openLevel(0); await p.waitForTimeout(300);
     fail(await ev(() => IC.S.screen === 'play' && IC.S.lvl === 0), 'tap on the first slide did not start it');
 
     // layout: inside the safe area, HUD panels apart, map coverage no worse than the baseline
@@ -70,6 +77,21 @@ module.exports = async function touch(browser, out, errs) {
     if (!base) base = lay.cover;
     else lay.cover.forEach((c, li) => { fail(c.slots <= base[li].slots, `level ${li + 1}: HUD covers ${c.slots} build sites (baseline ${base[li].slots})`); fail(c.path <= base[li].path + .01, /* 1 point: route samples grazing a panel edge */ `level ${li + 1}: HUD covers ${(c.path * 100).toFixed(1)}% of the routes (baseline ${(base[li].path * 100).toFixed(1)}%)`); });
     if (V.w < 1000 && V.touch) fail(lay.gut, 'phone landscape should move controls and abilities into the side gutters');
+    // wave marker tips (#23): every marker of every specimen, first wave and a later early-call tip, stays on screen and off the ability buttons
+    const tipBad = await p.evaluate(async () => {
+      const out = [], frame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const check = (li, tag) => { const st = document.getElementById('stage').getBoundingClientRect();
+        const abs = [...document.querySelectorAll('.ab')].filter(e => !e.hidden && e.getBoundingClientRect().width).map(e => e.getBoundingClientRect());
+        document.querySelectorAll('.wcall').forEach((b, bi) => { if (b.hidden) return; const r = b.querySelector('.tip').getBoundingClientRect();
+          const on = r.left >= st.left - .5 && r.right <= st.right + .5 && r.top >= st.top - .5 && r.bottom <= st.bottom + .5, hit = abs.some(a => r.left < a.right && a.left < r.right && r.top < a.bottom && a.top < r.bottom);
+          if (!on || hit) out.push(`specimen ${li + 1} ${tag} marker ${bi + 1}:${on ? '' : ' off-screen'}${hit ? ' over an ability button' : ''}`); }); };
+      for (let li = 0; li < IC.LEVELS.length; li++) {
+        IC.startLevel(li); await frame(); check(li, 'first wave');
+        IC.sendWave(); IC.S.spawnQ.length = 0; await frame(); check(li, 'early call');
+      }
+      IC.startLevel(0); await frame(); return out;
+    });
+    fail(!tipBad.length, `wave marker tips: ${tipBad.join('; ')}`);
     report.push(`${tag}: gutters ${lay.gut ? 'on' : 'off'} · build sites under HUD ${lay.cover.map(c => c.slots).join('/')} · route under HUD ${lay.cover.map(c => (c.path * 100).toFixed(1) + '%').join('/')}`);
 
     // build: touch = preview + confirm on the first tap, buy on the second; mouse = buy on the click
@@ -142,7 +164,7 @@ module.exports = async function touch(browser, out, errs) {
     await tapSel('.mnode[data-c="0"][data-t="0"]'); fail(await ev(() => IC.save.mem.neutro === 1), 'memory node tap did not train');
     await shot('memory'); await tapSel('#memBack'); fail(await ev(() => IC.S.screen === 'title'), 'memory back');
     // lab report
-    await tapSel('.slide[data-i="1"]'); await ev(() => IC.endLevel(true)); await p.waitForTimeout(1300);
+    await openLevel(1); await ev(() => IC.endLevel(true)); await p.waitForTimeout(1300);
     await sizes('#endOv .btn,#endOv .mlink', 'lab report'); await shot('report');
     await tapSel('#eRetry'); fail(await ev(() => IC.S.screen === 'play' && IC.S.lvl === 1), 'report retry');
     if (V.touch) { // portrait: rotate card over the paused game; back to landscape keeps it paused until a tap
@@ -162,4 +184,5 @@ if (require.main === module) (async () => {
   const { chromium } = require('playwright'); const b = await chromium.launch(), errs = [];
   await module.exports(b, process.argv[2] || 'shots', errs); await b.close();
   console.log('errors:', errs.length ? errs : 'none');
+  process.exitCode = errs.length ? 1 : 0;
 })();

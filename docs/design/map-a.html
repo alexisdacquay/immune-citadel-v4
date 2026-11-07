@@ -1,0 +1,280 @@
+<title>Immune Citadel - The Patient</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--void:#020407;--glass:rgba(9,16,26,.74);--rim:rgba(140,205,255,.22);--rim2:rgba(140,205,255,.45);--txt:#dce8f3;--dim:#7f95aa;--cyan:#7fd8ff;--dapi:#5b8cff;--red:#ff4d5e;--amber:#ffc24a;--lime:#a6ff4d;
+--sans:'Space Grotesk',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#020407;color:var(--txt);font:14px/1.4 var(--sans);overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1440px;height:900px;transform-origin:0 0;overflow:hidden;background:#020407}
+canvas{position:absolute;inset:0;width:1440px;height:900px}
+.glass{background:var(--glass);border:1px solid var(--rim);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 10px 30px -14px rgba(0,0,0,.8)}
+/* top bar */
+#bar{position:absolute;left:0;right:0;top:0;height:56px;display:flex;align-items:center;gap:14px;padding:0 14px 0 18px;border-width:0 0 1px;border-radius:0;background:linear-gradient(180deg,rgba(6,12,20,.86),rgba(6,12,20,.6))}
+#logo{display:flex;align-items:center;gap:10px;font:700 17px var(--sans);letter-spacing:.2em}
+#logo svg{width:30px;height:30px}
+#logo small{display:block;font:500 9px var(--mono);letter-spacing:.24em;color:var(--dim);margin-top:1px}
+.sp{flex:1}
+.prog{font:500 12px var(--mono);color:var(--dim);display:flex;gap:16px;align-items:center}
+.prog b{color:var(--txt);font-weight:700}
+.prog .st{color:var(--amber)}
+.tb{height:38px;display:flex;align-items:center;gap:8px;padding:0 14px;border-radius:10px;border:1px solid var(--rim);background:rgba(140,205,255,.05);color:var(--txt);font:600 13px var(--sans)}
+.tb svg,.ib svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ib{width:38px;height:38px;border-radius:10px;border:1px solid var(--rim);background:rgba(140,205,255,.05);display:grid;place-items:center;color:var(--txt)}
+.seg{display:flex;border:1px solid var(--rim);border-radius:10px;overflow:hidden;height:38px}
+.seg span{padding:0 12px;display:grid;place-items:center;font:600 11px var(--mono);letter-spacing:.12em;color:var(--dim)}
+.seg span.on{background:rgba(127,216,255,.18);color:#fff}
+/* nodes */
+.n{position:absolute;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+  background:radial-gradient(circle at 50% 50%,rgba(91,140,255,.95) 0 9px,rgba(91,140,255,.0) 15px),radial-gradient(circle at 38% 32%,color-mix(in srgb,var(--c) 70%,#fff) 0,var(--c) 30%,color-mix(in srgb,var(--c) 35%,#000) 78%);
+  border:2px solid color-mix(in srgb,var(--c) 60%,#fff);
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 22%,transparent),0 0 22px 2px color-mix(in srgb,var(--c) 70%,transparent),inset 0 -6px 12px rgba(0,0,0,.45),inset 0 3px 6px rgba(255,255,255,.35)}
+.n i{font:700 17px var(--mono);font-style:normal;color:#fff;text-shadow:0 1px 3px #000,0 0 6px rgba(0,0,0,.8)}
+.n .stars{position:absolute;top:47px;left:50%;transform:translateX(-50%);display:flex;gap:1px;filter:drop-shadow(0 1px 2px #000)}
+.n .stars svg{width:15px;height:15px}
+.n.lock{background:radial-gradient(circle at 40% 35%,#1d2a38,#0a1119 80%);border:2px solid rgba(140,205,255,.28);box-shadow:0 0 0 3px rgba(2,4,7,.7),inset 0 -4px 10px rgba(0,0,0,.5)}
+.n.lock i{color:#6c8196;font-size:14px}
+.n.lock::after{content:"";position:absolute;right:-3px;bottom:-3px;width:18px;height:18px;border-radius:50%;background:#0b1520 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f95aa' stroke-width='2.4' stroke-linecap='round'%3E%3Crect x='6' y='11' width='12' height='9' rx='2'/%3E%3Cpath d='M9 11V8a3 3 0 0 1 6 0v3'/%3E%3C/svg%3E") center/12px no-repeat;border:1px solid rgba(140,205,255,.3)}
+.n.next{width:64px;height:64px;margin:-32px 0 0 -32px;animation:pulse 1.6s ease-in-out infinite}
+.n.next::before{content:"";position:absolute;inset:-12px;border-radius:50%;border:2px solid var(--c);opacity:.8;animation:ring 1.6s ease-out infinite}
+.n.next i{font-size:21px}
+@keyframes pulse{50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--c) 30%,transparent),0 0 44px 10px color-mix(in srgb,var(--c) 80%,transparent),inset 0 -6px 12px rgba(0,0,0,.45),inset 0 3px 6px rgba(255,255,255,.35)}}
+@keyframes ring{from{transform:scale(.8);opacity:.9}to{transform:scale(1.45);opacity:0}}
+.n.ch{width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:12px;transform:rotate(45deg)}
+.n.ch i{transform:rotate(-45deg);font-size:13px;letter-spacing:.02em}
+.n.ch.open{background:radial-gradient(circle at 40% 35%,#3b2a10,#140c03 80%);border:2px solid var(--amber);box-shadow:0 0 16px rgba(255,194,74,.55),inset 0 0 10px rgba(255,194,74,.35)}
+.n.ch.open i{color:var(--amber)}
+.n.ch.lock::after{transform:rotate(-45deg)}
+/* labels */
+.lbl{position:absolute;pointer-events:none;padding:8px 14px;margin:-8px -14px;border-radius:14px;background:radial-gradient(ellipse at 50% 55%,rgba(2,5,9,.62),rgba(2,5,9,0) 72%);font:700 12px var(--mono);letter-spacing:.32em;text-transform:uppercase;color:var(--c);text-shadow:0 0 12px color-mix(in srgb,var(--c) 60%,transparent),0 1px 2px #000;white-space:nowrap}
+.lbl b{display:block;font:600 22px var(--sans);letter-spacing:.14em;color:#fff;text-shadow:0 0 18px color-mix(in srgb,var(--c) 70%,transparent),0 2px 4px #000}
+.lbl small{display:block;font:500 10px var(--mono);letter-spacing:.18em;color:var(--dim);text-transform:none;margin-top:2px}
+.lbl.r{text-align:right}
+.lbl.dimmed b{color:#a9b8c6}
+/* card */
+#card{position:absolute;width:280px;padding:14px 16px 14px;border-radius:16px;border-color:rgba(255,77,94,.4);box-shadow:0 20px 50px -18px #000,0 0 30px -10px rgba(255,77,94,.45)}
+#card::after{content:"";position:absolute;right:-9px;top:var(--ay,50%);width:16px;height:16px;transform:translateY(-50%) rotate(45deg);background:rgba(12,20,32,.95);border:1px solid rgba(255,77,94,.4);border-width:1px 1px 0 0}
+#card .k{font:600 10px var(--mono);letter-spacing:.24em;color:var(--red)}
+#card h2{margin:4px 0 2px;font:700 26px/1.1 var(--sans);letter-spacing:.01em}
+#card .pl{display:flex;align-items:center;gap:6px;font:500 12px var(--mono);color:var(--cyan);letter-spacing:.06em}
+#card p{margin:8px 0 10px;color:#b9c8d6;font-size:13.5px;line-height:1.4}
+#card .row{display:flex;align-items:center;gap:10px}
+#card .row svg.s{width:22px;height:22px}
+#card .play{margin-left:auto;height:44px;padding:0 22px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:linear-gradient(180deg,#ff6a78,#d42a3c);color:#fff;font:700 15px var(--sans);letter-spacing:.08em;display:flex;align-items:center;gap:8px;box-shadow:0 6px 18px -6px rgba(255,77,94,.8),inset 0 1px 0 rgba(255,255,255,.4)}
+#card .ch{margin-top:10px;padding-top:8px;border-top:1px solid rgba(140,205,255,.14);font:500 11px var(--mono);color:var(--dim);letter-spacing:.06em}
+#scan{position:absolute;left:0;right:0;height:120px;top:-120px;background:linear-gradient(180deg,transparent,rgba(127,216,255,.02) 80%,rgba(127,216,255,.07) 99%,transparent);animation:scan 7s linear infinite;pointer-events:none}
+@keyframes scan{to{top:900px}}
+.hud{position:absolute;font:500 10px var(--mono);letter-spacing:.16em;color:rgba(127,149,170,.75);pointer-events:none;white-space:pre}
+</style>
+
+<div id="stage">
+  <canvas id="cv" width="1440" height="900"></canvas>
+  <div id="scan"></div>
+  <div class="hud" style="left:22px;top:74px">WHOLE-BODY FLUORESCENCE · SCAN 04
+<span style="color:#5b8cff">■</span> DAPI  <span style="color:#7fd8ff">■</span> SURFACTANT  <span style="color:#ff4d5e">■</span> CD31  <span style="color:#a6ff4d">■</span> CD45  <span style="color:#c77dff">■</span> NEUN</div>
+  <div class="hud" style="right:22px;top:74px;text-align:right">PATIENT 001 · STABLE
+HR 72 · TEMP 37.0°C · SpO2 98%</div>
+  
+  <div id="nodes"></div>
+  <div id="bar" class="glass">
+    <div id="logo"><svg viewBox="0 0 32 32"><defs><radialGradient id="lg" cx="40%" cy="35%"><stop offset="0" stop-color="#cfefff"/><stop offset=".5" stop-color="#7fd8ff"/><stop offset="1" stop-color="#1b4d73"/></radialGradient></defs><circle cx="16" cy="16" r="13" fill="url(#lg)" opacity=".9"/><circle cx="16" cy="16" r="13" fill="none" stroke="#bfe9ff" stroke-width="1.5"/><path d="M11 17c1-4 6-6 9-3s-1 7-4 6" fill="#5b8cff" stroke="#9fc0ff" stroke-width="1"/></svg>
+      <div>IMMUNE CITADEL<small>THE PATIENT NEEDS YOU</small></div></div>
+    <div class="sp"></div>
+    <div class="prog"><span><b>8</b>/18 cleared</span><span class="st">★ <b style="color:var(--amber)">19</b>/54</span></div>
+    <button class="tb"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M8 7h7"/></svg>Field Guide</button>
+    <button class="tb"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M8 13l-2 8 6-3 6 3-2-8"/></svg>Immune Memory</button>
+    <div class="seg"><span>EASY</span><span class="on">NORMAL</span><span>HARD</span></div>
+    <button class="ib" title="Sound"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+    <button class="ib" title="Cloud save"><svg viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5z"/><path d="M9.5 13.5l2 2 3.5-4"/></svg></button>
+  </div>
+</div>
+
+<script>
+const W=1440,H=900,cv=document.getElementById('cv'),dpr=Math.min(2,window.devicePixelRatio||1);
+cv.width=W*dpr;cv.height=H*dpr;const X=cv.getContext('2d');X.scale(dpr,dpr);
+function fit(){const s=Math.min(innerWidth/W,innerHeight/H);const st=document.getElementById('stage');st.style.transform=`translate(${(innerWidth-W*s)/2}px,${(innerHeight-H*s)/2}px) scale(${s})`}
+fit();addEventListener('resize',fit);
+let seed=7;const R=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};const rr=(a,b)=>a+(b-a)*R();
+const ROT=-0.035,CX=720,CY=470,cs=Math.cos(ROT),sn=Math.sin(ROT);
+const T=(x,y)=>[CX+(x-CX)*cs-(y-CY)*sn,CY+(x-CX)*sn+(y-CY)*cs];
+const tf=c=>{c.translate(CX,CY);c.rotate(ROT);c.translate(-CX,-CY)};
+function layer(){const c=document.createElement('canvas');c.width=W*dpr;c.height=H*dpr;const g=c.getContext('2d');g.scale(dpr,dpr);return [c,g]}
+const rgba=(h,a)=>{const n=parseInt(h.slice(1),16);return `rgba(${n>>16},${n>>8&255},${n&255},${a})`};
+const COL={skin:'#4dffb8',lung:'#7fd8ff',blood:'#ff4d5e',lymph:'#c8ff4d',gut:'#ffc24a',brain:'#c77dff',dapi:'#5b8cff'};
+
+/* ---------- body silhouette ---------- */
+function capsule(g,x1,y1,r1,x2,y2,r2){const a=Math.atan2(y2-y1,x2-x1),p=a+Math.PI/2;g.beginPath();g.moveTo(x1+Math.cos(p)*r1,y1+Math.sin(p)*r1);g.lineTo(x2+Math.cos(p)*r2,y2+Math.sin(p)*r2);g.arc(x2,y2,r2,p,p+Math.PI,true);g.lineTo(x1-Math.cos(p)*r1,y1-Math.sin(p)*r1);g.arc(x1,y1,r1,p+Math.PI,p,true);g.fill()}
+function arm(g,s){const m=x=>s<0?x:1440-x;
+  capsule(g,m(478),392,50,m(352),585,40);capsule(g,m(352),585,40,m(232),752,31);
+  g.beginPath();g.ellipse(m(190),812,48,40,s*0.75,0,7);g.fill();
+  [[m(196),840,m(182),894,11],[m(176),840,m(146),886,10.5],[m(158),828,m(116),864,10],[m(150),806,m(104),826,9],[m(214),800,m(240),846,11]].forEach(f=>capsule(g,f[0],f[1],f[4],f[2],f[3],f[4]*.85))}
+function body(g){g.save();tf(g);g.fillStyle='#fff';
+  g.beginPath();g.ellipse(720,148,88,102,0,0,7);g.fill();
+  g.beginPath();g.moveTo(668,220);g.lineTo(772,220);g.lineTo(784,322);g.lineTo(656,322);g.fill();
+  g.beginPath();g.moveTo(720,300);g.bezierCurveTo(640,296,540,300,478,336);g.bezierCurveTo(436,360,430,412,444,470);g.bezierCurveTo(458,540,530,600,544,660);g.bezierCurveTo(552,720,536,800,524,940);
+  g.lineTo(916,940);g.bezierCurveTo(904,800,888,720,896,660);g.bezierCurveTo(910,600,982,540,996,470);g.bezierCurveTo(1010,412,1004,360,962,336);g.bezierCurveTo(900,300,800,296,720,300);g.fill();
+  arm(g,-1);arm(g,1);g.restore()}
+const [MC,MG]=layer();body(MG);
+
+/* ---------- background micrograph ---------- */
+const bg=X.createRadialGradient(720,430,50,720,450,900);bg.addColorStop(0,'#0b1724');bg.addColorStop(.55,'#050b13');bg.addColorStop(1,'#010205');
+X.fillStyle=bg;X.fillRect(0,0,W,H);
+X.globalCompositeOperation='lighter';
+for(let i=0;i<70;i++){const x=rr(-100,1540),y=rr(-50,950),c=R()<.5?'#ff4fd8':'#3fd0c9';X.strokeStyle=rgba(c,rr(.025,.07));X.lineWidth=rr(1,4);X.beginPath();X.moveTo(x,y);
+  X.bezierCurveTo(x+rr(-300,300),y+rr(-200,200),x+rr(-300,300),y+rr(-200,200),x+rr(-400,400),y+rr(-300,300));X.stroke()}
+for(let i=0;i<1700;i++){const x=rr(0,W),y=rr(0,H),r=rr(1,3.4),a=rr(.08,.32);const g=X.createRadialGradient(x,y,0,x,y,r*2.6);g.addColorStop(0,rgba(COL.dapi,a));g.addColorStop(1,rgba(COL.dapi,0));X.fillStyle=g;X.fillRect(x-r*3,y-r*3,r*6,r*6)}
+for(let i=0;i<26;i++){const x=rr(0,W),y=rr(60,H),r=rr(18,60),c=[COL.dapi,'#3fd0c9','#ff4fd8'][i%3];const g=X.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,rgba(c,.07));g.addColorStop(.7,rgba(c,.03));g.addColorStop(1,rgba(c,0));X.fillStyle=g;X.beginPath();X.arc(x,y,r,0,7);X.fill()}
+X.globalCompositeOperation='source-over';
+
+/* ---------- tissue inside body ---------- */
+{const [L,g]=layer();
+ const tg=g.createLinearGradient(300,0,1150,900);tg.addColorStop(0,'rgba(18,70,92,.55)');tg.addColorStop(.5,'rgba(8,30,48,.66)');tg.addColorStop(1,'rgba(14,52,70,.5)');g.fillStyle=tg;g.fillRect(0,0,W,H);
+ g.globalCompositeOperation='lighter';
+ for(let i=0;i<5200;i++){const x=rr(60,1380),y=rr(30,900),r=rr(4,9);g.strokeStyle=rgba('#3fd0c9',rr(.04,.12));g.lineWidth=1;g.beginPath();
+   for(let k=0;k<6;k++){const a=k/6*6.283+rr(-.2,.2),rad=r*rr(.8,1.15);g[k?'lineTo':'moveTo'](x+Math.cos(a)*rad,y+Math.sin(a)*rad)}g.closePath();g.stroke();
+   g.fillStyle=rgba(COL.dapi,rr(.15,.45));g.beginPath();g.ellipse(x+rr(-1,1),y+rr(-1,1),r*.35,r*.28,rr(0,3),0,7);g.fill()}
+ // light from upper left
+ g.globalCompositeOperation='source-over';const lg=g.createRadialGradient(560,250,40,620,380,700);lg.addColorStop(0,'rgba(160,230,255,.12)');lg.addColorStop(1,'rgba(0,0,0,.18)');g.fillStyle=lg;g.fillRect(0,0,W,H);
+ g.globalCompositeOperation='destination-in';g.drawImage(MC,0,0,W,H);X.drawImage(L,0,0,W,H)}
+
+/* ---------- organs ---------- */
+X.save();tf(X);X.globalCompositeOperation='lighter';
+function glowStroke(path,c,w,a,blur){X.save();X.shadowColor=rgba(c,.9);X.shadowBlur=blur||10;X.strokeStyle=rgba(c,a);X.lineWidth=w;X.lineCap='round';X.lineJoin='round';X.stroke(path);X.restore()}
+// lungs
+const lungL=new Path2D('M690 340 C640 330 585 372 566 440 C548 512 544 590 556 656 C600 668 652 656 690 624 C700 540 702 420 690 340Z');
+const lungR=new Path2D('M752 340 C802 330 857 372 876 440 C894 512 900 590 888 656 C850 664 815 660 800 640 C808 600 790 560 760 540 C752 470 744 400 752 340Z');
+[lungL,lungR].forEach(p=>{X.save();X.clip(p);const g=X.createRadialGradient(720,500,30,720,520,260);g.addColorStop(0,rgba(COL.lung,.05));g.addColorStop(1,rgba(COL.lung,.2));X.fillStyle=g;X.fillRect(500,300,450,400);X.restore();glowStroke(p,COL.lung,2,.55,14)});
+function branch(x,y,a,len,w,d,clip){const x2=x+Math.cos(a)*len,y2=y+Math.sin(a)*len;X.strokeStyle=rgba(COL.lung,Math.min(.9,.25+w*.08));X.lineWidth=w;X.beginPath();X.moveTo(x,y);X.lineTo(x2,y2);X.stroke();
+  if(d>0){const s=rr(.32,.6);branch(x2,y2,a-s,len*rr(.7,.84),w*.7,d-1);branch(x2,y2,a+rr(.32,.6),len*rr(.7,.84),w*.7,d-1)}
+  else for(let k=0;k<7;k++){X.strokeStyle=rgba(COL.lung,rr(.25,.6));X.lineWidth=1;X.beginPath();X.arc(x2+rr(-7,7),y2+rr(-7,7),rr(2,4.5),0,7);X.stroke()}}
+X.lineCap='round';
+X.save();X.clip(lungL);branch(700,392,Math.PI*0.72,46,6,7);branch(690,400,Math.PI*0.95,40,4,6);branch(700,395,Math.PI*0.55,52,4,6);X.restore();
+X.save();X.clip(lungR);branch(742,392,Math.PI*0.28,46,6,7);branch(752,400,Math.PI*0.05,40,4,6);branch(742,395,Math.PI*0.42,52,4,6);X.restore();
+// trachea
+{const p=new Path2D('M721 232 L721 388');glowStroke(p,COL.lung,16,.22,8);X.strokeStyle=rgba(COL.lung,.6);X.lineWidth=2;for(let y=240;y<384;y+=8){X.beginPath();X.ellipse(721,y,8,2.5,0,0,Math.PI);X.stroke()}
+ glowStroke(new Path2D('M721 386 Q712 398 690 405 M721 386 Q730 398 752 405'),COL.lung,7,.5,8)}
+// arteries + veins network (decor)
+function vessel(pts,c,w,a,jit){const p=new Path2D();p.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++){const [x0,y0]=pts[i-1],[x1,y1]=pts[i];p.quadraticCurveTo((x0+x1)/2+rr(-jit,jit),(y0+y1)/2+rr(-jit,jit),x1,y1)}glowStroke(p,c,w,a,6);return p}
+function twigs(x,y,a,len,c,d){const x2=x+Math.cos(a)*len,y2=y+Math.sin(a)*len;X.strokeStyle=rgba(c,.18+d*.06);X.lineWidth=.6+d*.5;X.beginPath();X.moveTo(x,y);X.quadraticCurveTo((x+x2)/2+rr(-6,6),(y+y2)/2+rr(-6,6),x2,y2);X.stroke();if(d>0){twigs(x2,y2,a+rr(.3,.8),len*.75,c,d-1);twigs(x2,y2,a-rr(.3,.8),len*.75,c,d-1)}}
+[-1,1].forEach(s=>{const m=x=>s<0?x:1440-x;
+  vessel([[m(700),470],[m(600),372],[m(478),392],[m(410),480],[m(352),585],[m(290),670],[m(232),752],[m(190),812],[m(160),860]],COL.blood,2.4,.55,10);
+  vessel([[m(690),470],[m(592),380],[m(470),402],[m(400),490],[m(340),590],[m(275),675],[m(222),760]],'#5b8cff',2,.35,10);
+  for(let i=0;i<9;i++){const t=i/8,x=m(478+(232-478)*t),y=392+(752-392)*t;twigs(x,y,s<0?Math.PI*rr(.5,1.1):Math.PI*rr(-.1,.5),rr(18,30),COL.blood,3)}
+  vessel([[m(706),468],[m(704),360],[m(698),260],[m(684),190]],COL.blood,2.6,.55,4);
+  twigs(m(684),190,-Math.PI/2+s*.4,26,COL.blood,4);
+  vessel([[m(700),860],[m(640),900],[m(620),950]],COL.blood,4,.5,4);
+  // lymph beads neck + armpit + groin
+  const beads=[[m(686),262,8],[m(676),288,9],[m(694),310,7],[m(500),428,10],[m(520),452,11],[m(492),470,8],[m(536),478,7],[m(600),892,10],[m(624),870,8]];
+  const lp=new Path2D();lp.moveTo(beads[0][0],beads[0][1]);beads.forEach(b=>lp.lineTo(b[0]+rr(-6,6),b[1]));glowStroke(lp,COL.lymph,1.2,.35,6);
+  beads.forEach(([x,y,r])=>{const g=X.createRadialGradient(x,y,0,x,y,r*1.6);g.addColorStop(0,rgba(COL.lymph,.8));g.addColorStop(.6,rgba(COL.lymph,.35));g.addColorStop(1,rgba(COL.lymph,0));X.fillStyle=g;X.beginPath();X.ellipse(x,y,r*1.6,r*1.2,.6,0,7);X.fill();
+    X.fillStyle=rgba('#ffffff',.5);for(let k=0;k<4;k++){X.beginPath();X.arc(x+rr(-r*.5,r*.5),y+rr(-r*.4,r*.4),1.3,0,7);X.fill()}});
+});
+// brain
+const brain=new Path2D();brain.ellipse(720,132,74,80,0,0,7);
+{X.save();X.clip(brain);const g=X.createRadialGradient(700,110,10,720,135,90);g.addColorStop(0,rgba(COL.brain,.32));g.addColorStop(1,rgba(COL.brain,.1));X.fillStyle=g;X.fillRect(600,40,240,200);
+ for(let i=0;i<90;i++){let x=rr(640,800),y=rr(55,215),a=rr(0,6.3);X.strokeStyle=rgba(COL.brain,rr(.25,.6));X.lineWidth=rr(1.2,2.6);X.beginPath();X.moveTo(x,y);for(let k=0;k<16;k++){a+=Math.sin(k*1.3+i)*1.1;x+=Math.cos(a)*5;y+=Math.sin(a)*5;X.lineTo(x,y)}X.stroke()}
+ for(let i=0;i<60;i++){const x=rr(650,790),y=rr(62,205);X.fillStyle=rgba('#ffd0ff',rr(.4,.9));X.beginPath();X.arc(x,y,rr(1,2.2),0,7);X.fill();X.strokeStyle=rgba(COL.brain,.35);X.lineWidth=.7;for(let k=0;k<3;k++){X.beginPath();X.moveTo(x,y);X.lineTo(x+rr(-14,14),y+rr(-14,14));X.stroke()}}
+ X.restore();glowStroke(brain,COL.brain,2,.6,16);glowStroke(new Path2D('M720 56 Q714 132 720 212'),COL.brain,1.5,.5,6);}
+// spinal cord + vagus nerve (decor, deep)
+glowStroke(new Path2D('M720 210 L721 940'),COL.brain,3,.22,8);
+// heart
+const heart=new Path2D('M752 548 C780 522 836 528 846 572 C856 618 818 660 790 690 C762 672 728 640 726 600 C724 572 734 560 752 548Z');
+{X.save();X.clip(heart);const g=X.createRadialGradient(780,585,6,790,605,80);g.addColorStop(0,rgba('#ff9aa8',.7));g.addColorStop(.5,rgba(COL.blood,.45));g.addColorStop(1,rgba('#a0103a',.3));X.fillStyle=g;X.fillRect(700,500,180,220);
+ for(let i=0;i<4;i++)twigs(rr(760,820),rr(550,570),Math.PI*rr(.4,.7),22,'#ffc24a',3);X.restore();glowStroke(heart,COL.blood,2.2,.8,18)}
+// aorta + pulmonary trunk
+const aorta=new Path2D('M772 556 C772 520 762 478 730 476 C700 474 690 500 692 540 L694 940');
+X.save();X.shadowColor=rgba(COL.blood,.9);X.shadowBlur=18;X.strokeStyle=rgba('#a01030',.55);X.lineWidth=24;X.lineCap='round';X.stroke(aorta);X.restore();
+glowStroke(aorta,COL.blood,13,.5,10);glowStroke(aorta,'#ffb3bd',2,.6,4);
+glowStroke(new Path2D('M760 560 C746 520 720 512 706 520 M746 524 C770 500 790 498 800 512'),'#5b8cff',8,.35,8);
+for(let i=0;i<46;i++){const t=R(),y=530+t*380,x=693+rr(-6,6);X.save();X.translate(x,y);X.rotate(rr(0,3));X.fillStyle=rgba('#ff6070',.75);X.beginPath();X.ellipse(0,0,5,3.2,0,0,7);X.fill();X.fillStyle=rgba('#5a0010',.6);X.beginPath();X.ellipse(0,0,2,1.2,0,0,7);X.fill();X.restore()}
+// gut: colon frame + coiled small intestine
+const colon=new Path2D('M842 940 C846 860 852 760 846 712 C840 690 812 684 780 690 L640 694 C604 696 590 712 590 740 C590 800 600 860 604 940');
+X.save();X.shadowColor=rgba(COL.gut,.8);X.shadowBlur=14;X.strokeStyle=rgba('#a0620a',.3);X.lineWidth=30;X.lineCap='round';X.stroke(colon);X.restore();
+glowStroke(colon,COL.gut,20,.16,6);
+{const len=900;X.fillStyle=rgba(COL.gut,.0);X.strokeStyle=rgba('#ffe3a8',.35);X.lineWidth=1.2;for(let i=0;i<70;i++){const y=700+i*3.6;}
+ // haustra: ring marks along colon
+ const pts=[[842,920],[846,800],[846,712],[780,690],[700,692],[640,694],[592,730],[596,820],[604,920]];
+ for(let i=0;i<pts.length-1;i++){const [a,b]=[pts[i],pts[i+1]];for(let t=0;t<1;t+=.16){const x=a[0]+(b[0]-a[0])*t,y=a[1]+(b[1]-a[1])*t,ang=Math.atan2(b[1]-a[1],b[0]-a[0])+Math.PI/2;X.beginPath();X.moveTo(x+Math.cos(ang)*12,y+Math.sin(ang)*12);X.lineTo(x-Math.cos(ang)*12,y-Math.sin(ang)*12);X.stroke()}}}
+X.save();X.globalCompositeOperation='source-over';X.fillStyle='rgba(6,4,2,.62)';X.beginPath();X.roundRect(604,704,236,240,30);X.fill();X.restore();
+{const p=new Path2D();let x=622,y=726;p.moveTo(x,y);const rows=[726,758,790,822,854,886];rows.forEach((ry,i)=>{const dir=i%2?-1:1;const x0=dir>0?622:818,x1=dir>0?818:622;for(let k=1;k<=8;k++){const xx=x0+(x1-x0)*k/8;p.quadraticCurveTo(xx-dir*12,ry+(k%2?-14:14),xx,ry)}if(i<rows.length-1)p.bezierCurveTo(x1+dir*22,ry,x1+dir*22,rows[i+1],x1,rows[i+1])});
+ X.save();X.shadowColor=rgba(COL.gut,.9);X.shadowBlur=10;X.strokeStyle=rgba('#7a4a06',.35);X.lineWidth=17;X.lineJoin='round';X.stroke(p);X.restore();glowStroke(p,COL.gut,11,.3,6);glowStroke(p,'#fff1c9',1.2,.4,2);
+ X.setLineDash([1.5,3]);X.strokeStyle=rgba('#ffd27a',.22);X.lineWidth=15;X.stroke(p);X.setLineDash([]);}
+// gut bacteria sprinkles
+for(let i=0;i<70;i++){const x=rr(610,830),y=rr(712,900);X.fillStyle=rgba(['#a6ff4d','#ffc24a','#ff7ad9'][i%3],rr(.3,.7));X.save();X.translate(x,y);X.rotate(rr(0,3));X.fillRect(-2.5,-1,5,2);X.restore()}
+// splinter wound on left fingertip
+{const wx=118,wy=852;const g=X.createRadialGradient(wx,wy,2,wx,wy,44);g.addColorStop(0,rgba('#ff4d5e',.75));g.addColorStop(.5,rgba('#ff4d5e',.25));g.addColorStop(1,rgba('#ff4d5e',0));X.fillStyle=g;X.beginPath();X.arc(wx,wy,44,0,7);X.fill();
+ X.save();X.shadowColor='#ffc24a';X.shadowBlur=12;X.strokeStyle='#ffd27a';X.lineWidth=4.5;X.lineCap='round';X.beginPath();X.moveTo(wx-34,wy+30);X.lineTo(wx+4,wy-4);X.stroke();X.lineWidth=2;X.strokeStyle='#fff';X.beginPath();X.moveTo(wx-30,wy+26);X.lineTo(wx,wy-1);X.stroke();X.restore();
+ for(let i=0;i<26;i++){X.fillStyle=rgba('#a6ff4d',.8);X.save();X.translate(wx+rr(-26,26),wy+rr(-26,26));X.rotate(rr(0,3));X.fillRect(-3,-1.2,6,2.4);X.restore()}}
+X.restore();X.globalCompositeOperation='source-over';
+
+/* ---------- skin membrane rim ---------- */
+{const [B,bg2]=layer();bg2.filter='blur(9px)';bg2.drawImage(MC,0,0,W,H);
+ const [Rm,rg]=layer();rg.drawImage(MC,0,0,W,H);rg.globalCompositeOperation='destination-out';rg.drawImage(B,0,0,W,H);rg.drawImage(B,0,0,W,H);
+ // keratinocyte cells in the rim
+ const [E,eg]=layer();eg.fillStyle=rgba(COL.skin,.9);eg.fillRect(0,0,W,H);eg.globalCompositeOperation='destination-out';
+ for(let i=0;i<9000;i++){const x=rr(40,1400),y=rr(30,900);eg.fillStyle='rgba(0,0,0,.85)';eg.beginPath();eg.ellipse(x,y,rr(2,4),rr(1.5,3),rr(0,3),0,7);eg.fill()}
+ eg.globalCompositeOperation='destination-in';eg.drawImage(Rm,0,0,W,H);
+ X.globalCompositeOperation='lighter';X.drawImage(E,0,0,W,H);
+ // outer halo
+ const [O,og]=layer();og.filter='blur(14px)';og.drawImage(MC,0,0,W,H);og.filter='none';og.globalCompositeOperation='destination-out';og.drawImage(MC,0,0,W,H);og.globalCompositeOperation='source-in';og.fillStyle=rgba(COL.skin,.55);og.fillRect(0,0,W,H);
+ X.drawImage(O,0,0,W,H);X.globalCompositeOperation='source-over'}
+
+/* ---------- level path ---------- */
+const NODES=[ // body-space
+ {x:182,y:812,r:'skin',s:3},{x:258,y:722,r:'skin',s:3},{x:330,y:630,r:'skin',s:2,f:[[262,556],[196,646]]},
+ {x:605,y:452,r:'lung',s:3},{x:720,y:428,r:'lung',s:1},{x:842,y:462,r:'lung',s:2,f:[[846,372],[918,392]]},
+ {x:800,y:604,r:'blood',s:3},{x:732,y:520,r:'blood',s:2},{x:694,y:650,r:'blood',s:0,f:[[680,762],[758,752]]},
+ {x:935,y:575,r:'lymph'},{x:1040,y:640,r:'lymph'},{x:1112,y:742,r:'lymph',f:[[1196,700],[1176,806]]},
+ {x:880,y:800,r:'gut'},{x:760,y:838,r:'gut'},{x:622,y:818,r:'gut',f:[[540,780],[474,836]]},
+ {x:665,y:160,r:'brain'},{x:722,y:96,r:'brain'},{x:778,y:160,r:'brain',f:[[852,104],[868,176]]}];
+const VIA=[ // waypoints between node i and i+1
+ [[214,770]],[[290,676]],[[380,548],[435,462],[505,410]],[[662,424]],[[784,432]],[[860,540]],[[760,560]],[[712,580]],[[790,700],[880,640]],[[990,596]],[[1080,690]],[[1060,820],[960,820]],[[820,826]],[[690,830]],[[575,730],[548,560],[560,420],[620,320],[676,250]],[[690,120]],[[752,120]]];
+function spline(pts){const p=new Path2D();p.moveTo(pts[0][0],pts[0][1]);for(let i=0;i<pts.length-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;p.bezierCurveTo(p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6,p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6,p2[0],p2[1])}return p}
+const seg=(a,b)=>{const pts=[[NODES[a].x,NODES[a].y]];for(let i=a;i<b;i++){pts.push(...VIA[i],[NODES[i+1].x,NODES[i+1].y])}return pts};
+X.save();tf(X);X.lineCap='round';X.lineJoin='round';
+// travelled vessel (1 -> 9)
+const done=spline(seg(0,8));
+X.save();X.shadowColor='rgba(127,216,255,.9)';X.shadowBlur=24;X.strokeStyle='rgba(127,216,255,.28)';X.lineWidth=26;X.stroke(done);X.restore();
+X.strokeStyle='#071522';X.lineWidth=17;X.stroke(done);
+X.strokeStyle='rgba(127,216,255,.95)';X.lineWidth=2.4;X.save();X.translate(0,-0);X.stroke(done);X.restore();
+X.setLineDash([2,14]);X.strokeStyle='#e8fbff';X.lineWidth=6;X.stroke(done);X.setLineDash([]);
+// locked vessel
+const ahead=spline(seg(8,14)),nerve=spline(seg(14,17));
+X.strokeStyle='rgba(2,6,10,.75)';X.lineWidth=17;X.stroke(ahead);X.stroke(nerve);
+X.setLineDash([10,9]);X.strokeStyle='rgba(140,205,255,.38)';X.lineWidth=2.4;X.stroke(ahead);X.strokeStyle=rgba(COL.brain,.5);X.stroke(nerve);X.setLineDash([]);
+// challenge forks
+NODES.forEach((n,i)=>(n.f||[]).forEach(([fx,fy])=>{X.strokeStyle='rgba(2,6,10,.75)';X.lineWidth=11;X.beginPath();X.moveTo(n.x,n.y);X.lineTo(fx,fy);X.stroke();X.setLineDash([5,6]);X.strokeStyle=i<6?'rgba(255,194,74,.85)':'rgba(140,205,255,.3)';X.lineWidth=2;X.stroke();X.setLineDash([])}));
+X.restore();
+
+/* ---------- region hazes + big lymph nodes ---------- */
+X.save();tf(X);X.globalCompositeOperation='lighter';
+[[230,700,190,'skin',.10],[720,470,200,'lung',.07],[740,600,150,'blood',.10],[1040,650,190,'lymph',.07],[720,810,170,'gut',.06],[720,140,150,'brain',.10]].forEach(([x,y,r,c,a])=>{const g=X.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,rgba(COL[c],a));g.addColorStop(1,rgba(COL[c],0));X.fillStyle=g;X.fillRect(x-r,y-r,2*r,2*r)});
+[[935,575,34,.5],[1040,640,30,.4],[1112,742,32,.5]].forEach(([x,y,r,rot])=>{X.save();X.translate(x,y);X.rotate(rot);const g=X.createRadialGradient(0,0,0,0,0,r*1.5);g.addColorStop(0,rgba(COL.lymph,.35));g.addColorStop(.7,rgba(COL.lymph,.18));g.addColorStop(1,rgba(COL.lymph,0));X.fillStyle=g;X.beginPath();X.ellipse(0,0,r*1.5,r*1.05,0,0,7);X.fill();
+ X.strokeStyle=rgba(COL.lymph,.55);X.lineWidth=1.5;X.beginPath();X.ellipse(0,0,r*1.3,r*.92,0,0,7);X.stroke();
+ for(let k=0;k<7;k++){const a=k/7*6.28,gx=Math.cos(a)*r*.8,gy=Math.sin(a)*r*.55;const h=X.createRadialGradient(gx,gy,0,gx,gy,r*.32);h.addColorStop(0,rgba('#f0ffc0',.5));h.addColorStop(1,rgba(COL.lymph,0));X.fillStyle=h;X.beginPath();X.arc(gx,gy,r*.32,0,7);X.fill()}
+ for(let k=0;k<40;k++){X.fillStyle=rgba('#ffffff',rr(.2,.6));X.beginPath();X.arc(rr(-r,r),rr(-r*.7,r*.7),rr(.8,1.8),0,7);X.fill()}X.restore()});
+X.restore();
+/* ---------- bloom ---------- */
+{const [Bl,bl]=layer();bl.filter='blur(10px)';bl.drawImage(cv,0,0,W,H);X.save();X.globalCompositeOperation='lighter';X.globalAlpha=.45;X.drawImage(Bl,0,0,W,H);
+ const [B2,b2]=layer();b2.filter='blur(36px)';b2.drawImage(cv,0,0,W,H);X.globalAlpha=.35;X.drawImage(B2,0,0,W,H);X.restore()}
+// vignette
+{const v=X.createRadialGradient(720,470,380,720,470,980);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.72)');X.fillStyle=v;X.fillRect(0,0,W,H)}
+// corner brackets
+X.strokeStyle='rgba(140,205,255,.35)';X.lineWidth=1.2;[[16,68,1,1],[1424,68,-1,1],[16,884,1,-1],[1424,884,-1,-1]].forEach(([x,y,a,b])=>{X.beginPath();X.moveTo(x,y+b*26);X.lineTo(x,y);X.lineTo(x+a*26,y);X.stroke()});
+
+/* ---------- DOM nodes ---------- */
+const star=on=>`<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z" fill="${on?'#ffc24a':'#1a2533'}" stroke="${on?'#fff2c4':'#4a5d72'}" stroke-width="1.2"/></svg>`;
+const host=document.getElementById('nodes');
+NODES.forEach((n,i)=>{const [x,y]=T(n.x,n.y),st=i<8?'done':i==8?'next':'lock';const d=document.createElement('button');d.className='n '+(st=='done'?'':st);
+  d.style.cssText=`left:${x}px;top:${y}px;--c:${COL[n.r]};padding:0`;d.innerHTML=`<i>${i+1}</i>`+(st=='done'?`<span class="stars">${[0,1,2].map(k=>star(k<n.s)).join('')}</span>`:'');host.appendChild(d);
+  (n.f||[]).forEach(([fx,fy],k)=>{const [a,b]=T(fx,fy);const c=document.createElement('button');c.className='n ch '+(i<6?'open':'lock');c.style.cssText=`left:${a}px;top:${b}px;--c:${COL[n.r]};padding:0`;c.title=k?'Chronic':'Acute';c.innerHTML=`<i>${k?'C':'A'}</i>`;host.appendChild(c)})});
+/* labels */
+const L=[['skin','I','Skin','the outer wall · epidermis',30,560,''],['lung','II','Lungs','air meets blood',1000,292,''],['blood','III','Blood','heart · aorta · arteries',350,380,''],
+ ['lymph','IV','Lymph Node','where the army trains',1040,476,' dimmed'],['gut','V','Gut','40 trillion microbes',930,838,' dimmed'],['brain','VI','Brain','the guarded citadel',830,236,' dimmed']];
+L.forEach(([r,num,name,sub,x,y,cls])=>{const e=document.createElement('div');e.className='lbl '+cls;e.style.cssText=`left:${x}px;top:${y}px;--c:${COL[r]}`+(cls.includes('r')?';transform:translateX(-100%)':'');e.innerHTML=`${num} · region<b>${name}</b><small>${sub}</small>`;host.appendChild(e)});
+/* card */
+{const [x,y]=T(694,650);const c=document.createElement('div');c.id='card';c.className='glass';c.style.left=(x-280-50)+'px';c.style.top=(y-136)+'px';c.style.setProperty('--ay','136px');
+ c.innerHTML=`<div class="k">LEVEL 9 · BLOOD</div><h2>The Current</h2><div class="pl"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Aorta</div>
+ <p>A long, fast artery. Parasites ride it away from the heart, out to the whole body.</p>
+ <div class="row">${[0,1,2].map(()=>star(0).replace('<svg','<svg class="s"')).join('')}<button class="play"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z" fill="#fff"/></svg>PLAY</button></div>
+ <div class="ch">◆ Acute · Chronic open at 1★</div>`;host.appendChild(c)}
+</script>
