@@ -4,19 +4,7 @@ Approved by the owner on 2026-11-06. One step at a time; each step is proven bef
 
 ## Target
 
-```mermaid
-flowchart LR
-    P["player's browser<br/>game + Sentry SDK"] -- "errors, load speed" --> S["Sentry<br/>(EU region)"]
-    P -- "gameplay events" --> API["save API"] --> DB[("Postgres<br/>saves + events")]
-    API -- "errors, failed saves" --> S
-    B["Better Stack<br/>uptime"] -- "every few min" --> SITE["static site"]
-    B -. "after the prod API is paid" .-> API
-    CI["CI job deployed"] -- "after each deploy" --> SITE
-    CI --> API
-    S -- email --> O(("owner"))
-    B -- email --> O
-    CI -- "red run: email" --> O
-```
+![Observability target: Sentry, Better Stack and the CI deployed job watch the game and email the owner](diagrams/observability.svg)
 
 | Job | Tool | Cost | Replaces |
 |---|---|---|---|
