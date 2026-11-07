@@ -24,4 +24,4 @@ Agreed with the owner on 2026-11-06. One step at a time; each step is verified b
 - Prod sends no telemetry, and Dash0 is a single point of failure: both superseded 2026-11-06 by [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) (Sentry replaces Dash0; production joins at the next promotion).
 
 ## Checked and cleared
-- Postgres expiry: the v4 database is on a paid plan (`basic_256mb`), not Free. Owner to decide on `immune-citadel-dev-db` and `immune-citadel-prod-db` (15 GB each, paid, created 2026-10-29), which look like v3 leftovers.
+- Postgres expiry: both v4 databases are on a paid plan (`basic_256mb`), not Free. The v3 services and databases were deleted on 2026-11-06 on the owner's instruction.

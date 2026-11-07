@@ -6,6 +6,7 @@ A Kingdom Rush-style tower defense inside the human body, for teens (12-15); edu
 - **Team:** the main session builds and checks everything; the `ic-bug-fixer` and `ic-qa` agents are paused by the owner.
 - **"continue"** from the owner means one turn of the team loop: use the `team-loop` skill.
 - **Branches:** `issue/<n>-<slug>` = one issue's work. Into `dev` only by pull request with auto-merge (`gh pr merge <n> --auto --merge`): GitHub merges once `test` and `game` pass on a branch up to date with `dev` (if `dev` moved: `gh pr update-branch <n>`). Render deploys every commit on `dev` and `main`; CI's `deployed` job proves it is live. Agents never merge or enable auto-merge on a pull request into `main` (production): only the owner does; GitHub does not enforce this.
+- **Infrastructure:** everything is live production grade and dev mirrors production (owner, 2026-11-06). `render.yaml` is the only place a plan or service setting changes; Render applies it through Blueprint `exs-dbndeu7f3r2c738bllag`. Never create a Free service or change settings in the dashboard. Details: `docs/OPERATIONS.md`.
 - **Checks:** `npm test` (fast tests, then integration on the Docker stack); `npm run test:game` for game changes; `node tools/balance.js 10 <specimens> none` for gameplay balance.
 - **Text rules:** immune-system vocabulary on screen (no magic, armor, spell, tower); kid-level; honest biology, with an "In reality" note on every bend.
 - `sed -i` is blocked in the agents' shell: edit with the Edit tool or a python heredoc that asserts each match.

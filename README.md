@@ -2,7 +2,7 @@
 
 A tower-defence game inside the human body, for teens (12-15). You defend tissue samples against pathogens by growing immune cells, and each cell fights the way it really does in the body.
 
-**Play:** https://immune-citadel-v4.onrender.com (production) · https://immune-citadel-v4-dev.onrender.com (dev). Free Render instances sleep: the first load can take about 50 s.
+**Play:** https://immune-citadel-v4.onrender.com (production) · https://immune-citadel-v4-dev.onrender.com (dev).
 
 ## The problem
 

@@ -2,7 +2,7 @@
 // both serve the pushed commit. Exit 1 if they do not within the limit, so the run goes red and GitHub emails the owner.
 // Passes early when the branch has moved on: Render may skip straight to the newer commit, whose own run checks it.
 // Env: SHA, API, SITE (base URLs), GITHUB_REPOSITORY, GITHUB_REF_NAME, GITHUB_TOKEN, GITHUB_API_URL; MINUTES (default 15).
-const get = async (url, ms = 90000) => { // a sleeping Free API takes about a minute to wake
+const get = async (url, ms = 90000) => { // generous: a fresh deploy can take a minute to answer
   const r = await fetch(url, { signal: AbortSignal.timeout(ms), cache: 'no-store' });
   if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`);
   return r.text();

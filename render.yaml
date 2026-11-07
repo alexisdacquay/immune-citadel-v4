@@ -1,0 +1,102 @@
+# Infrastructure for Immune Citadel v4 on Render (Frankfurt). Source of truth for
+# plans and settings: Render applies this file through a Blueprint; never change a
+# plan or a service setting in the dashboard.
+# Owner, 2026-11-06: everything is live production grade; dev mirrors production.
+# The two environments are identical except data, secrets, branch and origins.
+
+databases:
+  - name: immune-citadel-v4-prod-db
+    plan: basic-256mb
+    region: frankfurt
+    postgresMajorVersion: "18"
+    databaseName: immune_citadel_v4_prod
+    user: immune_citadel_v4_prod
+    diskSizeGB: 15
+    ipAllowList:
+      - source: [owner IP removed]/32
+        description: owner machine (Claude Code), read-only queries, set 2026-11-06
+  - name: immune-citadel-v4-dev-db
+    plan: basic-256mb
+    region: frankfurt
+    postgresMajorVersion: "18"
+    databaseName: immune_citadel_v4_db
+    user: immune_citadel_v4_db_user
+    diskSizeGB: 15
+    ipAllowList:
+      - source: [owner IP removed]/32
+        description: owner machine (Claude Code), read-only queries, set 2026-11-06
+
+services:
+  # Production: deploys every commit on main.
+  - type: web
+    name: immune-citadel-v4-api
+    runtime: node
+    plan: starter
+    region: frankfurt
+    repo: https://github.com/alexisdacquay/immune-citadel-v4
+    branch: main
+    autoDeployTrigger: commit
+    buildCommand: cd server && npm ci --omit=dev
+    startCommand: cd server && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DB_SCHEMA
+        value: prod
+      - key: ALLOWED_ORIGINS
+        value: https://immune-citadel-v4.onrender.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: immune-citadel-v4-prod-db
+          property: connectionString
+  - type: web
+    name: immune-citadel-v4
+    runtime: static
+    repo: https://github.com/alexisdacquay/immune-citadel-v4
+    branch: main
+    autoDeployTrigger: commit
+    buildCommand: mkdir -p public && cp index.html public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt
+    staticPublishPath: public
+    envVars:
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
+
+  # Dev: deploys every commit on dev.
+  - type: web
+    name: immune-citadel-v4-api-dev
+    runtime: node
+    plan: starter
+    region: frankfurt
+    repo: https://github.com/alexisdacquay/immune-citadel-v4
+    branch: dev
+    autoDeployTrigger: commit
+    buildCommand: cd server && npm ci --omit=dev
+    startCommand: cd server && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DB_SCHEMA
+        value: dev
+      - key: ALLOWED_ORIGINS
+        value: https://immune-citadel-v4-dev.onrender.com,http://localhost:8794
+      - key: SENTRY_ENVIRONMENT
+        value: dev
+      - key: SENTRY_DSN
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: immune-citadel-v4-dev-db
+          property: connectionString
+  - type: web
+    name: immune-citadel-v4-dev
+    runtime: static
+    repo: https://github.com/alexisdacquay/immune-citadel-v4
+    branch: dev
+    autoDeployTrigger: commit
+    buildCommand: mkdir -p public && cp index.html public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt
+    staticPublishPath: public
+    envVars:
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
