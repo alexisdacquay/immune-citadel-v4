@@ -67,7 +67,7 @@ Settings on a Render API service: build `cd server && npm ci --omit=dev`, start 
 
 ## Reading gameplay events
 
-The database accepts outside connections only from its IP allowlist: the owner's machine, `[owner IP removed]/32` (G.Network home line), set 2026-11-06 on the owner's instruction. If that IP changes, update it: Render → `immune-citadel-v4-db` → Networking, or `PATCH /v1/postgres/<id>` with `ipAllowList`. The Render MCP query tool connects from Render's servers and cannot use the allowlist.
+Each database accepts outside connections only from its IP allowlist: the owner's machine. The address is personal, so it lives only in Render, never in this repository or `render.yaml` (a Blueprint sync keeps a list the file omits). If it changes, update it: Render → the database → Networking, or `PATCH /v1/postgres/<id>` with `ipAllowList`. The Render MCP query tool connects from Render's servers and cannot use the allowlist.
 
 ```bash
 docker run --rm -it -e U="$URL?sslmode=require" postgres:18-alpine sh -c 'psql "$U" -c "SELECT * FROM dev.level_stats"'
