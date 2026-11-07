@@ -44,7 +44,7 @@ npm test
 | Game | `index.html` | nginx in Compose | static site |
 | Save API | `server/index.js` | Compose | web service |
 | Database | Postgres | Compose | Render Postgres |
-| Telemetry | `server/sentry.js`, `observability/sentry-alert.json` | to Sentry, if `.env` is set | dev: to Sentry; production: from its next release ([docs/OBSERVABILITY-PLAN.md](docs/OBSERVABILITY-PLAN.md)) |
+| Telemetry | `server/sentry.js`, `observability/sentry-alert.json` | to Sentry, if `.env` is set | dev: to Sentry; production: Sentry off until the browser identifier fix is promoted, Render logs and uptime checks meanwhile |
 
 ## How it is built
 
@@ -63,6 +63,6 @@ A small AI agent team works from GitHub issues: see [AGENTS.md](AGENTS.md) (wher
 | 7 | Containerization | [compose.yaml](compose.yaml), [server/Dockerfile](server/Dockerfile) |
 | 8 | Deployment | the URLs at the top |
 | 9 | CI/CD | [CI](.github/workflows/ci.yml) on every PR and push; Render deploys every commit on `dev` (only green pull requests get there); production moves only when the owner merges `dev` into `main`: [docs/OPERATIONS.md](docs/OPERATIONS.md#releases) |
-| 10 | Observability | save API errors and traces in Sentry (EU), no player data; logs in Render: [docs/OPERATIONS.md](docs/OPERATIONS.md#telemetry), plan: [docs/OBSERVABILITY-PLAN.md](docs/OBSERVABILITY-PLAN.md) |
+| 10 | Observability | one save followed end to end: its trace, log line and duration metric (`http.server.request.duration`) share one trace ID in Sentry (EU), the same ID as its log line in Render; uptime checks on both sites and both APIs; no player data leaves. Reviewers cannot log into Sentry: screenshots of one real save and a test that rebuilds the chain on any machine, [Follow one save](docs/OPERATIONS.md#follow-one-save); all signals: [docs/OPERATIONS.md](docs/OPERATIONS.md#telemetry) |
 | 11 | Alerting on user impact | "Save API error" in Sentry emails the owner, as code: [observability/sentry-alert.json](observability/sentry-alert.json) |
 | 12 | On-call agent | not done yet |
