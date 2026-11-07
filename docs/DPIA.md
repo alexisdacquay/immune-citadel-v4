@@ -12,14 +12,7 @@ Status: **draft, to be signed by the owner before gameplay events reach producti
 
 ## Data flows
 
-```mermaid
-flowchart LR
-    B["player's browser"] -- "save (game progress) under a random 16-character save code" --> API["save API<br/>Render, Frankfurt"]
-    B -- "gameplay events (anonymous, stats switch)" --> API
-    API --> DB[("Postgres<br/>Render, Frankfurt")]
-    B -- "crash reports, page-load speed" --> S["Sentry<br/>EU (Frankfurt)"]
-    API -- "server errors, request traces" --> S
-```
+![Data flows: the player's browser sends saves and anonymous gameplay events to the save API and Postgres (Render, Frankfurt); crash reports and server errors go to Sentry EU (Frankfurt)](diagrams/dpia-data-flow.svg)
 
 | Data | Purpose | Where | Kept | Identifies a child? |
 |---|---|---|---|---|

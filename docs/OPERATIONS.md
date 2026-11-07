@@ -16,17 +16,7 @@ Settings on a Render static site: build `mkdir -p public && cp index.html public
 
 ## Releases
 
-```mermaid
-flowchart LR
-    B["issue branch"] --> PR["pull request into dev"]
-    PR --> CI{"CI: test + game"}
-    CI -- red --> B
-    CI -- green --> M["GitHub auto-merges into dev<br/>(the only way in)"]
-    M --> DEV["Render deploys dev"] --> V{"CI: deployed"}
-    V -- red --> E["GitHub emails the owner"]
-    V -- green --> P["owner merges dev into main<br/>(a pull request: the production gate)"]
-    P --> PROD["Render deploys production"] --> V2{"CI: deployed"}
-```
+![Release pipeline: issue branch to dev through CI and GitHub auto-merge, then the owner's merge into main to production](diagrams/release-pipeline.svg)
 
 | Step | What | Proof |
 |---|---|---|

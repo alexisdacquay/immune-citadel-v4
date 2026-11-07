@@ -37,13 +37,7 @@ npm test
 
 ## How it fits together
 
-```mermaid
-flowchart LR
-    P[Player's browser<br/>index.html, the whole game] -- "GET/PUT /api/save/:code" --> A[Save API<br/>Node, server/]
-    A --> D[(Postgres)]
-    A -. "errors, traces" .-> O[Sentry<br/>EU]
-    O -- "alert: save API error" --> W[owner's e-mail]
-```
+![Player's browser calls the save API, which stores saves in Postgres and sends errors and traces to Sentry (EU), which e-mails the owner](docs/diagrams/system-overview.svg)
 
 | Part | Where | Local | Render |
 |---|---|---|---|

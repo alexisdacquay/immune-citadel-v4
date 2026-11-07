@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="how-it-fits-title how-it-fits-desc" id="how-it-fits-root">
+        <title id="how-it-fits-title">How Immune Citadel fits together</title>
+        <desc id="how-it-fits-desc">Code goes from GitHub to Render through a tested, auto-merged pull request; players use the game site and the save API backed by Postgres; Sentry, Better Stack and the CI deployed check watch it and email the owner.</desc>
+        <defs>
+      <style>#how-it-fits-root { --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace; }
+      #how-it-fits-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #how-it-fits-root .diagram-container { width: 100%; overflow-x: auto; }
+      @media print {
+#how-it-fits-root .diagram-container { overflow-x: visible; }
+}</style>
+          <marker id="how-it-fits-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+          <marker id="how-it-fits-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#bf4520"/></marker>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+        <!-- Zone: Render (drawn first) -->
+        <rect x="248" y="184" width="368" height="200" rx="8"
+              fill="#2d3142" stroke="#2d3142" stroke-width="0.8" fill-opacity="0.02" stroke-opacity="0.10"/>
+        <rect x="258" y="188" width="224" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="264" y="197" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace"
+              letter-spacing="0.14em">RENDER HOSTING · DEV AND PRODUCTION</text>
+
+        <!-- Arrows (behind boxes) -->
+        <!-- 1. GitHub -> Render: deploy -->
+        <path d="M 200,92 H 504 Q 512,92 512,100 V 184"
+              fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#how-it-fits-arrow)"/>
+        <!-- 2. CI deployed -> Render: right version live? -->
+        <path d="M 656,92 H 592 Q 584,92 584,100 V 184"
+              fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#how-it-fits-arrow)"/>
+        <!-- 3. CI deployed -> Owner: email if red -->
+        <path d="M 800,92 H 876 Q 884,92 884,100 V 216"
+              fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#how-it-fits-arrow)"/>
+        <!-- 4. Player -> Game site: plays (headline path) -->
+        <line x1="184" y1="244" x2="272" y2="244" stroke="#bf4520" stroke-width="1.4" marker-end="url(#how-it-fits-arrow-accent)"/>
+        <!-- 5. Player -> Save API: cloud saves -->
+        <path d="M 136,272 V 316 Q 136,324 144,324 H 272"
+              fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#how-it-fits-arrow)"/>
+        <!-- 6. Player -> Sentry: crashes, load speed -->
+        <path d="M 88,272 V 452 Q 88,460 96,460 H 272"
+              fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#how-it-fits-arrow)"/>
+        <!-- 7. Save API -> Postgres -->
+        <line x1="400" y1="324" x2="448" y2="324" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#how-it-fits-arrow)"/>
+        <!-- 8. Save API -> Sentry: errors, traces -->
+        <line x1="336" y1="352" x2="336" y2="432" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#how-it-fits-arrow)"/>
+        <!-- 9. Better Stack -> Game site: site up? -->
+        <line x1="656" y1="244" x2="416" y2="244" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#how-it-fits-arrow)"/>
+        <!-- 10. Better Stack -> Owner: email -->
+        <line x1="800" y1="244" x2="848" y2="244" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#how-it-fits-arrow)"/>
+        <!-- 11. Sentry -> Owner: email -->
+        <path d="M 400,460 H 876 Q 884,460 884,452 V 272"
+              fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#how-it-fits-arrow)"/>
+
+        <!-- Arrow labels (masked, 8px from their stroke) -->
+        <rect x="436" y="136" width="68" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="470" y="145" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">AUTO-MERGE</text>
+
+        <rect x="592" y="136" width="88" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="636" y="145" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">RIGHT VERSION?</text>
+
+        <rect x="796" y="148" width="80" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="836" y="157" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">EMAIL IF RED</text>
+
+        <rect x="210" y="224" width="36" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="228" y="233" fill="#bf4520" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">PLAYS</text>
+
+        <rect x="172" y="304" width="72" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="208" y="313" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">CLOUD SAVES</text>
+
+        <rect x="138" y="440" width="92" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="184" y="449" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">CRASHES, SPEED</text>
+
+        <rect x="344" y="392" width="92" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="390" y="401" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">ERRORS, TRACES</text>
+
+        <rect x="508" y="224" width="56" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="536" y="233" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">SITE UP?</text>
+
+        <rect x="806" y="224" width="36" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="824" y="233" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">EMAIL</text>
+
+        <rect x="622" y="440" width="36" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="640" y="449" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">EMAIL</text>
+
+        <!-- Nodes -->
+        <!-- Code on GitHub (outside service) -->
+        <rect x="40" y="64" width="160" height="56" rx="6" fill="#f5f5f5"/>
+        <rect x="40" y="64" width="160" height="56" rx="6" fill="#2d3142" stroke="#2d3142" stroke-width="1" fill-opacity="0.03" stroke-opacity="0.30"/>
+        <text x="120" y="89" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Code on GitHub</text>
+        <text x="120" y="104" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">pull request, CI tests</text>
+
+        <!-- CI job deployed (outside service) -->
+        <rect x="656" y="64" width="144" height="56" rx="6" fill="#f5f5f5"/>
+        <rect x="656" y="64" width="144" height="56" rx="6" fill="#2d3142" stroke="#2d3142" stroke-width="1" fill-opacity="0.03" stroke-opacity="0.30"/>
+        <text x="728" y="89" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">CI job</text>
+        <text x="728" y="104" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">deployed</text>
+
+        <!-- Player's browser (person) -->
+        <rect x="40" y="216" width="144" height="56" rx="6" fill="#f5f5f5"/>
+        <rect x="40" y="216" width="144" height="56" rx="6" fill="#4f5d75" stroke="#5a6580" stroke-width="1" fill-opacity="0.10"/>
+        <text x="112" y="248" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Player’s browser</text>
+
+        <!-- Game site (focal) -->
+        <rect x="272" y="216" width="144" height="56" rx="6" fill="#f5f5f5"/>
+        <rect x="272" y="216" width="144" height="56" rx="6" fill="#bf4520" stroke="#bf4520" stroke-width="1" fill-opacity="0.08"/>
+        <text x="344" y="241" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Game site</text>
+        <text x="344" y="256" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">index.html</text>
+
+        <!-- Save API (service) -->
+        <rect x="272" y="296" width="128" height="56" rx="6" fill="#f5f5f5"/>
+        <rect x="272" y="296" width="128" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+        <text x="336" y="328" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Save API</text>
+
+        <!-- Postgres (store) -->
+        <rect x="448" y="296" width="144" height="56" rx="6" fill="#f5f5f5"/>
+        <rect x="448" y="296" width="144" height="56" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+        <text x="520" y="321" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Postgres</text>
+        <text x="520" y="336" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">saves</text>
+
+        <!-- Better Stack (outside service) -->
+        <rect x="656" y="216" width="144" height="56" rx="6" fill="#f5f5f5"/>
+        <rect x="656" y="216" width="144" height="56" rx="6" fill="#2d3142" stroke="#2d3142" stroke-width="1" fill-opacity="0.03" stroke-opacity="0.30"/>
+        <text x="728" y="248" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Better Stack</text>
+
+        <!-- Owner (person) -->
+        <rect x="848" y="216" width="72" height="56" rx="6" fill="#f5f5f5"/>
+        <rect x="848" y="216" width="72" height="56" rx="6" fill="#4f5d75" stroke="#5a6580" stroke-width="1" fill-opacity="0.10"/>
+        <text x="884" y="248" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Owner</text>
+
+        <!-- Sentry (outside service) -->
+        <rect x="272" y="432" width="128" height="56" rx="6" fill="#f5f5f5"/>
+        <rect x="272" y="432" width="128" height="56" rx="6" fill="#2d3142" stroke="#2d3142" stroke-width="1" fill-opacity="0.03" stroke-opacity="0.30"/>
+        <text x="336" y="457" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Sentry</text>
+        <text x="336" y="472" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">errors, traces</text>
+
+        <!-- Legend strip -->
+        <line x1="40" y1="532" x2="920" y2="532" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.10"/>
+        <text x="40" y="552" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.18em">LEGEND</text>
+
+        <rect x="40" y="564" width="14" height="10" rx="2" fill="#bf4520" stroke="#bf4520" stroke-width="1" fill-opacity="0.08"/>
+        <text x="60" y="572" fill="#4f5d75" font-size="9" font-family="'Geist', system-ui, sans-serif">Focal</text>
+
+        <rect x="112" y="564" width="14" height="10" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+        <text x="132" y="572" fill="#4f5d75" font-size="9" font-family="'Geist', system-ui, sans-serif">Service</text>
+
+        <rect x="192" y="564" width="14" height="10" rx="2" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+        <text x="212" y="572" fill="#4f5d75" font-size="9" font-family="'Geist', system-ui, sans-serif">Store</text>
+
+        <rect x="264" y="564" width="14" height="10" rx="2" fill="#2d3142" stroke="#2d3142" stroke-width="1" fill-opacity="0.03" stroke-opacity="0.30"/>
+        <text x="284" y="572" fill="#4f5d75" font-size="9" font-family="'Geist', system-ui, sans-serif">Outside service</text>
+
+        <rect x="384" y="564" width="14" height="10" rx="2" fill="#4f5d75" stroke="#5a6580" stroke-width="1" fill-opacity="0.10"/>
+        <text x="404" y="572" fill="#4f5d75" font-size="9" font-family="'Geist', system-ui, sans-serif">Person</text>
+
+        <line x1="472" y1="569" x2="500" y2="569" stroke="#bf4520" stroke-width="1.4" marker-end="url(#how-it-fits-arrow-accent)"/>
+        <text x="508" y="572" fill="#4f5d75" font-size="9" font-family="'Geist', system-ui, sans-serif">Main path</text>
+
+        <line x1="584" y1="569" x2="612" y2="569" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#how-it-fits-arrow)"/>
+        <text x="620" y="572" fill="#4f5d75" font-size="9" font-family="'Geist', system-ui, sans-serif">Deploy, request</text>
+
+        <line x1="720" y1="569" x2="748" y2="569" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#how-it-fits-arrow)"/>
+        <text x="756" y="572" fill="#4f5d75" font-size="9" font-family="'Geist', system-ui, sans-serif">Watch, alert</text>
+      </svg>

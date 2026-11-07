@@ -6,23 +6,7 @@ Last update: 2026-11-06 22:32 UTC.
 
 ## How it fits together
 
-```mermaid
-flowchart LR
-    DEV["code on GitHub"] -- "pull request: CI tests,<br/>then auto-merge" --> RENDER
-    subgraph RENDER["Render (hosting): dev and production"]
-      SITE["game site<br/>index.html"]
-      API["save API"] --> DB[("Postgres<br/>saves")]
-    end
-    PLAYER["player's browser"] -- plays --> SITE
-    PLAYER -- "cloud saves" --> API
-    PLAYER -- "crashes, load speed" --> SENTRY["Sentry<br/>errors, traces"]
-    API -- "errors, traces" --> SENTRY
-    CI["CI job 'deployed'"] -- "right version live?" --> RENDER
-    BETTER["Better Stack"] -- "site up?" --> SITE
-    SENTRY -- email --> OWNER(("owner"))
-    CI -- "email if red" --> OWNER
-    BETTER -- email --> OWNER
-```
+![How it fits together: GitHub deploys to Render, players use the game site and save API, Sentry, Better Stack and the CI job "deployed" email the owner](diagrams/how-it-fits.svg)
 
 All of it runs on dev today; production gets it at the next promotion ([OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 6). Gameplay events (step 5, [EVENTS.md](EVENTS.md)) go player → save API → Postgres, dev first. Dash0 is no longer used by this project.
 
