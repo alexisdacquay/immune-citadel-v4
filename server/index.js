@@ -1,9 +1,10 @@
 // Cloud saves for Immune Citadel. A save is an opaque JSON object keyed by a 16-character save code the game generates.
 // Knowing the code is the only credential, so codes carry 80 random bits. Without DATABASE_URL it keeps saves in memory (local dev, tests).
 const http = require('node:http');
-const log = require('pino')({ level: process.env.LOG_LEVEL || 'info' }); // JSON lines, read in Render's logs
-const route = require('./route');
 const { initSentry, Sentry } = require('./sentry');
+const span = () => Sentry.getActiveSpan()?.spanContext(); // the request's trace, while Sentry is on
+const log = require('pino')({ level: process.env.LOG_LEVEL || 'info', mixin: () => (span() ? { trace_id: span().traceId, span_id: span().spanId } : {}) }); // JSON lines in Render's logs, findable by trace ID
+const route = require('./route');
 const play = require('./play');
 
 const CODE = /^[A-HJ-NP-Z2-9]{16}$/; // the game's alphabet: no I, O, 0, 1
@@ -125,10 +126,15 @@ function createServer(store) {
       const h = { 'content-type': 'application/json', 'cache-control': 'no-store', vary: 'Origin' };
       if (origin && (ORIGINS.includes(origin) || ORIGINS.includes('*'))) Object.assign(h, { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'GET, PUT', 'access-control-allow-headers': 'content-type', 'access-control-max-age': '86400' });
       res.writeHead(status, h); res.end(body === undefined ? '' : JSON.stringify(body));
-      if (req.url !== '/health') log[status >= 500 ? 'error' : 'info']({ method: req.method, route: route(req.url), status, ms: Date.now() - t0 }, 'request');
+      const line = { method: req.method, route: route(req.url), status, ms: Date.now() - t0 }, level = status >= 500 ? 'error' : 'info';
+      if (req.url !== '/health') log[level](line, 'request');
+      if (line.route === '/api/save/:code' && req.method !== 'OPTIONS') { // only saves and loads reach Sentry's logs and metrics: play and CORS preflights stay home
+        Sentry.logger[level]('request', line);
+        Sentry.metrics.distribution('http.server.request.duration', line.ms / 1000, { unit: 'second', attributes: { 'http.request.method': req.method, 'http.route': line.route, 'http.response.status_code': status } }); // OpenTelemetry's name: its count is the rate, its status codes the errors
+      }
     };
     try {
-      const url = new URL(req.url, 'http://x');
+      let url; try { url = new URL(req.url, 'http://x'); } catch { return send(400, { error: 'bad request' }); } // a path like // is the caller's error, not a server error
       if (req.method === 'OPTIONS') return send(204);
       if (url.pathname === '/health' && req.method === 'GET') return send(200, { ok: true, commit: process.env.RENDER_GIT_COMMIT || 'local' }); // deploys wait for this commit
       if (url.pathname === '/api/play') return await playRoute(req, res, origin, send, store);
@@ -151,6 +157,7 @@ function createServer(store) {
       }
       send(405, { error: 'method not allowed' });
     } catch (e) {
+      if (!req.complete) return log.warn({ method: req.method, route: route(req.url) }, 'client left mid-upload'); // a closed tab is not a server error: no Sentry, no email
       Sentry.captureException(e, { tags: { method: req.method, route: route(req.url) } }); // a failed save emails the owner (alert rule in Sentry)
       log.error({ err: e.message }, 'request failed'); send(500, { error: 'server error' });
     }
@@ -167,6 +174,11 @@ if (require.main === module) {
     const prune = () => store.prune().then(n => n && log.info({ rows: n }, 'old events deleted')).catch(e => log.warn({ err: e.message }, 'event pruning failed'));
     await prune(); setInterval(prune, 864e5).unref(); // daily
     const port = +process.env.PORT || 8787;
-    createServer(store).listen(port, () => log.info(`save API on :${port}, ${process.env.DATABASE_URL ? `postgres schema ${SCHEMA}` : 'in-memory store'}, origins ${ORIGINS.join(' ') || 'none'}`));
+    const server = createServer(store).listen(port, () => log.info(`save API on :${port}, ${process.env.DATABASE_URL ? `postgres schema ${SCHEMA}` : 'in-memory store'}, origins ${ORIGINS.join(' ') || 'none'}`));
+    process.on('SIGTERM', () => { // on, not once: npm may pass on a second copy of the signal // each deploy stops the old instance: finish the saves in flight, send buffered telemetry, then exit
+      log.info('shutting down');
+      server.close(() => Sentry.close(2000).finally(() => process.exit(0)));
+      setTimeout(() => process.exit(1), 25000).unref(); // before Render's kill at 30 s
+    });
   }).catch(e => { log.fatal({ err: e.message }, 'startup failed'); process.exit(1); });
 }

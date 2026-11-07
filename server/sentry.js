@@ -1,9 +1,11 @@
-// Sentry for the save API: errors and request traces (docs/OBSERVABILITY-PLAN.md, steps 1-2). Off without SENTRY_DSN.
-// Children's data stays home: no IP, headers, cookies, bodies, query strings, query parameters or local variables,
-// and any save code (the player's only credential) is replaced before an event leaves the process.
+// Sentry for the save API: errors, request traces, and one log line and one metric per save or load (docs/OPERATIONS.md#telemetry). Off without SENTRY_DSN.
+// Children's data stays home: no IP, headers, cookies, bodies, query strings, query parameters, local variables or browser identifier (user agent),
+// and any save code (the player's only credential) is replaced before anything leaves the process.
 const Sentry = require('@sentry/node');
 const CODE_ANYWHERE = /[A-HJ-NP-Z2-9]{16}/g; // the save-code alphabet, as in index.js
-const scrub = item => JSON.parse(JSON.stringify(item).replace(CODE_ANYWHERE, ':code'));
+const IDS = new Set(['trace_id', 'span_id', 'parent_span_id']); // Sentry's own hex IDs, never a save code: kept whole, or 16 digits in a row would break the link to Render's log line
+const scrub = item => JSON.parse(JSON.stringify(item, (k, v) => (/user.?agent/i.test(k) ? undefined // the span keeps user_agent.original even with httpHeaders off
+  : typeof v === 'string' && !IDS.has(k) ? v.replace(CODE_ANYWHERE, ':code') : v)));
 
 function initSentry(extra = {}) {
   if (!process.env.SENTRY_DSN && !extra.dsn) return;
@@ -13,7 +15,8 @@ function initSentry(extra = {}) {
     release: process.env.RENDER_GIT_COMMIT,
     dataCollection: { userInfo: false, cookies: false, httpHeaders: false, httpBodies: [], urlQueryParams: false, databaseQueryData: false, stackFrameVariables: false },
     tracesSampler: ({ attributes }) => (['/health', '/api/play'].includes(attributes?.['url.path']) ? 0 : 1), // every request (a few thousand a month); not Render's health checks, not gameplay events (no third party sees play)
-    beforeSend: scrub, beforeSendSpan: scrub, // v11 streams spans: beforeSendSpan covers traces
+    sendClientReports: false, // not even a count of the gameplay requests left out
+    beforeSend: scrub, beforeSendSpan: scrub, beforeSendLog: scrub, beforeSendMetric: scrub, // v11 streams spans: beforeSendSpan covers traces
     ...extra,
   });
 }

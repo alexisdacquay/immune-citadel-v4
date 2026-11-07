@@ -41,29 +41,38 @@ Settings on a Render static site: build `mkdir -p public && cp index.html public
 | a broken API build | Render health check on `/health` | the old deploy keeps traffic; `deployed` red after 15 min |
 | Render never deploys, or deploys the wrong commit | `deployed` | red run; GitHub emails whoever triggered it (the person who enabled auto-merge, today the owner) if Actions email notifications are on |
 | game site down | Better Stack: HEAD on both sites every 5 min ([observability/betterstack.js](../observability/betterstack.js)) | email |
-| production or dev API down | nothing yet | Better Stack check on each API's `/health`, to add now that both APIs are paid instances (step 6) |
+| production or dev API down | Better Stack: GET `/health` on both APIs every 5 min (monitors 5200741, 5200742, created 2026-11-07) | email; runbook below |
 | the game crashes on players' devices (dev and production sites) | Sentry, project `immune-citadel-game` | email when an issue is new or returns ([observability/sentry-game-alert.json](../observability/sentry-game-alert.json)) |
 | CI never runs after a merge, or a dashboard rollback leaves an old commit live | not covered | accepted: see [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md), Open |
-| a save or load fails with a server error | Sentry alert (below); production from [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 6 | email |
+| a save or load fails with a server error | Sentry alert (below): dev today; production once its `SENTRY_DSN` is set again (removed 2026-11-07 until the browser identifier fix reaches production) | email; runbook below |
 
 **Rollback:** Render dashboard → the service → Events → Rollback on the last good deploy (reuses its build; a dashboard rollback turns auto-deploy off: turn it back on after), or merge a revert pull request (CI, then Render, redeploy).
 
 ## Telemetry
 
+![Sentry, Better Stack and the CI deployed job watch the game and the save API and email the owner; each save or load sends Sentry one trace, one log line and one metric under one trace ID](diagrams/observability.svg)
+
 | What | Where | Detail |
 |---|---|---|
 | save API errors | Sentry, project `immune-citadel-api` | every request that fails with a server error, with its stack trace and route |
 | save API traces | same | every request except `/health` and `/api/play`, with its Postgres queries (query text with `$1`, no values) |
-| logs | Render, the service's Logs tab | JSON lines with method, route, status, duration; never the save code |
+| logs | Render, the service's Logs tab: every request; Sentry, Logs: saves and loads only | one JSON line per request: method, route, status, `ms`, and `trace_id`/`span_id` while Sentry is on; never the save code |
+| save metric | Sentry, Metrics: `http.server.request.duration` (seconds, OpenTelemetry's name) | one point per save or load, by `http.request.method`, `http.route`, `http.response.status_code`: the count is the request rate, the status codes the errors, the value the speed |
 | game errors and load speed | Sentry, project `immune-citadel-game` | dev and production sites only; release = the commit in `/version.txt`; save codes scrubbed |
 | gameplay events | the save API's Postgres, table `events`, views `funnel`, `level_stats`, `card_reads`, `sittings` | dev and production sites only; anonymous; what and why in [EVENTS.md](EVENTS.md); read below |
-| site up | Better Stack | HEAD on both game sites every 5 min; apply changes with `node observability/betterstack.js` (`BETTERSTACK_API_TOKEN`) |
+| up | Better Stack | HEAD on both game sites, GET `/health` on both APIs, every 5 min; apply changes with `node observability/betterstack.js` (`BETTERSTACK_API_TOKEN`) |
 
 Sentry organisation `myown-76`, EU region (de.sentry.io). Environments: `local`, `dev`, `production`. Organisation privacy settings: IP addresses not stored; location (`$user.geo`) removed by an Advanced Data Scrubbing rule, because Sentry derives it from the IP even when IP storage is off.
 
-**Children's data:** [server/sentry.js](../server/sentry.js) sends no IP, headers, cookies, bodies, query strings, database parameters or local variables, and replaces any save code (the player's only credential) with `:code` in errors and traces. Proof: [server/sentry.test.js](../server/sentry.test.js). Logs use the route `/api/save/:code` ([server/route.js](../server/route.js), [server/telemetry.test.js](../server/telemetry.test.js)).
+**Children's data:** [server/sentry.js](../server/sentry.js) sends no IP, headers, cookies, bodies, query strings, database parameters or local variables, and no browser identifier (user agent), and replaces any save code (the player's only credential) with `:code`, in errors, traces, logs and metrics. Gameplay events (`/api/play`) never reach Sentry. Proof: [server/sentry.test.js](../server/sentry.test.js), [server/observability.test.js](../server/observability.test.js). Logs use the route `/api/save/:code` ([server/route.js](../server/route.js), [server/telemetry.test.js](../server/telemetry.test.js)).
 
-Settings on a Render API service: build `cd server && npm ci --omit=dev`, start `cd server && npm start`, and the variables `SENTRY_DSN` (Sentry → project → Client Keys) and `SENTRY_ENVIRONMENT` (`dev` or `production`). Without `SENTRY_DSN`, Sentry is off. Locally: `SENTRY_DSN` in `.env` (see `.env.example`).
+Settings on a Render API service: build `cd server && npm ci --omit=dev`, start `cd server && exec npm start`, and the variables `SENTRY_DSN` (Sentry → project → Client Keys) and `SENTRY_ENVIRONMENT` (`dev` or `production`). Without `SENTRY_DSN`, Sentry is off. Locally: `SENTRY_DSN` in `.env` (see `.env.example`). On each deploy Render sends `SIGTERM`: the API finishes the saves in flight, sends buffered telemetry, and exits (at most 25 s; Render kills at 30 s). The start command is `cd server && exec npm start`: with `exec`, Render's stop signal reaches npm, which passes it on to the API instead of stopping at a shell. A player who closes the tab mid-save is logged in Render (`client left mid-upload`), not reported as an error; Sentry still shows that request's trace as a `PUT` 200, and Render's line with the same `trace_id` is the truth.
+
+### Follow one save
+
+One save, followed through every signal by its trace ID.
+
+Without a Sentry login, rebuild the same chain on any machine: `node --test server/observability.test.js` runs the API against a fake Sentry and checks that one save gives one trace, one log line and one metric under the trace ID of its Render log line; that no save code, save, IP or browser identifier leaves; that gameplay events stay home; that a closed tab is no error; that a deploy finishes a save in flight; and that a Sentry outage never fails a save. Each check was proven able to fail by removing the code it guards (25 removals, 2026-11-07, 13 of them by an independent reviewer). Two removals change nothing on their own: the scrub on logs and metrics, a second guard behind the save-route filter; and the route attribute, which is fixed inside that filter.
 
 ## Reading gameplay events
 
@@ -79,4 +88,10 @@ docker run --rm -it -e U="$URL?sslmode=require" postgres:18-alpine sh -c 'psql "
 
 "Save API error (a save or load failed): email owner": every error in `immune-citadel-api` emails the owner, at most once per 30 min per issue. Defined in [observability/sentry-alert.json](../observability/sentry-alert.json) (Sentry alert 1464000), applied through the Sentry MCP.
 
+Meaning: a save or load answered 500. Impact: that player's progress is not in the cloud (the game keeps it in the browser and retries on the next save or visit). Diagnosis: the Sentry issue's trace → its Postgres span and log line; Render → the API → Logs, search the `trace_id`. Mitigation: database down → Render → the database → Events; bad deploy → Rollback (above).
+
 Try it locally (with `SENTRY_DSN` in `.env`): `docker compose up`, make a save, `docker compose stop db`, make another, then `docker compose start db`. Measured 2026-11-06: failed save 17:42:21 UTC, issue IMMUNE-CITADEL-API-1, alert fired 17:42:33, email received.
+
+## Alert: API down
+
+Better Stack emails when `/health` fails and still fails 60 s later. Meaning: the API does not answer, or it started without its database. Impact: no player can save or load. Diagnosis: Render → the API → Events (deploy failed?) and Logs (`startup failed`). Mitigation: Rollback (above); if the database is down, Render → the database → Events.

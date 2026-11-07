@@ -16,6 +16,7 @@ test('the game served by Compose calls the API port Compose publishes, and the A
 test('the API starts the same way everywhere, and Compose takes the Sentry DSN from .env only', () => {
   assert.equal(JSON.parse(read('server/package.json')).scripts.start, 'node index.js');
   assert.match(read('server/Dockerfile'), /CMD \["npm", "start"\]/);
+  assert.equal(read('render.yaml').match(/startCommand: cd server && exec npm start/g).length, 2, 'exec, so a deploy\'s SIGTERM reaches the API and not only a shell');
   assert.match(compose, /SENTRY_DSN: \$\{SENTRY_DSN:-\}/);
   assert.doesNotMatch(compose + read('.env.example'), /ingest\.[a-z.]*sentry\.io/, 'no real DSN in tracked files');
   assert.match(read('.gitignore'), /^\.env$/m);
