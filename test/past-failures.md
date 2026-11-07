@@ -2,7 +2,7 @@
 
 Every failure that reached a player, `dev` or a review, as a closed question for the QA agent (stage 1, `tools/qa.js`). Whenever a pull request changes a file a line names, stage 1 asks that line again, 3 times, and anything but YES fails the merge. Each line was proven on the real model when added: NO on the code just before its fix, YES after, 3 times of 3 (2026-11-07).
 
-A bug fix adds its line here in the same pull request, in the same form: `- [<issue or PR>] <file>[, <file>]: <question>`, phrased so YES means right, about the behaviour, never "does X appear". Stage 1 reads this file from the base branch, so a new line counts from the next pull request on.
+A bug fix adds its line here in the same pull request, in the same form: `- [<issue or PR>] <file>[, <file>]: <question>`, phrased so YES means right, about the behaviour, never "does X appear". Stage 1 reads this file from the base branch, so a new line counts from the next pull request on. How to write a good check: `AGENTS.md`, **Test plan**.
 
 - [#1] index.html: When a B Cell antibody cloud lands, do flying pathogens such as Influenza inside its splash get tagged by the antibodies (opsonized, so they take extra damage from other cells), rather than being skipped by the cloud entirely?
 - [#2] index.html: In the Heroic challenge (shown to players as Acute), does the player start with more than 1 vitality, so a single leaked spore does not end the run, while the Iron challenge (shown as Chronic) still starts with exactly 1 vitality?
