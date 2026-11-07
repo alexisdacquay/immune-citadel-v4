@@ -36,7 +36,6 @@ All of it runs on dev today; production gets it at the next promotion ([OBSERVAB
 
 | Item | When |
 |---|---|
-| sign [DPIA.md](DPIA.md) | before step 6 (production) |
 | playtest (#18), approve the promotion (#19) | before step 6 |
 
 ## Parked by the owner

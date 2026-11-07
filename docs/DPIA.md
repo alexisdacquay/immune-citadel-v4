@@ -1,6 +1,6 @@
 # Data protection impact assessment
 
-Status: **draft, to be signed by the owner before gameplay events reach production** (step 6). Dev runs them first: it has no real players, only the owner and the team, and its data proves the design this assessment describes. Headings follow the ICO template ([Children's Code, standard 2](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/childrens-information/childrens-code-guidance-and-resources/age-appropriate-design-a-code-of-practice-for-online-services/2-data-protection-impact-assessments/)). Review it when anything that leaves the browser changes.
+Status: **signed by the owner on 2026-11-07** (sign-off below); gameplay events may reach production at step 6. Dev runs them first: it has no real players, only the owner and the team, and its data proves the design this assessment describes. Headings follow the ICO template ([Children's Code, standard 2](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/childrens-information/childrens-code-guidance-and-resources/age-appropriate-design-a-code-of-practice-for-online-services/2-data-protection-impact-assessments/)). Review it when anything that leaves the browser changes.
 
 ## The service
 
@@ -54,4 +54,4 @@ Status: **draft, to be signed by the owner before gameplay events reach producti
 
 | Role | Name | Date |
 |---|---|---|
-| owner | | |
+| owner | Alexis Dacquay | 2026-11-07 |
