@@ -70,12 +70,7 @@ The server adds the **date** it received the request (no time of day): one day i
 
 ## How events travel
 
-```mermaid
-flowchart LR
-    G["game<br/>(stats switch on)"] -- "open: at once<br/>rest: at each level end and on hide" --> A["save API<br/>POST /api/play"]
-    A -- "valid events only" --> T[("Postgres<br/>table events")]
-    T --> V["SQL views<br/>funnel, level_stats,<br/>card_reads, sittings"]
-```
+![Game (stats switch on) posts events to the save API at /api/play; only valid events reach the Postgres events table, read by four SQL views](diagrams/events-flow.svg)
 
 | Rule | Detail | Why |
 |---|---|---|
