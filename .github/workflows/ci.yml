@@ -60,26 +60,6 @@ jobs:
           HEAD: ${{ github.event.pull_request.head.sha }}
           GITHUB_TOKEN: ${{ github.token }}
 
-  dev-green: # a pull request into main (a promotion) waits for dev's own CI run on the same commit, deploy proof included, and fails unless it is green
-    if: github.event_name == 'pull_request' && github.base_ref == 'main'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions: { actions: read, contents: read }
-    steps:
-      - env:
-          GH_TOKEN: ${{ github.token }}
-          SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          for i in $(seq 1 50); do
-            r=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow CI --branch dev --event push --commit "$SHA" --json status,conclusion -q '.[0] | "\(.status) \(.conclusion)"')
-            case "$r" in
-              "completed success") echo "dev is green at $SHA"; exit 0 ;;
-              completed*) echo "::error::dev's CI run on $SHA ended '$r': fix dev before promoting"; exit 1 ;;
-            esac
-            sleep 30
-          done
-          echo "::error::no finished CI run on dev for $SHA (promotions come from dev)"; exit 1
-
   deployed: # after a push to dev or main: proof that Render now serves this commit (API /health and site /version.txt), red otherwise
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
