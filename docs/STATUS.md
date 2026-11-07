@@ -41,8 +41,7 @@ All of it runs on dev today; production gets it at the next promotion ([OBSERVAB
 
 | Item | Note |
 |---|---|
-| public repo (#28) | "not yet" |
-| on-call agent (#27) | stopped |
+| on-call agent (#27), observability 2/2 (#70) | roadmap, P1 (rubric points: +2 and +1) |
 | Chronic challenge balance (#20) | roadmap, P2; target when picked up: the bot wins about 5 of 6 |
 
 ## Decisions (2026-11-07)
@@ -53,6 +52,7 @@ All of it runs on dev today; production gets it at the next promotion ([OBSERVAB
 | QA agent as a required CI check; merges into `dev` automatic on green, production by the owner only (#61) | a human or an agent arming each merge |
 | `dev` merges without the up-to-date rule; `main` keeps it and needs `dev` green (#63) | GitHub's merge queue (needs Enterprise Cloud on a private repo) |
 | diagrams with `diagram-design`, light, never Mermaid | Mermaid |
+| repository public; the owner's IP removed from every file and from history (#68); GitHub Support asked to purge old pull-request copies | a fresh repository (would lose the issue and pull-request evidence) |
 
 ## Decisions (2026-11-06)
 
