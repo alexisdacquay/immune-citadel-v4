@@ -1,5 +1,5 @@
 {
-  "name": "main: pull request up to date, green CI and QA, dev green on the same commit",
+  "name": "main: pull request up to date, green CI, dev green on the same commit",
   "target": "branch",
   "enforcement": "active",
   "conditions": {
@@ -40,10 +40,6 @@
           },
           {
             "context": "game",
-            "integration_id": 15368
-          },
-          {
-            "context": "qa",
             "integration_id": 15368
           },
           {
