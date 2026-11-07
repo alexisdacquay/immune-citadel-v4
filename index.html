@@ -2541,7 +2541,7 @@ function showInfo(o) {
       <div class="perk wide">Holds one pathogen and stings flyers too. Tap or click near the path to send it.${S.kit.gz ? `<div class="skt"><span class="skn">★ Granzyme Burst · E</span><span class="skd"><br>${Math.round(L.dmg * G.k)} damage and a ${G.stun} s stun to everything within ${G.r}. Every ${G.cd} s.</span></div>` : ''}</div>`; // Granzyme joins at specimen 05
   } else if (o.kind === 'enemy') {
     const D = ENEMIES[o.type], e = o.e;
-    const hp = e ? Math.ceil(Math.max(0, e.hp)) : Math.round(D.hp * LVLMULT[S.lvl || 0] * S.M.hp * (1 + Math.max(0, S.wave - 1) * .045));
+    const hp = e ? Math.ceil(Math.max(0, e.hp)) : Math.round(D.hp * LVLMULT[S.lvl || 0] * S.M.hp * (DIFF[save.diff] || DIFF.normal).hp * (S.mode === 'campaign' ? CAMPHP[S.lvl || 0] : 1) * (1 + Math.max(0, S.wave - 1) * .045)); // same factors as sendWave
     html = `<div class="por"><img src="${portrait(o.type)}"></div><div class="meta"><small>${D.kind}${D.flying ? ' · flying' : ''}</small><b>${D.name}</b><span>${D.desc}</span></div>
       <div class="sv">${sv('HEALTH', e ? `${hp}<i>/${Math.round(e.max)}</i>` : hp)}${sv('COAT', Math.round(Math.max(0, D.armor - (e ? e.shred : 0)) * 100) + '%')}${sv('TOUGH', Math.round(D.mr * 100) + '%')}${sv('BREACH', '−' + D.lives, null, 'opt')}</div>`;
   }
