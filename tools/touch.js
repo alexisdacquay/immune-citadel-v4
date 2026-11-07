@@ -77,6 +77,21 @@ module.exports = async function touch(browser, out, errs) {
     if (!base) base = lay.cover;
     else lay.cover.forEach((c, li) => { fail(c.slots <= base[li].slots, `level ${li + 1}: HUD covers ${c.slots} build sites (baseline ${base[li].slots})`); fail(c.path <= base[li].path + .01, /* 1 point: route samples grazing a panel edge */ `level ${li + 1}: HUD covers ${(c.path * 100).toFixed(1)}% of the routes (baseline ${(base[li].path * 100).toFixed(1)}%)`); });
     if (V.w < 1000 && V.touch) fail(lay.gut, 'phone landscape should move controls and abilities into the side gutters');
+    // wave marker tips (#23): every marker of every specimen, first wave and a later early-call tip, stays on screen and off the ability buttons
+    const tipBad = await p.evaluate(async () => {
+      const out = [], frame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const check = (li, tag) => { const st = document.getElementById('stage').getBoundingClientRect();
+        const abs = [...document.querySelectorAll('.ab')].filter(e => !e.hidden && e.getBoundingClientRect().width).map(e => e.getBoundingClientRect());
+        document.querySelectorAll('.wcall').forEach((b, bi) => { if (b.hidden) return; const r = b.querySelector('.tip').getBoundingClientRect();
+          const on = r.left >= st.left - .5 && r.right <= st.right + .5 && r.top >= st.top - .5 && r.bottom <= st.bottom + .5, hit = abs.some(a => r.left < a.right && a.left < r.right && r.top < a.bottom && a.top < r.bottom);
+          if (!on || hit) out.push(`specimen ${li + 1} ${tag} marker ${bi + 1}:${on ? '' : ' off-screen'}${hit ? ' over an ability button' : ''}`); }); };
+      for (let li = 0; li < IC.LEVELS.length; li++) {
+        IC.startLevel(li); await frame(); check(li, 'first wave');
+        IC.sendWave(); IC.S.spawnQ.length = 0; await frame(); check(li, 'early call');
+      }
+      IC.startLevel(0); await frame(); return out;
+    });
+    fail(!tipBad.length, `wave marker tips: ${tipBad.join('; ')}`);
     report.push(`${tag}: gutters ${lay.gut ? 'on' : 'off'} · build sites under HUD ${lay.cover.map(c => c.slots).join('/')} · route under HUD ${lay.cover.map(c => (c.path * 100).toFixed(1) + '%').join('/')}`);
 
     // build: touch = preview + confirm on the first tap, buy on the second; mouse = buy on the click
