@@ -29,8 +29,7 @@ All of it runs on dev today; production gets it at the next promotion ([OBSERVAB
 | # | Work | Why this order |
 |---|---|---|
 | 1 | owner playtest (#18), then promotion to production (#19) with observability step 6 | production is three days behind dev; no open bug left |
-| 2 | Chronic challenge balance (#20): settle a target win rate, then tune | the bot wins it 2 times in 6 |
-| 3 | QA agent: count real catches and false alarms on each pull request until 2026-11-21, then decide the next QA check | add QA checks only where they earn their cost |
+| 2 | QA agent: count real catches and false alarms on each pull request until 2026-11-21, then decide the next QA check | add QA checks only where they earn their cost |
 
 ## Waiting on the owner
 
@@ -44,6 +43,7 @@ All of it runs on dev today; production gets it at the next promotion ([OBSERVAB
 |---|---|
 | public repo (#28) | "not yet" |
 | on-call agent (#27) | stopped |
+| Chronic challenge balance (#20) | roadmap, P2; target when picked up: the bot wins about 5 of 6 |
 
 ## Decisions (2026-11-07)
 
