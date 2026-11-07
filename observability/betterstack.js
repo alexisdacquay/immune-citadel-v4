@@ -1,12 +1,14 @@
 // Better Stack uptime checks for the game sites (docs/OBSERVABILITY-PLAN.md, step 4): creates or updates them, by URL.
 // node observability/betterstack.js   (BETTERSTACK_API_TOKEN: Better Stack -> Settings -> API tokens, Uptime)
-// HEAD every 5 min: proves the site answers without downloading the game. The save APIs are left out while they are on
-// Render's Free plan: a check every few minutes would keep them awake and use up the workspace's free hours.
+// Every 5 min. Sites: HEAD, proves the site answers without downloading the game. Save APIs (Starter plan since 2026-11-06,
+// always on): GET /health, which also proves the API reached its database at startup.
+const COMMON = { monitor_type: 'status', http_method: 'head', check_frequency: 300, email: true, recovery_period: 0, confirmation_period: 60 };
 const MONITORS = [
   { pronounceable_name: 'Immune Citadel game (production)', url: 'https://immune-citadel-v4.onrender.com/' },
   { pronounceable_name: 'Immune Citadel game (dev)', url: 'https://immune-citadel-v4-dev.onrender.com/' },
+  { pronounceable_name: 'Immune Citadel save API (production)', url: 'https://immune-citadel-v4-api.onrender.com/health', http_method: 'get' },
+  { pronounceable_name: 'Immune Citadel save API (dev)', url: 'https://immune-citadel-v4-api-dev.onrender.com/health', http_method: 'get' },
 ];
-const COMMON = { monitor_type: 'status', http_method: 'head', check_frequency: 300, email: true, recovery_period: 0, confirmation_period: 60 };
 
 const API = 'https://uptime.betterstack.com/api/v2/monitors', TOKEN = (process.env.BETTERSTACK_API_TOKEN || '').trim();
 if (!TOKEN) { console.error('Set BETTERSTACK_API_TOKEN'); process.exit(1); }
