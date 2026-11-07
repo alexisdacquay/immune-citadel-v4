@@ -10,6 +10,8 @@
 
 All on Render, Frankfurt. Dev mirrors production: the same services on the same plans, and only data, secrets, branch and alert routing differ (owner, 2026-11-06: everything is production grade). Per environment: a static site, a Node web service on the Starter plan (always on, health-check gated deploys), and its own Postgres 18 on `basic_256mb` (point-in-time recovery and daily backups): `immune-citadel-v4-prod-db` with schema `prod`, `immune-citadel-v4-dev-db` with schema `dev`. `GET /health` on an API returns the commit it runs (production from its next release), e.g. `{"ok":true,"commit":"13c5715…"}`; Render uses it as the health check, so a broken API deploy never takes traffic.
 
+[render.yaml](../render.yaml) declares all six resources; Render applies it through Blueprint `exs-dbndeu7f3r2c738bllag` (first sync 2026-11-06 adopted the existing services, moved both APIs from Free to Starter, and grew the dev database disk to 15 GB like production). Change a plan or setting there, never in the dashboard: Render's API refuses a Free-to-paid change on a service, a Blueprint sync does not. The Blueprint reads `issue/57-prod-grade-infra` with auto-sync off until `render.yaml` reaches `main`; then point it at `main` with auto-sync on, so only the owner's merge into production changes infrastructure.
+
 Settings on a Render static site: build `mkdir -p public && cp index.html public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt`, publish directory `public`, variable `SKIP_INSTALL_DEPS=true`. Only the game is public (the default would publish the whole checkout, server code and `node_modules` included), and `/version.txt` shows the commit the site runs.
 
 ## Releases
