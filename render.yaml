@@ -3,6 +3,8 @@
 # plan or a service setting in the dashboard.
 # Owner, 2026-11-06: everything is live production grade; dev mirrors production.
 # The two environments are identical except data, secrets, branch and origins.
+# Database IP allowlists are set in Render only, never here: they hold the owner's personal IP. Omitted, a sync keeps
+# the current list (Render Blueprint spec); a database created from scratch would accept any IP with valid credentials.
 
 databases:
   - name: immune-citadel-v4-prod-db
@@ -12,9 +14,6 @@ databases:
     databaseName: immune_citadel_v4_prod
     user: immune_citadel_v4_prod
     diskSizeGB: 15
-    ipAllowList:
-      - source: [owner IP removed]/32
-        description: owner machine (Claude Code), read-only queries, set 2026-11-06
   - name: immune-citadel-v4-dev-db
     plan: basic-256mb
     region: frankfurt
@@ -22,9 +21,6 @@ databases:
     databaseName: immune_citadel_v4_db
     user: immune_citadel_v4_db_user
     diskSizeGB: 15
-    ipAllowList:
-      - source: [owner IP removed]/32
-        description: owner machine (Claude Code), read-only queries, set 2026-11-06
 
 services:
   # Production: deploys every commit on main.

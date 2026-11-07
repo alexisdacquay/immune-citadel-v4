@@ -55,7 +55,7 @@ A small AI agent team works from GitHub issues: see [AGENTS.md](AGENTS.md) (wher
 | # | Criterion | Where to look |
 |---|---|---|
 | 1 | Problem description | [The problem](#the-problem), [What it does](#what-it-does) |
-| 2 | Product specification | [docs/SPEC.md](docs/SPEC.md); the tracker is [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues): each task has acceptance criteria, e.g. [#24](https://github.com/alexisdacquay/immune-citadel-v4/issues/24), [#25](https://github.com/alexisdacquay/immune-citadel-v4/issues/25), and [#21](https://github.com/alexisdacquay/immune-citadel-v4/issues/21) shows spec, engineer report and QA verdict by the agents |
+| 2 | Product specification | [docs/SPEC.md](docs/SPEC.md); the tracker is [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues): each task has acceptance criteria, e.g. [#24](https://github.com/alexisdacquay/immune-citadel-v4/issues/24), [#25](https://github.com/alexisdacquay/immune-citadel-v4/issues/25), and [#21](https://github.com/alexisdacquay/immune-citadel-v4/issues/21) shows spec, engineer report and QA verdict by the agents. Issues close when `dev` is promoted to production; until then a finished issue carries the label `status:on-dev` |
 | 3 | Agent team | [docs/TEAM.md](docs/TEAM.md) |
 | 4 | Context management | [AGENTS.md](AGENTS.md), pointing to SPEC, TEAM and OPERATIONS |
 | 5 | Application | game, save API and Postgres, end to end; `docker compose up` |
