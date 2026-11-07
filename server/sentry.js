@@ -2,7 +2,8 @@
 // Children's data stays home: no IP, headers, cookies, bodies, query strings, query parameters, local variables or browser identifier (user agent),
 // and any save code (the player's only credential) is replaced before anything leaves the process.
 const Sentry = require('@sentry/node');
-const CODE_ANYWHERE = /[A-HJ-NP-Z2-9]{16}/g; // the save-code alphabet, as in index.js
+const CODE_ANYWHERE = /(?![2-9]{16})[A-HJ-NP-Z2-9]{16}/g; // the save-code alphabet, as in index.js; not 16 digits in a row, which occur in hex trace IDs
+// shortcut: an all-digit save code (about 1 in 4 billion) is not replaced; hex IDs are lowercase, so they never contain one of its letters
 const scrub = item => JSON.parse(JSON.stringify(item, (k, v) => (/user.?agent/i.test(k) ? undefined : v)).replace(CODE_ANYWHERE, ':code')); // the span keeps user_agent.original even with httpHeaders off
 
 function initSentry(extra = {}) {
@@ -13,6 +14,7 @@ function initSentry(extra = {}) {
     release: process.env.RENDER_GIT_COMMIT,
     dataCollection: { userInfo: false, cookies: false, httpHeaders: false, httpBodies: [], urlQueryParams: false, databaseQueryData: false, stackFrameVariables: false },
     tracesSampler: ({ attributes }) => (['/health', '/api/play'].includes(attributes?.['url.path']) ? 0 : 1), // every request (a few thousand a month); not Render's health checks, not gameplay events (no third party sees play)
+    sendClientReports: false, // not even a count of the gameplay requests left out
     beforeSend: scrub, beforeSendSpan: scrub, beforeSendLog: scrub, beforeSendMetric: scrub, // v11 streams spans: beforeSendSpan covers traces
     ...extra,
   });

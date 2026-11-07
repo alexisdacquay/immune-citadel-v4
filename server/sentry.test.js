@@ -26,6 +26,27 @@ test('a failed save is reported to Sentry without the save code, the save, the I
   } finally { srv.close(); }
 });
 
+test('a failed load is reported even when the player has already left; a malformed path is no server error', async () => {
+  sent.length = 0;
+  const slow = { get: async () => { await new Promise(r => setTimeout(r, 200)); throw new Error('database down while loading'); }, put: async () => 'x' };
+  const srv = createServer(slow); await new Promise(r => srv.listen(0, r));
+  try {
+    const gone = new AbortController(); setTimeout(() => gone.abort(), 50);
+    await fetch(`http://localhost:${srv.address().port}/api/save/${CODE}`, { signal: gone.signal }).catch(() => {});
+    await new Promise(r => setTimeout(r, 300));
+    assert.equal((await fetch(`http://localhost:${srv.address().port}//`)).status, 404);
+    await Sentry.flush(2000);
+    const out = JSON.stringify(sent);
+    assert.match(out, /database down while loading/, 'a closed tab hides no database error');
+    assert.doesNotMatch(out, /Invalid URL/);
+  } finally { srv.close(); }
+});
+
+test('the scrub replaces save codes but leaves trace IDs whole', () => {
+  const { beforeSendLog } = Sentry.getClient().getOptions(), id = '2345678923456789abcdef0123456789';
+  assert.deepEqual(beforeSendLog({ trace_id: id, body: `saved ${CODE}` }), { trace_id: id, body: 'saved :code' });
+});
+
 test('request traces name the route, never the save code', async () => {
   sent.length = 0;
   const store = { get: async () => null, put: async () => new Date().toISOString(), play: async () => 0 };

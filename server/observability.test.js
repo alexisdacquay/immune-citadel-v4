@@ -34,7 +34,7 @@ const lines = text => text.split('\n').filter(l => l.startsWith('{')).map(l => J
 test('one save: trace, log line and metric share one trace ID with the Render log line, and nothing identifies the player', async () => {
   const sentry = await fakeSentry(), a = await startApi(`http://key@127.0.0.1:${sentry.port}/1`);
   try {
-    const res = await fetch(`${a.base}/api/save/${CODE}`, { method: 'PUT', headers: { 'content-type': 'application/json', 'user-agent': UA, 'cf-connecting-ip': IP, 'x-forwarded-for': IP }, body: JSON.stringify({ save: { marker: SECRET } }) });
+    const res = await fetch(`${a.base}/api/save/${CODE}?note=${SECRET}`, { method: 'PUT', headers: { 'content-type': 'application/json', 'user-agent': UA, 'cf-connecting-ip': IP, 'x-forwarded-for': IP }, body: JSON.stringify({ save: { marker: SECRET } }) });
     assert.equal(res.status, 200);
     await fetch(`${a.base}/api/play`, { method: 'POST', body: JSON.stringify({ page: '0123456789abcdef', release: '', events: [{ name: 'hide', t: 1 }] }) });
     await new Promise(r => { const s = net.connect(a.port, '127.0.0.1', () => { // a child closes the tab mid-save
@@ -50,11 +50,13 @@ test('one save: trace, log line and metric share one trace ID with the Render lo
     assert.equal(metrics.length, 1, 'one metric point for the save, delivered before exit');
     assert.equal(metrics[0].name, 'http.server.request.duration');
     assert.equal(metrics[0].attributes['http.response.status_code'].value, 200);
+    assert.equal(metrics[0].unit, 'second'); assert.ok(metrics[0].value > 0 && metrics[0].value < 5, 'the duration, in seconds');
     assert.ok(sentry.items.some(i => i.type === 'span' && i.raw.includes(render.trace_id)), 'the trace itself');
 
     const all = sentry.items.map(i => i.raw).join('\n');
     assert.doesNotMatch(all, new RegExp(`${CODE}|${SECRET}|${IP.replace(/\./g, '\\.')}|${UA.replace('.', '\\.')}`), 'no save code, save, IP or browser identifier');
     assert.doesNotMatch(all, /user_agent|\/api\/play/, 'no user agent field at all, and play never leaves');
+    assert.ok(!sentry.items.some(i => i.type === 'client_report'), 'not even a count of the gameplay requests left out');
     assert.equal(of('event').length, 0, 'a closed tab is not reported as an error');
     assert.ok(lines(a.out.text).some(l => l.msg === 'client left mid-upload'), 'but it is logged in Render');
   } finally { a.api.kill('SIGKILL'); sentry.close(); }
@@ -66,7 +68,7 @@ test('a deploy finishes a save in flight', async () => {
     const reply = new Promise(r => { const s = net.connect(a.port, '127.0.0.1', () => {
       const body = JSON.stringify({ save: { a: 1 } });
       s.write(`PUT /api/save/${CODE} HTTP/1.1\r\nHost: x\r\nContent-Type: application/json\r\nContent-Length: ${body.length}\r\n\r\n${body.slice(0, 5)}`);
-      setTimeout(() => { a.api.kill('SIGTERM'); setTimeout(() => s.write(body.slice(5)), 200); }, 100); // the stop arrives mid-upload
+      setTimeout(() => { a.api.kill('SIGTERM'); a.api.kill('SIGTERM'); setTimeout(() => s.write(body.slice(5)), 200); }, 100); // the stop arrives mid-upload, twice (npm passes on a copy)
       let got = ''; s.on('data', c => { got += c; s.end(); }).on('close', () => r(got)).on('error', () => r(got));
     }); });
     assert.match(await reply, /^HTTP\/1\.1 200/, 'the save completes');

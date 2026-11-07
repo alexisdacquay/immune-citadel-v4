@@ -128,13 +128,13 @@ function createServer(store) {
       res.writeHead(status, h); res.end(body === undefined ? '' : JSON.stringify(body));
       const line = { method: req.method, route: route(req.url), status, ms: Date.now() - t0 }, level = status >= 500 ? 'error' : 'info';
       if (req.url !== '/health') log[level](line, 'request');
-      if (line.route === '/api/save/:code') { // only saves and loads reach Sentry's logs and metrics: play stays home
+      if (line.route === '/api/save/:code' && req.method !== 'OPTIONS') { // only saves and loads reach Sentry's logs and metrics: play and CORS preflights stay home
         Sentry.logger[level]('request', line);
         Sentry.metrics.distribution('http.server.request.duration', line.ms / 1000, { unit: 'second', attributes: { 'http.request.method': req.method, 'http.route': line.route, 'http.response.status_code': status } }); // OpenTelemetry's name: its count is the rate, its status codes the errors
       }
     };
     try {
-      const url = new URL(req.url, 'http://x');
+      const url = new URL('http://x' + req.url); // a path like // is not a server error
       if (req.method === 'OPTIONS') return send(204);
       if (url.pathname === '/health' && req.method === 'GET') return send(200, { ok: true, commit: process.env.RENDER_GIT_COMMIT || 'local' }); // deploys wait for this commit
       if (url.pathname === '/api/play') return await playRoute(req, res, origin, send, store);
@@ -157,7 +157,7 @@ function createServer(store) {
       }
       send(405, { error: 'method not allowed' });
     } catch (e) {
-      if (req.readableAborted) return log.warn({ method: req.method, route: route(req.url) }, 'client left mid-upload'); // a closed tab is not a server error: no Sentry, no email
+      if (!req.complete) return log.warn({ method: req.method, route: route(req.url) }, 'client left mid-upload'); // a closed tab is not a server error: no Sentry, no email
       Sentry.captureException(e, { tags: { method: req.method, route: route(req.url) } }); // a failed save emails the owner (alert rule in Sentry)
       log.error({ err: e.message }, 'request failed'); send(500, { error: 'server error' });
     }
@@ -175,7 +175,7 @@ if (require.main === module) {
     await prune(); setInterval(prune, 864e5).unref(); // daily
     const port = +process.env.PORT || 8787;
     const server = createServer(store).listen(port, () => log.info(`save API on :${port}, ${process.env.DATABASE_URL ? `postgres schema ${SCHEMA}` : 'in-memory store'}, origins ${ORIGINS.join(' ') || 'none'}`));
-    process.once('SIGTERM', () => { // each deploy stops the old instance: finish the saves in flight, send buffered telemetry, then exit
+    process.on('SIGTERM', () => { // on, not once: npm may pass on a second copy of the signal // each deploy stops the old instance: finish the saves in flight, send buffered telemetry, then exit
       log.info('shutting down');
       server.close(() => Sentry.close(2000).finally(() => process.exit(0)));
       setTimeout(() => process.exit(1), 25000).unref(); // before Render's kill at 30 s
