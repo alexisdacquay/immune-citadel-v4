@@ -28,7 +28,7 @@ Settings on a Render static site: build `mkdir -p public && cp index.html public
 
 **Rules on `dev` and `main`** (GitHub rulesets, need GitHub Pro on a private repo; no force push, no deletion, nobody bypasses):
 - `dev` ([.github/rulesets/dev.json](../.github/rulesets/dev.json)): changes only through a pull request; `test`, `game` and `qa` must pass; the branch need not be up to date, so auto-merge never stalls; CI runs again on `dev` after each merge.
-- `main` ([.github/rulesets/main.json](../.github/rulesets/main.json), ruleset 26693579): the same checks on a branch that is up to date, plus `dev-green`: the promotion fails unless `dev`'s own CI run on that commit, deploy proof included, finished green.
+- `main` ([.github/rulesets/main.json](../.github/rulesets/main.json), ruleset 26693579): `test` and `game` on a branch that is up to date, plus `dev-green` from [promotion.yml](../.github/workflows/promotion.yml), a workflow that runs on pull requests into `main` only, so no push run reports a skipped `dev-green` that GitHub would count as passing (#75). QA judged each change on its way into `dev` (owner, 2026-11-07): the promotion fails unless `dev`'s own CI run on that commit, deploy proof included, finished green.
 - Owner, 2026-11-07: GitHub's merge queue needs Enterprise Cloud on a private repo, so the strict guarantee sits on the promotion, as DORA and trunk-based development advise.
 - Re-apply after an edit: `gh api -X PUT repos/alexisdacquay/immune-citadel-v4/rulesets/<id> --input .github/rulesets/<file>.json` (ids: `gh api repos/alexisdacquay/immune-citadel-v4/rulesets`).
 
