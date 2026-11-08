@@ -1,4 +1,4 @@
-// node --test server/  (in-memory store; the Postgres store is exercised by the dev deploy)
+// Save API unit tests on the in-memory store; Postgres is covered by test/integration.test.js.
 process.env.ALLOWED_ORIGINS = 'https://game.example'; process.env.LOG_LEVEL = 'silent';
 const test = require('node:test'), assert = require('node:assert');
 const { createServer, memoryStore } = require('./index.js');
@@ -75,4 +75,14 @@ test('gameplay events: only known shapes are stored, nothing else gets in', asyn
   let last; for (let i = 0; i < 61; i++) last = (await post(ev(start), { 'cf-connecting-ip': '5.6.7.8' })).status;
   assert.equal(last, 429, 'events have their own rate limit');
   assert.equal((await fetch(`${base}/api/save/ABCDEFGHJKMNPQRS`, { method: 'PUT', headers: { 'cf-connecting-ip': '5.6.7.8' }, body: JSON.stringify({ save: { a: 1 } }) })).status, 200, 'and never use up the save budget');
+});
+
+test('cloud saves untouched for 13 months are pruned, newer ones stay', async () => {
+  const store = memoryStore(), day = 864e5, at = d => new Date(Date.now() - d * day).toISOString();
+  store.saves.set('ABCDEFGHJKMNPQRS', { data: { a: 1 }, updatedAt: at(396) });
+  store.saves.set('ABCDEFGHJKMNPQRT', { data: { a: 2 }, updatedAt: at(394) });
+  await store.put('ABCDEFGHJKMNPQRU', { a: 3 });
+  assert.deepEqual(await store.prune(), { events: 0, saves: 1 });
+  assert.equal(await store.get('ABCDEFGHJKMNPQRS'), null, 'older than 395 days: deleted');
+  assert.ok(await store.get('ABCDEFGHJKMNPQRT') && await store.get('ABCDEFGHJKMNPQRU'), 'newer saves kept');
 });

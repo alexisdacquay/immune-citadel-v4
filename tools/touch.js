@@ -3,6 +3,8 @@
 // real taps or clicks on every control, two-tap buy on touch vs one-click buy with the mouse, >= 40 px touch targets,
 // HUD panels apart from each other and covering no more of the map than the 800x540 layout (the HUD's relative size on phones before),
 // safe-area insets respected, no page scroll or zoom, and the rotate card in portrait.
+// On every view, and on extra title-only views (laptop windows that letterbox the stage, a 667x375 phone): the title bar fits with nothing
+// drawn over anything else, the cloud button takes a real tap, the Field Guide's Back shows without scrolling, and "Your data" fits.
 const path = require('path'), fs = require('fs');
 const VIEWS = [
   { n: 'desk-s', w: 800, h: 540 }, // first: its map coverage is the baseline
@@ -10,6 +12,9 @@ const VIEWS = [
   { n: 'phone', w: 844, h: 390, touch: true, notch: true },
   { n: 'phone-xl', w: 932, h: 430, touch: true },
   { n: 'tablet', w: 1024, h: 768, touch: true },
+  // title only (launch audit, 2026-11-08): the name ran over the counters at these laptop sizes, and at 667x375 the cloud button ran off the screen
+  { n: 'laptop', w: 1280, h: 720, title: true }, { n: 'laptop-s', w: 1366, h: 657, title: true }, { n: 'laptop-l', w: 1536, h: 730, title: true }, { n: 'laptop-m', w: 1366, h: 768, title: true, name: true },
+  { n: 'phone-se', w: 667, h: 375, touch: true, title: true },
 ];
 const z18 = () => Array(18).fill(0), ST = z18(); ST[0] = 3; ST[1] = 2;
 const SAVE = JSON.stringify({ st: ST, hc: z18(), ic: z18(), rch: 17, hints: ['build', 'wave', 'upgrade', 'hero'], seen: ['bact', 'virus', 'staph', 'candida', 'spore', 'flu', 'worm', 'boss', 'salmon', 'toxo', 'rabies', 'virion'], viewed: [] }); // full kit (rch 17), every pathogen met: no intro or unlock card covers the layout checks
@@ -49,19 +54,47 @@ module.exports = async function touch(browser, out, errs) {
     };
     const shot = n => p.screenshot({ path: `${out}/touch-${V.n}-${n}.png` });
 
+    // title bar: every control on screen, none drawn over the next (the name over the counters at 1280x720, the cloud button cut at 667x375)
+    const bar = await ev(() => {
+      document.getElementById('cloudBtn').hidden = false; // shown only where a cloud API answers (not on file://); laid out the same
+      const B = document.querySelector('#titleOv .mbar'), b = B.getBoundingClientRect(), out = [];
+      const kids = [...B.children].filter(e => e.getBoundingClientRect().width);
+      if (B.scrollWidth > B.clientWidth + .5) out.push(`bar content ${B.scrollWidth} px wide in ${B.clientWidth} px`);
+      kids.forEach((e, i) => { const r = e.getBoundingClientRect(), g = document.createRange(); g.selectNodeContents(e);
+        const right = getComputedStyle(e).overflowX === 'visible' ? Math.max(r.right, g.getBoundingClientRect().right) : r.right; // what is painted, not just the box
+        if (r.left < Math.max(0, b.left) - .5 || right > Math.min(innerWidth, b.right) + .5) out.push(`${e.id || e.className} off the bar (${r.left | 0} to ${right | 0})`);
+        const n = kids[i + 1]; if (n && right > n.getBoundingClientRect().left + .5) out.push(`${e.id || e.className} drawn over ${n.id || n.className} (to ${right | 0}, next at ${n.getBoundingClientRect().left | 0})`); });
+      const c = document.getElementById('cloudBtn').getBoundingClientRect(), hit = document.elementFromPoint(c.left + c.width / 2, c.top + c.height / 2);
+      if (!hit || !hit.closest('#cloudBtn')) out.push('the cloud button is covered or clipped');
+      return out;
+    });
+    fail(!bar.length, `title bar: ${bar.join('; ')}`);
+    if (V.name) fail(await ev(() => getComputedStyle(document.querySelector('#titleOv .mbar .logo div')).display !== 'none'), 'the game name is hidden on a laptop bar where it fits (1366x768)');
+    await tap(...await mid('#cloudBtn'));
+    fail(await ev(() => !document.getElementById('cloudPop').hidden), 'a tap on the cloud button did not open the cloud panel');
+    await ev(() => { document.getElementById('cloudPop').hidden = true; });
+    // Field Guide from the title: Back on screen and uncovered as it opens, before any scroll (on landscape phones it was below the fold)
+    await tapSel('#guideBtn'); fail(await ev(() => IC.S.screen === 'guide'), 'guide button on the title');
+    const gb = await ev(() => { const r = document.getElementById('gBack').getBoundingClientRect(), h = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { t: r.top, b: r.bottom, l: r.left, r: r.right, hit: !!(h && h.closest('#gBack')) }; });
+    const gok = gb.t >= safe.t && gb.b <= safe.b && gb.l >= safe.l && gb.r <= safe.r && gb.hit;
+    fail(gok, `Field Guide Back not on screen when it opens: ${gb.t | 0} to ${gb.b | 0} of ${V.h}${gb.hit ? '' : ', covered'}`);
+    if (gok) await tap(...await mid('#gBack')); else await tapSel('#gBack'); // scroll to it, so one failure does not cascade
+    fail(await ev(() => IC.S.screen === 'title'), 'guide back to the title');
+
     // "Your data" fits the screen and its Play stats switch (the opt-out the DPIA relies on) takes a real tap: on a landscape
     // phone it used to run off the bottom, out of reach. The popover scrolls inside itself; a swipe there sets its scrollTop.
     await tapSel('#dataBtn');
-    const dp = await ev(() => { const P = document.querySelector('#dataPop'), r = P.getBoundingClientRect(); P.scrollTop = P.scrollHeight; return { top: r.top, bottom: r.bottom, on: document.querySelector('#statsTg').getAttribute('aria-checked') }; });
+    const dp = await ev(() => { const P = document.querySelector('#dataPop'), r = P.getBoundingClientRect(); document.querySelector('#statsTg').scrollIntoView({ block: 'nearest' }); return { top: r.top, bottom: r.bottom, on: document.querySelector('#statsTg').getAttribute('aria-checked') }; });
     fail(dp.top >= 0 && dp.bottom <= V.h, `"Your data" runs off the screen: ${dp.top | 0} to ${dp.bottom | 0}`);
     await tapSel('#statsTg');
     fail(await ev(() => document.querySelector('#statsTg').getAttribute('aria-checked')) !== dp.on, 'a tap on the Play stats switch did not turn it');
     await tapSel('#statsTg'); await tapSel('#dataBtn'); // back as it was, popover closed
     fail(await ev(() => document.querySelector('#dataPop').hidden), '"Your data" did not close');
+    if (V.title) { await ctx.close(); continue; }
 
     // tray
     await shot('tray');
-    await sizes('.slide:not(.locked),.chb,.mbtn,.lnode:not(.locked) .hit,.lch:not(.locked) .hit', 'tray');
+    await sizes('.slide:not(.locked),.chb,.mbtn,.seg button,.lnode:not(.locked) .hit,.lch:not(.locked) .hit', 'tray');
     await openLevel(0); await p.waitForTimeout(300);
     fail(await ev(() => IC.S.screen === 'play' && IC.S.lvl === 0), 'tap on the first slide did not start it');
 

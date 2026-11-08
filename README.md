@@ -1,10 +1,16 @@
 # Immune Citadel
 
+[![CI on dev](https://github.com/alexisdacquay/immune-citadel-v4/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/alexisdacquay/immune-citadel-v4/actions/workflows/ci.yml?query=branch%3Adev)
+
 **A tower-defence game inside the human body, for teens aged 12 to 15.** Bacteria, viruses, fungi and parasites pour into the body, and you grow immune cells beside their route to stop them. Each cell fights the way it really does in the body, so to win you have to learn what each one is good at.
+
+**Built with:** vanilla JavaScript on an HTML canvas (the whole game is one `index.html`), a Node 22 save API (`node:http`, `pg`, `pino`), Postgres, Docker Compose with nginx, Playwright tests, GitHub Actions, Render (Frankfurt), Sentry (EU) and Better Stack; built by Claude Code and checked by a DeepSeek QA agent.
 
 ![Level 1, The Splinter, in play: a glowing route through the skin, immune cells grown beside it, and the red marker that calls the next wave; vitality, ATP and the wave count at the top, the hero and ability buttons at the bottom](docs/screenshots/play.jpg)
 
 **Play it in the browser:** https://immune-citadel-v4.onrender.com (production) · https://immune-citadel-v4-dev.onrender.com (dev, the newest changes). Free, no account, on a laptop, a tablet or a phone held sideways.
+
+**Reviewers:** every course criterion, with the points claimed and a proof you can open without logging in, is in [For reviewers](#for-reviewers).
 
 [The problem](#the-problem) · [What it does](#what-it-does) · [Screenshots](#screenshots) · [Run it](#run-it) · [Test it](#test-it) · [How it fits together](#how-it-fits-together) · [How it is built](#how-it-is-built) · [For reviewers](#for-reviewers)
 
@@ -52,8 +58,9 @@ Every level can be won with the cells unlocked by then: a bot plays all 18 in th
 
 ### Saves and privacy
 
-- **Saves without an account.** Progress is kept in the browser. The first save also creates a 16-character save code and a copy in the cloud. Typing the code on another device continues the game there; the two devices' progress is merged, never overwritten.
-- **No names, no ads, no chat.** The game sends a few anonymous play stats (which level, the outcome, how long a card stays open) to its own database, never the save code. Each page load, and any crash, also sends a report to Sentry, which keeps reports in the EU. A report has no name and no internet address in it; Sentry's servers see the address in transit but are set never to keep it. A switch under "Your data" on the title screen turns the play stats off. What is and is never collected: [docs/EVENTS.md](docs/EVENTS.md); the data protection impact assessment, signed by the owner: [docs/DPIA.md](docs/DPIA.md).
+- **Saves without an account.** Progress is kept in the browser. The first save also creates a 16-character save code and a copy in the cloud. Typing the code on another device continues the game there; the two devices' progress is merged, never overwritten (except when two devices sync at the same moment: the cloud then keeps the last write until the other device syncs again, [#104](https://github.com/alexisdacquay/immune-citadel-v4/issues/104)). A cloud save not updated for 13 months is deleted automatically; a browser that still has the game uploads its progress again at the next visit.
+- **No names, no ads, no chat.** The game sends a few anonymous play stats (which level, the outcome, how long a card stays open) to its own database, never the save code. Each page load (only while play stats are on) and any crash also sends a report to Sentry, which keeps reports in the EU. A report has no name and no internet address in it; Sentry's servers see the address in transit but are set never to keep it. A switch under "Your data" on the title screen turns the play stats, and the page-load reports, off. What is and is never collected: [docs/EVENTS.md](docs/EVENTS.md); the data protection impact assessment, signed by the owner: [docs/DPIA.md](docs/DPIA.md).
+- **Questions.** Open a [GitHub issue](https://github.com/alexisdacquay/immune-citadel-v4/issues); no response time is promised. Never post a save code there: issues are public and the code is the only key to a save. Without the code nobody can find a save, so there is no deletion on request: an unused cloud save is deleted after 13 months.
 
 ## Screenshots
 
@@ -81,7 +88,7 @@ Every level can be won with the cells unlocked by then: a bot plays all 18 in th
 Needs Docker.
 
 ```bash
-docker compose up
+docker compose up --build
 ```
 
 The game is at http://localhost:8080 and the save API at http://localhost:8787, with its own Postgres. To also send save API errors to Sentry, copy `.env.example` to `.env` and fill in `SENTRY_DSN`; without it, Sentry is off.
@@ -134,7 +141,7 @@ A small AI agent team builds the game, with one human owner who sets priorities,
    - `qa-review`, stage 2, **advisory**. An open review against the issue's acceptance criteria. It comments and never blocks; every finding is fixed or answered before a promotion.
 4. GitHub merges the pull request into `dev` as soon as `test`, `game` and `qa` are green. No human merges into `dev`.
 5. Render deploys every commit on `dev`, and CI's `deployed` job proves that commit is live, then runs a read-only smoke and privacy check on it ([tools/smoke.js](tools/smoke.js)).
-6. Production moves only when the owner merges `dev` into `main`.
+6. Production moves only through a promotion: a pull request from `dev` into `main`, merged once the owner gives a written go.
 
 Where to read more:
 
@@ -150,19 +157,21 @@ Where to read more:
 
 ## For reviewers
 
-Immune Citadel is a project for the [DataTalksClub AI Dev Tools Zoomcamp](https://github.com/DataTalksClub/ai-dev-tools-zoomcamp/tree/main/project). Each criterion below points to where it is met.
+Immune Citadel is a project for the [DataTalksClub AI Dev Tools Zoomcamp](https://github.com/DataTalksClub/ai-dev-tools-zoomcamp/tree/main/project). One row per criterion, with the rubric's top band in short, the points claimed, and a proof a logged-out reader can open.
 
-| # | Criterion | Where to look |
-|---|---|---|
-| 1 | Problem description | [The problem](#the-problem), [What it does](#what-it-does) |
-| 2 | Product specification | [docs/SPEC.md](docs/SPEC.md); the tracker is [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues): each task has acceptance criteria, e.g. [#24](https://github.com/alexisdacquay/immune-citadel-v4/issues/24), [#25](https://github.com/alexisdacquay/immune-citadel-v4/issues/25). [#21](https://github.com/alexisdacquay/immune-citadel-v4/issues/21) shows the agents' spec, engineer report and QA verdict, including a first FAIL that went back for a fix. Issues close when `dev` is promoted to production; until then a finished issue stays open, meant to carry the label `status:on-dev` (the most recent ones do not yet) |
-| 3 | Agent team | [docs/TEAM.md](docs/TEAM.md): the owner, the main Claude Code session (plans, designs, builds), an independent DeepSeek QA agent in CI, panels of short-lived subagents for wide questions, and a bug-fixer subagent, paused by the owner |
-| 4 | Context management | [AGENTS.md](AGENTS.md), read first by every agent ([CLAUDE.md](CLAUDE.md) points to it), pointing to STATUS, SPEC, TEAM and OPERATIONS; the team loop is a skill ([.claude/skills/team-loop](.claude/skills/team-loop/SKILL.md)) |
-| 5 | Application | the game, the save API and Postgres, end to end: `docker compose up`, then http://localhost:8080; [Run it](#run-it) |
-| 6 | Testing | `npm test`: unit and integration tests ([server/](server), [test/](test)); `npm run test:game`: a bot plays every level, plus phone and tablet layouts ([tools/test.js](tools/test.js), [tools/touch.js](tools/touch.js)); the QA agent asks the builder's checks and the [past failures](test/past-failures.md) on every pull request ([tools/qa.js](tools/qa.js)). [Test it](#test-it), [How it is built](#how-it-is-built) |
-| 7 | Containerization | [compose.yaml](compose.yaml) (game, save API, Postgres, with health checks), [server/Dockerfile](server/Dockerfile) |
-| 8 | Deployment | Render, Frankfurt, declared in [render.yaml](render.yaml): production and dev, each a static site, a Node API and its own Postgres; the URLs at the top; [docs/OPERATIONS.md](docs/OPERATIONS.md) |
-| 9 | CI/CD | [CI](.github/workflows/ci.yml): `test` and `game` on every pull request and every push to `dev` and `main`; on pull requests into `dev`, QA stage 1 `qa` (required) and stage 2 `qa-review` (advisory). GitHub merges into `dev` once `test`, `game` and `qa` are green; Render deploys every commit on `dev`, and the `deployed` job proves it is live and runs a read-only smoke and privacy check ([tools/smoke.js](tools/smoke.js)); production moves only when the owner merges `dev` into `main`: [docs/OPERATIONS.md](docs/OPERATIONS.md#releases) |
-| 10 | Observability | one save followed end to end: its trace, log line and duration metric (`http.server.request.duration`) share one trace ID in Sentry (EU), the same ID as its log line in Render (on dev; on production since 2026-11-08, a trace and a log line seen, the metric not checked yet); uptime checks on both sites and both APIs; no player data leaves. Reviewers cannot log into Sentry: a test rebuilds the chain on any machine, [Follow one save](docs/OPERATIONS.md#follow-one-save); all signals: [docs/OPERATIONS.md](docs/OPERATIONS.md#telemetry) |
-| 11 | Alerting on user impact | "Save API error" in Sentry emails the owner, as code: [observability/sentry-alert.json](observability/sentry-alert.json) (dev and production). Game crashes: [observability/sentry-game-alert.json](observability/sentry-game-alert.json). A site or API down: Better Stack, [observability/betterstack.js](observability/betterstack.js). Runbooks in [docs/OPERATIONS.md](docs/OPERATIONS.md) |
-| 12 | On-call agent | not built yet: [#27](https://github.com/alexisdacquay/immune-citadel-v4/issues/27) (P1, roadmap) waits on an owner decision about its design; see [docs/STATUS.md](docs/STATUS.md#waiting-on-the-owner) |
+| # | Criterion: top band | Points claimed | Proof |
+|---|---|---|---|
+| 1 | **Problem description:** the README describes the problem, what the system does and how it behaves | 2 / 2 | The README opens with the teaching problem, then how the game plays and teaches. [The problem](#the-problem), [What it does](#what-it-does) |
+| 2 | **Product specification:** a spec, a public tracker, tasks with acceptance criteria, evidence that agents used it | 2 / 2 | The spec writes each player journey as acceptance criteria; most issues from #19 on carry their own, and the agents post their spec, reports and QA verdicts on the issues. [docs/SPEC.md](docs/SPEC.md), [#25](https://github.com/alexisdacquay/immune-citadel-v4/issues/25) (acceptance criteria), [#21](https://github.com/alexisdacquay/immune-citadel-v4/issues/21) (spec, engineer report, a QA FAIL, then a PASS) |
+| 3 | **Agent team:** the agent team and how it works together | 2 / 2 | TEAM names each role, what it owns and never does, and the loop from an issue to production. [docs/TEAM.md](docs/TEAM.md) |
+| 4 | **Context management:** AGENTS.md pointing to modular docs | 2 / 2 | AGENTS.md, which [CLAUDE.md](CLAUDE.md) loads, sends each agent to STATUS, SPEC, TEAM, OPERATIONS and the plans. [AGENTS.md](AGENTS.md), [team-loop skill](.claude/skills/team-loop/SKILL.md) |
+| 5 | **Application:** full stack end to end, data in a database, one command locally | 2 / 2 | `docker compose up --build` runs the game, the save API and Postgres; a save made in one browser continues in another. [Run it](#run-it), [test/integration.test.js](test/integration.test.js) |
+| 6 | **Testing:** unit and integration tests, one command, passing | 2 / 2 | `npm test` runs the unit tests, then the integration tests on the Docker stack; both pass in CI on `dev` (the run lists `test` and `game` green; the Actions log, which names each test file, needs a GitHub login). [Test it](#test-it), [a green CI run on dev](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42480697284) |
+| 7 | **Containerization:** the whole system, database included, with one Compose command | 2 / 2 | One Compose file starts the game (nginx), the save API and Postgres, each with a health check. [compose.yaml](compose.yaml), [server/Dockerfile](server/Dockerfile) |
+| 8 | **Deployment:** reachable at a public URL | 2 / 2 | Production and dev run on Render, declared in [render.yaml](render.yaml); each API's `/health` and each site's `/version.txt` name the commit that is live. Production: [/health](https://immune-citadel-v4-api.onrender.com/health), [/version.txt](https://immune-citadel-v4.onrender.com/version.txt). Dev: [/health](https://immune-citadel-v4-api-dev.onrender.com/health), [/version.txt](https://immune-citadel-v4-dev.onrender.com/version.txt) |
+| 9 | **CI/CD:** CI runs the tests, CD deploys to dev, a manual deploy to production | 3 / 3 | CI tests every pull request, Render deploys every commit on `dev`, and production moves only through a promotion pull request into `main` that the owner approves in writing. [Promotion #113](https://github.com/alexisdacquay/immune-citadel-v4/pull/113), [its deployed run](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42478940135), [OPERATIONS, Releases](docs/OPERATIONS.md#releases) |
+| 10 | **Observability:** a key journey with metrics, traces and structured logs sharing a trace ID, no customer data, viewable in a UI | 2 / 2 | One save gives Sentry (EU) a trace, a log line and a duration metric under one trace ID, the same ID as its Render log line, with no player data. Screenshots of one real save in Sentry's UI: [Follow one save](docs/OPERATIONS.md#follow-one-save); a test rebuilds the chain on any machine: [server/observability.test.js](server/observability.test.js) |
+| 11 | **Alerting on user impact:** at least one alert | 1 / 1 | A failed save or load (save API error) and a game crash email the owner, both defined as code; Better Stack emails when a site or an API is down. [The alert in Sentry, with a real firing](docs/OPERATIONS.md#alert-save-api-error), [observability/sentry-alert.json](observability/sentry-alert.json) |
+| 12 | **On-call agent:** wakes on an alert and fixes the issue | 0 / 2 until its first drill | Built: a Sentry alert opens an issue here, the agent wakes on it, finds the cause, and opens a pull request into `dev` with the fix and a regression test, tested sealed. The first real drill is recorded after the owner's setup. [OPERATIONS, On-call agent](docs/OPERATIONS.md#on-call-agent), [.github/workflows/oncall.yml](.github/workflows/oncall.yml) |
+
+**Claimed: 22 of 24 points.**

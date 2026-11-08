@@ -2,27 +2,42 @@
 
 Where the project stands and what comes next, on one page. It is updated at the end of every step; the details live in the linked plans, and the backlog is [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues).
 
-Last update: 2026-11-08, for the promotion of 2026-11-08 (fonts [#108](https://github.com/alexisdacquay/immune-citadel-v4/pull/108), smoke [#107](https://github.com/alexisdacquay/immune-citadel-v4/pull/107)), which puts production and `dev` on the same code.
+Last update: 2026-11-08, about 15:15 UTC: `dev` (`f07f748` and later) is the release candidate for the next promotion: the reviewer docs, Sentry screenshots, phone and laptop fixes, save retention, the #102 log fix and the on-call agent. The DPIA update ([#117](https://github.com/alexisdacquay/immune-citadel-v4/pull/117)) waits for the owner's signature.
 
 ## At a glance
 
-- **Production** runs `274d452`, the promotion of 2026-11-08 (PR #110: fonts [#108](https://github.com/alexisdacquay/immune-citadel-v4/pull/108), smoke [#107](https://github.com/alexisdacquay/immune-citadel-v4/pull/107)): the whole 18-level campaign on the body map, cloud saves, the save API's one-trace-ID observability (on production since the owner set its key on 2026-11-08: a trace and a log line seen, the metric not checked), the game's crash reports without the player's browser identifier ([#94](https://github.com/alexisdacquay/immune-citadel-v4/issues/94)), the game's fonts served from its own site instead of Google Fonts, and a read-only smoke and privacy check after every push to `dev` or `main` (CI's `deployed` job).
-- **Dev** runs the same code as production.
-- **In flight:** one pull request to finish ([#90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90)), in conflict with `dev`.
+- **Production** runs `9aa33f5`, the promotion of 2026-11-08 at 12:09 UTC ([#113](https://github.com/alexisdacquay/immune-citadel-v4/pull/113)): the whole 18-level campaign on the body map, cloud saves, the save API's one-trace-ID observability, crash reports without the player's browser identifier, the game's fonts from its own site, a read-only smoke and privacy check after every deploy, and a "Your data" popover that fits a landscape phone. Every promotion: [Promotions](#promotions).
+- **Dev** runs production's code plus every pull request merged into `dev` since #113.
+- **In flight:** the [open pull requests into `dev`](https://github.com/alexisdacquay/immune-citadel-v4/pulls?q=is%3Apr+is%3Aopen+base%3Adev); [#90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90) is in conflict with `dev` (below).
 - **Next:** the rubric work ([#77](https://github.com/alexisdacquay/immune-citadel-v4/issues/77), P0).
 
 ## Where things run
 
 | Environment | Commit | What it has |
 |---|---|---|
-| Production (`main`) | `274d452`, the promotion of 2026-11-08 (PR #110: fonts [#108](https://github.com/alexisdacquay/immune-citadel-v4/pull/108), smoke [#107](https://github.com/alexisdacquay/immune-citadel-v4/pull/107)) | the body map (#39, #40), P0 bug fixes (#1-#9), intro cards (#10), the owed-card fix (#37), wave-marker and HUD fixes (#21, #22, #23), cloud saves, Sentry in the game with no browser identifier (#94), gameplay events, uptime checks on both sites and both APIs, the save API's trace, log line and metric under one trace ID (#82; on production since 2026-11-08, a trace and a log line seen, the metric not checked), the deploy pipeline and QA in two stages (#92), the game's fonts from its own site (#108), a read-only smoke and privacy check in CI's `deployed` job (#107) |
-| Dev (`dev`) | the same code as production | |
+| Production (`main`) | `9aa33f5` | what each promotion brought: [Promotions](#promotions) |
+| Dev (`dev`) | the head of `dev`: production plus every pull request merged since #113 | |
 
-**The first 2026-11-08 promotion ([#96](https://github.com/alexisdacquay/immune-citadel-v4/pull/96)).** The owner authorised it in writing, once a pre-promotion mega test was green: every suite and the bot on all 18 levels, the live dev site in a real browser on three screen sizes, an attack on the save API, children's data checked in Sentry, all past failures re-asked, and a sweep of the repository. It found one privacy leak, already live: the game's crash reports carried the player's browser identifier. That was fixed in [#95](https://github.com/alexisdacquay/immune-citadel-v4/pull/95) before the promotion. On production right after: the API's `/health` and the site's `/version.txt` serve `ee5728d`, CI's `deployed` job is green, and a read-only smoke test found no errors and nothing identifying in what the game sends to Sentry.
+## Promotions
 
-**The save API in Sentry.** The owner set `SENTRY_DSN` on the production save API on 2026-11-08 (deploy at 07:41 UTC). At 07:47 UTC one load of an unknown save code on production gave a Sentry trace, reading the production database, and a log line with environment `production`; the metric was not checked separately. The save API's alert rule has no environment filter, so a save API error in production emails the owner.
+Every merge into `main`, the production branch. Each needed the owner's written go; then the owner or, on that go, the orchestrator clicked merge. The proof run is `main`'s CI run on that commit: `test`, `game` and `deployed` (the commit is live) green.
 
-**The promotion of 2026-11-08 (fonts [#108](https://github.com/alexisdacquay/immune-citadel-v4/pull/108), smoke [#107](https://github.com/alexisdacquay/immune-citadel-v4/pull/107)).** The owner approved it on 2026-11-08. It brings the game's fonts from its own site, so a player's browser no longer contacts Google ([#99](https://github.com/alexisdacquay/immune-citadel-v4/issues/99) closed; the DPIA re-signed by the owner on 2026-11-08), and `tools/smoke.js`, a read-only smoke and privacy check of the live site in CI's `deployed` job on `dev` and `main`. Since this promotion the Render Blueprint reads `main` with auto-sync on, so infrastructure changes reach Render only when promoted.
+| PR | Commit | Merged (UTC) | What it brought | The owner's go | Proof run |
+|---|---|---|---|---|---|
+| [#73](https://github.com/alexisdacquay/immune-citadel-v4/pull/73) | `db0ae14` | 2026-11-07 15:55 | the first promotion: the 18-level campaign, cloud saves, Sentry in the game, gameplay events, the deploy pipeline | in chat: "promote the repo" | [42388716983](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42388716983) |
+| [#96](https://github.com/alexisdacquay/immune-citadel-v4/pull/96) | `ee5728d` | 2026-11-08 01:38 | the save API's trace, log line and metric under one trace ID (#82); no browser identifier in the game's crash reports (#94, [#95](https://github.com/alexisdacquay/immune-citadel-v4/pull/95)); QA stage 1 (#92) | in chat, in writing: promote "once the mega-test is green", a pre-promotion test of every suite, the live dev site and the save API, which was green | [42435143169](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42435143169) |
+| [#98](https://github.com/alexisdacquay/immune-citadel-v4/pull/98) | `a296382` | 2026-11-08 02:05 | docs only: STATUS and OPERATIONS for #96 (#97) | the written go of #96, read as covering this docs-only follow-up | [42437059743](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42437059743) |
+| [#110](https://github.com/alexisdacquay/immune-citadel-v4/pull/110) | `274d452` | 2026-11-08 08:33 | the game's fonts from its own site, so a player's browser no longer contacts Google (#108, #99); the smoke and privacy check in `deployed` (#107); the "Your data" wording on Sentry (#109); the DPIA re-signed | in chat: "ok" to five steps, among them this promotion and the Blueprint on `main` | [42463417842](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42463417842) |
+| [#113](https://github.com/alexisdacquay/immune-citadel-v4/pull/113) | `9aa33f5` | 2026-11-08 12:09 | the "Your data" and cloud popovers fit a landscape phone, so the Play stats switch can be reached (#112); the fonts build without its guard (#111) | in chat: "Yes, promote" | [42478940135](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42478940135) |
+
+Infrastructure and telemetry events around them:
+
+- **2026-11-06:** the first Blueprint sync adopted the existing services, moved both APIs from Free to Starter, and grew the dev database disk to 15 GB like production's.
+- **2026-11-08, 07:41 UTC:** the owner set `SENTRY_DSN` on the production save API. At 07:47 UTC one load on production gave a Sentry trace reading the production database and a log line with environment `production`; `http.server.request.duration` points with environment `production` are in Sentry too (checked 2026-11-08).
+- **2026-11-08, about 07:58 UTC:** the last Blueprint sync from `dev` made both game sites copy `fonts/`.
+- **2026-11-08, 08:34 UTC,** after #110: the Blueprint switched to `main` with auto-sync on; its first plan from `main` found no changes.
+- **2026-11-08, 12:09:54 UTC:** the first sync after a change on `main` (#113) dropped the fonts guard from both sites' build and redeployed both sites.
+- **After #113:** an independent check in a real browser at 844x390, 932x430, 1180x820 and 1440x900 found the Play stats switch reachable and working at every size; on most landscape phones it sits below the popover's fold, with nothing showing that the popover scrolls.
 
 How the parts connect: [README, How it fits together](../README.md#how-it-fits-together). How QA works: [TEAM.md](TEAM.md#how-qa-works-two-stages).
 
@@ -37,7 +52,7 @@ How the parts connect: [README, How it fits together](../README.md#how-it-fits-t
 | Plan | Done | Left |
 |---|---|---|
 | [PIPELINE-PLAN.md](PIPELINE-PLAN.md): trustworthy deploys | steps 1-4: the site publishes only the game; rules on `dev` and `main`; deploy on every commit with the `deployed` proof; auto-merge | nothing: closed (its step 5 moved to the observability plan) |
-| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | steps 1-5, proven on `dev`; step 6 in part: promoted, uptime checks on both APIs, and the production save API in Sentry (2026-11-08); step 7 on `dev` and production (#82) | step 7: one real save on `dev` shown in Sentry, with screenshots, and its automatic check (#90). Step 6: left: the production checks |
+| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | steps 1-5, proven on `dev`; step 6 in part: promoted, uptime checks on both APIs, and the production save API in Sentry (2026-11-08); step 7 on `dev` and production (#82) | step 7: its automatic check (#90); the screenshots of one real dev save are done (2026-11-08). Step 6: the production checks are left |
 
 ## What is next
 
@@ -45,26 +60,27 @@ In the order the team loop uses: `P0` first, then the owner's latest priority, t
 
 | # | Work | Why now |
 |---|---|---|
-| 1 | Rubric: full marks with margin, obvious to any reviewer ([#77](https://github.com/alexisdacquay/immune-citadel-v4/issues/77), P0): README's "For reviewers" table, then at least three independent cold reviews | the only P0; no review report is linked yet |
-| 2 | Finish #70 on `dev`: land #90, and add screenshots of one real save to [OPERATIONS, Follow one save](OPERATIONS.md#follow-one-save) | #70's after-merge item: one save on `dev` shown in Sentry as trace, log line and metric, with screenshots; the other one, `SENTRY_DSN` back on the production API, is done (2026-11-08) |
-| 3 | QA: count real catches and false alarms of both stages on each pull request until 2026-11-21, then decide what changes | set on 2026-11-07; stage 1 in its new form has run in CI on [#97](https://github.com/alexisdacquay/immune-citadel-v4/pull/97), [#107](https://github.com/alexisdacquay/immune-citadel-v4/pull/107) and [#108](https://github.com/alexisdacquay/immune-citadel-v4/pull/108), all PASS |
+| 1 | Rubric: full marks with margin, obvious to any reviewer ([#77](https://github.com/alexisdacquay/immune-citadel-v4/issues/77), P0): README's "For reviewers" table, in the rubric's words with the points claimed (2026-11-08), then at least three independent cold reviews | the only P0; no review report is linked yet |
+| 2 | Finish #70 on `dev`: land #90 (the `observed` CI job) | the screenshots of one real dev save in Sentry are in [OPERATIONS, Follow one save](OPERATIONS.md#follow-one-save) (2026-11-08), and `SENTRY_DSN` is back on the production API; #90 would repeat the check after every deploy |
+| 3 | QA: count real catches and false alarms of both stages on each pull request until 2026-11-21, then decide what changes | set on 2026-11-07; stage 1 in its new form has run in CI on every pull request into `dev` since [#93](https://github.com/alexisdacquay/immune-citadel-v4/pull/93) |
 | 4 | P1 backlog: a backup model for QA (#83), body map zones in reading order (#78), trading-card design (#79, mock-ups first, the owner picks) | the owner's P1s that can start without the owner |
-| 5 | P2 backlog: an unlocked level looks cleared on the body map (#84, a bug), more enemy variety (#80), game content out of `index.html` (#17), Chapter 2 (#11) | planned |
+| 5 | P2 backlog: a save whose `owe` is not a list blocks that code's cloud sync ([#101](https://github.com/alexisdacquay/immune-citadel-v4/issues/101); #102, the save code in our log line, is fixed on `dev` and ships with the next promotion); an unlocked level looks cleared on the body map (#84, a bug), more enemy variety (#80), game content out of `index.html` (#17), Chapter 2 (#11) | planned |
 
 ## Waiting on the owner
 
 | Item | Why it waits |
 |---|---|
 | Playtest the campaign ([#18](https://github.com/alexisdacquay/immune-citadel-v4/issues/18)) | the balance bot cannot judge fun, clarity or repetition |
+| Sign the DPIA update ([#117](https://github.com/alexisdacquay/immune-citadel-v4/pull/117)) | its rows describe today's changes; only the owner signs |
 | Approve the next promotion | only the owner approves a merge into `main` |
-| On-call agent ([#27](https://github.com/alexisdacquay/immune-citadel-v4/issues/27), P1, rubric criterion 12): do reviewers accept a scheduled job that checks Sentry as "wakes on an alert"? | the design question to settle before it is built |
+| On-call agent ([#27](https://github.com/alexisdacquay/immune-citadel-v4/issues/27), rubric criterion 12): install Sentry's GitHub integration and run the one-line deploy-key command in [OPERATIONS, On-call agent](OPERATIONS.md#on-call-agent) | the agent is built and on `dev` (#118, #124); it wakes only with these and once it is on `main`; then its first drill is recorded |
 
 ## Parked by the owner
 
 | Item | Note |
 |---|---|
 | Chronic challenge balance ([#20](https://github.com/alexisdacquay/immune-citadel-v4/issues/20)) | roadmap, P2; target when picked up: the bot wins about 5 of 6 |
-| The owner's home IP in one QA bot comment (PR #69) and one Actions log | left as they are: the owner's decision of 2026-11-08 ("it will take time to fix") |
+| A personal value in one old bot comment and one Actions log | left as they are: the owner's decision of 2026-11-08 ("it will take time to fix") |
 | the `ic-bug-fixer` and `ic-qa` subagents | the orchestrator builds bugs too, and QA runs in CI (#61); see [TEAM.md](TEAM.md) |
 
 ## Decisions

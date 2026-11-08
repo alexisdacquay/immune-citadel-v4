@@ -1,6 +1,6 @@
 # Product specification
 
-What the game must do for its players, written as player journeys with acceptance criteria. Each criterion below describes the game as it is: checked against `index.html` on 2026-11-08, the same game file on `dev` and in production since the promotion of 2026-11-08 (fonts #108, smoke #107). What is known and not built yet is listed at the end, under [Not built yet](#not-built-yet).
+What the game must do for its players, written as player journeys with acceptance criteria. Each criterion below describes the game as it is: checked against `index.html` on `dev` at `f07f748` on 2026-11-08; production gets this file at the next promotion.
 
 ![A level in play: immune cells grown beside the infection route, the vitality, ATP and wave counters at the top left, the game controls at the top right, the hero and ability buttons at the bottom left](screenshots/play.jpg)
 
@@ -85,7 +85,7 @@ The player crosses the body in 18 levels: six regions, three levels each, along 
 | 17 | Brain · Brain Barrier | Microglia | Macrophage specialists: M1 Inflammatory, M2 Resolver · challenges open |
 | **18** | Brain · Brain Barrier | The Last Wall | Rabies Lyssavirus (boss) |
 
-Levels in bold are the six full maps, where the challenges live.
+Levels in bold are the six full maps, where the challenges live. How the body map was designed, with the mock-ups considered: [docs/design/](design/) (body-map design history; the approved one is `map-a2.html`).
 
 ![The NK Sentinel hero selected in play: a dashed line shows where it is being sent, and its card shows its level, health, damage and Granzyme Burst](screenshots/hero.jpg)
 
@@ -126,9 +126,11 @@ Progress follows the player from one device to another without an account.
 
 - Progress (stars, challenges won, the furthest level, cards and plates seen, Memory, settings) is saved in the browser after every change and survives a reload.
 - On the dev and production sites, and on the local Docker stack, the first save also creates a save code and stores a copy on the save API. The code is 16 letters and digits, without I, O, 0 or 1 because codes get read aloud and retyped. The cloud panel (cloud button on the title bar) shows it in groups of four, with a Copy button.
-- Typing that code on another device loads the save there and merges the two: progress only grows (best stars, every challenge won, the furthest level, everything seen), never overwritten. Memory and settings follow the save being continued, then the most recent change.
+- Typing that code on another device loads the save there and merges the two: progress only grows (best stars, every challenge won, the furthest level, everything seen), never overwritten (except when two devices sync at the same moment: the cloud keeps the last write until the other device syncs again, [#104](https://github.com/alexisdacquay/immune-citadel-v4/issues/104)). Memory and settings follow the save being continued, then the most recent change.
 - Without the cloud (offline, or the API down) the game plays and saves locally, and the cloud panel says that progress is safe on this device and will sync later. The next save or visit retries.
-- The save code is the only key to a save: it never appears in logs, in Sentry or in gameplay events.
+- The save code is the only key to a save: it never appears in logs, however its path is written ([#102](https://github.com/alexisdacquay/immune-citadel-v4/issues/102)), in Sentry or in gameplay events.
+- A cloud save not updated for 13 months is deleted automatically, at server start and daily, at the same moment as old gameplay events. A browser that still has the game uploads its progress again at the next visit.
+- Questions go to a [GitHub issue](https://github.com/alexisdacquay/immune-citadel-v4/issues), with no promised response time. A save code is never posted there: issues are public. Without the code nobody can find a save, so a save cannot be deleted on request; unused saves expire after 13 months.
 - A save from the earlier six-level version keeps its progress: its stars and challenge wins move onto the six full maps.
 
 ## 6. Your data
@@ -164,9 +166,10 @@ Continuous integration runs `test` and `game` on every pull request and every pu
 
 | Gap | Where it is tracked |
 |---|---|
-| Saves never expire: no retention period has been decided | [DPIA.md](DPIA.md), risk "saves never expire" |
+| A player cannot delete their own cloud save before it expires (13 months unused): no delete button yet | [DPIA.md](DPIA.md) (the 2026-11-08 update, [PR #117](https://github.com/alexisdacquay/immune-citadel-v4/pull/117)) |
 | The Chronic challenge is very hard: the bot wins 2 of 6 (target about 5 of 6); parked by the owner | [#20](https://github.com/alexisdacquay/immune-citadel-v4/issues/20) |
 | On the body map an unlocked level looks cleared; regions II and III read out of order | [#84](https://github.com/alexisdacquay/immune-citadel-v4/issues/84), [#78](https://github.com/alexisdacquay/immune-citadel-v4/issues/78) |
 | No tips after a leak or a loss, no situation cards for first-time players | [#12](https://github.com/alexisdacquay/immune-citadel-v4/issues/12), [#81](https://github.com/alexisdacquay/immune-citadel-v4/issues/81) |
 | The owner's playtest of the 18-level campaign | [#18](https://github.com/alexisdacquay/immune-citadel-v4/issues/18) |
+| Known save API bugs: an oversized upload, a malformed `owe`, no limit on saves, two devices at once, a 404 logged on the first cloud save, a deeply nested save answered with 500 | [#100](https://github.com/alexisdacquay/immune-citadel-v4/issues/100), [#101](https://github.com/alexisdacquay/immune-citadel-v4/issues/101), [#103](https://github.com/alexisdacquay/immune-citadel-v4/issues/103) to [#105](https://github.com/alexisdacquay/immune-citadel-v4/issues/105), [#126](https://github.com/alexisdacquay/immune-citadel-v4/issues/126) |
 | More chapters, enemies and modes | [roadmap issues](https://github.com/alexisdacquay/immune-citadel-v4/issues?q=is%3Aissue+is%3Aopen+label%3Aroadmap) |

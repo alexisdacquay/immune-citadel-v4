@@ -16,6 +16,15 @@ test('a save sent to the API is stored in Postgres and read back', async () => {
   assert.deepEqual((await (await fetch(`${API}/api/save/${code}`)).json()).save, { st: [3, 1] });
 });
 
+test('the server prunes cloud saves untouched for 13 months, at start, and keeps newer ones', async () => {
+  const old = newCode(), recent = newCode();
+  sql(`INSERT INTO saves (code, data, updated_at) VALUES ('${old}', '{}', now() - interval '396 days'), ('${recent}', '{}', now() - interval '394 days')`);
+  execFileSync('docker', ['compose', 'restart', 'api']); // the prune runs at server start, then daily
+  for (let i = 0; i < 60 && !(await fetch(`${API}/health`).then(r => r.ok, () => false)); i++) await new Promise(r => setTimeout(r, 500));
+  assert.equal(sql(`SELECT count(*) FROM saves WHERE code = '${old}'`), '0', 'old save deleted');
+  assert.equal(sql(`SELECT count(*) FROM saves WHERE code = '${recent}'`), '1', 'newer save kept');
+});
+
 test('gameplay events reach the events table and its views', async () => {
   const page = Array.from({ length: 16 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
   const r = await fetch(`${API}/api/play`, { method: 'POST', body: JSON.stringify({ page, release: '', events: [{ name: 'level_start', t: 1, level: 18, mode: 'iron', difficulty: 'hard' }, { name: 'hide', t: 2 }] }) });
