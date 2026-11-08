@@ -5,7 +5,8 @@ const { chromium } = require('playwright'); const path = require('path');
   const runs = +(process.argv[2] || 3), lvls = process.argv[3] ? process.argv[3].split(',').map(Number) : null, mems = process.argv[4] && process.argv[4] !== 'both' ? [process.argv[4]] : ['none', 'all'];
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
   p.on('pageerror', e => console.log('ERR', e.message));
-  await p.goto('file://' + path.resolve(process.env.FILE || path.resolve(__dirname, '../index.html'))); // FILE = another build to compare await p.waitForTimeout(500);
+  await p.goto('file://' + path.resolve(process.env.FILE || path.resolve(__dirname, '../index.html'))); // FILE = another build to compare
+  await p.waitForTimeout(500);
   const nLv = await p.evaluate(() => IC.LEVELS.length);
   if (process.env.C) await p.evaluate(c => c.split(',').forEach(kv => { const [l, v] = kv.split(':'); IC.CAMPHP[l - 1] = +v; }), process.env.C); // C='9:.85' = campaign pathogen health per specimen
   if (process.env.M) await p.evaluate(m => m.split(',').forEach(kv => { const [l, v] = kv.split(':'); IC.LVLMULT[l - 1] = +v; }), process.env.M);
@@ -15,11 +16,11 @@ const { chromium } = require('playwright'); const path = require('path');
     const r = await p.evaluate(([li, mem, used, mode, H, INF, POL, PAT]) => {
       IC.save.mem = mem === 'all' ? Object.fromEntries(IC.MEMORY.map(M => [M.id, 3])) : mem === 'none' ? {} : JSON.parse(mem); // or a JSON memory, e.g. '{"hero":3}'
       if (H) Object.assign(IC.MODES[mode], JSON.parse(H));
-      IC.save.rch = mem === 'none' ? li : IC.LEVELS.length - 1; IC.startLevel(li, mode); const S = IC.S; S.screen = 'play'; // a first-time player has only that specimen's kit if (INF) S.lives = 999;
+      IC.save.rch = mem === 'none' ? li : IC.LEVELS.length - 1; IC.startLevel(li, mode); const S = IC.S; S.screen = 'play'; // a first-time player has only that specimen's kit
+      if (INF) S.lives = 999;
       const memOk = mem[0] === '{' ? true : mem === 'none' ? (!S.hero || S.hero.lvl === 1) && IC.AB.fever.cd === 32 : S.hero.lvl === 2 && IC.AB.fever.cd === 26 && IC.AB.swarm.n === 4 && IC.TOWERS.neutro.lv[0].range === 154;
       const order = ['neutro', 'macro', 'killer', 'bcell', 'neutro', 'killer', 'bcell', 'macro'].filter(k => S.lines.includes(k));
       // rank slots by path coverage
-      const cover = s => { let c = 0; for (const p of S.paths) for (let d = 0; d < p.len; d += 10) { const q = (function(){ return null })(); } return 0; };
       const ranked = S.slots.map((s, i) => { let c = 0; for (const p of S.paths) for (const [x, y] of p.pts) if (Math.hypot(x - s.x, y - s.y) < 140) c++; return [c, i]; }).sort((a, b) => b[0] - a[0]).map(x => x[1]);
       // hero post: in the front-middle of a route (where pathogens still arrive alive), the point with the most path (all routes)
       // within 90 and the most build sites within 150 = busiest choke
@@ -29,11 +30,11 @@ const { chromium } = require('playwright'); const path = require('path');
         let sc = 0; for (const o of S.paths) for (const [x, y] of o.pts) if (Math.hypot(x - q.x, y - q.y) < 90) sc++;
         sc += 3 * S.slots.filter(s => Math.hypot(s.x - q.x, s.y - q.y) < 150).length; if (sc > ps) { ps = sc; park = q; }
       }
-      let bi = 0, t = 0, lowest = 20, leakP = null; const leaks = {}, lw = {}, lt = []; const ol = S.lives; const origStep = IC.step; let prev = new Set();
+      let bi = 0, t = 0, leakP = null; const leaks = {}, lw = {}, lt = [];
       while (!S.over && t < 1500) {
         for (let k = 0; k < 60; k++) { const before = S.lives, alive = S.enemies.slice(); IC.step(1 / 60); while (S.screen === 'card') IC.cardNext(); if (S.lives < before) { lw[S.wave] = (lw[S.wave] || 0) + before - S.lives; for (const e of alive) if (e.dead && e.d >= e.path.len) { leakP = e.p; leaks[e.type] = (leaks[e.type] || 0) + 1; if (lt.length < 12) lt.push(e.type + '@' + (S.time | 0)); } } } t++;
         // spend
-        if (POL === 'focus') { // playtest/fun/human.js decision block: 3 cells, then the top damage dealers go deep, then widen; one purchase per s
+        if (POL === 'focus') { // a human-like decision block: 3 cells, then the top damage dealers go deep, then widen; one purchase per s
           const T = IC.TOWERS, P = IC.SPECS, free = S.slots.map((sl, i) => sl.tower ? null : i).filter(i => i != null);
           const target = Math.min(free.length + S.towers.length, 4 + li), has = k => S.towers.filter(x => x.type === k).length;
           const upcoming = [...(S.wave < S.waves.length ? S.waves[S.wave].map(g => g.t) : []), ...(S.wave > 0 ? S.waves[S.wave - 1].map(g => g.t) : [])];
@@ -75,12 +76,11 @@ const { chromium } = require('playwright'); const path = require('path');
         }
         if (S.wave === 0 && POL !== 'focus' || S.L.hold && S.mode === 'campaign' && S.wave > 0 && !S.enemies.length && !S.spawnQ.length) IC.sendWave(); // hold: the player calls each wave once the field is clear
         if (S.cds.fever <= 0) { let best = null, bn = 3; for (const e of S.enemies) { if (POL === 'focus' && !e.seen) continue; const n = S.enemies.filter(o => Math.hypot(o.x - e.x, o.y - e.y) < 80 && (POL !== 'focus' || o.seen)).reduce((s, o) => s + (o.D.stealth && !o.seen ? 3 : 1), 0); /* hidden stealth counts triple: fever reveals it */ if (n > bn) { bn = n; best = e; } } if (best) { S.ability = 'fever'; IC.castAbility(best.x, best.y); } }
-        if (S.cds.swarm <= 0 && S.enemies.length) { const e = S.enemies.filter(e => !e.D.flying && (POL !== 'focus' || e.seen && e.d / e.path.len > .7)).sort((a, b) => (a.path.len - a.d) - (b.path.len - b.d))[0]; if (e) { const q = e.path; S.ability = 'swarm'; IC.castAbility(e.x, e.y); } }
+        if (S.cds.swarm <= 0 && S.enemies.length) { const e = S.enemies.filter(e => !e.D.flying && (POL !== 'focus' || e.seen && e.d / e.path.len > .7)).sort((a, b) => (a.path.len - a.d) - (b.path.len - b.d))[0]; if (e) { S.ability = 'swarm'; IC.castAbility(e.x, e.y); } }
         const H = S.hero || { dead: true }; // no hero before specimen 04
         if (POL === 'focus') { if (leakP != null && !H.dead) { const q = IC.posAt(S.paths[leakP], S.paths[leakP].len * .75); if (Math.hypot(H.hx - q.x, H.hy - q.y) > 30) IC.heroMove(q.x, q.y); leakP = null; } }
         else if (!H.dead && !H.mv && Math.hypot(H.hx - park.x, H.hy - park.y) > 5) IC.heroMove(park.x, park.y);
         if (!H.dead && S.cds.granzyme <= 0) { const n = S.enemies.filter(e => Math.hypot(e.x - H.x, e.y - H.y) < IC.HERO.gz.r).length; if (n >= 3 || (n && H.hp < H.max * .35)) IC.granzyme(); }
-        lowest = Math.min(lowest, S.lives);
       }
       return { mem, memOk, level: li, won: S.over && S.lives > 0, lives: S.lives, wave: S.wave, secs: t, towers: S.towers.map(x => x.spec ? x.spec + x.rank : x.type[0] + x.lvl).join(' '), gold: S.gold, leaks: JSON.stringify(leaks), lw: JSON.stringify(lw), lt: lt.join(' '), hero: S.hero && `L${S.hero.lvl} kills ${S.hero.kills} park ${park.x | 0},${park.y | 0}`, used, t: S.time | 0, leftQ: S.spawnQ.length };
     }, [li, mem, used, process.env.MODE || 'campaign', process.env.H || '', !!process.env.INF, process.env.POL || 'wide', process.env.CALL === 'patient']);

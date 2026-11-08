@@ -1,6 +1,6 @@
 # Product specification
 
-What the game must do for its players, written as player journeys with acceptance criteria. Each criterion below describes the game as it is: checked against `index.html` on 2026-11-08, the same game file on `dev` and in production since the promotion of 2026-11-08 (fonts #108, smoke #107). What is known and not built yet is listed at the end, under [Not built yet](#not-built-yet).
+What the game must do for its players, written as player journeys with acceptance criteria. Each criterion below describes the game as it is: checked against `index.html` on 2026-11-08, the same game file on `dev` and in production since the promotion of 2026-11-08 at 12:09 UTC ([PR #113](https://github.com/alexisdacquay/immune-citadel-v4/pull/113), `9aa33f5`). What is known and not built yet is listed at the end, under [Not built yet](#not-built-yet).
 
 ![A level in play: immune cells grown beside the infection route, the vitality, ATP and wave counters at the top left, the game controls at the top right, the hero and ability buttons at the bottom left](screenshots/play.jpg)
 
@@ -85,7 +85,7 @@ The player crosses the body in 18 levels: six regions, three levels each, along 
 | 17 | Brain · Brain Barrier | Microglia | Macrophage specialists: M1 Inflammatory, M2 Resolver · challenges open |
 | **18** | Brain · Brain Barrier | The Last Wall | Rabies Lyssavirus (boss) |
 
-Levels in bold are the six full maps, where the challenges live.
+Levels in bold are the six full maps, where the challenges live. How the body map was designed, with the mock-ups considered: [docs/design/](design/) (body-map design history; the approved one is `map-a2.html`).
 
 ![The NK Sentinel hero selected in play: a dashed line shows where it is being sent, and its card shows its level, health, damage and Granzyme Burst](screenshots/hero.jpg)
 
@@ -171,4 +171,5 @@ Continuous integration runs `test` and `game` on every pull request and every pu
 | On the body map an unlocked level looks cleared; regions II and III read out of order | [#84](https://github.com/alexisdacquay/immune-citadel-v4/issues/84), [#78](https://github.com/alexisdacquay/immune-citadel-v4/issues/78) |
 | No tips after a leak or a loss, no situation cards for first-time players | [#12](https://github.com/alexisdacquay/immune-citadel-v4/issues/12), [#81](https://github.com/alexisdacquay/immune-citadel-v4/issues/81) |
 | The owner's playtest of the 18-level campaign | [#18](https://github.com/alexisdacquay/immune-citadel-v4/issues/18) |
+| Known save API bugs: an oversized upload, a malformed `owe`, a crafted path in our log line, no limit on saves, two devices at once, a 404 logged on the first cloud save | [#100](https://github.com/alexisdacquay/immune-citadel-v4/issues/100) to [#105](https://github.com/alexisdacquay/immune-citadel-v4/issues/105) |
 | More chapters, enemies and modes | [roadmap issues](https://github.com/alexisdacquay/immune-citadel-v4/issues?q=is%3Aissue+is%3Aopen+label%3Aroadmap) |

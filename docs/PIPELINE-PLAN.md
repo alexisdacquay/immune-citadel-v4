@@ -1,5 +1,7 @@
 # Pipeline plan: trustworthy deploys
 
+*Who this page is for: a build record of how the deploy pipeline was set up, step by step, with its proof. How it works today: [OPERATIONS.md](OPERATIONS.md#releases).*
+
 **Status: closed.** Steps 1 to 4 were done and proven on 2026-11-06; step 5 moved to [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md). The deploy proof first ran on production at the 2026-11-07 promotion. How the pipeline works today: [OPERATIONS.md, Releases](OPERATIONS.md#releases).
 
 Agreed with the owner on 2026-11-06. One step at a time, each verified before the next started; a step is marked done only when its proof is recorded here.
@@ -26,7 +28,7 @@ Agreed with the owner on 2026-11-06. One step at a time, each verified before th
 
 ### 1. Game sites publish only the game: done
 
-Before, both sites published the whole checkout (`publishPath ./`, and Render's automatic `npm install` added `node_modules`): server code, docs, CI and agent files were public. Now the build is `mkdir -p public && cp index.html public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt`, publishing `public`, with `SKIP_INSTALL_DEPS=true`.
+Before, both sites published the whole checkout (`publishPath ./`, and Render's automatic `npm install` added `node_modules`): server code, docs, CI and agent files were public. The build became (2026-11-06) `mkdir -p public && cp index.html public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt`, publishing `public`, with `SKIP_INSTALL_DEPS=true`. Today's build, which also publishes the fonts: [OPERATIONS, What runs on Render](OPERATIONS.md#what-runs-on-render).
 
 Required proof: `/version.txt` shows the commit; `/server/index.js`, `/node_modules/…`, `/docs/…` and `/.claude/…` return 404; the game loads.
 

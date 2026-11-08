@@ -1,6 +1,8 @@
 # Observability plan
 
-**Status:** steps 1 to 5 done and proven on dev (2026-11-06). Step 6, production, is partly done: production was promoted on 2026-11-07 and 2026-11-08, and its save API reports to Sentry since 2026-11-08; some production checks are not recorded. Step 7 (one trace ID across trace, log line and metric) is on dev since 2026-11-07 and on production since 2026-11-08; its walkthrough of one real dev save is not done, and on production the metric is not checked.
+*Who this page is for: a build record of how the monitoring was set up, step by step, with its proof. How it works today: [OPERATIONS.md](OPERATIONS.md#telemetry).*
+
+**Status:** steps 1 to 5 done and proven on dev (2026-11-06). Step 6, production, is partly done: production was promoted on 2026-11-07 and 2026-11-08, and its save API reports to Sentry since 2026-11-08; some production checks are not recorded. Step 7 (one trace ID across trace, log line and metric) is on dev since 2026-11-07 and on production since 2026-11-08; its walkthrough of one real dev save is not done.
 
 Approved by the owner on 2026-11-06. One step at a time; each step is proven before the next starts, and a step is marked done only when its proof is recorded here. How things work today lives in [OPERATIONS.md, Telemetry](OPERATIONS.md#telemetry); it is updated in the step that changes it.
 
@@ -14,7 +16,7 @@ Approved by the owner on 2026-11-06. One step at a time; each step is proven bef
 | 4 | Better Stack on both game sites | done 2026-11-06 | done 2026-11-06 |
 | 5 | Own gameplay events, "Your data" card, DPIA | done 2026-11-06 | code shipped 2026-11-07; no production read recorded |
 | 6 | Production at the promotion | n/a | partly done 2026-11-07 and 2026-11-08 |
-| 7 | One trace ID across trace, log line and metric ([#70](https://github.com/alexisdacquay/immune-citadel-v4/issues/70)) | merged 2026-11-07 (PR #82); real-save walkthrough not done | shipped 2026-11-08 (PR #96); a trace and a log line seen, the metric not checked |
+| 7 | One trace ID across trace, log line and metric ([#70](https://github.com/alexisdacquay/immune-citadel-v4/issues/70)) | merged 2026-11-07 (PR #82); real-save walkthrough not done | shipped 2026-11-08 (PR #96); a trace, a log line and metric points seen |
 
 ## Target
 
@@ -74,7 +76,7 @@ Errors and load speed. Loaded only on the dev and production sites (never locall
 
 - **Proof, 2026-11-06 (PR #50):** on the dev site Sentry loads (environment `dev`, release `6919f8b`) with no cookie and no storage beyond the game's own keys. A test error at 18:55:01 opened IMMUNE-CITADEL-GAME-1 with the code scrubbed; the page load was traced (827 ms).
 - **Finding:** Sentry derived the city from the IP (`user.geo`); fixed by the organisation settings in the rules above.
-- **Game alert** 1464194: a new or returning game error emails the owner; it fired at 18:57:13 on a second test error. Sentry's default high-priority alert is disabled, because it duplicated the save API emails.
+- **Game alert** 1464194: a new or returning game error emails the owner; it fired at 18:57:13 on a second test error. Sentry's default "high priority issues" rules: the save API project's (1463992) is disabled, because it duplicated the save API emails; the game project's (1463993) is enabled and kept as a backstop.
 - **Rollback:** revert the pull request.
 
 ### 4. Better Stack: done
@@ -125,8 +127,7 @@ Done:
 
 Not done:
 - One real save on dev shown in Sentry as a trace, its log line and the metric, with screenshots in [Follow one save](OPERATIONS.md#follow-one-save). [PR #90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90) (open, in conflict with `dev`) automates this check after every dev deploy; its hand run on 2026-11-07 at 20:46 UTC found all three.
-- Production: the metric not checked, and no production save shown with one trace ID across its trace, log line and metric.
-- Not recorded: whether the running APIs use the `exec` start command from `render.yaml` ([OPERATIONS.md](OPERATIONS.md#infrastructure-as-code)).
+- Production: no production save shown with one trace ID across its trace, log line and metric.
 - Issue #70 is still open.
 
 **Rollback:** revert PR #82.
