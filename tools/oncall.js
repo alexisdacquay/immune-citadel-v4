@@ -12,7 +12,7 @@
 // SENTRY_AUTH_TOKEN (event:read), DEEPSEEK_API_KEY, ONCALL_MODEL (default deepseek-v4-pro), SENTRY_URL (default https://de.sentry.io,
 // the EU region), SENTRY_ORG (default myown-76), AUTOMERGE (set: auto-merge is allowed, i.e. a person's token pushes), RUN_URL,
 // DRY_RUN (set: no push, no pull request, no comment; prints instead).
-const { execFileSync } = require('node:child_process'), fs = require('node:fs'), path = require('node:path');
+const { execFileSync } = require('node:child_process'), fs = require('node:fs'), path = require('node:path'), os = require('node:os');
 const { parseChecks } = require('./qa.js');
 
 const run = (cmd, args, opts = {}) => execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 64 << 20, ...opts });
@@ -104,6 +104,18 @@ const TASK = 'You are the on-call engineer for Immune Citadel, a browser game fo
 // can neither read a secret, nor reach the internet, nor change a file that the later commit would pick up.
 const sealedTests = () => run('docker', ['run', '--rm', '--network', 'none', '-v', `${process.cwd()}:/w:ro`, '-w', '/w', 'node:22', 'npm', 'run', 'test:unit'], { stdio: 'pipe', timeout: 10 * 60000 });
 
+// The push. GitHub starts no workflow for what GITHUB_TOKEN pushes or opens, so the agent pushes with a deploy key
+// (ONCALL_DEPLOY_KEY: write access to this repository only) when it has one, else with gh's token (ONCALL_TOKEN). The key is written
+// outside the checkout, after the sealed tests, so the model's code never sees it.
+function push(branch) {
+  const key = process.env.ONCALL_DEPLOY_KEY;
+  if (!key) { run('gh', ['auth', 'setup-git']); return run('git', ['push', '--force', '-u', 'origin', branch]); }
+  const f = path.join(process.env.RUNNER_TEMP || os.tmpdir(), 'oncall-deploy-key');
+  fs.writeFileSync(f, key.endsWith('\n') ? key : `${key}\n`, { mode: 0o600 });
+  return run('git', ['push', '--force', `git@github.com:${process.env.GITHUB_REPOSITORY}.git`, `${branch}:refs/heads/${branch}`],
+    { env: { ...process.env, GIT_SSH_COMMAND: `ssh -i ${f} -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new` } });
+}
+
 async function deepseek(messages, { key = process.env.DEEPSEEK_API_KEY, model = process.env.ONCALL_MODEL || 'deepseek-v4-pro' } = {}) {
   const body = JSON.stringify({ model, temperature: 0, reasoning_effort: 'high', max_tokens: 32000, response_format: { type: 'json_object' }, messages });
   for (let i = 1; ; i++) {
@@ -165,8 +177,10 @@ async function main() {
     + `## QA checks\n${fix.qa_checks.join('\n')}\n\n_Opened by the on-call agent (tools/oncall.js, ${process.env.ONCALL_MODEL || 'deepseek-v4-pro'}). It merges into dev like any other pull request; production stays the owner's._`;
   if (dry) return console.log(`[dry run] would open "${fix.title}"\n${diff}\n${run('git', ['diff'])}\n${body}`);
   run('git', ['checkout', '-B', branch]); run('git', ['commit', '-am', `${fix.title} (on-call agent, #${n})`]);
-  run('gh', ['auth', 'setup-git']); run('git', ['push', '--force', '-u', 'origin', branch]); // its own branch: a retry replaces an unmerged attempt
+  push(branch); // its own branch: a retry replaces an unmerged attempt
   const url = gh('pr', 'create', '--base', 'dev', '--head', branch, '--title', fix.title, '--body', body).trim();
+  // A pull request opened with GITHUB_TOKEN starts no CI; a push by the deploy key after it does (pull_request: synchronize).
+  if (process.env.ONCALL_DEPLOY_KEY) { run('git', ['commit', '--allow-empty', '-m', `Start CI on the on-call fix (#${n})`]); push(branch); }
   if (merges) gh('pr', 'merge', url, '--auto', '--merge');
   say(`On-call agent: fix proposed in ${url} at ${new Date().toISOString()} (unit tests green, attempt ${fix.attempt} of 3).\n**Cause:** ${fix.diagnosis}\n${merges ? 'It merges into dev once test, game and qa pass.' : project.automerge ? 'Auto-merge is off (no ONCALL_TOKEN): a maintainer arms it.' : 'A game incident: a maintainer reads the diff and arms auto-merge (the game\'s Sentry key is public, so its errors are untrusted).'}`);
 }

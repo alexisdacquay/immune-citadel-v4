@@ -30,7 +30,7 @@ jobs:
       ISSUE: ${{ github.event.issue.number || inputs.issue }}
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
-      # A person's token (ONCALL_TOKEN), when set, so the agent's push and pull request start CI: GitHub starts no workflow for GITHUB_TOKEN.
+      # The agent pushes with a deploy key (ONCALL_DEPLOY_KEY), so its push starts CI: GitHub starts no workflow for GITHUB_TOKEN.
       # No credentials are left in .git/config: the agent sets them up only for its final push.
       - uses: actions/checkout@v5
         with: { ref: dev, fetch-depth: 0, persist-credentials: false }
@@ -46,8 +46,9 @@ jobs:
         timeout-minutes: 25 # 3 attempts of one model answer (up to 7 min) and the sealed tests
         env:
           GH_TOKEN: ${{ secrets.ONCALL_TOKEN || github.token }} # the token only in the two steps that call gh
+          ONCALL_DEPLOY_KEY: ${{ secrets.ONCALL_DEPLOY_KEY }} # pushes with it start CI; only this step has it
           SENTRY_ISSUE: ${{ inputs.sentry_issue }}
-          AUTOMERGE: ${{ secrets.ONCALL_TOKEN != '' && '1' || '' }}
+          AUTOMERGE: ${{ (secrets.ONCALL_TOKEN != '' || secrets.ONCALL_DEPLOY_KEY != '') && '1' || '' }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       - if: failure() || cancelled()
