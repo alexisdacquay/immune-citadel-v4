@@ -29,3 +29,4 @@ A bug fix adds its line here in the same pull request, in the same form: `- [<is
 - [PR #120] index.html: In the title screen's top bar, does the rule that hides the game name depend on the width of the bar itself rather than the width of the browser window, so the name is never drawn over the cleared and stars counters?
 - [PR #120] index.html: On a 667x375 phone, where the title screen's top bar is about 604 px wide, does the game hide both the cleared counter and the stars counter in that bar, so the cloud save button fits inside it?
 - [PR #120] index.html: On a screen 560 px tall or less, does the Field Guide keep its Back button stuck to the bottom of the visible area while the guide's content scrolls?
+- [#102] server/route.js: Does the route the API logs hide the save code even when the path is written another way, such as //api/save/CODE, an upper-case /API/SAVE/, or URL-encoded slashes, by decoding the path before redacting it?
