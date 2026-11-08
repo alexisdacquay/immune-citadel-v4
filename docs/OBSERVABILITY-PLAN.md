@@ -126,7 +126,7 @@ Done:
 - **Owner did:** re-signed [DPIA.md](DPIA.md) for the new Sentry records (2026-11-07).
 
 Not done:
-- The automatic check: [PR #90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90) (open, in conflict with `dev`) would repeat the real-save check after every deploy to dev. The walkthrough itself is done: one real dev save in Sentry's UI, 2026-11-08, in [Follow one save](OPERATIONS.md#follow-one-save).
+- Done 2026-11-08: the walkthrough of one real dev save in Sentry's UI ([Follow one save](OPERATIONS.md#follow-one-save)), and its automatic check: after every deploy to dev or production, CI's `deployed` job runs [tools/verify-sentry.js](../tools/verify-sentry.js), one save under a known trace ID that must reach Sentry as a trace, a log line and a metric within 5 minutes.
 - Production: shown on 2026-11-08: a load at 07:47 UTC gave trace `7fdfa1f7fe03461e9f0b104ffa5d7c51` (`SELECT "prod".saves`) and its log line under one trace ID, and Sentry holds `http.server.request.duration` points with environment `production`. The screenshots in OPERATIONS are of a dev save.
 - Issue #70 is still open.
 
