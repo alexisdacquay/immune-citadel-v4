@@ -59,6 +59,7 @@ A change reaches players in five moves:
 3. **Auto-merge into dev.** Right after opening the pull request, the builder arms auto-merge with `sh tools/automerge.sh <n>`, which refuses any base but `dev`. GitHub merges as soon as `test`, `game` and `qa` are green, with no human in the loop.
 4. **Deploy and proof.** Render deploys every commit on `dev`. The CI job `deployed` proves the new commit is live.
 5. **Promotion.** Only the owner merges `dev` into `main`, through a pull request that needs `test`, `game` and `dev-green`. Render deploys production and `deployed` proves it.
+6. **Back into dev.** The promotion's merge commit lands on `main` only, and `main` accepts only a branch that is up to date with it. So the next pull request into `dev` also merges `origin/main` (no file changes), or the next promotion cannot merge. A pull request that only does this fails stage 1, which needs a real `[changes]` check, so it rides with a real change.
 
 | Step | What | Proof |
 |---|---|---|
@@ -67,9 +68,9 @@ A change reaches players in five moves:
 | Auto-merge | armed with a person's token, never `GITHUB_TOKEN`: a merge by `GITHUB_TOKEN` starts no workflows, so there would be no deploy proof. The branch need not be up to date with `dev`: CI runs again on `dev` after every merge, and a red `dev` blocks the next promotion | [PR #45](https://github.com/alexisdacquay/immune-citadel-v4/pull/45) |
 | CD | Render's auto-deploy trigger is "on commit" on all four services; only green pull requests can put a commit on `dev` or `main` | [PIPELINE-PLAN.md](PIPELINE-PLAN.md), step 3 |
 | Deploy proof | CI job `deployed` on each push to `dev` or `main`: [tools/verify-deploy.js](../tools/verify-deploy.js) waits until the API's `/health` and the site's `/version.txt` serve the pushed commit, else the run goes red after 15 min (if a newer push arrives first, that push's own run takes over) | dev: [run 42221746028](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42221746028), live 58 s after the merge; production: [run 42388716983](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42388716983), live 73 s after the merge |
-| Promotion | [promotion.yml](../.github/workflows/promotion.yml): `dev-green` waits for `dev`'s own CI run on the same commit, deploy proof included, and fails unless it is green; then the owner merges | [PR #73](https://github.com/alexisdacquay/immune-citadel-v4/pull/73), 2026-11-07 |
+| Promotion | [promotion.yml](../.github/workflows/promotion.yml): `dev-green` waits for `dev`'s own CI run on the same commit, deploy proof included, and fails unless it is green; then the owner merges | [PR #73](https://github.com/alexisdacquay/immune-citadel-v4/pull/73), 2026-11-07; [PR #96](https://github.com/alexisdacquay/immune-citadel-v4/pull/96), 2026-11-08 |
 
-**Production is the owner's.** Agents never merge, or arm auto-merge on, a pull request into `main`. This is a team rule ([AGENTS.md](../AGENTS.md)); GitHub does not enforce it.
+**Production is the owner's.** Agents never merge, or arm auto-merge on, a pull request into `main`. This is a team rule ([AGENTS.md](../AGENTS.md)); GitHub does not enforce it. The one exception so far: the owner authorised the orchestrator in writing to merge PR #96 on 2026-11-08, once the pre-promotion mega test was green.
 
 ### QA in two stages
 
