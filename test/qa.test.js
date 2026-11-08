@@ -48,3 +48,10 @@ test('stage 1: a check line it cannot read fails the job instead of being skippe
   assert.deepEqual(parseChecks(body, { section: true })[0], { label: 'changes', files: ['a.js'], question: 'Is it fixed?' });
   assert.deepEqual(unreadable(body), ['- [Changes] a.js: wrong label?', '  - [stays] a.js: indented?', '* [stays] a.js: star?', '- [stays] a.js:5: line number?']);
 });
+
+test('every check line in test/past-failures.md can be read, so no past failure is skipped unseen', () => {
+  const text = require('node:fs').readFileSync(require('node:path').join(__dirname, 'past-failures.md'), 'utf8');
+  const lines = text.split('\n').filter(l => /^\s*[-*+]\s*\[/.test(l));
+  assert.equal(parseChecks(text).length, lines.length);
+  assert.ok(lines.length >= 17);
+});
