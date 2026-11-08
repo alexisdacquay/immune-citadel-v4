@@ -196,12 +196,13 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 .slides{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 /* title: the body map (design: docs/design/map-a2.html) under a top bar, the selected level's card beside its node, the keys below */
 #titleOv{display:block;padding:0;background:#010205;backdrop-filter:none;-webkit-backdrop-filter:none;overflow-x:hidden}#titleOv>*{--ut:1}
-.mbar{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;padding:8px 14px 8px 16px;background:linear-gradient(180deg,rgba(6,12,20,.94),rgba(6,12,20,.78));border-bottom:1px solid var(--rim);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.mbar{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;padding:8px 14px 8px 16px;background:linear-gradient(180deg,rgba(6,12,20,.94),rgba(6,12,20,.78));border-bottom:1px solid var(--rim);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);container-type:inline-size}
 .mbar .logo{display:flex;align-items:center;gap:10px;margin-right:auto;font:700 17px var(--sans);letter-spacing:.2em;color:#fff;white-space:nowrap}.mbar .logo svg{flex:none;width:30px;height:30px}
 .mbar .logo small{display:block;margin-top:1px;font:500 9px var(--mono);letter-spacing:.24em;color:var(--dim)}
 .mbar .prog{display:flex;gap:14px;margin-right:6px;font:500 12px var(--mono);color:var(--dim);white-space:nowrap}.mbar .prog b{color:var(--txt)}#starN{color:var(--amber)}
-.mbar>*{flex:none;white-space:nowrap}.mbar .logo{flex:1 1 auto;min-width:0}.mbar .mbtn{box-shadow:none}
-@media (max-width:1240px){.mbar .logo div{display:none}}@media (max-width:1000px){.mbar .bl,.mbar .prog .cl{display:none}}
+.mbar>*{flex:none;white-space:nowrap}.mbar .logo{flex:1 1 auto;min-width:0;overflow:hidden}.mbar .mbtn{box-shadow:none}
+/* the bar's own content width (window minus 30 px padding), not the window's: a letterboxed stage makes the bar narrower than the window (the name ran over the counters at 1280x720) */
+@container (max-width:1210px){.mbar .logo div{display:none}}@container (max-width:970px){.mbar .bl,.mbar .prog .cl{display:none}}@container (max-width:630px){.mbar .logo,.mbar .prog{display:none}} /* 667x375: the cloud button ran off the screen */
 #mapv{position:relative;overflow:hidden;background:#010205}
 #mstage{position:absolute;left:0;top:0;width:1440px;height:900px;transform-origin:0 0}
 #mapCv,#bodymap{position:absolute;inset:0;width:1440px;height:900px}
@@ -295,7 +296,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 #cloudBtn{padding:9px;margin:0 0 14px 6px;flex:none}#cloudBtn svg{stroke-linecap:round}#cloudBtn.busy svg{animation:cpulse 1s ease-in-out infinite alternate}#cloudBtn.err svg{stroke:#ffb15c;fill:rgba(255,177,92,.14);filter:none}
 @keyframes cpulse{to{opacity:.35}}
 #dataBtn{padding:9px;margin:0 0 14px 6px;flex:none}#dataBtn svg{fill:none;stroke-linecap:round;stroke-linejoin:round}
-#cloudPop p,#dataPop p{margin:0 0 10px;font:400 13px/1.4 var(--sans);color:var(--dim)}#dataPop p b{color:var(--txt);font-weight:600}#dataPop .tg{padding:8px 0}.tg:disabled{cursor:default;opacity:.7}
+#cloudPop p,#dataPop p{margin:0 0 10px;font:400 13px/1.4 var(--sans);color:var(--dim)}#dataPop p b{color:var(--txt);font-weight:600}#dataPop .tg{padding:8px 0}#dataPop .ask{margin:8px 0 0;font-size:12px}#dataPop a{color:var(--cyan);overflow-wrap:anywhere}.tg:disabled{cursor:default;opacity:.7}
 #cloudPop .cc{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-bottom:12px}#cloudPop .cc span,#cloudPop .ci span{flex:1 0 100%;font:600 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 #cloudPop .cc b{flex:1;font:600 15px var(--mono);letter-spacing:.06em;color:var(--txt);user-select:all}
 #cloudPop .btn{padding:7px 12px;font-size:12px}#cloudPop .cc .btn{flex:none}#cloudGo{width:100%;margin-top:8px}
@@ -383,6 +384,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 .gtab.on{color:#fff;background:rgba(127,216,255,.14);border-color:var(--rim2)}
 .gtab.on[data-tab="path"]{background:rgba(255,106,61,.12);border-color:rgba(255,138,143,.5)}
 #guideOv .tin{margin-top:0}
+@media (max-height:560px){#guideOv .mfoot{position:sticky;bottom:0;z-index:1;margin-top:10px;padding:8px 0 10px;background:linear-gradient(transparent,rgba(2,5,9,.95) 10px)}} /* landscape phones: Back stays on screen while the plates scroll */
 .gbody{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;margin-top:14px;align-items:start}
 .ggrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .gt{position:relative;display:flex;align-items:center;gap:10px;padding:5px 10px 5px 5px;border-radius:12px;border:1px solid rgba(140,205,255,.13);background:rgba(140,205,255,.035);text-align:left}
@@ -446,6 +448,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 .touch .rep .btn,.touch .rep .mlink{min-height:calc(42px / var(--u,1))}
 .touch .tin .btn,.touch .mbtn,.touch .gtab,.touch .gt,.touch .mnode,.touch .chb{min-height:calc(42px / var(--ut,1))}
 .touch .tin .btn,.touch .mbtn{min-width:calc(42px / var(--ut,1))}
+.touch .seg{padding-block:1px}.touch .seg button{min-height:calc(40px / var(--ut,1))} /* difficulty: 40 px targets, the bar no taller */
 .touch .mnode{align-items:center}.touch .chb{border-radius:999px;padding-right:14px}
 #pausePill small{white-space:nowrap}
 .touch .ab.armed .tip{animation:tipflash 2.6s forwards}
@@ -470,6 +473,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 #rotate b{display:block;font:700 24px/1.1 var(--sans);color:#fff;margin:6px 0 8px}
 #rotate p{margin:0;font-size:13px;line-height:1.45;color:var(--dim)}
 @media (max-width:700px){.mgrid{grid-template-columns:repeat(3,1fr);row-gap:12px}.mroot{display:none}.mhd{display:block}.bank{display:inline-block;margin-top:10px}.tbtns{position:static;margin-top:8px;flex-wrap:wrap}.gbody{grid-template-columns:1fr}.ggrid{grid-template-columns:repeat(2,minmax(0,1fr))}.gtabs{margin-top:10px}.hd{display:block}.slides{grid-template-columns:1fr}.slide .body{grid-template-columns:1fr 1fr}.tin h1{font-size:44px}}
+@media (prefers-reduced-motion:reduce){*,::before,::after{animation-iteration-count:1!important;scroll-behavior:auto!important}} /* endless pulses and rings play once */
 </style>
 <script>
 // Sentry: game crashes and load speed (docs/OBSERVABILITY-PLAN.md, step 3). Only on the dev and production sites, never locally or in tests.
@@ -478,6 +482,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 (() => {
   const env = { 'immune-citadel-v4.onrender.com': 'production', 'immune-citadel-v4-dev.onrender.com': 'dev' }[location.hostname];
   if (!env) return;
+  const statsOn = () => { let on = true; try { on = localStorage.getItem('immune-citadel-v4-stats') !== 'off'; } catch (e) {} return on && navigator.globalPrivacyControl !== true; }; // the game's statsOn(): the Play stats switch, and Global Privacy Control counts as off
   const scrub = x => JSON.parse(JSON.stringify(x, (k, v) => (/user.?agent/i.test(k) ? undefined : v)).replace(/[A-HJ-NP-Z2-9]{16}/g, ':code')); // spans carry user_agent.original (#94)
   const s = document.createElement('script');
   s.src = 'https://browser.sentry-cdn.com/11.9.0/bundle.tracing.min.js';
@@ -486,7 +491,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
     dsn: 'https://8a64357620418627c0ad9b402c812e8e@o4512385980235776.ingest.de.sentry.io/4512386038628432', // public by design: it only lets a browser send reports
     environment: env, release: v.trim() || undefined,
     integrations: d => [...d.filter(i => !['BrowserSession', 'CultureContext'].includes(i.name)), // sessions carry the user agent, culture the time zone and locale (#94)
-      Sentry.browserTracingIntegration({ shouldCreateSpanForRequest: u => !u.includes('/api/play') })], tracesSampleRate: 1, // every page load: a few thousand a month; gameplay events never become spans
+      Sentry.browserTracingIntegration({ shouldCreateSpanForRequest: u => !u.includes('/api/play') })], tracesSampler: () => (statsOn() ? 1 : 0), // load-speed traces only with play stats on; crash reports always. A few thousand a month; gameplay events never become spans
     dataCollection: { userInfo: false, cookies: false, httpHeaders: false, httpBodies: [], urlQueryParams: false },
     beforeSend: scrub, beforeSendSpan: scrub, beforeBreadcrumb: b => (/\/api\/play/.test(JSON.stringify(b.data || {})) ? null : scrub(b)), // no third party sees play
   }));
@@ -497,7 +502,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 <body>
 <div id="safe"></div>
 <div id="rotate" hidden><div class="glass"><svg viewBox="0 0 96 96"><circle cx="48" cy="48" r="44" fill="rgba(91,140,255,.08)" stroke="rgba(140,205,255,.25)" stroke-dasharray="3 5"/><g class="ph"><rect x="31" y="14" width="34" height="68" rx="7" fill="rgba(9,16,26,.9)" stroke="#7fd8ff" stroke-width="2"/><circle cx="48" cy="44" r="9" fill="rgba(127,216,255,.18)" stroke="#7fd8ff" stroke-width="1.5"/><circle cx="46" cy="43" r="3.4" fill="#5b8cff"/><path d="M42 75h12" stroke="#7fd8ff" stroke-width="2" stroke-linecap="round"/></g></svg>
-  <small>FIELD OF VIEW</small><b>Turn your device</b><p>The game is wide. Hold the phone sideways; it waits, paused.</p></div></div>
+  <small>FIELD OF VIEW</small><b>Turn your device</b><p>The game is wide. Hold the device sideways; it waits, paused.</p></div></div>
 <div id="stage">
   <canvas id="cv"></canvas>
   <div id="wcalls"></div>
@@ -539,8 +544,9 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
   </div>
   <div id="dataPop" class="glass" hidden><small>YOUR DATA</small>
     <p>The game sends a few <b>anonymous</b> play stats to our own server: which level you play, how it ends, how long you read each card. No name, no save code, nothing that says who you are. They help us make levels fairer. They are deleted after 13 months.</p>
-    <p>Each time the game loads, and if it crashes, a report goes to Sentry, a company that helps us find bugs and keeps the reports in the EU. A report has no name and no internet address in it. Like any website, Sentry's servers see your internet address while they talk to your browser, but Sentry is set never to keep it. Your cloud save stays on our server (Render, in Frankfurt) under your save code. Our server forgets your internet address within two minutes and never saves it.</p>
+    <p>Each time the game loads (only with play stats on), and if it crashes, a report goes to Sentry, a company that helps us find bugs and keeps the reports in the EU. A report has no name and no internet address in it. Like any website, Sentry's servers see your internet address while they talk to your browser, but Sentry is set never to keep it. Your cloud save stays on our server (Render, in Frankfurt) under your save code. Our server forgets your internet address within two minutes and never saves it.</p>
     <button class="tg" id="statsTg" role="switch"><svg viewBox="0 0 24 24"><path d="M5 19V11M12 19V5M19 19v-6"/></svg><span>Play stats<em id="statsEm"></em></span><i></i></button>
+    <p class="ask">Questions, or want your data deleted? Open an issue at <a href="https://github.com/alexisdacquay/immune-citadel-v4/issues" target="_blank" rel="noopener">github.com/alexisdacquay/immune-citadel-v4/issues</a>. We cannot promise when we will answer. Never post your save code there. Cloud saves not used for 13 months are deleted automatically.</p>
   </div>
   <div id="hint" class="glass" hidden><i class="ar"></i><small></small><p></p><button class="x" aria-label="Dismiss tip" title="Dismiss tip">×</button></div>
 
@@ -590,6 +596,7 @@ HR 72 · TEMP 37.0°C · SpO2 98%</div>
 // ============================================================ utils
 const W = 1000, H = 620, TAU = Math.PI * 2;
 const $ = s => document.querySelector(s);
+const CALM = matchMedia('(prefers-reduced-motion: reduce)'); // the player's system asks for less motion: no screen shake, pulses play once
 const TOUCH = matchMedia('(any-pointer: coarse)').matches || navigator.maxTouchPoints > 0; // phones, tablets, touch laptops
 document.documentElement.classList.toggle('touch', TOUCH);
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
@@ -2280,7 +2287,7 @@ function render() {
   if (!bgCache) bgCache = makeBg(S.L, cv.width, cv.height);
   const k = viewK * DPR; g.setTransform(k, 0, 0, k, 0, 0);
   g.save();
-  if (S.shake > 0) g.translate(rand(-1, 1) * S.shake * .6, rand(-1, 1) * S.shake * .6);
+  if (S.shake > 0 && !CALM.matches) g.translate(rand(-1, 1) * S.shake * .6, rand(-1, 1) * S.shake * .6);
   g.drawImage(bgCache, 0, 0, W, H);
   const E = S.L.edge;
   g.globalCompositeOperation = 'lighter';

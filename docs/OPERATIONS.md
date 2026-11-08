@@ -120,7 +120,7 @@ GitHub rulesets on both branches; nobody bypasses them, and neither branch accep
 | `dev` is red when the owner promotes | `dev-green` | the promotion's check fails |
 | a game site is down | Better Stack: HEAD on both sites every 5 min ([observability/betterstack.js](../observability/betterstack.js)) | email |
 | a save API is down | Better Stack: GET `/health` on both APIs every 5 min (monitors 5200741, 5200742) | email; [runbook](#alert-api-down) |
-| the game crashes on a player's device (dev and production sites) | Sentry, project `immune-citadel-game` | email when an issue is new or returns ([observability/sentry-game-alert.json](../observability/sentry-game-alert.json)) |
+| the game crashes on a player's device (dev and production sites) | Sentry, project `immune-citadel-game` | email when an issue is new or returns ([observability/sentry-game-alert.json](../observability/sentry-game-alert.json)), and again when it first reaches production ([observability/sentry-game-alert-production.json](../observability/sentry-game-alert-production.json)) |
 | a save or load fails with a server error | Sentry alert: on dev and production (the rule has no environment filter) | email; [runbook](#alert-save-api-error) |
 | CI never runs after a merge, or a dashboard rollback leaves an old commit live | not covered | accepted: [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md#open) |
 
@@ -196,7 +196,21 @@ Each check was proven able to fail by removing the code it guards: 25 removals o
 
 **On dev, with Sentry access:** after a save on the dev site, Render → `immune-citadel-v4-api-dev` → Logs shows its line (`"msg":"request"`, `"route":"/api/save/:code"`) with a `trace_id`. In Sentry, project `immune-citadel-api`, environment `dev`, that trace ID finds the trace (`PUT /api/save/:code` with its Postgres spans), the log line, and the metric point.
 
-**Not done yet:** the walkthrough of one real dev save with screenshots, an after-merge item of [#70](https://github.com/alexisdacquay/immune-citadel-v4/issues/70). [PR #90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90) (open, not merged) adds a CI job `observed` that makes one real save on dev after every deploy and asks Sentry's API for all three; run by hand on 2026-11-07 at 20:46 UTC, it found the trace, the log line and the metric (trace `f026882f878afbbb6006c851a118cc13`).
+**One real save on dev, in Sentry's UI** (2026-11-08, 13:25:47 UTC, trace `e273c17a1ecc4b94b4627985857338e4`). One `PUT /api/save/:code` on the dev API gave:
+
+- **Render's log line**, structured JSON, with the trace ID and the route, never the code:
+  `{"level":30,"trace_id":"e273c17a1ecc4b94b4627985857338e4","span_id":"b525e162abb587a9","method":"PUT","route":"/api/save/:code","status":200,"ms":53,"msg":"request"}`
+- **The trace** in Sentry: the request span and its Postgres spans (connect, then a parameterised `INSERT`, so no save code or save data in it).
+
+  ![Sentry trace e273c17a: http.server PUT /api/save/:code with its Postgres spans, 4 spans, 1 log, 1 metric, environment dev](screenshots/sentry-trace.jpg)
+- **The log line** in Sentry Logs, found by the same trace ID: route `/api/save/:code`, status 200, 53 ms, and its parent span `b525e162abb587a9`, the request span of the trace above.
+
+  ![Sentry Logs filtered on trace e273c17a: one request line with route /api/save/:code and parent span b525e162abb587a9](screenshots/sentry-log.jpg)
+- **The metric point** `http.server.request.duration`, listed with the same trace ID (value 0.053 s, status 200). Its trace summary counts the same 4 spans, 1 log and 1 metric.
+
+  ![Sentry Application Metrics: the http.server.request.duration sample of trace e273c17a, 53 ms, with its trace summary](screenshots/sentry-metric.jpg)
+
+[PR #90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90) (open, not merged) would repeat this check in CI after every deploy to dev.
 
 ## Reading gameplay events
 
@@ -209,6 +223,8 @@ docker run --rm -it -e U="$URL?sslmode=require" postgres:18-alpine sh -c 'psql "
 `$URL` is the database's external connection string (Render → the database → Connect, or `GET /v1/postgres/<id>/connection-info`); never commit or paste it. Schemas: `dev` and `prod`. Views: `funnel`, `level_stats`, `card_reads`, `sittings` ([EVENTS.md](EVENTS.md)).
 
 ## Alert: save API error
+
+![The Sentry alert rule 'Save API error (a save or load failed): email owner', with its one firing on 2026-11-06 (Error: getaddrinfo ENOTFOUND db)](screenshots/sentry-alert.jpg)
 
 **"Save API error (a save or load failed): email owner"**: every error in Sentry project `immune-citadel-api` emails the owner, at most once per 30 min per issue. Defined in [observability/sentry-alert.json](../observability/sentry-alert.json) (Sentry alert 1464000) and applied through the Sentry MCP.
 
