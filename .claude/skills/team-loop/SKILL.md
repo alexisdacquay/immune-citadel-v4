@@ -1,6 +1,6 @@
 ---
 name: team-loop
-description: Run the Immune Citadel team loop when the owner says "continue" (or "next", "keep going", "what is next") in the immune-citadel-v4 project, or types /team-loop. Triage the GitHub backlog, spec the top issue, route it (bugs to ic-bug-fixer, everything else built by the orchestrator), have ic-qa verify it through the issue-cycle workflow, integrate into dev and report.
+description: Run the Immune Citadel team loop when the owner says "continue" (or "next", "keep going", "what is next") in the immune-citadel-v4 project, or types /team-loop. Triage the GitHub backlog, spec the top issue, build it with its QA checks, let CI's QA agent verify it, integrate into dev and report.
 ---
 
 # team-loop: one turn of the team loop (what "continue" means)
@@ -19,16 +19,14 @@ The process and roles are defined in `docs/TEAM.md`. This is the orchestrator's 
 - Label the issue `status:in-progress`.
 
 ## 3. Build and verify
-Route by the issue's type label:
-- **`bug`:** run the saved workflow `issue-cycle` with args `{ "issue": <n>, "slug": "<short-slug>" }`. It runs `ic-bug-fixer`, then `ic-qa`, and loops back to the bug-fixer at most twice on a FAIL. Do not fix the bug yourself.
-- **Everything else** (feature, content, design, balance, chore, anything touching how the game teaches): build it yourself on branch `issue/<n>-<slug>`, run the checks, post a short **Build notes** comment, then run `issue-cycle` with `"qaOnly": true`. On a FAIL, fix it yourself and run QA again.
-- Add `"roleFiles": true` when this session did not start in the repo (the agent types are then not registered).
-- Never verify your own work in place of `ic-qa`; if the workflow fails, find the root cause before retrying.
+- The `ic-bug-fixer` and `ic-qa` agents and the `issue-cycle` workflow are paused by the owner: the orchestrator builds every issue, bugs included, on branch `issue/<n>-<slug>`, runs `npm test` (and `npm run test:game` when the game changes) and posts a short **Build notes** comment.
+- Write the pull request's `## QA checks` (AGENTS.md, **Test plan**): what the change could break, as closed questions, at least one `[changes]`. A bug fix also adds its line to `test/past-failures.md`, proven NO on the code before the fix and YES after.
+- QA runs in CI on the pull request: stage 1 `qa` (required) asks those questions and the past failures in the files the change touches; stage 2 `qa-review` is the open review, advisory.
 
 ## 4. Integrate
-- On a PASS: read the diff yourself (`git diff dev...issue/<n>-<slug>`). If you disagree with something, send it back with a comment instead of patching it silently.
-- Open (or reuse) the pull request from `issue/<n>-<slug>` into `dev`, turn on auto-merge (`gh pr merge <n> --auto --merge`; if `dev` moves first: `gh pr update-branch <n>`); once CI's `deployed` job is green on `dev`, label `status:on-dev` and post a one-line **Integrated** comment with the commit.
-- On a second FAIL: label `needs-owner` or re-spec; never merge a failing issue.
+- Read the diff yourself before opening the pull request into `dev`; arm auto-merge right away with `sh tools/automerge.sh <n>`. GitHub merges once `test`, `game` and `qa` are green.
+- On a stage 1 FAIL: a real defect, fix it; a wrong answer, rewrite the question and add the lesson to AGENTS.md. Fix or answer every `qa-review` finding before the next promotion.
+- Once CI's `deployed` job is green on `dev`, label the issue `status:on-dev` and post a one-line **Integrated** comment with the commit.
 
 ## 5. Report
 Tell the owner in a few lines: what shipped (issue links), what is not verified, what needs them. Then, if the owner asked for more than one cycle, go back to step 1.

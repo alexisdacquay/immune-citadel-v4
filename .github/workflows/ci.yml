@@ -43,7 +43,7 @@ jobs:
     # No "needs": it reads code, not test results, so it runs beside test and game and adds no wait.
     if: github.event_name == 'pull_request' && github.base_ref == 'dev'
     runs-on: ubuntu-latest
-    timeout-minutes: 15 # each question takes seconds; a model call gives up after 12 min
+    timeout-minutes: 15 # each question takes seconds; a model call gives up after 4 min and is tried at most 3 times
     permissions: { contents: read, issues: write, pull-requests: write }
     steps:
       - uses: actions/checkout@v5
