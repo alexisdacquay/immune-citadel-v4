@@ -2,7 +2,7 @@
 const CARDS = ['bact', 'virus', 'staph', 'flu', 'worm', 'candida', 'boss', 'salmon', 'toxo', 'rabies', 'bcell', 'fever', 'macro', 'hero', 'gz',
   'killer', 'spec-killer', 'spec-bcell', 'spec-neutro', 'spec-macro', 'swarm']; // the game's intro cards (INTRO in index.html); tools/test.js keeps them equal
 const CHALLENGE_LEVELS = [3, 6, 9, 12, 15, 18];
-const MAX_EVENTS = 20, DAILY_CAP = 2000, KEEP_DAYS = 395; // 2,000 rows x 395 days x ~150 B ~ 120 MB per server on the shared 1 GB disk
+const MAX_EVENTS = 20, DAILY_CAP = 2000, KEEP_DAYS = 395; // 2,000 rows x 395 days x ~150 B ~ 120 MB per environment, on its own 15 GB disk (render.yaml); saves untouched this long go too
 
 const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
 const bool = v => typeof v === 'boolean';

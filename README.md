@@ -52,8 +52,9 @@ Every level can be won with the cells unlocked by then: a bot plays all 18 in th
 
 ### Saves and privacy
 
-- **Saves without an account.** Progress is kept in the browser. The first save also creates a 16-character save code and a copy in the cloud. Typing the code on another device continues the game there; the two devices' progress is merged, never overwritten.
+- **Saves without an account.** Progress is kept in the browser. The first save also creates a 16-character save code and a copy in the cloud. Typing the code on another device continues the game there; the two devices' progress is merged, never overwritten (except when two devices sync in the same second: the cloud then keeps the last write until the other device syncs again, [#104](https://github.com/alexisdacquay/immune-citadel-v4/issues/104)). A cloud save not updated for 13 months is deleted automatically; a browser that still has the game uploads its progress again at the next visit.
 - **No names, no ads, no chat.** The game sends a few anonymous play stats (which level, the outcome, how long a card stays open) to its own database, never the save code. Each page load, and any crash, also sends a report to Sentry, which keeps reports in the EU. A report has no name and no internet address in it; Sentry's servers see the address in transit but are set never to keep it. A switch under "Your data" on the title screen turns the play stats off. What is and is never collected: [docs/EVENTS.md](docs/EVENTS.md); the data protection impact assessment, signed by the owner: [docs/DPIA.md](docs/DPIA.md).
+- **Questions, or deleting a cloud save.** Open a [GitHub issue](https://github.com/alexisdacquay/immune-citadel-v4/issues). Never post the save code there: issues are public and the code is the only key to the save. No response time is promised.
 
 ## Screenshots
 
