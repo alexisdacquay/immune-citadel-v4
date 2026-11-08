@@ -1,0 +1,13 @@
+{
+  "_comment": "Sentry alert 1469307 (org myown-76, de.sentry.io), created by the agent through the Sentry MCP on 2026-11-08. The same as sentry-game-alert.json, filtered to environment production: Sentry's 'new issue' fires once per issue, so a crash first seen on dev would never email again when it reaches production; with an environment filter, the first event in production counts as new.",
+  "name": "Game error in production (new or returning): email owner",
+  "projectSlugs": ["immune-citadel-game"],
+  "environment": "production",
+  "triggers": { "logicType": "any-short", "conditions": [
+    { "type": "first_seen_event", "comparison": true, "conditionResult": true },
+    { "type": "regression_event", "comparison": true, "conditionResult": true },
+    { "type": "reappeared_event", "comparison": true, "conditionResult": true }
+  ] },
+  "actionFilters": [{ "logicType": "all", "conditions": [], "actions": [{ "type": "email", "config": { "targetType": "user", "targetIdentifier": "5157255" }, "data": {} }] }],
+  "frequencyMinutes": 30
+}
