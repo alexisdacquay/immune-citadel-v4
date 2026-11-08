@@ -49,6 +49,16 @@ module.exports = async function touch(browser, out, errs) {
     };
     const shot = n => p.screenshot({ path: `${out}/touch-${V.n}-${n}.png` });
 
+    // "Your data" fits the screen and its Play stats switch (the opt-out the DPIA relies on) takes a real tap: on a landscape
+    // phone it used to run off the bottom, out of reach. The popover scrolls inside itself; a swipe there sets its scrollTop.
+    await tapSel('#dataBtn');
+    const dp = await ev(() => { const P = document.querySelector('#dataPop'), r = P.getBoundingClientRect(); P.scrollTop = P.scrollHeight; return { top: r.top, bottom: r.bottom, on: document.querySelector('#statsTg').getAttribute('aria-checked') }; });
+    fail(dp.top >= 0 && dp.bottom <= V.h, `"Your data" runs off the screen: ${dp.top | 0} to ${dp.bottom | 0}`);
+    await tapSel('#statsTg');
+    fail(await ev(() => document.querySelector('#statsTg').getAttribute('aria-checked')) !== dp.on, 'a tap on the Play stats switch did not turn it');
+    await tapSel('#statsTg'); await tapSel('#dataBtn'); // back as it was, popover closed
+    fail(await ev(() => document.querySelector('#dataPop').hidden), '"Your data" did not close');
+
     // tray
     await shot('tray');
     await sizes('.slide:not(.locked),.chb,.mbtn,.lnode:not(.locked) .hit,.lch:not(.locked) .hit', 'tray');
