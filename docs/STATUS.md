@@ -72,7 +72,7 @@ In the order the team loop uses: `P0` first, then the owner's latest priority, t
 |---|---|
 | Playtest the campaign ([#18](https://github.com/alexisdacquay/immune-citadel-v4/issues/18)) | the balance bot cannot judge fun, clarity or repetition |
 | Approve the next promotion | only the owner approves a merge into `main` |
-| On-call agent ([#27](https://github.com/alexisdacquay/immune-citadel-v4/issues/27), P1, rubric criterion 12): do reviewers accept a scheduled job that checks Sentry as "wakes on an alert"? | the design question to settle before it is built |
+| On-call agent ([#27](https://github.com/alexisdacquay/immune-citadel-v4/issues/27), rubric criterion 12): install Sentry's GitHub integration, add "Create a GitHub issue" to the alert rules, and add the `ONCALL_TOKEN` secret | the agent is built and merged into `dev` (#118, #124); it wakes only with these and once it is on `main`; then its first drill is recorded ([OPERATIONS, On-call agent](OPERATIONS.md#on-call-agent)) |
 
 ## Parked by the owner
 
