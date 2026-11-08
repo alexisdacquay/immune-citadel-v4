@@ -12,7 +12,7 @@ How Immune Citadel runs: where it is deployed, how a change reaches players, wha
 | Dev | https://immune-citadel-v4-dev.onrender.com | https://immune-citadel-v4-api-dev.onrender.com | every commit on `dev` |
 | Local | http://localhost:8080 | http://localhost:8787 | `docker compose up` (or `npm start`) |
 
-**Which commit is live:** `GET /health` on a save API returns it (`{"ok":true,"commit":"…"}`), and `/version.txt` on a game site shows it. Render waits for `/health` to answer before a new API deploy takes traffic, so a broken build never does. Production was last promoted on 2026-11-08 (fonts #108, smoke #107); at that point dev and production ran the same code.
+**Which commit is live:** `GET /health` on a save API returns it (`{"ok":true,"commit":"…"}`), and `/version.txt` on a game site shows it. Render waits for `/health` to answer before a new API deploy takes traffic, so a broken build never does. Production was last promoted on 2026-11-08 (PR #110, `274d452`: fonts #108, smoke #107); at that point dev and production ran the same code.
 
 ### What runs on Render
 
@@ -33,16 +33,16 @@ Locally, `docker compose up` ([compose.yaml](../compose.yaml)) runs the same thr
 
 [render.yaml](../render.yaml) declares all six resources, and Render applies it through Blueprint `exs-dbndeu7f3r2c738bllag`. Change a plan or a setting there, never in the dashboard: Render's API refuses a Free-to-paid change on a service, a Blueprint sync does not. The first sync (2026-11-06) adopted the existing services, moved both APIs from Free to Starter, and grew the dev database disk to 15 GB like production's.
 
-Since the promotion of 2026-11-08, the Blueprint reads `main` with auto-sync on, so a change to `render.yaml` reaches Render only when the owner promotes it. The last sync from `dev`, at about 07:58 UTC on 2026-11-08, made both game sites copy `fonts/`.
+Since the promotion of 2026-11-08 (PR #110, `274d452`), the Blueprint reads `main` with auto-sync on (switched at 08:34 UTC; its first plan from `main` found no changes), so a change to `render.yaml` reaches Render only when the owner promotes it. The last sync from `dev`, at about 07:58 UTC on 2026-11-08, made both game sites copy `fonts/`.
 
 Each database accepts outside connections only from an IP allowlist holding the owner's address. That address is personal, so it is set in Render only, never in `render.yaml` or anywhere in this repository (a Blueprint sync keeps a list the file leaves out).
 
 | Service | Build | Then |
 |---|---|---|
-| Game site | `mkdir -p public && cp index.html public/ && { [ ! -d fonts ] || cp -r fonts public/; } && printf %s "$RENDER_GIT_COMMIT" > public/version.txt` (the game and its self-hosted fonts) | publishes `public`, with `SKIP_INSTALL_DEPS=true` |
+| Game site | `mkdir -p public && cp index.html public/ && cp -r fonts public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt` (the game and its self-hosted fonts) | publishes `public`, with `SKIP_INSTALL_DEPS=true` |
 | Save API | `cd server && npm ci --omit=dev` | starts `cd server && exec npm start` |
 
-Why: the site publishes only the game (Render's default would publish the whole checkout, server code and `node_modules` included), and `/version.txt` names its commit. With `exec`, Render's stop signal reaches npm, which passes it to the API instead of stopping at a shell. `exec` is in `render.yaml` on both branches; whether the running services use it is not checked. The guard `{ [ ! -d fonts ] || cp -r fonts public/; }` only let the build pass before `fonts/` reached `main`; a follow-up into `dev` drops it.
+Why: the site publishes only the game (Render's default would publish the whole checkout, server code and `node_modules` included), and `/version.txt` names its commit. With `exec`, Render's stop signal reaches npm, which passes it to the API instead of stopping at a shell. `exec` is in `render.yaml` and applied: the Blueprint's first plan from `main`, on 2026-11-08, found no difference from the running services. The game sites copy `fonts/` without a guard since the promotion after 2026-11-08; until then they ran a guard that let `main` build before `fonts/` reached it.
 
 Save API variables: `SENTRY_DSN` (a secret set in Render: Sentry → the project → Client Keys; without it, Sentry is off), `SENTRY_ENVIRONMENT`, `DB_SCHEMA`, `ALLOWED_ORIGINS`, `DATABASE_URL` (from the database) and `NODE_VERSION`.
 
