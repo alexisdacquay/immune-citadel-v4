@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Observability target</title>
+  <title>Observability</title>
   <!-- Font source: system (no Google Fonts link); the stacks fall through to platform faces. -->
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -55,12 +55,12 @@
 </head>
 <body>
   <div class="frame">
-    <p class="eyebrow">Architecture · doc-inline</p>
-    <h1>Observability target</h1>
+    <p class="eyebrow">Architecture · Observability</p>
+    <h1>What watches the game and the save API</h1>
 
     <div class="diagram-container">
       <svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="observability-title observability-desc">
-        <title id="observability-title">Observability target</title>
+        <title id="observability-title">What watches the game and the save API</title>
         <desc id="observability-desc">The player's browser reports errors and speed to Sentry; the save API sends Sentry its errors and, for each save or load, one trace, one log line and one duration metric under one trace ID, the same ID as its log line in Render; Better Stack and the CI deployed job check the static site and the save API; all three tools email the owner.</desc>
         <defs>
           <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="observability-title observability-desc" id="observability-root">
-        <title id="observability-title">Observability target</title>
+        <title id="observability-title">What watches the game and the save API</title>
         <desc id="observability-desc">The player's browser reports errors and speed to Sentry; the save API sends Sentry its errors and, for each save or load, one trace, one log line and one duration metric under one trace ID, the same ID as its log line in Render; Better Stack and the CI deployed job check the static site and the save API; all three tools email the owner.</desc>
         <defs>
       <style>#observability-root { --color-paper:   #f5f5f5;

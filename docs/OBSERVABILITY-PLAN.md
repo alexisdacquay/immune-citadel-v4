@@ -1,57 +1,132 @@
 # Observability plan
 
-Approved by the owner on 2026-11-06. One step at a time; each step is proven before the next starts. Tick a step only when its proof is recorded here. How things work today stays in [OPERATIONS.md](OPERATIONS.md); it is updated in the step that changes it.
+**Status:** steps 1 to 5 done and proven on dev (2026-11-06). Step 6, production, is partly done: production was promoted on 2026-11-07, but its save API sends nothing to Sentry yet. Step 7 (one trace ID across trace, log line and metric) is on dev since 2026-11-07 and not yet on production; its walkthrough of one real dev save is not done.
+
+Approved by the owner on 2026-11-06. One step at a time; each step is proven before the next starts, and a step is marked done only when its proof is recorded here. How things work today lives in [OPERATIONS.md, Telemetry](OPERATIONS.md#telemetry); it is updated in the step that changes it.
+
+## At a glance
+
+| # | Step | Dev | Production |
+|---|---|---|---|
+| 1 | Sentry on the save API: errors and the "save failed" email | done 2026-11-06 | off: `SENTRY_DSN` held back (step 6) |
+| 2 | Dash0 removed; Sentry traces every request | done 2026-11-06 | code shipped; no traces without `SENTRY_DSN` |
+| 3 | Sentry in the game: errors and load speed | done 2026-11-06 | on since the 2026-11-07 promotion; no test error recorded |
+| 4 | Better Stack on both game sites | done 2026-11-06 | done 2026-11-06 |
+| 5 | Own gameplay events, "Your data" card, DPIA | done 2026-11-06 | code shipped 2026-11-07; no production read recorded |
+| 6 | Production at the promotion | n/a | partly done 2026-11-07 |
+| 7 | One trace ID across trace, log line and metric ([#70](https://github.com/alexisdacquay/immune-citadel-v4/issues/70)) | merged 2026-11-07 (PR #82); real-save walkthrough not done | not yet: next promotion |
 
 ## Target
 
-![Observability target: Sentry, Better Stack and the CI deployed job watch the game and email the owner](diagrams/observability.svg)
+![Observability target: Sentry, Better Stack and the CI deployed job watch the game and the save API and email the owner](diagrams/observability.svg)
 
-| Job | Tool | Cost | Replaces |
+| Job | Tool | Cost | Replaced |
 |---|---|---|---|
-| game crashes and errors | Sentry, browser SDK | free plan | nothing (the game reports nothing today) |
-| game load speed | Sentry, same SDK, low sample rate | free plan | nothing |
+| game crashes and errors | Sentry, browser SDK | free plan | nothing (the game reported nothing before) |
+| game load speed | Sentry, same SDK | free plan | nothing |
 | gameplay and learning: levels started, won, lost, quit | own events: game → save API → Postgres; funnels as SQL views | $0 | nothing |
 | save API errors, "saves failing" alert | Sentry, Node SDK | free plan | Dash0 and `observability/alert.js` |
 | site and API up | Better Stack uptime | free plan | nothing |
-| right commit live | CI job `deployed` | done | — |
-| alerts | email from each tool | $0 | — |
+| right commit live | CI job `deployed` | $0 | nothing ([PIPELINE-PLAN.md](PIPELINE-PLAN.md), step 3) |
+| alerts | email from each tool | $0 | nothing |
 
-Dash0 is removed from this project in step 2, once step 1 is proven (the account stays, for another project). Checkly, Grafana and PostHog are not used.
+Checkly, Grafana and PostHog are not used. The Dash0 account stays, for another project.
 
 ## Why these tools
 
 | Tool | Reason | Source |
 |---|---|---|
-| Sentry | most used and most admired of the monitoring tools in the survey (13.9% used, 45.9% admired); the only tracker found in the school apps Kahoot, Padlet and Sdui | [Stack Overflow survey 2026](https://survey.stackoverflow.co/2026/technology/data), [Kuketz audit](https://www.kuketz-blog.de/die-digitale-bildung-unter-der-lupe-eine-analyse-von-schul-und-lern-apps/) |
-| own gameplay events | kids' learning apps keep this first-party (ANTON logs to its own domain, no trackers); no third party sees children's play | [Kuketz on ANTON](https://www.kuketz-blog.de/anton-datenschutzfreundlich-und-verantwortungsbewusst-schul-apps-teil-3/) |
-| Better Stack | Render's docs name it for outside uptime checks; recommended by practitioners | [Render uptime advice](https://render.com/docs/uptime-best-practices), [HN](https://news.ycombinator.com/item?id=40276687) |
+| Sentry | the most used and most admired of the monitoring tools in the survey (13.9% used, 45.9% admired); the only tracker found in the school apps Kahoot, Padlet and Sdui | [Stack Overflow survey 2026](https://survey.stackoverflow.co/2026/technology/data), [Kuketz audit](https://www.kuketz-blog.de/die-digitale-bildung-unter-der-lupe-eine-analyse-von-schul-und-lern-apps/) |
+| own gameplay events | children's learning apps keep this first-party (ANTON logs to its own domain, no trackers), so no third party sees children's play | [Kuketz on ANTON](https://www.kuketz-blog.de/anton-datenschutzfreundlich-und-verantwortungsbewusst-schul-apps-teil-3/) |
+| Better Stack | Render's docs name it for outside uptime checks; practitioners recommend it | [Render uptime advice](https://render.com/docs/uptime-best-practices), [HN](https://news.ycombinator.com/item?id=40276687) |
 | no Dash0 | Sentry already does its one job here (API errors and the save alert) | — |
 
 ## Rules for every step
 
 | Rule | Detail |
 |---|---|
-| Sentry org region | EU (Frankfurt). Chosen at sign-up, cannot be changed later |
-| Sentry organisation settings | Security & Privacy: "Prevent Storing of IP Addresses" on; Advanced Data Scrubbing rule `[Remove] [Anything] from [$user.geo.**]` (errors, transactions, attachments): Sentry derives a location from the IP even when IP storage is off. Set 2026-11-06; proof: IMMUNE-CITADEL-GAME-3 (19:00, IP gone, city still there), IMMUNE-CITADEL-GAME-4 (19:13, no IP, no location) |
-| Sentry privacy | `dataCollection: { userInfo: false, cookies: false, httpHeaders: false, httpBodies: [], urlQueryParams: false }` (from SDK v11 these are collected unless set; `sendDefaultPii` is deprecated); IP storage off in project settings; Session Replay off; no save code in any message or URL sent |
+| Sentry region | EU (Frankfurt), chosen at sign-up; it cannot be changed later |
+| Sentry organisation settings | Security & Privacy: "Prevent Storing of IP Addresses" on; Advanced Data Scrubbing rule `[Remove] [Anything] from [$user.geo.**]` (errors, transactions, attachments), because Sentry derives a location from the IP even when IP storage is off. Set 2026-11-06; proof: IMMUNE-CITADEL-GAME-3 (19:00, IP gone, city still there), IMMUNE-CITADEL-GAME-4 (19:13, no IP, no location) |
+| Sentry privacy in code | game and API: `dataCollection: { userInfo: false, cookies: false, httpHeaders: false, httpBodies: [], urlQueryParams: false }` (from SDK v11 these are collected unless set; `sendDefaultPii` is deprecated); the API also sets `databaseQueryData: false, stackFrameVariables: false`. Session Replay off. No save code in anything sent |
 | gameplay events | as in [EVENTS.md](EVENTS.md): anonymous, a random id per page load kept in memory, date only, deleted after 13 months; no save code, no free text, no IP stored; a "Your data" card and a stats switch in the game |
-| Render Free hours | no longer applies: both APIs are on the Starter plan since 2026-11-06; monitor both |
-| dev vs production | dev first, proven, then production at the next promotion (the owner approves it) |
+| dev, then production | dev first, proven, then production at the next promotion, which the owner approves |
 
-## Steps
+## Steps in detail
 
-| # | Step | Proof | Rollback | Owner does | Status |
-|---|---|---|---|---|---|
-| 1 | Sentry on the save API (dev), errors only, next to Dash0: Sentry's own OpenTelemetry setup off and no tracing, so it does not clash with `server/otel.js` (Sentry custom OpenTelemetry setup); email alert when a save fails | local stack with the dev DSN: `docker compose stop db`, make a save → Sentry issue → email; Render dev deploy green with the DSN set | remove the `SENTRY_DSN` variable | create the Sentry organisation, EU region (fixed at sign-up) | done 2026-11-06: local failed save 17:42:21 UTC → issue IMMUNE-CITADEL-API-1 (route `/api/save/:code`, no player data) → alert 17:42:33 → email received; dev runs it since PR #48 (20e3aba, `deployed` green, `SENTRY_DSN` and `SENTRY_ENVIRONMENT=dev` set) |
-| 2 | remove Dash0: `server/otel.js`, OpenTelemetry packages, `observability/alert.js`, `OTEL_*` and `DASH0_*` variables; Sentry traces every request except `/health`; the alert kept as code in `observability/sentry-alert.json`; OPERATIONS.md and README rewritten | `git grep -i dash0` finds only plans; tests green (traces carry no save code); a save on dev appears as a trace in Sentry, environment `dev` | revert the PR, restore the variables | none: the Dash0 account stays for another project | done 2026-11-06: PR #49; dev save at 18:54:21 UTC → trace `PUT /api/save/:code` with its Postgres spans (`$1`, no values), environment `dev` |
-| 3 | Sentry in the game: errors and load speed. Loaded only on the dev and production sites (never locally or in tests) from Sentry's CDN, pinned version with an integrity hash; the commit from `/version.txt` is the release; save codes scrubbed from reports, traces and breadcrumbs | a thrown test error on dev → Sentry issue with browser and commit → email; DevTools: no new cookie or storage key | revert the PR | none | done 2026-11-06: PR #50; on the dev site Sentry loads (environment `dev`, release 6919f8b), no cookie, no storage beyond the game's own keys; test error 18:55:01 → issue IMMUNE-CITADEL-GAME-1 with the code scrubbed; page load traced (827 ms). Finding: Sentry derived the city from the IP (`user.geo`); fixed by the organisation settings above. Game alert added (1464194): new or returning game errors email the owner, fired 18:57:13 on a second test error; Sentry's default high-priority alert disabled (it duplicated save API emails) |
-| 4 | Better Stack: both game sites, HEAD every 5 min, defined in `observability/betterstack.js` | monitors up; a test monitor on a missing page → email | delete the monitors | create the Better Stack account | done 2026-11-06: monitors 5198459 (production) and 5198460 (dev) up since 18:55 UTC, created by `observability/betterstack.js`; a temporary monitor on a missing dev page opened incident 1048345571 at 18:56:22 (HTTP 404, email on), then was deleted |
-| 5 | gameplay events ([EVENTS.md](EVENTS.md)): endpoint `/api/play` with caps, table with 13-month deletion, views; "Your data" card and stats switch; `docs/DPIA.md` | a played level on dev appears in `level_stats`; with the switch off, nothing is sent | revert the PR (the table stays, unused) | approve EVENTS.md (list, default on); sign [DPIA.md](DPIA.md) | done 2026-11-06: list approved (stats on by default); PR #54 (969716f) on dev. Level 2 played on the dev site with the Play button, card closed, won 22:27 UTC → 3 batches, all 204, no storage warning; `dev.level_stats`: level 2 campaign normal, 1 run, 1 won; `dev.funnel`: 1 first win; `dev.card_reads`: bact 1 s; no `/api/play` span in Sentry (game or API). DPIA waiting for the owner's signature, before step 6 |
-| 6 | production at promotion: Sentry DSN, Better Stack monitors on both APIs (paid instances and one database per environment done 2026-11-06), the events table migrated | laptop test error with the production DSN → email; a test error from the production game → Sentry issue; a played level on production appears in the funnel query; API monitor up | per step | approve the promotion and the paid instance | partly done 2026-11-07: promoted (db0ae14); Better Stack monitors 5200741 (production API) and 5200742 (dev API) created; production `SENTRY_DSN` held back until step 7 is promoted (the browser identifier reached Sentry on dev) |
-| 7 | logs and one metric for saves and loads in Sentry under the request's trace ID, the same ID in Render's log line; user agent removed; a tab closed mid-save is no error; SIGTERM finishes saves and flushes ([#70](https://github.com/alexisdacquay/immune-citadel-v4/issues/70)) | `server/observability.test.js` (each check proven able to fail); one save on dev in Sentry, [Follow one save](OPERATIONS.md#follow-one-save) | revert the PR | re-sign [DPIA.md](DPIA.md): done 2026-11-07 | in review |
+### 1. Sentry on the save API: done on dev
+
+Errors only at first, next to Dash0, with Sentry's own OpenTelemetry setup off so it did not clash with `server/otel.js`; an email alert when a save fails.
+
+- **Proof, 2026-11-06:** on the local stack with the dev DSN, a failed save at 17:42:21 UTC opened issue IMMUNE-CITADEL-API-1 (route `/api/save/:code`, no player data); the alert fired at 17:42:33; the email arrived. Dev runs it since PR #48 (`20e3aba`, `deployed` green, `SENTRY_DSN` and `SENTRY_ENVIRONMENT=dev` set).
+- **Rollback:** remove the `SENTRY_DSN` variable.
+- **Owner did:** created the Sentry organisation in the EU region.
+
+### 2. Dash0 removed, Sentry traces: done
+
+Removed `server/otel.js`, the OpenTelemetry packages, `observability/alert.js`, and the `OTEL_*` and `DASH0_*` variables. Sentry traces every request except `/health` (and, since step 5, `/api/play`); the alert is kept as code in [observability/sentry-alert.json](../observability/sentry-alert.json).
+
+- **Proof, 2026-11-06 (PR #49):** a dev save at 18:54:21 UTC appeared as the trace `PUT /api/save/:code` with its Postgres spans (`$1`, no values), environment `dev`.
+- **Rollback:** revert the pull request and restore the variables.
+
+### 3. Sentry in the game: done on dev
+
+Errors and load speed. Loaded only on the dev and production sites (never locally or in tests) from Sentry's CDN, at a pinned version with an integrity hash; the commit in `/version.txt` is the release; save codes are scrubbed from reports, traces and breadcrumbs.
+
+- **Proof, 2026-11-06 (PR #50):** on the dev site Sentry loads (environment `dev`, release `6919f8b`) with no cookie and no storage beyond the game's own keys. A test error at 18:55:01 opened IMMUNE-CITADEL-GAME-1 with the code scrubbed; the page load was traced (827 ms).
+- **Finding:** Sentry derived the city from the IP (`user.geo`); fixed by the organisation settings in the rules above.
+- **Game alert** 1464194: a new or returning game error emails the owner; it fired at 18:57:13 on a second test error. Sentry's default high-priority alert is disabled, because it duplicated the save API emails.
+- **Rollback:** revert the pull request.
+
+### 4. Better Stack: done
+
+Both game sites, HEAD every 5 min, defined in [observability/betterstack.js](../observability/betterstack.js).
+
+- **Proof, 2026-11-06:** monitors 5198459 (production) and 5198460 (dev) up since 18:55 UTC, created by the script. A temporary monitor on a missing dev page opened incident 1048345571 at 18:56:22 (HTTP 404, email on), then was deleted.
+- **Rollback:** delete the monitors.
+- **Owner did:** created the Better Stack account.
+
+### 5. Gameplay events: done on dev
+
+As listed in [EVENTS.md](EVENTS.md): the endpoint `/api/play` with caps, a table with 13-month deletion, SQL views, the "Your data" card and the stats switch, and [DPIA.md](DPIA.md).
+
+- **Proof, 2026-11-06 (PR #54, `969716f`):** level 2 played on the dev site with the Play button, card closed, won at 22:27 UTC: 3 batches, all answered 204, no storage warning. `dev.level_stats`: level 2, campaign normal, 1 run, 1 won; `dev.funnel`: 1 first win; `dev.card_reads`: bact 1 s. No `/api/play` span in Sentry, game or API.
+- **Owner did:** approved the event list (stats on by default) and signed the DPIA (2026-11-07).
+- **Rollback:** revert the pull request; the table stays, unused.
+
+### 6. Production at the promotion: partly done
+
+Production gets the Sentry DSN, Better Stack monitors on both APIs, and the events table. Paid instances and one database per environment were done on 2026-11-06.
+
+Done on 2026-11-07:
+- Promoted on the owner's word: PR #73 merged as `db0ae14`; `main`'s CI run [42388716983](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42388716983) green, deploy proof included.
+- Better Stack monitors 5200741 (production API) and 5200742 (dev API) created.
+- The code that loads Sentry in the game and sends gameplay events shipped to production with the promotion.
+
+Not done:
+- Production `SENTRY_DSN` on the save API: removed on 2026-11-07 and held back until step 7 reaches production, because the browser identifier (user agent) reached Sentry on dev.
+- Not recorded: a laptop test error with the production DSN, a test error from the production game in Sentry, and a played level on production in the funnel query.
+
+### 7. One trace ID across trace, log line and metric: on dev
+
+Logs and one metric for saves and loads in Sentry under the request's trace ID, with the same ID in Render's log line; the user agent removed; a tab closed mid-save is no error; `SIGTERM` finishes saves in flight and sends buffered telemetry ([#70](https://github.com/alexisdacquay/immune-citadel-v4/issues/70)).
+
+Done:
+- [server/observability.test.js](../server/observability.test.js), run by CI on every pull request; each check proven able to fail by 25 code removals (13 by an independent reviewer). See [Follow one save](OPERATIONS.md#follow-one-save).
+- A privacy reviewer sent realistic browser traffic (user agent, referer, accept-language, cookie, forwarded IPs, query string): no marker reached anything sent to Sentry (PR #82).
+- Merged into `dev` on 2026-11-07 at 20:29 UTC (PR #82); the `dev` push run [42411334057](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42411334057) is green, deploy proof included.
+- Better Stack `GET /health` monitors on both APIs (see step 6).
+- **Owner did:** re-signed [DPIA.md](DPIA.md) for the new Sentry records (2026-11-07).
+
+Not done:
+- One real save on dev shown in Sentry as a trace, its log line and the metric, with screenshots in [Follow one save](OPERATIONS.md#follow-one-save). [PR #90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90) (open) automates this check after every dev deploy; its hand run on 2026-11-07 at 20:46 UTC found all three.
+- Production: the next promotion, then `SENTRY_DSN` set back on the production API (the owner's word).
+- Not recorded: whether the running APIs use the `exec` start command from `render.yaml` ([OPERATIONS.md](OPERATIONS.md#infrastructure-as-code)).
+- Issue #70 is still open.
+
+**Rollback:** revert PR #82.
 
 ## Open
 
-- Not covered: CI never running after a merge, or a dashboard rollback leaving an old commit live. The `deployed` job runs only when CI runs. Accepted: practitioners check the commit after each deploy, not continuously; a rollback is a deliberate owner action.
-- Sentry's free plan lists 20 metric monitors; whether one can alert on a count of failed saves is unconfirmed. Confirmed: an email on a new or recurring save error. Step 1 settles it.
-- Ad blockers can block Sentry reports from the game. Sentry's `tunnel` option (reports sent through our own API) fixes it if step 2 shows missing reports.
+- **Not covered:** CI never running after a merge, or a dashboard rollback leaving an old commit live; the `deployed` job runs only when CI runs. Accepted: practitioners check the commit after each deploy, not continuously, and a rollback is a deliberate owner action.
+- **Not settled:** an alert on a count of failed saves. Sentry's free plan lists 20 metric monitors, and step 7 adds the save metric, but whether a monitor can alert on it is unconfirmed. Today every save API error emails the owner (alert 1464000).
+- **Not measured:** ad blockers can block the game's Sentry reports (the game still runs). If reports go missing, Sentry's `tunnel` option, which sends them through our own API, is the fix.
