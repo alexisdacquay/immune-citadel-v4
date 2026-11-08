@@ -164,6 +164,17 @@ web       nginx:alpine         Up 16 seconds (healthy)   0.0.0.0:8080->80/tcp
 - **Dev:** https://immune-citadel-v4-dev.onrender.com ([/version.txt](https://immune-citadel-v4-dev.onrender.com/version.txt)) and the save API's [/health](https://immune-citadel-v4-api-dev.onrender.com/health): both name the head of [`dev`](https://github.com/alexisdacquay/immune-citadel-v4/commits/dev).
 - **Infrastructure as code:** [render.yaml](../render.yaml): the game site, the save API and Postgres, for dev and for production.
 
+Production, 2026-11-08:
+
+```
+$ curl -s -o /dev/null -w '%{http_code}\n' https://immune-citadel-v4.onrender.com/
+200
+$ curl -s https://immune-citadel-v4.onrender.com/version.txt
+d3f7a43d47fbddd870a453b291ac7a7a6aae11b1
+$ curl -s https://immune-citadel-v4-api.onrender.com/health
+{"ok":true,"commit":"d3f7a43d47fbddd870a453b291ac7a7a6aae11b1"}
+```
+
 ## 9. CI/CD
 
 > **3 points:** "CI runs tests, CD deploys to dev, and there's a manual deploy to production."
