@@ -2,12 +2,12 @@
 
 Where the project stands and what comes next, on one page. It is updated at the end of every step; the details live in the linked plans, and the backlog is [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues).
 
-Last update: 2026-11-08, about 15:15 UTC: `dev` (`f07f748` and later) is the release candidate for the next promotion: the reviewer docs, Sentry screenshots, phone and laptop fixes, save retention, the #102 log fix and the on-call agent. The DPIA update ([#117](https://github.com/alexisdacquay/immune-citadel-v4/pull/117)) waits for the owner's signature.
+Last update: 2026-11-08, about 17:10 UTC: production runs the launch release `ee4783d` ([#129](https://github.com/alexisdacquay/immune-citadel-v4/pull/129)), and the on-call agent's first drill answered a real alert with a fix live on `dev` in 11 minutes ([OPERATIONS, On-call agent](OPERATIONS.md#on-call-agent)).
 
 ## At a glance
 
-- **Production** runs `9aa33f5`, the promotion of 2026-11-08 at 12:09 UTC ([#113](https://github.com/alexisdacquay/immune-citadel-v4/pull/113)): the whole 18-level campaign on the body map, cloud saves, the save API's one-trace-ID observability, crash reports without the player's browser identifier, the game's fonts from its own site, a read-only smoke and privacy check after every deploy, and a "Your data" popover that fits a landscape phone. Every promotion: [Promotions](#promotions).
-- **Dev** runs production's code plus every pull request merged into `dev` since #113.
+- **Production** runs `ee4783d`, the launch release of 2026-11-08 at 16:40 UTC ([#129](https://github.com/alexisdacquay/immune-citadel-v4/pull/129)): the whole 18-level campaign on the body map, cloud saves (deleted after 13 months unchanged), the save API's one-trace-ID observability, crash reports and load reports that respect Play stats and Global Privacy Control, the game's own fonts, phone and laptop layout fixes, the on-call agent, and a read-only smoke and privacy check after every push to `dev` or `main`.
+- **Dev** runs production's code plus every pull request merged into `dev` since #129: the drill's planted line and the on-call agent's fix of it (#130, #132).
 - **In flight:** the [open pull requests into `dev`](https://github.com/alexisdacquay/immune-citadel-v4/pulls?q=is%3Apr+is%3Aopen+base%3Adev); [#90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90) is in conflict with `dev` (below).
 - **Next:** the rubric work ([#77](https://github.com/alexisdacquay/immune-citadel-v4/issues/77), P0).
 
@@ -15,7 +15,7 @@ Last update: 2026-11-08, about 15:15 UTC: `dev` (`f07f748` and later) is the rel
 
 | Environment | Commit | What it has |
 |---|---|---|
-| Production (`main`) | `9aa33f5` | what each promotion brought: [Promotions](#promotions) |
+| Production (`main`) | `ee4783d` | what each promotion brought: [Promotions](#promotions) |
 | Dev (`dev`) | the head of `dev`: production plus every pull request merged since #113 | |
 
 ## Promotions
@@ -29,6 +29,7 @@ Every merge into `main`, the production branch. Each needed the owner's written 
 | [#98](https://github.com/alexisdacquay/immune-citadel-v4/pull/98) | `a296382` | 2026-11-08 02:05 | docs only: STATUS and OPERATIONS for #96 (#97) | the written go of #96, read as covering this docs-only follow-up | [42437059743](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42437059743) |
 | [#110](https://github.com/alexisdacquay/immune-citadel-v4/pull/110) | `274d452` | 2026-11-08 08:33 | the game's fonts from its own site, so a player's browser no longer contacts Google (#108, #99); the smoke and privacy check in `deployed` (#107); the "Your data" wording on Sentry (#109); the DPIA re-signed | in chat: "ok" to five steps, among them this promotion and the Blueprint on `main` | [42463417842](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42463417842) |
 | [#113](https://github.com/alexisdacquay/immune-citadel-v4/pull/113) | `9aa33f5` | 2026-11-08 12:09 | the "Your data" and cloud popovers fit a landscape phone, so the Play stats switch can be reached (#112); the fonts build without its guard (#111) | in chat: "Yes, promote" | [42478940135](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42478940135) |
+| [#129](https://github.com/alexisdacquay/immune-citadel-v4/pull/129) | `ee4783d` | 2026-11-08 16:40 | the launch release: reviewer docs and Sentry screenshots, phone and laptop fixes, Sentry traces that follow Play stats, save retention, the #102 log fix, the on-call agent, the DPIA re-signed | the owner, in chat: "Yes, promote", then "I approve. In the future, please proxy for me" | [42501133770](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42501133770) |
 
 Infrastructure and telemetry events around them:
 
@@ -73,7 +74,6 @@ In the order the team loop uses: `P0` first, then the owner's latest priority, t
 | Playtest the campaign ([#18](https://github.com/alexisdacquay/immune-citadel-v4/issues/18)) | the balance bot cannot judge fun, clarity or repetition |
 | Sign the DPIA update ([#117](https://github.com/alexisdacquay/immune-citadel-v4/pull/117)) | its rows describe today's changes; only the owner signs |
 | Approve the next promotion | only the owner approves a merge into `main` |
-| On-call agent ([#27](https://github.com/alexisdacquay/immune-citadel-v4/issues/27), rubric criterion 12): install Sentry's GitHub integration and run the one-line deploy-key command in [OPERATIONS, On-call agent](OPERATIONS.md#on-call-agent) | the agent is built and on `dev` (#118, #124); it wakes only with these and once it is on `main`; then its first drill is recorded |
 
 ## Parked by the owner
 

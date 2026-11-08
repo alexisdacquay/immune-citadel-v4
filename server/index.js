@@ -160,6 +160,7 @@ function createServer(store) {
         let body; try { body = JSON.parse(text); } catch { return send(400, { error: 'body must be JSON' }); }
         const save = body && body.save;
         if (!save || typeof save !== 'object' || Array.isArray(save)) return send(400, { error: 'body must be {"save": {...}}' });
+        log.debug({ owed: Array.isArray(save.owe) ? save.owe.filter(Boolean).length : 0 }, 'cards owed'); // how many cards the save still owes the player, at debug level
         const updatedAt = await store.put(code, save);
         return send(200, { updatedAt });
       }
