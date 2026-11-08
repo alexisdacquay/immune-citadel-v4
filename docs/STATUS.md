@@ -2,7 +2,7 @@
 
 Where the project stands and what comes next, on one page. It is updated at the end of every step; the details live in the linked plans, and the backlog is [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues).
 
-Last update: 2026-11-08, after the promotion of 12:09 UTC ([Promotions](#promotions)) and the docs made ready for course reviewers.
+Last update: 2026-11-08, about 15:15 UTC: `dev` (`f07f748` and later) is the release candidate for the next promotion: the reviewer docs, Sentry screenshots, phone and laptop fixes, save retention, the #102 log fix and the on-call agent. The DPIA update ([#117](https://github.com/alexisdacquay/immune-citadel-v4/pull/117)) waits for the owner's signature.
 
 ## At a glance
 
@@ -52,7 +52,7 @@ How the parts connect: [README, How it fits together](../README.md#how-it-fits-t
 | Plan | Done | Left |
 |---|---|---|
 | [PIPELINE-PLAN.md](PIPELINE-PLAN.md): trustworthy deploys | steps 1-4: the site publishes only the game; rules on `dev` and `main`; deploy on every commit with the `deployed` proof; auto-merge | nothing: closed (its step 5 moved to the observability plan) |
-| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | steps 1-5, proven on `dev`; step 6 in part: promoted, uptime checks on both APIs, and the production save API in Sentry (2026-11-08); step 7 on `dev` and production (#82) | step 7: one real save on `dev` shown in Sentry, with screenshots, and its automatic check (#90). Step 6: the production checks are left |
+| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | steps 1-5, proven on `dev`; step 6 in part: promoted, uptime checks on both APIs, and the production save API in Sentry (2026-11-08); step 7 on `dev` and production (#82) | step 7: its automatic check (#90); the screenshots of one real dev save are done (2026-11-08). Step 6: the production checks are left |
 
 ## What is next
 
@@ -64,13 +64,14 @@ In the order the team loop uses: `P0` first, then the owner's latest priority, t
 | 2 | Finish #70 on `dev`: land #90 (the `observed` CI job) | the screenshots of one real dev save in Sentry are in [OPERATIONS, Follow one save](OPERATIONS.md#follow-one-save) (2026-11-08), and `SENTRY_DSN` is back on the production API; #90 would repeat the check after every deploy |
 | 3 | QA: count real catches and false alarms of both stages on each pull request until 2026-11-21, then decide what changes | set on 2026-11-07; stage 1 in its new form has run in CI on every pull request into `dev` since [#93](https://github.com/alexisdacquay/immune-citadel-v4/pull/93) |
 | 4 | P1 backlog: a backup model for QA (#83), body map zones in reading order (#78), trading-card design (#79, mock-ups first, the owner picks) | the owner's P1s that can start without the owner |
-| 5 | P2 backlog: two save API bugs, a save whose `owe` is not a list blocks that code's cloud sync ([#101](https://github.com/alexisdacquay/immune-citadel-v4/issues/101)) and a hand-crafted path puts a save code in our log line ([#102](https://github.com/alexisdacquay/immune-citadel-v4/issues/102)); an unlocked level looks cleared on the body map (#84, a bug), more enemy variety (#80), game content out of `index.html` (#17), Chapter 2 (#11) | planned |
+| 5 | P2 backlog: a save whose `owe` is not a list blocks that code's cloud sync ([#101](https://github.com/alexisdacquay/immune-citadel-v4/issues/101); #102, the save code in our log line, is fixed on `dev` and ships with the next promotion); an unlocked level looks cleared on the body map (#84, a bug), more enemy variety (#80), game content out of `index.html` (#17), Chapter 2 (#11) | planned |
 
 ## Waiting on the owner
 
 | Item | Why it waits |
 |---|---|
 | Playtest the campaign ([#18](https://github.com/alexisdacquay/immune-citadel-v4/issues/18)) | the balance bot cannot judge fun, clarity or repetition |
+| Sign the DPIA update ([#117](https://github.com/alexisdacquay/immune-citadel-v4/pull/117)) | its rows describe today's changes; only the owner signs |
 | Approve the next promotion | only the owner approves a merge into `main` |
 | On-call agent ([#27](https://github.com/alexisdacquay/immune-citadel-v4/issues/27), rubric criterion 12): install Sentry's GitHub integration, add "Create a GitHub issue" to the alert rules, and add the `ONCALL_TOKEN` secret | the agent is built and merged into `dev` (#118, #124); it wakes only with these and once it is on `main`; then its first drill is recorded ([OPERATIONS, On-call agent](OPERATIONS.md#on-call-agent)) |
 
