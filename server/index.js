@@ -11,7 +11,7 @@ const CODE = /^[A-HJ-NP-Z2-9]{16}$/; // the game's alphabet: no I, O, 0, 1
 const MAX_BODY = 8 * 1024; // a full save is about 1 KB
 const WRITES_PER_MIN = 120; // per client IP; a player saves a few times per level, a classroom shares one IP
 const PLAY_PER_MIN = 60; // gameplay event batches per client IP: one per level end or hidden tab; never counted against saves
-const SCHEMA = process.env.DB_SCHEMA || 'public'; // prod and dev share one Postgres instance, one schema each
+const SCHEMA = process.env.DB_SCHEMA || 'public'; // one schema per environment; each environment has its own Postgres (render.yaml)
 if (process.env.DATABASE_URL && !process.env.DB_SCHEMA) throw new Error('DB_SCHEMA must be set with DATABASE_URL, or dev would write into prod');
 if (!/^[a-z_][a-z0-9_]*$/.test(SCHEMA)) throw new Error('DB_SCHEMA must be a plain lowercase identifier');
 const ORIGINS = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -19,12 +19,17 @@ const ORIGINS = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()
 function memoryStore() {
   const m = new Map();
   return {
+    saves: m,
     init: async () => {},
     get: async code => m.get(code) || null,
     put: async (code, data) => { const row = { data, updatedAt: new Date().toISOString() }; m.set(code, row); return row.updatedAt; },
     events: [],
     play: async function (page, release, rows) { if (this.events.length + rows.length > play.DAILY_CAP) return 0; this.events.push(...rows.map(r => ({ page, release, ...r }))); return rows.length; },
-    prune: async () => {},
+    prune: async () => { // same rule as Postgres for saves; events in memory carry no day, so they stay
+      let saves = 0; const old = Date.now() - play.KEEP_DAYS * 864e5;
+      for (const [code, row] of m) if (Date.parse(row.updatedAt) < old) { m.delete(code); saves++; }
+      return { events: 0, saves };
+    },
   };
 }
 
@@ -71,7 +76,10 @@ function pgStore(url) {
       await pool.query(`INSERT INTO ${E} (${COLS.join(', ')}) VALUES ${rows.map((_, i) => `(${COLS.map((_, j) => '$' + (i * COLS.length + j + 1)).join(', ')})`).join(', ')}`, vals);
       return rows.length;
     })),
-    prune: async () => (await pool.query(`DELETE FROM ${E} WHERE day < current_date - ${play.KEEP_DAYS}`)).rowCount,
+    prune: async () => ({ // retention (docs/EVENTS.md, docs/SPEC.md): events and cloud saves untouched for 13 months
+      events: (await pool.query(`DELETE FROM ${E} WHERE day < current_date - ${play.KEEP_DAYS}`)).rowCount,
+      saves: (await pool.query(`DELETE FROM ${T} WHERE updated_at < now() - interval '${play.KEEP_DAYS} days'`)).rowCount,
+    }),
     get: async code => {
       const r = await pool.query(`SELECT data, updated_at FROM ${T} WHERE code = $1`, [code]);
       return r.rows[0] ? { data: r.rows[0].data, updatedAt: r.rows[0].updated_at.toISOString() } : null;
@@ -171,7 +179,7 @@ if (require.main === module) {
   if (process.env.RENDER && !process.env.DATABASE_URL) { log.fatal('DATABASE_URL is not set: refusing to keep player saves in memory'); process.exit(1); }
   const store = process.env.DATABASE_URL ? pgStore(process.env.DATABASE_URL) : memoryStore();
   store.init().then(async () => {
-    const prune = () => store.prune().then(n => n && log.info({ rows: n }, 'old events deleted')).catch(e => log.warn({ err: e.message }, 'event pruning failed'));
+    const prune = () => store.prune().then(n => (n.events || n.saves) && log.info(n, 'old events and saves deleted')).catch(e => log.warn({ err: e.message }, 'pruning failed'));
     await prune(); setInterval(prune, 864e5).unref(); // daily
     const port = +process.env.PORT || 8787;
     const server = createServer(store).listen(port, () => log.info(`save API on :${port}, ${process.env.DATABASE_URL ? `postgres schema ${SCHEMA}` : 'in-memory store'}, origins ${ORIGINS.join(' ') || 'none'}`));
