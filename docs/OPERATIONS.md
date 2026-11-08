@@ -140,7 +140,7 @@ Either of these:
 4. **Check.** `/health` answers, and a save and a load on the site work.
 5. **Clean up.** Once the restored database serves saves, the owner deletes the old one in Render.
 
-A restore brings the data back as it was at that time, so rows deleted since then come back too. The API's prune runs again when it starts and then daily; a save deleted on request must be deleted again by hand.
+A restore brings the data back as it was at that time, so rows deleted since then come back too. The API's prune runs again when it starts and then daily; a save deleted by hand since then must be deleted again by hand.
 
 ## Telemetry
 
