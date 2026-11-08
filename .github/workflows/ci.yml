@@ -93,7 +93,7 @@ jobs:
   deployed: # after a push to dev or main: proof that Render now serves this commit (API /health and site /version.txt), then a read-only browser check of the live site, red otherwise
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 25 # verify-deploy gives up after 15; npm ci and the smoke check take a few more
+    timeout-minutes: 30 # verify-deploy gives up after 15; npm ci, the smoke check and the Sentry check (up to 5) take the rest
     env:
       SHA: ${{ github.sha }}
       API: ${{ github.ref_name == 'main' && 'https://immune-citadel-v4-api.onrender.com' || 'https://immune-citadel-v4-api-dev.onrender.com' }}
@@ -108,3 +108,7 @@ jobs:
       # A failure counts only while this commit is still the branch head: Render may already serve a newer one, whose own run checks it.
       - run: |
           node tools/smoke.js "$SITE" "$API" "$SHA" || { head=$(gh api "repos/$GITHUB_REPOSITORY/branches/$GITHUB_REF_NAME" -q .commit.sha) && [ "$head" != "$SHA" ] && echo "superseded: the branch is now at $head, its own run checks that commit"; }
+      # Monitoring still works: one save on the live API, under a trace ID chosen here, must reach Sentry as a trace, a log line and a
+      # metric within 5 minutes, or this goes red and GitHub emails the owner. It overwrites one fixed save code, so the database never grows.
+      - run: node tools/verify-sentry.js
+        env: { SENTRY_AUTH_TOKEN: '${{ secrets.SENTRY_AUTH_TOKEN }}' }

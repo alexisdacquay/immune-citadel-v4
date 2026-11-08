@@ -8,7 +8,7 @@ Last update: 2026-11-08, about 19:00 UTC: production runs `d3f7a43` ([#134](http
 
 - **Production** runs `d3f7a43` ([#134](https://github.com/alexisdacquay/immune-citadel-v4/pull/134), the on-call drill record) on top of the launch release `ee4783d` ([#129](https://github.com/alexisdacquay/immune-citadel-v4/pull/129)): the whole 18-level campaign on the body map, cloud saves (deleted after 13 months unchanged), the save API's one-trace-ID observability, crash reports and load reports that respect Play stats and Global Privacy Control, the game's own fonts, phone and laptop layout fixes, the on-call agent, and a read-only smoke and privacy check after every push to `dev` or `main`.
 - **Dev** runs production's code plus every pull request merged into `dev` since #134.
-- **In flight:** the [open pull requests into `dev`](https://github.com/alexisdacquay/immune-citadel-v4/pulls?q=is%3Apr+is%3Aopen+base%3Adev); [#90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90) is in conflict with `dev` (below).
+- **In flight:** the [open pull requests into `dev`](https://github.com/alexisdacquay/immune-citadel-v4/pulls?q=is%3Apr+is%3Aopen+base%3Adev).
 - **Next:** the rubric work ([#77](https://github.com/alexisdacquay/immune-citadel-v4/issues/77), P0).
 
 ## Where things run
@@ -47,14 +47,14 @@ How the parts connect: [README, How it fits together](../README.md#how-it-fits-t
 
 | Pull request | What | State | Next |
 |---|---|---|---|
-| [#90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90) | a real Sentry check after every deploy to `dev` (CI job `observed`), and a local Sentry receiver for the tests (#70) | auto-merge armed; `test`, `game` and `qa` green from its run of 2026-11-07, judged by the previous QA; in conflict with `dev`, so GitHub cannot merge it. Its description has no `## QA checks`, so any new push fails the new stage 1 | resolve the conflict and add its QA checks in the same push; once merged, the `observed` job runs on every deploy to `dev` |
+| none | | | |
 
 ## Plans
 
 | Plan | Done | Left |
 |---|---|---|
 | [PIPELINE-PLAN.md](PIPELINE-PLAN.md): trustworthy deploys | steps 1-4: the site publishes only the game; rules on `dev` and `main`; deploy on every commit with the `deployed` proof; auto-merge | nothing: closed (its step 5 moved to the observability plan) |
-| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | steps 1-5, proven on `dev`; step 6 in part: promoted, uptime checks on both APIs, and the production save API in Sentry (2026-11-08); step 7 on `dev` and production (#82) | step 7: its automatic check (#90); the screenshots of one real dev save are done (2026-11-08). Step 6: the production checks are left |
+| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | steps 1-5, proven on `dev`; step 6 in part: promoted, uptime checks on both APIs, and the production save API in Sentry (2026-11-08); step 7 on `dev` and production (#82) | step 7 is done: the screenshots of one real dev save (2026-11-08), and CI's `deployed` job checks after every deploy that a save still reaches Sentry. Step 6: the production checks are left |
 
 ## What is next
 
@@ -63,10 +63,9 @@ In the order the team loop uses: `P0` first, then the owner's latest priority, t
 | # | Work | Why now |
 |---|---|---|
 | 1 | Rubric: full marks with margin, obvious to any reviewer ([#77](https://github.com/alexisdacquay/immune-citadel-v4/issues/77), P0): README's "For reviewers" table, in the rubric's words with the points claimed (2026-11-08), then at least three independent cold reviews | the only P0; no review report is linked yet |
-| 2 | Finish #70 on `dev`: land #90 (the `observed` CI job) | the screenshots of one real dev save in Sentry are in [OPERATIONS, Follow one save](OPERATIONS.md#follow-one-save) (2026-11-08), and `SENTRY_DSN` is back on the production API; #90 would repeat the check after every deploy |
-| 3 | QA: count real catches and false alarms of both stages on each pull request until 2026-11-21, then decide what changes | set on 2026-11-07; stage 1 in its new form has run in CI on every pull request into `dev` since [#93](https://github.com/alexisdacquay/immune-citadel-v4/pull/93) |
-| 4 | P1 backlog: a backup model for QA (#83), body map zones in reading order (#78), trading-card design (#79, mock-ups first, the owner picks) | the owner's P1s that can start without the owner |
-| 5 | P2 backlog: a save whose `owe` is not a list blocks that code's cloud sync ([#101](https://github.com/alexisdacquay/immune-citadel-v4/issues/101)); an unlocked level looks cleared on the body map (#84, a bug), more enemy variety (#80), game content out of `index.html` (#17), Chapter 2 (#11) | planned |
+| 2 | QA: count real catches and false alarms of both stages on each pull request until 2026-11-21, then decide what changes | set on 2026-11-07; stage 1 in its new form has run in CI on every pull request into `dev` since [#93](https://github.com/alexisdacquay/immune-citadel-v4/pull/93) |
+| 3 | P1 backlog: a backup model for QA (#83), body map zones in reading order (#78), trading-card design (#79, mock-ups first, the owner picks) | the owner's P1s that can start without the owner |
+| 4 | P2 backlog: a save whose `owe` is not a list blocks that code's cloud sync ([#101](https://github.com/alexisdacquay/immune-citadel-v4/issues/101)); an unlocked level looks cleared on the body map (#84, a bug), more enemy variety (#80), game content out of `index.html` (#17), Chapter 2 (#11) | planned |
 
 ## Waiting on the owner
 
