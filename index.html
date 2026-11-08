@@ -303,7 +303,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 #cloudPop input:focus{outline:2px solid var(--cyan);outline-offset:1px}
 #sndPop,#cloudPop,#dataPop{position:absolute;z-index:12;width:240px;padding:8px 6px 6px;transform:scale(var(--u,1));transform-origin:0 0;background:var(--glass2);border-color:var(--rim2);box-shadow:0 0 26px -8px rgba(127,216,255,.5),0 14px 30px -14px #000;animation:hpop .2s ease-out}
 #sndPop small,#cloudPop small,#dataPop small{display:block;padding:0 10px 4px;font:600 max(9px,calc(9px / var(--u,1))) var(--mono);letter-spacing:.18em;color:var(--cyan)}
-#cloudPop,#dataPop{width:290px;max-width:calc(100vw - 16px);box-sizing:border-box;padding:8px 14px 12px;transform:none;animation:cpop .2s ease-out}@keyframes cpop{from{transform:scale(.6);opacity:0}}#cloudPop small,#dataPop small{padding:0 0 6px;font-size:10px}
+#cloudPop,#dataPop{width:290px;max-width:calc(100vw - 16px);max-height:calc(100% - 16px);overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;padding:8px 14px 12px;transform:none;animation:cpop .2s ease-out}@keyframes cpop{from{transform:scale(.6);opacity:0}}#cloudPop small,#dataPop small{padding:0 0 6px;font-size:10px}
 .tg{display:flex;align-items:center;gap:11px;width:100%;padding:8px 10px;border:0;border-radius:9px;background:none;text-align:left;color:var(--dim)}
 .tg:hover{background:rgba(140,205,255,.08)}
 .tg svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
