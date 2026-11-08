@@ -20,6 +20,11 @@ for (const [what, extra] of [
   ['play data', ',"breadcrumb":"POST https://api/api/play"'],
 ]) test(`${what} in a Sentry payload fails (${extra})`, () => assert.deepEqual(leak(extra), [`${what} in a Sentry payload`]));
 
+test('a crash report that does not tell Sentry to drop the IP fails: infer_ip missing, or not "never"', () => {
+  const ev = settings => `{"event_id":"1","sdk":{"settings":${settings}}}\n{"type":"event"}\n{"message":"x"}`;
+  for (const s of ['{}', '{"infer_ip":"auto"}']) assert.deepEqual(run({ sentry: [ev(s), spans] }), ['Sentry is not told to drop the IP address (infer_ip must be "never")']);
+});
+
 test('a site or API on another commit fails, and so does a down API', () => {
   assert.match(run({ version: 'a'.repeat(40) })[0], /^site serves a{40}/);
   assert.match(run({ health: { ok: true, commit: 'a'.repeat(40) } })[0], /^API \/health/);

@@ -43,7 +43,7 @@ Both jobs run only on pull requests into `dev`. A promotion into `main` is not j
 
 Until 2026-11-07, QA was a single open review. Its record on every blocking verdict: 8 real defects caught, 7 false alarms, and 3 runs that blocked with no verdict because the model ran out of time or tokens ([#88](https://github.com/alexisdacquay/immune-citadel-v4/issues/88)). A first two-stage design ([#89](https://github.com/alexisdacquay/immune-citadel-v4/pull/89)), a short prompt judging the acceptance criteria, passed real defects on a benchmark, and the owner rejected it. The owner's design, approved on 2026-11-08: give the agent simple, closed tasks at low effort, many of them, for quick signals, and let the builder, who knows what the change could break, write the questions.
 
-Stage 1 in this form arrived with [#92](https://github.com/alexisdacquay/immune-citadel-v4/pull/92) on 2026-11-08. That pull request's own `qa` job still ran the previous judge, so the first pull request judged by the new stage 1 in CI is the one after it. Before merging, the builder ran it locally with the real model:
+Stage 1 in this form arrived with [#92](https://github.com/alexisdacquay/immune-citadel-v4/pull/92) on 2026-11-08. That pull request's own `qa` job still ran the previous judge, so the first pull request judged by the new stage 1 in CI was [#93](https://github.com/alexisdacquay/immune-citadel-v4/pull/93); #95, #97, #107 and #108 followed. Before merging, the builder ran it locally with the real model:
 
 | Change judged | Stage 1 result | Time |
 |---|---|---|
@@ -66,7 +66,7 @@ The test plan is two things: each pull request's `## QA checks`, and [test/past-
 
 `[changes]` means "this change makes it true": YES on the new code, not YES on the old. `[stays]` means "this must still hold": YES on the new code. After the label come the files that hold the answer, then the question.
 
-**Past failures.** Every failure that reached a player, `dev` or a review becomes a closed question, proven when it is added: NO on the code just before its fix, YES after, 3 runs out of 3. Today the file holds 15 past failures as 17 questions. Stage 1 asks a line again whenever a pull request touches a file it names, so a bug that was fixed once cannot quietly come back. A real line:
+**Past failures.** Every failure that reached a player, `dev` or a review becomes a closed question, proven when it is added: NO on the code just before its fix, YES after, 3 runs out of 3. Today the file holds 18 past failures as 20 questions. Stage 1 asks a line again whenever a pull request touches a file it names, so a bug that was fixed once cannot quietly come back. A real line:
 
 ```markdown
 - [#3] index.html: Is every Aorta level subtitle free of any claim that the blood or the current carries pathogens toward the heart (the aorta carries blood away from the heart)?
@@ -96,7 +96,7 @@ When the owner says **continue**, the orchestrator runs one turn of this loop. T
 6. **Integrate.** GitHub merges the pull request once `test`, `game` and `qa` are green, with no human. Render deploys the new `dev` commit, and CI's `deployed` job proves it is live.
 7. **Report.** One short message to the owner: what shipped, what is not verified, what needs them.
 
-**Promotion** is separate and the owner's alone: the owner merges `dev` into `main` (production). Issues close then, each with a "Shipped to production" comment. Until then a finished issue stays open, and the label `status:on-dev` is meant to mark it; the most recent ones, such as [#86](https://github.com/alexisdacquay/immune-citadel-v4/issues/86), do not carry it yet.
+**Promotion** is separate and the owner's: the owner merges `dev` into `main` (production), or authorises the orchestrator in writing to do it ([OPERATIONS, Releases](OPERATIONS.md#releases) lists each time). Issues close then, each with a "Shipped to production" comment. Until then a finished issue stays open, and the label `status:on-dev` is meant to mark it; the most recent ones, such as [#86](https://github.com/alexisdacquay/immune-citadel-v4/issues/86), do not carry it yet.
 
 ## Gates
 
@@ -113,7 +113,7 @@ When the owner says **continue**, the orchestrator runs one turn of this loop. T
 |---|---|
 | the backlog and priorities | [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues): labels `P0`-`P4`, type (`bug`, `type:feature`, `type:content`, `type:chore`, `type:design`), status, `needs-owner`, `roadmap` |
 | a spec with acceptance criteria | any recent issue, for example [#88](https://github.com/alexisdacquay/immune-citadel-v4/issues/88) or [#70](https://github.com/alexisdacquay/immune-citadel-v4/issues/70) |
-| a builder's test plan and both QA verdicts | the description and comments of a pull request into `dev`, for example [#92](https://github.com/alexisdacquay/immune-citadel-v4/pull/92) (its stage 1 verdict came from the previous judge; the first **QA checks** comment comes with the next pull request) |
+| a builder's test plan and both QA verdicts | the description and comments of a pull request into `dev`, for example [#92](https://github.com/alexisdacquay/immune-citadel-v4/pull/92) (its stage 1 verdict came from the previous judge), or [#93](https://github.com/alexisdacquay/immune-citadel-v4/pull/93) for the first **QA checks** comment from the new stage 1 |
 | the past failures stage 1 keeps asking | [test/past-failures.md](../test/past-failures.md) |
 | the older bug-fixer and QA subagent route | [#21](https://github.com/alexisdacquay/immune-citadel-v4/issues/21) |
 | which issue a commit belongs to | the `(#n)` at the end of each commit message on `dev` |
@@ -128,6 +128,7 @@ When the owner says **continue**, the orchestrator runs one turn of this loop. T
 | `tools/qa.js` | the QA agent, both stages |
 | `tools/automerge.sh` | arms auto-merge on a pull request into `dev`, and refuses any other base |
 | `tools/verify-deploy.js` | CI's `deployed` job: waits until Render serves the pushed commit |
+| `tools/smoke.js` | CI's `deployed` job, next: plays the live site read-only and checks no player data reaches Sentry |
 
 ## Known gaps
 

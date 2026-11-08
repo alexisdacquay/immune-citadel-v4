@@ -40,12 +40,15 @@ test('the game loads Sentry only on the dev and production sites, pinned and che
   assert.match(block, /beforeSend: scrub, beforeSendSpan: scrub, beforeBreadcrumb: b => \(\/\\\/api\\\/play\/\.test\(JSON\.stringify\(b\.data \|\| \{\}\)\) \? null : scrub\(b\)\)/);
   assert.match(block, /shouldCreateSpanForRequest: u => !u\.includes\('\/api\/play'\)/, 'gameplay events never reach Sentry');
   assert.doesNotMatch(block, /replayIntegration/, 'no session replay');
+  assert.match(block, /dataCollection: \{ userInfo: false,/, 'userInfo false makes the SDK tell Sentry infer_ip "never", so Sentry keeps no IP');
 });
 
 test('the game takes its fonts from its own site, never from Google, and both sites publish them (#99)', () => {
-  const html = read('index.html'), files = [...html.matchAll(/src:url\((fonts\/[\w-]+\.woff2)\)/g)].map(m => m[1]);
+  const html = read('index.html'), files = [...html.matchAll(/url\(['"]?(fonts\/[^)'"]+)/g)].map(m => m[1]);
   assert.doesNotMatch(html, /fonts\.(googleapis|gstatic)\.com/, 'Google would get the player\'s IP and browser identifier');
   assert.ok(files.length >= 2, 'self-hosted font faces');
+  assert.equal(files.length, html.match(/@font-face/g).length, 'every @font-face names a file in fonts/');
+  for (const f of ['fonts/OFL-spacegrotesk.txt', 'fonts/OFL-jetbrainsmono.txt']) assert.ok(fs.existsSync(path.join(__dirname, '..', f)), `${f}: the SIL Open Font License must ship with the fonts`);
   for (const f of files) assert.ok(fs.existsSync(path.join(__dirname, '..', f)), `${f} is missing`);
   assert.equal(read('render.yaml').match(/cp -r fonts public\//g).length, 2, 'both static sites publish fonts/');
   assert.match(compose, /\.\/fonts:\/usr\/share\/nginx\/html\/fonts/, 'Compose serves fonts/ too');

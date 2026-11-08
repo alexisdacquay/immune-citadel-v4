@@ -22,6 +22,8 @@ function problems({ sha, status, version, health, errors, failed, sentry, code, 
     'play data': /\/api\/play/.test(sent),
   };
   for (const [what, hit] of Object.entries(leaks)) if (hit) bad.push(`${what} in a Sentry payload`);
+  // The IP never appears in the payload: Sentry takes it from the connection unless the report says infer_ip "never" (userInfo: false).
+  if (sentry.some(b => (b.includes('"type":"event"') && !b.includes('"infer_ip":"never"')) || /"infer_ip":"(?!never")/.test(b))) bad.push('Sentry is not told to drop the IP address (infer_ip must be "never")');
   return bad;
 }
 
