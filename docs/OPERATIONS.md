@@ -106,7 +106,7 @@ GitHub rulesets on both branches; nobody bypasses them, and neither branch accep
 | Branch must be up to date | no, so auto-merge never stalls | yes |
 
 - `dev-green` lives in its own workflow, [promotion.yml](../.github/workflows/promotion.yml), which runs only on pull requests into `main`. Inside `ci.yml` it would be skipped on every push, and GitHub counts a skipped check as passing ([#75](https://github.com/alexisdacquay/immune-citadel-v4/issues/75)).
-- No merge queue: GitHub offers it only to repositories owned by an organisation, and this one belongs to a personal account. So the strict guarantee sits on the promotion, as trunk-based development advises (owner, 2026-11-07).
+- No merge queue: GitHub offers it only to repositories owned by an organisation, and this one belongs to a personal account. So the strict guarantee sits on the promotion, as trunk-based development advises. Decision: the owner, 2026-11-07.
 - Re-apply a ruleset after editing its file: `gh api -X PUT repos/alexisdacquay/immune-citadel-v4/rulesets/<id> --input .github/rulesets/<file>.json`.
 
 ### What goes wrong, and who notices
@@ -140,7 +140,7 @@ Either of these:
 4. **Check.** `/health` answers, and a save and a load on the site work.
 5. **Clean up.** Once the restored database serves saves, the owner deletes the old one in Render.
 
-A restore brings the data back as it was at that time, so rows deleted since then come back too. The API's prune runs again when it starts and then daily; a save deleted on request must be deleted again by hand.
+A restore brings the data back as it was at that time, so rows deleted since then come back too. The API's prune runs again when it starts and then daily; a save deleted by hand since then must be deleted again by hand.
 
 ## Telemetry
 

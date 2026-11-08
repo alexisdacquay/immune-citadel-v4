@@ -127,7 +127,7 @@ Done:
 
 Not done:
 - One real save on dev shown in Sentry as a trace, its log line and the metric, with screenshots in [Follow one save](OPERATIONS.md#follow-one-save). [PR #90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90) (open, in conflict with `dev`) automates this check after every dev deploy; its hand run on 2026-11-07 at 20:46 UTC found all three.
-- Production: no production save shown with one trace ID across its trace, log line and metric.
+- Production: shown on 2026-11-08: a load at 07:47 UTC gave trace `7fdfa1f7fe03461e9f0b104ffa5d7c51` (`SELECT "prod".saves`) and its log line under one trace ID, and Sentry holds `http.server.request.duration` points with environment `production`. The screenshots in OPERATIONS are of a dev save.
 - Issue #70 is still open.
 
 **Rollback:** revert PR #82.

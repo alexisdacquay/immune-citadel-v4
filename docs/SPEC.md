@@ -126,11 +126,11 @@ Progress follows the player from one device to another without an account.
 
 - Progress (stars, challenges won, the furthest level, cards and plates seen, Memory, settings) is saved in the browser after every change and survives a reload.
 - On the dev and production sites, and on the local Docker stack, the first save also creates a save code and stores a copy on the save API. The code is 16 letters and digits, without I, O, 0 or 1 because codes get read aloud and retyped. The cloud panel (cloud button on the title bar) shows it in groups of four, with a Copy button.
-- Typing that code on another device loads the save there and merges the two: progress only grows (best stars, every challenge won, the furthest level, everything seen), never overwritten (except when two devices sync in the same second: the cloud keeps the last write until the other device syncs again, [#104](https://github.com/alexisdacquay/immune-citadel-v4/issues/104)). Memory and settings follow the save being continued, then the most recent change.
+- Typing that code on another device loads the save there and merges the two: progress only grows (best stars, every challenge won, the furthest level, everything seen), never overwritten (except when two devices sync at the same moment: the cloud keeps the last write until the other device syncs again, [#104](https://github.com/alexisdacquay/immune-citadel-v4/issues/104)). Memory and settings follow the save being continued, then the most recent change.
 - Without the cloud (offline, or the API down) the game plays and saves locally, and the cloud panel says that progress is safe on this device and will sync later. The next save or visit retries.
 - The save code is the only key to a save: it never appears in logs, however its path is written ([#102](https://github.com/alexisdacquay/immune-citadel-v4/issues/102)), in Sentry or in gameplay events.
 - A cloud save not updated for 13 months is deleted automatically, at server start and daily, at the same moment as old gameplay events. A browser that still has the game uploads its progress again at the next visit.
-- Questions, or a request to delete a cloud save, go to a [GitHub issue](https://github.com/alexisdacquay/immune-citadel-v4/issues), with no promised response time. The save code is never posted there: issues are public.
+- Questions go to a [GitHub issue](https://github.com/alexisdacquay/immune-citadel-v4/issues), with no promised response time. A save code is never posted there: issues are public. Without the code nobody can find a save, so a save cannot be deleted on request; unused saves expire after 13 months.
 - A save from the earlier six-level version keeps its progress: its stars and challenge wins move onto the six full maps.
 
 ## 6. Your data
@@ -166,7 +166,7 @@ Continuous integration runs `test` and `game` on every pull request and every pu
 
 | Gap | Where it is tracked |
 |---|---|
-| Saves never expire: no retention period has been decided | [DPIA.md](DPIA.md), risk "saves never expire" |
+| A player cannot delete their own cloud save before it expires (13 months unused): no delete button yet | [DPIA.md](DPIA.md) (the 2026-11-08 update, [PR #117](https://github.com/alexisdacquay/immune-citadel-v4/pull/117)) |
 | The Chronic challenge is very hard: the bot wins 2 of 6 (target about 5 of 6); parked by the owner | [#20](https://github.com/alexisdacquay/immune-citadel-v4/issues/20) |
 | On the body map an unlocked level looks cleared; regions II and III read out of order | [#84](https://github.com/alexisdacquay/immune-citadel-v4/issues/84), [#78](https://github.com/alexisdacquay/immune-citadel-v4/issues/78) |
 | No tips after a leak or a loss, no situation cards for first-time players | [#12](https://github.com/alexisdacquay/immune-citadel-v4/issues/12), [#81](https://github.com/alexisdacquay/immune-citadel-v4/issues/81) |
