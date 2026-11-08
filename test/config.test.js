@@ -53,3 +53,14 @@ test('the game takes its fonts from its own site, never from Google, and both si
   assert.equal(read('render.yaml').match(/cp -r fonts public\//g).length, 2, 'both static sites publish fonts/');
   assert.match(compose, /\.\/fonts:\/usr\/share\/nginx\/html\/fonts/, 'Compose serves fonts/ too');
 });
+
+test('Sentry load-speed traces follow the Play stats choice: off by the switch or by Global Privacy Control means no traces', () => {
+  const html = read('index.html'), block = html.slice(html.indexOf('// Sentry: game crashes'), html.indexOf('</head>'));
+  assert.doesNotMatch(block, /tracesSampleRate/, 'a fixed rate would ignore the choice');
+  assert.match(block, /tracesSampler: \(\) => \(statsOn\(\) \? 1 : 0\)/);
+  const fn = block.match(/const statsOn = \(\) => \{([^\n]*?)\}; /);
+  assert.ok(fn, 'the bootstrap has its own statsOn()');
+  assert.match(fn[1], /localStorage\.getItem\('immune-citadel-v4-stats'\) !== 'off'/, 'the switch, under the key the game saves it to');
+  assert.match(fn[1], /navigator\.globalPrivacyControl !== true/, 'Global Privacy Control counts as off');
+  assert.match(html, /const STATS_KEY = 'immune-citadel-v4-stats'.*\nconst statsOn = \(\) => statsPref && navigator\.globalPrivacyControl !== true;/, 'the same rule as the game\'s statsOn()');
+});
