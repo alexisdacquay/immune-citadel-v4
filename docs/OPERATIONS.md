@@ -2,7 +2,7 @@
 
 How Immune Citadel runs: where it is deployed, how a change reaches players, what watches it, and what to do when an alert fires. The plans behind this page, with their proof, are [PIPELINE-PLAN.md](PIPELINE-PLAN.md) and [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md).
 
-**On this page:** [Environments](#environments) · [Infrastructure as code](#infrastructure-as-code) · [Releases](#releases) · [QA in two stages](#qa-in-two-stages) · [Branch rules](#branch-rules) · [Rollback](#rollback) · [Restore the database](#restore-the-database) · [Telemetry](#telemetry) · [Follow one save](#follow-one-save) · [Reading gameplay events](#reading-gameplay-events) · [Alert: save API error](#alert-save-api-error) · [Alert: API down](#alert-api-down)
+**On this page:** [Environments](#environments) · [Infrastructure as code](#infrastructure-as-code) · [Releases](#releases) · [QA in two stages](#qa-in-two-stages) · [Branch rules](#branch-rules) · [Rollback](#rollback) · [Restore the database](#restore-the-database) · [Telemetry](#telemetry) · [Follow one save](#follow-one-save) · [Reading gameplay events](#reading-gameplay-events) · [On-call agent](#on-call-agent) · [Alert: save API error](#alert-save-api-error) · [Alert: API down](#alert-api-down)
 
 ## Environments
 
@@ -221,6 +221,23 @@ docker run --rm -it -e U="$URL?sslmode=require" postgres:18-alpine sh -c 'psql "
 ```
 
 `$URL` is the database's external connection string (Render → the database → Connect, or `GET /v1/postgres/<id>/connection-info`); never commit or paste it. Schemas: `dev` and `prod`. Views: `funnel`, `level_stats`, `card_reads`, `sittings` ([EVENTS.md](EVENTS.md)).
+
+## On-call agent
+
+When a Sentry alert fires, an agent wakes and proposes the fix, with no human in the loop until the merge (rubric: "an agent wakes up on an alert and fixes the issue"; [#27](https://github.com/alexisdacquay/immune-citadel-v4/issues/27)).
+
+1. **The alert opens an issue here.** The Sentry alert rules (save API error, game error) have a second action, "Create a GitHub issue", through Sentry's GitHub integration.
+2. **The agent wakes on it.** The **On-call** workflow ([.github/workflows/oncall.yml](../.github/workflows/oncall.yml)) starts only for an issue opened by Sentry's app (`sentry[bot]`), an issue the owner labels `incident`, or a manual run (Actions → On-call → Run workflow).
+3. **It finds the cause.** [tools/oncall.js](../tools/oncall.js) reads the latest event of the Sentry issue: the exception, the frames of our own code, environment and release, never request, user or device data. It gives DeepSeek (`deepseek-v4-pro`) that error and the source files the stack names, and asks for the smallest fix with a regression test and QA checks.
+4. **It proves the fix.** It applies the edits all or nothing, then runs `npm run test:unit` sealed in Docker: no network, no secrets, the checkout read-only. On red it sends the failure back, 3 attempts at most.
+5. **It opens a pull request into `dev`.** A save API fix merges like any other, on `test`, `game` and `qa`. A game fix waits for a human, because the game's Sentry key is public by design, so anyone can raise a game error and write the text the model reads. Production stays the owner's.
+6. **It reports on the incident issue:** when it woke, what it read, the pull request, or why it stopped.
+
+**Guard rails.** It edits only `index.html` and `server/<name>.js` (an allow-list), at most 150 lines and 20,000 characters. The agent's own code runs from `main`, never from `dev`. The error text is untrusted data in its prompt. One agent runs at a time, and a retry replaces its own unmerged branch. The design was reviewed independently on 2026-11-08 ([#124](https://github.com/alexisdacquay/immune-citadel-v4/pull/124)).
+
+**Setup, once, by the owner:** install Sentry's GitHub integration on this repository, add "Create a GitHub issue" to the alert rules, and add an `ONCALL_TOKEN` secret: a fine-grained token for this repository only, with contents, pull requests and issues. Its push then starts CI, which GitHub never does for its own `GITHUB_TOKEN`. An issue-triggered workflow runs from the default branch, so the agent wakes only once it is on `main`.
+
+**Status (2026-11-08):** built and merged into `dev` ([#118](https://github.com/alexisdacquay/immune-citadel-v4/pull/118), [#124](https://github.com/alexisdacquay/immune-citadel-v4/pull/124)). A dry run of its model step on the dev 500 that today's audit found (a deeply nested save): it diagnosed the missing depth limit, proposed an iterative depth check that answers 400, with a regression test, and the server tests passed. The first real drill, a real alert on dev answered by the agent's pull request, comes after the owner's setup and the promotion, and is recorded here.
 
 ## Alert: save API error
 
