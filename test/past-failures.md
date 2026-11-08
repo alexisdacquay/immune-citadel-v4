@@ -25,3 +25,4 @@ A bug fix adds its line here in the same pull request, in the same form: `- [<is
 - [#106] tools/smoke.js: Does a Sentry payload whose only mention of a user agent is Sentry's own setting named infer_user_agent pass the leak check, with no user agent failure reported?
 - [#99] index.html: Does the game load its fonts only from font files on its own site, with no request of any kind to fonts.googleapis.com or fonts.gstatic.com?
 - [PR #109] index.html: Does the "Your data" text tell the player that Sentry's servers see their internet address but Sentry is set never to keep it, instead of saying that Sentry gets no internet address?
+- [PR #112] index.html: On a landscape phone, is the "Your data" popover kept no taller than the game stage, scrolling inside itself, so that its Play stats switch can always be reached and tapped?
