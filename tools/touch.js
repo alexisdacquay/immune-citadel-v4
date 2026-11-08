@@ -13,7 +13,7 @@ const VIEWS = [
   { n: 'phone-xl', w: 932, h: 430, touch: true },
   { n: 'tablet', w: 1024, h: 768, touch: true },
   // title only (launch audit, 2026-11-08): the name ran over the counters at these laptop sizes, and at 667x375 the cloud button ran off the screen
-  { n: 'laptop', w: 1280, h: 720, title: true }, { n: 'laptop-s', w: 1366, h: 657, title: true }, { n: 'laptop-l', w: 1536, h: 730, title: true },
+  { n: 'laptop', w: 1280, h: 720, title: true }, { n: 'laptop-s', w: 1366, h: 657, title: true }, { n: 'laptop-l', w: 1536, h: 730, title: true }, { n: 'laptop-m', w: 1366, h: 768, title: true, name: true },
   { n: 'phone-se', w: 667, h: 375, touch: true, title: true },
 ];
 const z18 = () => Array(18).fill(0), ST = z18(); ST[0] = 3; ST[1] = 2;
@@ -69,6 +69,7 @@ module.exports = async function touch(browser, out, errs) {
       return out;
     });
     fail(!bar.length, `title bar: ${bar.join('; ')}`);
+    if (V.name) fail(await ev(() => getComputedStyle(document.querySelector('#titleOv .mbar .logo div')).display !== 'none'), 'the game name is hidden on a laptop bar where it fits (1366x768)');
     await tap(...await mid('#cloudBtn'));
     fail(await ev(() => !document.getElementById('cloudPop').hidden), 'a tap on the cloud button did not open the cloud panel');
     await ev(() => { document.getElementById('cloudPop').hidden = true; });

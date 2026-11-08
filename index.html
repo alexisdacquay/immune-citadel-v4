@@ -202,7 +202,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 .mbar .prog{display:flex;gap:14px;margin-right:6px;font:500 12px var(--mono);color:var(--dim);white-space:nowrap}.mbar .prog b{color:var(--txt)}#starN{color:var(--amber)}
 .mbar>*{flex:none;white-space:nowrap}.mbar .logo{flex:1 1 auto;min-width:0;overflow:hidden}.mbar .mbtn{box-shadow:none}
 /* the bar's own content width (window minus 30 px padding), not the window's: a letterboxed stage makes the bar narrower than the window (the name ran over the counters at 1280x720) */
-@container (max-width:1210px){.mbar .logo div{display:none}}@container (max-width:970px){.mbar .bl,.mbar .prog .cl{display:none}}@container (max-width:630px){.mbar .logo,.mbar .prog{display:none}} /* 667x375: the cloud button ran off the screen */
+@container (max-width:1180px){.mbar .logo div{display:none}}@container (max-width:970px){.mbar .bl,.mbar .prog .cl{display:none}}@container (max-width:630px){.mbar .logo,.mbar .prog{display:none}} /* 667x375: the cloud button ran off the screen */
 #mapv{position:relative;overflow:hidden;background:#010205}
 #mstage{position:absolute;left:0;top:0;width:1440px;height:900px;transform-origin:0 0}
 #mapCv,#bodymap{position:absolute;inset:0;width:1440px;height:900px}
@@ -546,7 +546,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
     <p>The game sends a few <b>anonymous</b> play stats to our own server: which level you play, how it ends, how long you read each card. No name, no save code, nothing that says who you are. They help us make levels fairer. They are deleted after 13 months.</p>
     <p>Each time the game loads (only with play stats on), and if it crashes, a report goes to Sentry, a company that helps us find bugs and keeps the reports in the EU. A report has no name and no internet address in it. Like any website, Sentry's servers see your internet address while they talk to your browser, but Sentry is set never to keep it. Your cloud save stays on our server (Render, in Frankfurt) under your save code. Our server forgets your internet address within two minutes and never saves it.</p>
     <button class="tg" id="statsTg" role="switch"><svg viewBox="0 0 24 24"><path d="M5 19V11M12 19V5M19 19v-6"/></svg><span>Play stats<em id="statsEm"></em></span><i></i></button>
-    <p class="ask">Questions, or want your data deleted? Open an issue at <a href="https://github.com/alexisdacquay/immune-citadel-v4/issues" target="_blank" rel="noopener">github.com/alexisdacquay/immune-citadel-v4/issues</a>. We cannot promise when we will answer. Never post your save code there. Cloud saves not used for 13 months are deleted automatically.</p>
+    <p class="ask">The game makes your cloud save by itself. If it is not used for 13 months, it is deleted. Questions? Open an issue at <a href="https://github.com/alexisdacquay/immune-citadel-v4/issues" target="_blank" rel="noopener">github.com/alexisdacquay/immune-citadel-v4/issues</a> (it needs a GitHub account). We cannot promise when we will answer. Never post your save code there: it is the only key to your save.</p>
   </div>
   <div id="hint" class="glass" hidden><i class="ar"></i><small></small><p></p><button class="x" aria-label="Dismiss tip" title="Dismiss tip">×</button></div>
 
