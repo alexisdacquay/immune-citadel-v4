@@ -5,7 +5,8 @@ const { problems } = require('../tools/smoke.js');
 const SHA = 'b'.repeat(40), CODE = 'ABCDEFGHJKMNPQRS';
 const report = extra => `{"event_id":"1","sdk":{"name":"sentry.javascript.browser","settings":{"infer_ip":"never","infer_user_agent":"never"}}}\n{"type":"event"}\n{"message":":code"${extra || ''}}`;
 const spans = '{"sdk":{}}\n{"type":"span","item_count":1}\n{"items":[{"name":"PUT /api/save/:code"}]}';
-const run = (over = {}) => problems({ sha: SHA, status: 200, version: SHA, health: { ok: true, commit: SHA }, errors: [], failed: [], sentry: [report(), spans], code: CODE, plays: 2, ...over });
+const off = (...bodies) => ({ 'play stats off': bodies, GPC: [report()] });
+const run = (over = {}) => problems({ sha: SHA, status: 200, version: SHA, health: { ok: true, commit: SHA }, errors: [], failed: [], sentry: [report(), spans], code: CODE, plays: 2, off: off(report()), ...over });
 const leak = extra => run({ sentry: [report(extra), spans] });
 
 test('a clean run passes, with Sentry\'s own infer_user_agent setting in the payload', () => assert.deepEqual(run(), []));
@@ -41,4 +42,10 @@ test('a run with nothing to inspect fails: no save, no gameplay post, no crash r
   assert.deepEqual(run({ plays: 0 }), ['the game sent no gameplay events']);
   assert.deepEqual(run({ sentry: [spans] }), ['no Sentry event was captured']);
   assert.deepEqual(run({ sentry: [report()] }), ['no Sentry span was captured']);
+});
+
+test('with play stats off, a trace sent to Sentry fails, and so does a missing crash report', () => {
+  assert.deepEqual(run({ off: off(report(), spans) }), ['play stats off: a trace was sent to Sentry']);
+  assert.deepEqual(run({ off: off(report(), '{}\n{"type":"transaction"}\n{}') }), ['play stats off: a trace was sent to Sentry']);
+  assert.deepEqual(run({ off: off() }), ['play stats off: no Sentry crash report was captured']);
 });
