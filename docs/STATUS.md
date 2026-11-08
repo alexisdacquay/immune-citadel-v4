@@ -7,7 +7,7 @@ Last update: 2026-11-08, about 19:00 UTC: production runs `d3f7a43` ([#134](http
 ## At a glance
 
 - **Production** runs `d3f7a43` ([#134](https://github.com/alexisdacquay/immune-citadel-v4/pull/134), the on-call drill record) on top of the launch release `ee4783d` ([#129](https://github.com/alexisdacquay/immune-citadel-v4/pull/129)): the whole 18-level campaign on the body map, cloud saves (deleted after 13 months unchanged), the save API's one-trace-ID observability, crash reports and load reports that respect Play stats and Global Privacy Control, the game's own fonts, phone and laptop layout fixes, the on-call agent, and a read-only smoke and privacy check after every push to `dev` or `main`.
-- **Dev** runs production's code plus every pull request merged into `dev` since #129: the drill's planted line and the on-call agent's fix of it (#130, #132).
+- **Dev** runs production's code plus every pull request merged into `dev` since #134.
 - **In flight:** the [open pull requests into `dev`](https://github.com/alexisdacquay/immune-citadel-v4/pulls?q=is%3Apr+is%3Aopen+base%3Adev); [#90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90) is in conflict with `dev` (below).
 - **Next:** the rubric work ([#77](https://github.com/alexisdacquay/immune-citadel-v4/issues/77), P0).
 

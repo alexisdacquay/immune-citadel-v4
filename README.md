@@ -115,7 +115,7 @@ npm run test:game   # the game suite, about 6 minutes
 |---|---|
 | `npm test` | Unit tests (seconds): the save API, its privacy scrub, the deploy check, the QA agent's tool. Then it starts the Docker stack and runs the integration tests: a save goes game → API → Postgres and back; a save continues on a second browser; gameplay events reach their table. |
 | `npm run test:game` | Onboarding with real clicks, a bot playing every level, saves, challenges, Memory, the Field Guide, and phone and tablet layouts ([tools/test.js](tools/test.js), [tools/touch.js](tools/touch.js)). |
-| `node tools/balance.js <runs> <levels> none` | Gameplay balance, for example `10 1-18 none`: a bot plays and prints the vitality left per run. |
+| `node tools/balance.js <runs> [levels] [none\|all\|both]` | Gameplay balance, for example `node tools/balance.js 10 1,2,3 none` (levels comma-separated, all 18 if omitted; Memory upgrades off, on, or both): a bot prints the vitality left per run. |
 
 Every pull request into `dev` also gets an independent QA agent: see [How it is built](#how-it-is-built).
 
@@ -135,7 +135,7 @@ Every Render setting lives in [render.yaml](render.yaml). Environments, releases
 
 ## How it is built
 
-A small AI agent team builds the game, with one human owner who sets priorities, playtests and gives the written go for every production release. Four agents: the main Claude Code session builds; a DeepSeek QA agent checks every change in CI; a DeepSeek on-call agent answers alerts with a fix; short-lived Claude panels audit and propose designs. Roles and the loop: [docs/TEAM.md](docs/TEAM.md).
+A small AI agent team builds the game, with one human owner who sets priorities, playtests and gives the written go for production releases (per release, or since 2026-11-08 as a standing go). Four agents: the orchestrator (the main Claude Code session) builds; a DeepSeek QA agent checks every change in CI; a DeepSeek on-call agent answers alerts with a fix; short-lived Claude panels audit and propose designs. Roles and the loop: [docs/TEAM.md](docs/TEAM.md).
 
 **From issue to production:**
 
