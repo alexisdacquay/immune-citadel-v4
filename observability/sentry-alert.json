@@ -1,8 +1,11 @@
 {
-  "_comment": "Sentry alert 1464000 (org myown-76, de.sentry.io), applied by the agent through the Sentry MCP (create_alert_rule / update_alert_rule). Every save API error emails the owner, at most once per 30 min per issue.",
-  "name": "Save API error (a save or load failed): email owner",
+  "_comment": "Sentry alert 1464000 (org myown-76, de.sentry.io), applied by the agent through the Sentry MCP (create_alert_rule / update_alert_rule). Every save API error emails the owner, at most once per 30 min per issue, and opens a GitHub issue labelled incident through Sentry's GitHub integration (integration 558317, installed 2026-11-08): that issue wakes the on-call agent (.github/workflows/oncall.yml). Sentry opens one GitHub issue per Sentry issue.",
+  "name": "Save API error (a save or load failed): email owner, wake the on-call agent",
   "projectSlugs": ["immune-citadel-api"],
   "triggers": { "logicType": "any-short", "conditions": [{ "type": "every_event", "comparison": true, "conditionResult": true }] },
-  "actionFilters": [{ "logicType": "all", "conditions": [], "actions": [{ "type": "email", "config": { "targetType": "user", "targetIdentifier": "5157255" }, "data": {} }] }],
+  "actionFilters": [{ "logicType": "all", "conditions": [], "actions": [
+    { "type": "email", "config": { "targetType": "user", "targetIdentifier": "5157255" }, "data": {} },
+    { "type": "github", "integrationId": "558317", "config": { "targetType": "specific" }, "data": { "additional_fields": { "repo": "alexisdacquay/immune-citadel-v4", "labels": ["incident"] }, "dynamic_form_fields": [] } }
+  ] }],
   "frequencyMinutes": 30
 }
