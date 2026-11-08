@@ -24,3 +24,4 @@ A bug fix adds its line here in the same pull request, in the same form: `- [<is
 - [#94] index.html: Does the game's browser error reporting keep the browser's user agent out of everything it sends to Sentry, with no session tracking and any field named like user agent removed from events and spans?
 - [#106] tools/smoke.js: Does a Sentry payload whose only mention of a user agent is Sentry's own setting named infer_user_agent pass the leak check, with no user agent failure reported?
 - [#99] index.html: Does the game load its fonts only from font files on its own site, with no request of any kind to fonts.googleapis.com or fonts.gstatic.com?
+- [PR #109] index.html: Does the "Your data" text tell the player that Sentry's servers see their internet address but Sentry is set never to keep it, instead of saying that Sentry gets no internet address?
