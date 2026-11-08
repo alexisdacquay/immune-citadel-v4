@@ -33,7 +33,7 @@ services:
     branch: main
     autoDeployTrigger: commit
     buildCommand: cd server && npm ci --omit=dev
-    startCommand: cd server && npm start
+    startCommand: cd server && exec npm start # exec: Render's stop signal reaches npm, which passes it to the API
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
@@ -72,7 +72,7 @@ services:
     branch: dev
     autoDeployTrigger: commit
     buildCommand: cd server && npm ci --omit=dev
-    startCommand: cd server && npm start
+    startCommand: cd server && exec npm start # exec: Render's stop signal reaches npm, which passes it to the API
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
