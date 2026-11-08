@@ -4,7 +4,13 @@
 
 **A tower-defence game inside the human body, for teens aged 12 to 15.** Bacteria, viruses, fungi and parasites pour into the body, and you grow immune cells beside their route to stop them. Each cell fights the way it really does in the body, so to win you have to learn what each one is good at.
 
-**Built with:** vanilla JavaScript on an HTML canvas (the whole game is one `index.html`), a Node 22 save API (`node:http`, `pg`, `pino`), Postgres, Docker Compose with nginx, Playwright tests, GitHub Actions, Render (Frankfurt), Sentry (EU) and Better Stack; built by Claude Code and checked by a DeepSeek QA agent.
+**Built with:**
+- Game: vanilla JavaScript on an HTML canvas, one `index.html`
+- Save API: Node 22 (`node:http`, `pg`, `pino`) and Postgres
+- Run: Docker Compose with nginx; Render (Frankfurt) in the cloud
+- Tests and CI: Node's test runner, Playwright, GitHub Actions
+- Monitoring: Sentry (EU), Better Stack
+- Agents: Claude Code builds; DeepSeek agents check every change and answer alerts
 
 ![Level 1, The Splinter, in play: a glowing route through the skin, immune cells grown beside it, and the red marker that calls the next wave; vitality, ATP and the wave count at the top, the hero and ability buttons at the bottom](docs/screenshots/play.jpg)
 
@@ -41,7 +47,7 @@ Immune Citadel teaches the same content through play. To win a level you must us
 
 3. **The right cell in the right place.** Each pathogen's trick needs a real answer. Staph aureus has a tough coat that blunts neutrophils and macrophages. A worm is far too big for killer T cells. Flu drifts over the macrophages that block the path.
 4. **Honest about every bend.** Where the game bends real biology for play, the card says so in an "In reality" note. For flu: it does not fly through your body; it spreads from cell to cell.
-5. **Something to come back for.** A win earns 1 to 3 stars. Stars buy Memory upgrades that last across levels. Every cell and pathogen met gets a plate in the Field Guide. The last level of each body place, once won, opens two harder challenges, Acute and Chronic, from level 17 on, when your side is complete.
+5. **Something to come back for.** A win earns 1 to 3 stars. Stars buy Memory upgrades that last across levels. Every cell and pathogen met gets a plate in the Field Guide. Once you reach level 17, the last level of each body place offers two harder challenges, Acute and Chronic.
 
 ### The campaign: 18 levels, six body places
 
@@ -58,9 +64,9 @@ Every level can be won with the cells unlocked by then: a bot plays all 18 in th
 
 ### Saves and privacy
 
-- **Saves without an account.** Progress is kept in the browser. The first save also creates a 16-character save code and a copy in the cloud. Typing the code on another device continues the game there; the two devices' progress is merged, never overwritten (except when two devices sync at the same moment: the cloud then keeps the last write until the other device syncs again, [#104](https://github.com/alexisdacquay/immune-citadel-v4/issues/104)). A cloud save not updated for 13 months is deleted automatically; a browser that still has the game uploads its progress again at the next visit.
-- **No names, no ads, no chat.** The game sends a few anonymous play stats (which level, the outcome, how long a card stays open) to its own database, never the save code. Each page load (only while play stats are on) and any crash also sends a report to Sentry, which keeps reports in the EU. A report has no name and no internet address in it; Sentry's servers see the address in transit but are set never to keep it. A switch under "Your data" on the title screen turns the play stats, and the page-load reports, off. What is and is never collected: [docs/EVENTS.md](docs/EVENTS.md); the data protection impact assessment, signed by the owner: [docs/DPIA.md](docs/DPIA.md).
-- **Questions.** Open a [GitHub issue](https://github.com/alexisdacquay/immune-citadel-v4/issues); no response time is promised. Never post a save code there: issues are public and the code is the only key to a save. Without the code nobody can find a save, so there is no deletion on request: an unused cloud save is deleted after 13 months.
+- **Saves without an account.** Progress is kept in the browser and copied to the cloud under a 16-character save code. Typing the code on another device continues the game there; the two devices' progress is merged. A cloud save unchanged for 13 months is deleted.
+- **No names, no ads, no chat.** A few anonymous play stats (level, outcome, how long a card stays open) go to the game's own database, never the save code. Crash reports, and page-load reports while play stats are on, go to Sentry (EU), with no name and no internet address. A switch under "Your data" turns play stats off. Details: [docs/EVENTS.md](docs/EVENTS.md); the data protection impact assessment, signed by the owner: [docs/DPIA.md](docs/DPIA.md).
+- **Questions.** Open a [GitHub issue](https://github.com/alexisdacquay/immune-citadel-v4/issues); no response time is promised. Never post a save code there: it is the only key to a save.
 
 ## Screenshots
 
@@ -105,7 +111,7 @@ npm run test:game   # the game suite, about 6 minutes
 
 | Command | What it checks |
 |---|---|
-| `npm test` | Unit tests (a few seconds): the save API, its telemetry and privacy scrub, the wiring between the parts, the deploy proof, the QA tool. Then the stack starts and the integration tests run: a save goes from the game page through the API into Postgres and back, and a save made in one browser continues in another through its code, and gameplay events reach their table. |
+| `npm test` | Unit tests (seconds): the save API, its privacy scrub, the deploy proof, the QA tool. Then integration tests on the Docker stack: a save goes game → API → Postgres and back; a save continues on a second browser; gameplay events reach their table. |
 | `npm run test:game` | Onboarding with real clicks, a bot playing every level, saves, challenges, Memory, the Field Guide, and phone and tablet layouts ([tools/test.js](tools/test.js), [tools/touch.js](tools/touch.js)). |
 | `node tools/balance.js 10 <levels> none` | Gameplay balance: an unseeded bot prints the vitality left per run. |
 
@@ -113,7 +119,7 @@ Every pull request into `dev` also gets an independent QA agent: see [How it is 
 
 ## How it fits together
 
-![How it fits together: code on GitHub, tested and checked by QA in each pull request, deploys to Render (dev and production) on each commit; the player's browser plays the game site and sends saves and gameplay events to the save API, which stores them in Postgres; the browser sends crashes and load speed, and the save API errors and traces, to Sentry; Better Stack checks that the site and the API are up; the CI job "deployed" checks the right version is live; all three email the owner](docs/diagrams/how-it-fits.svg)
+![How it fits together: the browser plays the game site and talks to the save API and Postgres on Render; Sentry, Better Stack and CI watch them](docs/diagrams/how-it-fits.svg)
 
 | Part | Code | Local (`docker compose up`) | Render, Frankfurt (dev and production) |
 |---|---|---|---|
@@ -127,17 +133,17 @@ Every Render setting lives in [render.yaml](render.yaml). Environments, releases
 
 ## How it is built
 
-A small AI agent team builds the game, with one human owner who sets priorities, playtests and approves every production release. The main Claude Code session plans, designs and builds; an independent DeepSeek agent checks its work in CI. Roles and the loop: [docs/TEAM.md](docs/TEAM.md).
+A small AI agent team builds the game, with one human owner who sets priorities, playtests and approves every production release. The main Claude Code session plans, designs and builds; an independent DeepSeek agent checks every change in CI; a DeepSeek on-call agent answers alerts with a fix. Roles and the loop: [docs/TEAM.md](docs/TEAM.md).
 
 **From issue to production:**
 
-![From pull request to production: the builder's QA checks and the past failures in the files changed feed stage 1, the required qa job (closed YES or NO questions at low effort, 3 votes each, any failed check fails it); test and game run beside it; once test, game and qa are green GitHub auto-merges into dev, Render deploys it and the CI job deployed checks it is live; stage 2, qa-review, comments after test and game pass and never blocks; the owner merges dev into main for production](docs/diagrams/qa-stages.svg)
+![From pull request to production: test, game and the QA agent on each pull request, auto-merge into dev, Render deploys dev, owner-approved promotion into main](docs/diagrams/qa-stages.svg)
 
 1. Work starts as a [GitHub issue](https://github.com/alexisdacquay/immune-citadel-v4/issues) with acceptance criteria and is built on its own branch.
 2. The pull request into `dev` carries a `## QA checks` section written by the builder: one closed question per thing the change could break, phrased so YES means right.
 3. CI runs four jobs on it:
    - `test` and `game`: the suites above.
-   - `qa`, stage 1, **required**. The QA agent answers each check YES or NO at low effort, three times, from the files the check names; the majority answer counts. It also asks again every past failure in [test/past-failures.md](test/past-failures.md) whose files the change touches. A `[changes]` check must be YES on the new code and not YES on the old, so it really tests the change.
+   - `qa`, stage 1, **required**: an AI reviewer answers each yes/no check 3 times and the majority counts. Checks come from the pull request and from [test/past-failures.md](test/past-failures.md). A check marked `[changes]` must fail on the old code, which proves it tests the change.
    - `qa-review`, stage 2, **advisory**. An open review against the issue's acceptance criteria. It comments and never blocks; every finding is fixed or answered before a promotion.
 4. GitHub merges the pull request into `dev` as soon as `test`, `game` and `qa` are green. No human merges into `dev`.
 5. Render deploys every commit on `dev`, and CI's `deployed` job proves that commit is live, then runs a read-only smoke and privacy check on it ([tools/smoke.js](tools/smoke.js)).
@@ -157,21 +163,21 @@ Where to read more:
 
 ## For reviewers
 
-Immune Citadel is a project for the [DataTalksClub AI Dev Tools Zoomcamp](https://github.com/DataTalksClub/ai-dev-tools-zoomcamp/tree/main/project). One row per criterion, with the rubric's top band in short, the points claimed, and a proof a logged-out reader can open.
+Immune Citadel is a project for the [DataTalksClub AI Dev Tools Zoomcamp](https://github.com/DataTalksClub/ai-dev-tools-zoomcamp/tree/main/project). Each row links to its proof in [docs/PROOF.md](docs/PROOF.md): the rubric's words, screenshots, raw output, links that open without a login.
 
-| # | Criterion: top band | Points claimed | Proof |
+| # | Criterion | Points | Proof in one line (screenshots and raw output behind each link) |
 |---|---|---|---|
-| 1 | **Problem description:** the README describes the problem, what the system does and how it behaves | 2 / 2 | **[Proof](docs/PROOF.md#1-problem-description)**. The README opens with the teaching problem, then how the game plays and teaches. [The problem](#the-problem), [What it does](#what-it-does) |
-| 2 | **Product specification:** a spec, a public tracker, tasks with acceptance criteria, evidence that agents used it | 2 / 2 | **[Proof](docs/PROOF.md#2-product-specification)**. The spec writes each player journey as acceptance criteria; most issues from #19 on carry their own, and the agents post their spec, reports and QA verdicts on the issues. [docs/SPEC.md](docs/SPEC.md), [#25](https://github.com/alexisdacquay/immune-citadel-v4/issues/25) (acceptance criteria), [#21](https://github.com/alexisdacquay/immune-citadel-v4/issues/21) (spec, engineer report, a QA FAIL, then a PASS) |
-| 3 | **Agent team:** the agent team and how it works together | 2 / 2 | **[Proof](docs/PROOF.md#3-agent-team)**. TEAM names each role, what it owns and never does, and the loop from an issue to production. [docs/TEAM.md](docs/TEAM.md) |
-| 4 | **Context management:** AGENTS.md pointing to modular docs | 2 / 2 | **[Proof](docs/PROOF.md#4-context-management)**. AGENTS.md, which [CLAUDE.md](CLAUDE.md) loads, sends each agent to STATUS, SPEC, TEAM, OPERATIONS and the plans. [AGENTS.md](AGENTS.md), [team-loop skill](.claude/skills/team-loop/SKILL.md) |
-| 5 | **Application:** full stack end to end, data in a database, one command locally | 2 / 2 | **[Proof](docs/PROOF.md#5-application)**. `docker compose up --build` runs the game, the save API and Postgres; a save made in one browser continues in another. [Run it](#run-it), [test/integration.test.js](test/integration.test.js) |
-| 6 | **Testing:** unit and integration tests, one command, passing | 2 / 2 | **[Proof](docs/PROOF.md#6-testing)**. `npm test` runs the unit tests, then the integration tests on the Docker stack; both pass in CI on `dev` (the run lists `test` and `game` green; the Actions log, which names each test file, needs a GitHub login). [Test it](#test-it), [a green CI run on dev](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42480697284) |
-| 7 | **Containerization:** the whole system, database included, with one Compose command | 2 / 2 | **[Proof](docs/PROOF.md#7-containerization)**. One Compose file starts the game (nginx), the save API and Postgres, each with a health check. [compose.yaml](compose.yaml), [server/Dockerfile](server/Dockerfile) |
-| 8 | **Deployment:** reachable at a public URL | 2 / 2 | **[Proof](docs/PROOF.md#8-deployment)**. Production and dev run on Render, declared in [render.yaml](render.yaml); each API's `/health` and each site's `/version.txt` name the commit that is live. Production: [/health](https://immune-citadel-v4-api.onrender.com/health), [/version.txt](https://immune-citadel-v4.onrender.com/version.txt). Dev: [/health](https://immune-citadel-v4-api-dev.onrender.com/health), [/version.txt](https://immune-citadel-v4-dev.onrender.com/version.txt) |
-| 9 | **CI/CD:** CI runs the tests, CD deploys to dev, a manual deploy to production | 3 / 3 | **[Proof](docs/PROOF.md#9-cicd)**. CI tests every pull request, Render deploys every commit on `dev`, and production moves only through a promotion pull request into `main` that the owner approves in writing. [promotion #129](https://github.com/alexisdacquay/immune-citadel-v4/pull/129), [its CI run on main](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42501133770), [OPERATIONS, Releases](docs/OPERATIONS.md#releases) |
-| 10 | **Observability:** a key journey with metrics, traces and structured logs sharing a trace ID, no customer data, viewable in a UI | 2 / 2 | **[Proof](docs/PROOF.md#10-observability)**. One save gives Sentry (EU) a trace, a log line and a duration metric under one trace ID, the same ID as its Render log line, with no player data. Screenshots of one real save in Sentry's UI: [Follow one save](docs/OPERATIONS.md#follow-one-save); a test rebuilds the chain on any machine: [server/observability.test.js](server/observability.test.js) |
-| 11 | **Alerting on user impact:** at least one alert | 1 / 1 | **[Proof](docs/PROOF.md#11-alerting-on-user-impact)**. A failed save or load (save API error) and a game crash email the owner, both defined as code; Better Stack emails when a site or an API is down. [The alert in Sentry, with a real firing](docs/OPERATIONS.md#alert-save-api-error), [observability/sentry-alert.json](observability/sentry-alert.json) |
-| 12 | **On-call agent:** wakes on an alert and fixes the issue | 2 / 2 | **[Proof](docs/PROOF.md#12-on-call-agent)**. A Sentry alert opens an issue here, the agent wakes on it, finds the cause and opens a pull request into `dev` with the fix and a regression test, which merges on green. First drill, 2026-11-08: alert at 16:53:05 UTC, fix live on `dev` at 17:04:06, no human in the loop. [The drill, with times](docs/OPERATIONS.md#on-call-agent), [the alert's issue #131](https://github.com/alexisdacquay/immune-citadel-v4/issues/131), [the agent's fix #132](https://github.com/alexisdacquay/immune-citadel-v4/pull/132) |
+| 1 | Problem description | 2 / 2 | [Proof](docs/PROOF.md#1-problem-description): README: the problem, what the game does, how it behaves |
+| 2 | Product specification | 2 / 2 | [Proof](docs/PROOF.md#2-product-specification): SPEC.md; public issues with acceptance criteria; agents open, work and judge issues and pull requests |
+| 3 | Agent team | 2 / 2 | [Proof](docs/PROOF.md#3-agent-team): 4 agents with roles and limits, one loop; their work is visible on every pull request |
+| 4 | Context management | 2 / 2 | [Proof](docs/PROOF.md#4-context-management): AGENTS.md points to STATUS, SPEC, TEAM, OPERATIONS |
+| 5 | Application | 2 / 2 | [Proof](docs/PROOF.md#5-application): one command; a click in the browser lands as a row in Postgres |
+| 6 | Testing | 2 / 2 | [Proof](docs/PROOF.md#6-testing): `npm test`: 46 unit and 4 integration tests pass on a fresh clone |
+| 7 | Containerization | 2 / 2 | [Proof](docs/PROOF.md#7-containerization): `docker compose up --build`: game, API and Postgres, all healthy |
+| 8 | Deployment | 2 / 2 | [Proof](docs/PROOF.md#8-deployment): [play it](https://immune-citadel-v4.onrender.com); `/health` and `/version.txt` name the live commit |
+| 9 | CI/CD | 3 / 3 | [Proof](docs/PROOF.md#9-cicd): CI on every pull request; CD to dev on every merge; production only by a pull request merged by hand |
+| 10 | Observability | 2 / 2 | [Proof](docs/PROOF.md#10-observability): one save: trace, log line and metric under one trace ID, in Sentry's UI |
+| 11 | Alerting on user impact | 1 / 1 | [Proof](docs/PROOF.md#11-alerting-on-user-impact): a failed save emails the owner and opens a GitHub issue |
+| 12 | On-call agent | 2 / 2 | [Proof](docs/PROOF.md#12-on-call-agent): a real alert on a deliberately planted fault: the agent fixed it, live on dev 11 minutes later, no human |
 
-**Claimed: 24 of 24 points.** Every row, with screenshots and raw output: [docs/PROOF.md](docs/PROOF.md).
+**Claimed: 24 of 24 points.**

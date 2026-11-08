@@ -6,7 +6,7 @@ Last update: 2026-11-08, about 17:10 UTC: production runs the launch release `ee
 
 ## At a glance
 
-- **Production** runs `ee4783d`, the launch release of 2026-11-08 at 16:40 UTC ([#129](https://github.com/alexisdacquay/immune-citadel-v4/pull/129)): the whole 18-level campaign on the body map, cloud saves (deleted after 13 months unchanged), the save API's one-trace-ID observability, crash reports and load reports that respect Play stats and Global Privacy Control, the game's own fonts, phone and laptop layout fixes, the on-call agent, and a read-only smoke and privacy check after every push to `dev` or `main`.
+- **Production** runs `d3f7a43` ([#134](https://github.com/alexisdacquay/immune-citadel-v4/pull/134), the on-call drill record) on top of the launch release `ee4783d` ([#129](https://github.com/alexisdacquay/immune-citadel-v4/pull/129)): the whole 18-level campaign on the body map, cloud saves (deleted after 13 months unchanged), the save API's one-trace-ID observability, crash reports and load reports that respect Play stats and Global Privacy Control, the game's own fonts, phone and laptop layout fixes, the on-call agent, and a read-only smoke and privacy check after every push to `dev` or `main`.
 - **Dev** runs production's code plus every pull request merged into `dev` since #129: the drill's planted line and the on-call agent's fix of it (#130, #132).
 - **In flight:** the [open pull requests into `dev`](https://github.com/alexisdacquay/immune-citadel-v4/pulls?q=is%3Apr+is%3Aopen+base%3Adev); [#90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90) is in conflict with `dev` (below).
 - **Next:** the rubric work ([#77](https://github.com/alexisdacquay/immune-citadel-v4/issues/77), P0).
@@ -15,7 +15,7 @@ Last update: 2026-11-08, about 17:10 UTC: production runs the launch release `ee
 
 | Environment | Commit | What it has |
 |---|---|---|
-| Production (`main`) | `ee4783d` | what each promotion brought: [Promotions](#promotions) |
+| Production (`main`) | `d3f7a43` | what each promotion brought: [Promotions](#promotions) |
 | Dev (`dev`) | the head of `dev`: production plus every pull request merged since #113 | |
 
 ## Promotions
@@ -30,6 +30,7 @@ Every merge into `main`, the production branch. Each needed the owner's written 
 | [#110](https://github.com/alexisdacquay/immune-citadel-v4/pull/110) | `274d452` | 2026-11-08 08:33 | the game's fonts from its own site, so a player's browser no longer contacts Google (#108, #99); the smoke and privacy check in `deployed` (#107); the "Your data" wording on Sentry (#109); the DPIA re-signed | in chat: "ok" to five steps, among them this promotion and the Blueprint on `main` | [42463417842](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42463417842) |
 | [#113](https://github.com/alexisdacquay/immune-citadel-v4/pull/113) | `9aa33f5` | 2026-11-08 12:09 | the "Your data" and cloud popovers fit a landscape phone, so the Play stats switch can be reached (#112); the fonts build without its guard (#111) | in chat: "Yes, promote" | [42478940135](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42478940135) |
 | [#129](https://github.com/alexisdacquay/immune-citadel-v4/pull/129) | `ee4783d` | 2026-11-08 16:40 | the launch release: reviewer docs and Sentry screenshots, phone and laptop fixes, Sentry traces that follow Play stats, save retention, the #102 log fix, the on-call agent, the DPIA re-signed | the owner, in chat: "Yes, promote", then "I approve. In the future, please proxy for me" | [42501133770](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42501133770) |
+| [#134](https://github.com/alexisdacquay/immune-citadel-v4/pull/134) | `d3f7a43` | 2026-11-08 17:29 | the on-call agent's first drill, recorded (#133), and its fix (#132) of the drill's planted fault (#130) | the owner's standing written go: "In the future, please proxy for me" (2026-11-08), quoted in the pull request | [42505199017](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42505199017) |
 
 Infrastructure and telemetry events around them:
 

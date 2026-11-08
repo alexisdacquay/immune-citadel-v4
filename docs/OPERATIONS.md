@@ -72,7 +72,7 @@ A change reaches players in six moves:
 | Deploy proof | CI job `deployed` on each push to `dev` or `main`: [tools/verify-deploy.js](../tools/verify-deploy.js) waits until the API's `/health` and the site's `/version.txt` serve the pushed commit, else the run goes red after 15 min (if a newer push arrives first, that push's own run takes over). Then [tools/smoke.js](../tools/smoke.js) plays the live site in Chromium, read-only (Sentry and the page's `/api/` calls are answered locally, nothing is sent or saved), and goes red on a wrong commit, an error, or a save code, user agent, an `ip_address` field, headers or play data in a Sentry payload, or a crash report that does not tell Sentry to drop the IP (`infer_ip` not `never`) | dev: [run 42221746028](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42221746028), live 58 s after the merge; production: [run 42388716983](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42388716983), live 73 s after the merge; every promotion's run is in [STATUS, Promotions](STATUS.md#promotions) |
 | Promotion | [promotion.yml](../.github/workflows/promotion.yml): `dev-green` waits for `dev`'s own CI run on the same commit, deploy proof included, and fails unless it is green; then, on the owner's written go, the owner or the orchestrator merges | [STATUS, Promotions](STATUS.md#promotions): every promotion, its approval and its proof run |
 
-**Every promotion needs the owner's written go.** Then the owner or, on that go, the orchestrator (the main Claude Code session) clicks merge. Each go is recorded in the [STATUS promotions table](STATUS.md#promotions). No agent arms auto-merge on a pull request into `main`. This is a team rule ([AGENTS.md](../AGENTS.md)); GitHub does not enforce it.
+**Every promotion needs the owner's written go.** Then the owner or, on that go, the orchestrator (the main Claude Code session) clicks merge. Since 2026-11-08 the owner's standing written go ("In the future, please proxy for me") lets the orchestrator give it; each pull request quotes the go it relies on. Each go is recorded in the [STATUS promotions table](STATUS.md#promotions). No agent arms auto-merge on a pull request into `main`. This is a team rule ([AGENTS.md](../AGENTS.md)); GitHub does not enforce it.
 
 ### QA in two stages
 
@@ -210,8 +210,6 @@ Each check was proven able to fail by removing the code it guards: 25 removals o
 
   ![Sentry Application Metrics: the http.server.request.duration sample of trace e273c17a, 53 ms, with its trace summary](screenshots/sentry-metric.jpg)
 
-[PR #90](https://github.com/alexisdacquay/immune-citadel-v4/pull/90) (open, not merged) would repeat this check in CI after every deploy to dev.
-
 ## Reading gameplay events
 
 The databases accept outside connections only from their IP allowlist: the owner's machine. If that address changes, update it in Render (the database → Networking, or `PATCH /v1/postgres/<id>` with `ipAllowList`). The Render MCP query tool connects from Render's servers, so the allowlist blocks it.
@@ -226,7 +224,7 @@ docker run --rm -it -e U="$URL?sslmode=require" postgres:18-alpine sh -c 'psql "
 
 When a Sentry alert fires, an agent wakes and proposes the fix, with no human in the loop until the merge (rubric: "an agent wakes up on an alert and fixes the issue"; [#27](https://github.com/alexisdacquay/immune-citadel-v4/issues/27)).
 
-1. **The alert opens an issue here.** Once the owner's setup below is done, the Sentry alert rules (save API error, game error) get a second action, "Create a GitHub issue", through Sentry's GitHub integration.
+1. **The alert opens an issue here.** The save API alert has a second action, "Create a GitHub issue", through Sentry's GitHub integration (installed 2026-11-08).
 2. **The agent wakes on it.** The **On-call** workflow ([.github/workflows/oncall.yml](../.github/workflows/oncall.yml)) starts only for an issue opened by Sentry's app (`sentry[bot]`), an issue the owner labels `incident`, or a manual run (Actions → On-call → Run workflow).
 3. **It finds the cause.** [tools/oncall.js](../tools/oncall.js) reads the latest event of the Sentry issue: the exception, the frames of our own code, environment and release, never request, user or device data. It gives DeepSeek (`deepseek-v4-pro`) that error and the source files the stack names, and asks for the smallest fix with a regression test and QA checks.
 4. **It proves the fix.** It applies the edits all or nothing, then runs `npm run test:unit` sealed in Docker: no network, no secrets, the checkout read-only. On red it sends the failure back, 3 attempts at most.
@@ -235,7 +233,7 @@ When a Sentry alert fires, an agent wakes and proposes the fix, with no human in
 
 **Guard rails.** It edits only `index.html` and `server/<name>.js` (an allow-list), at most 150 lines and 20,000 characters. The agent's own code runs from `main`, never from `dev`. The error text is untrusted data in its prompt. One agent runs at a time, and a retry replaces its own unmerged branch. The design was reviewed independently on 2026-11-08 ([#124](https://github.com/alexisdacquay/immune-citadel-v4/pull/124)).
 
-**Setup, once, by the owner:** install Sentry's GitHub integration on this repository (Sentry → Settings → Integrations → GitHub), so that the orchestrator can add "Create a GitHub issue" to the alert rules. Then run, once, the command below. It creates a write deploy key for this repository only, stores its private half as the `ONCALL_DEPLOY_KEY` secret without showing it, and lets GitHub Actions open pull requests. The agent pushes with that key because GitHub starts no CI for what its own `GITHUB_TOKEN` pushes. No personal token is needed. An issue-triggered workflow runs from the default branch, so the agent wakes only once it is on `main`. The `incident` label is for a manual wake-up by the owner.
+**Setup (done 2026-11-08), once, by the owner:** install Sentry's GitHub integration on this repository (Sentry → Settings → Integrations → GitHub), so that the orchestrator can add "Create a GitHub issue" to the alert rules. Then run, once, the command below. It creates a write deploy key for this repository only, stores its private half as the `ONCALL_DEPLOY_KEY` secret without showing it, and lets GitHub Actions open pull requests. The agent pushes with that key because GitHub starts no CI for what its own `GITHUB_TOKEN` pushes. No personal token is needed. An issue-triggered workflow runs from the default branch, so the agent wakes only once it is on `main`. The `incident` label is for a manual wake-up by the owner.
 
 ```bash
 D=$(mktemp -d) && ssh-keygen -q -t ed25519 -N "" -C "immune-citadel-v4 on-call agent" -f "$D/k" && gh repo deploy-key add "$D/k.pub" -R alexisdacquay/immune-citadel-v4 --allow-write --title "on-call agent" && gh secret set ONCALL_DEPLOY_KEY -R alexisdacquay/immune-citadel-v4 < "$D/k" && gh api -X PUT repos/alexisdacquay/immune-citadel-v4/actions/permissions/workflow -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true && rm -rf "$D" && echo "on-call key set"
@@ -258,9 +256,11 @@ The merge was made with GitHub's own token, so `dev`'s push run (and its `deploy
 
 ## Alert: save API error
 
-![The Sentry alert rule 'Save API error (a save or load failed): email owner', with its one firing on 2026-11-06 (Error: getaddrinfo ENOTFOUND db)](screenshots/sentry-alert.jpg)
+| Its two firings | Its two actions: email, and a GitHub issue |
+|---|---|
+| ![The save API alert: 2 triggers, Nov 6 and Nov 8](screenshots/proof/alert-1-history.jpg) | ![The alert's actions: notify by email, create a GitHub issue](screenshots/proof/alert-2-actions.jpg) |
 
-**"Save API error (a save or load failed): email owner"**: every error in Sentry project `immune-citadel-api` emails the owner, at most once per 30 min per issue. Defined in [observability/sentry-alert.json](../observability/sentry-alert.json) (Sentry alert 1464000) and applied through the Sentry MCP.
+**"Save API error (a save or load failed): email owner, wake the on-call agent"**: every error in Sentry project `immune-citadel-api` emails the owner, at most once per 30 min per issue, and opens a GitHub issue that wakes the [on-call agent](#on-call-agent). Defined in [observability/sentry-alert.json](../observability/sentry-alert.json) (Sentry alert 1464000) and applied through the Sentry MCP.
 
 | | |
 |---|---|
