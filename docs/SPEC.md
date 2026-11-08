@@ -9,7 +9,7 @@ What the game must do for its players, written as player journeys with acceptanc
 | **Who** | teens aged 12-15, playing in a browser on a laptop, tablet or phone, at home or in class |
 | **Goal** | they come out able to say what each main immune cell does and why the body needs several kinds, because the game only rewards using each cell for what it is really good at |
 | **Content rules** | fun first, honest always. On-screen words are immune-system words (no "tower", "magic", "armour"). Where the game bends real biology for play, an "In reality" note says how |
-| **Backlog** | [GitHub issues](https://github.com/alexisdacquay/immune-citadel-v4/issues); each issue carries its own acceptance criteria |
+| **Backlog** | [GitHub issues](https://github.com/alexisdacquay/immune-citadel-v4/issues); feature and task issues carry their own acceptance criteria |
 
 ## Words on screen and in the code
 
