@@ -7,14 +7,14 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 | # | Criterion | Points | The proof in one line |
 |---|---|---|---|
 | [1](#1-problem-description) | Problem description | 2 / 2 | README: the problem, what the game does, how it behaves |
-| [2](#2-product-specification) | Product specification | 2 / 2 | SPEC.md; public issues with acceptance criteria; agents open, work and judge issues and pull requests |
+| [2](#2-product-specification) | Product specification | 2 / 2 | SPEC.md; public issues with acceptance criteria; agents write specs and verdicts on them, and the on-call agent works issues on its own |
 | [3](#3-agent-team) | Agent team | 2 / 2 | 4 agents with roles and limits, one loop; their work is visible on every pull request |
 | [4](#4-context-management) | Context management | 2 / 2 | AGENTS.md points to STATUS, SPEC, TEAM, OPERATIONS |
 | [5](#5-application) | Application | 2 / 2 | one command; a click in the browser lands as a row in Postgres |
 | [6](#6-testing) | Testing | 2 / 2 | `npm test`: 46 unit and 4 integration tests pass on a fresh clone |
 | [7](#7-containerization) | Containerization | 2 / 2 | `docker compose up --build`: game, API and Postgres, all healthy |
 | [8](#8-deployment) | Deployment | 2 / 2 | public URL; `/health` and `/version.txt` name the live commit |
-| [9](#9-cicd) | CI/CD | 3 / 3 | CI on every pull request; CD to dev on every merge; production only by a pull request merged by hand |
+| [9](#9-cicd) | CI/CD | 3 / 3 | CI on every pull request; CD to dev on every merge; production only by a promotion merged on the owner's written go |
 | [10](#10-observability) | Observability | 2 / 2 | one save: trace, log line and metric under one trace ID, in Sentry's UI |
 | [11](#11-alerting-on-user-impact) | Alerting on user impact | 1 / 1 | a failed save emails the owner and opens a GitHub issue |
 | [12](#12-on-call-agent) | On-call agent | 2 / 2 | a real alert on a deliberately planted fault: the agent fixed it, live on dev 11 minutes later, no human |
@@ -25,9 +25,7 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 
 - **Problem:** immunology is taught as a list of names to memorise; teens learn the names without understanding what each cell does ([README, The problem](../README.md#the-problem)).
 - **What it does:** a tower-defence game inside the body, 18 levels; each threat and cell is introduced when it first appears ([README, What it does](../README.md#what-it-does)).
-- **Expected behaviour:** player journeys with acceptance criteria in [SPEC.md](SPEC.md).
-
-![The game: the body map with its 18 levels](screenshots/body-map.jpg)
+- **Expected behaviour:** [README, Play in 30 seconds](../README.md#play-in-30-seconds) and the campaign table; full player journeys with acceptance criteria in [SPEC.md](SPEC.md).
 
 ## 2. Product specification
 
@@ -38,7 +36,7 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 - **Agents used the tracker** (bot accounts, so no doubt who wrote it):
   - [#131](https://github.com/alexisdacquay/immune-citadel-v4/issues/131): opened by `sentry[bot]`, worked by the on-call agent as `github-actions` (criterion 12);
   - every pull request into `dev`: the QA agent posts its verdict as `github-actions`, for example on [#132](https://github.com/alexisdacquay/immune-citadel-v4/pull/132) (criterion 3).
-- **And on the issues:** agents that run on the owner's machine post through the owner's login, with the role in the heading ("Build notes", "QA verdict"), for example [#24](https://github.com/alexisdacquay/immune-citadel-v4/issues/24):
+- **Local agents on issues:** they post through the owner's login, and the heading names the role ("Build notes", "QA verdict"), for example [#24](https://github.com/alexisdacquay/immune-citadel-v4/issues/24):
 
 | Acceptance criteria, ticked when verified | The QA verdict on the same issue (posted through the owner's login) |
 |---|---|
@@ -53,9 +51,9 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 | Orchestrator | Claude Code (main session) | specs each issue, builds it, writes its QA checks, opens the pull request | merges into production without the owner's written go |
 | QA | DeepSeek, in CI on every pull request into `dev` ([tools/qa.js](../tools/qa.js)) | answers yes/no checks (required); writes an open review (advisory) | edit code |
 | On-call | DeepSeek, woken by a Sentry alert ([tools/oncall.js](../tools/oncall.js)) | finds the cause, opens a fix pull request with a regression test | touch `main`, CI, dependencies, or files outside the game and the save API |
-| Panels | short-lived Claude subagents | independent audits and design options; a skeptic checks each finding | decide |
+| Panels | short-lived Claude subagents, started by the orchestrator | audit a change or propose designs; a second subagent re-checks each finding | decide or merge |
 
-**The loop:** issue with acceptance criteria → orchestrator builds on a branch → pull request with QA checks → CI `test`, `game` and the QA agent → GitHub merges into `dev` → Render deploys dev → owner's written go → promotion into `main` → Render deploys production. An alert enters the same loop through the on-call agent. Full process: [TEAM.md](TEAM.md).
+**The loop** (diagram below): issue → branch → pull request → CI and the QA agent → `dev` → owner's go → `main`. An alert enters the same loop through the on-call agent. Full process: [TEAM.md](TEAM.md).
 
 ![Release pipeline: branch, pull request with test, game and qa, auto-merge into dev, Render deploys dev, owner-approved promotion into main, Render deploys production](diagrams/release-pipeline.svg)
 
@@ -83,7 +81,7 @@ Two agents on one pull request: the on-call agent's fix, judged by the QA agent,
 
 **One command:** `docker compose up --build`, then open http://localhost:8080.
 
-Proof on a fresh clone, 2026-11-08. In the browser, pick **HARD**; the game saves to the cloud by itself. (A throwaway save in the local database; the address bar, http://localhost:8080, is outside the screenshot.)
+Proof on a fresh clone, 2026-11-08. On the title screen, pick difficulty **HARD** (top right); the game saves to the local API by itself. (A throwaway save in the local database; the address bar, http://localhost:8080, is outside the screenshot.)
 
 ![The game at localhost:8080: the cloud panel says "Synced", this device's code GRHP-7YTL-X44D-A7TH](screenshots/proof/local-game-synced.jpg)
 
@@ -107,9 +105,11 @@ Browser → save API → Postgres: the click on HARD is the `hard` in that row.
 
 ```
 $ npm test
+# unit tests (npm run test:unit)
 ℹ tests 46
 ℹ pass 46
 ℹ fail 0
+# integration tests on the Docker stack (npm run test:integration)
 ✔ a save sent to the API is stored in Postgres and read back
 ✔ the server prunes cloud saves untouched for 13 months, at start, and keeps newer ones
 ✔ gameplay events reach the events table and its views
@@ -139,7 +139,7 @@ web       nginx:alpine         Up 16 seconds (healthy)   0.0.0.0:8080->80/tcp
 
 ## 8. Deployment
 
-> **2 points:** "The application is deployed and reachable at a public URL."
+> **2 points:** "The application is deployed and reachable at a public URL, or there's a clear demo with the deployment."
 
 - **Play it:** https://immune-citadel-v4.onrender.com
 - **Live commit:** [/version.txt](https://immune-citadel-v4.onrender.com/version.txt) (the game) and [/health](https://immune-citadel-v4-api.onrender.com/health) (the save API). On 2026-11-08 both said `d3f7a43` (promotion #134). Later, both name the head of [`main`](https://github.com/alexisdacquay/immune-citadel-v4/commits/main).
@@ -153,9 +153,13 @@ web       nginx:alpine         Up 16 seconds (healthy)   0.0.0.0:8080->80/tcp
 | Step | What happens | Proof |
 |---|---|---|
 | CI | every pull request runs `test` (unit and integration), `game` (the bot plays every level) and `qa` (the QA agent) | [ci.yml](../.github/workflows/ci.yml); the green checks on [#132](https://github.com/alexisdacquay/immune-citadel-v4/pull/132) |
-| CD to dev | a green pull request merges into `dev`; Render deploys `dev`; CI's `deployed` job then checks the live site | [a dev run, `deployed` green](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42503983315) |
-| Manual deploy to production | Render deploys `main` on merge, so the manual step is the merge. Only a promotion pull request reaches `main`; GitHub requires green CI and `dev` green on the same commit; nothing automatic (workflow, auto-merge, schedule) targets `main`. A person clicks merge after the owner's written go, quoted in the pull request: [#129](https://github.com/alexisdacquay/immune-citadel-v4/pull/129), "Yes, promote"; [#134](https://github.com/alexisdacquay/immune-citadel-v4/pull/134), the owner's standing go ("In the future, please proxy for me") | [rulesets](https://github.com/alexisdacquay/immune-citadel-v4/rules) |
+| CD to dev | a green pull request merges into `dev`; Render deploys every commit on `dev`; CI's `deployed` job waits until the live site serves it, then tests it | [render.yaml](../render.yaml) (`branch: dev`, `autoDeployTrigger: commit`); [a dev run, `deployed` green](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42503983315) |
+| Manual deploy to production | a promotion pull request `dev` → `main`, merged only on the owner's written go, never automatically | [rulesets](https://github.com/alexisdacquay/immune-citadel-v4/rules), [STATUS, Promotions](STATUS.md#promotions) |
 | Rollback | redeploy the last good commit in Render, or revert the pull request | [OPERATIONS, Rollback](OPERATIONS.md#rollback) |
+
+- **The merge is the manual step:** Render deploys `main` on merge, and nothing automatic (workflow, auto-merge, schedule) targets `main`.
+- **GitHub enforces:** a pull request only; green CI; `dev` green on the same commit.
+- **Every promotion has a human's written go, quoted in its pull request:** #129, "Yes, promote" (the owner); #134, the owner's standing go of 2026-11-08 ("In the future, please proxy for me"), merged by the main session. The full list is in [STATUS, Promotions](STATUS.md#promotions).
 
 | The rules on `dev` and `main` | A promotion, with the owner's written go |
 |---|---|
@@ -171,6 +175,8 @@ Its `deployed` job printed ([run 42501133770](https://github.com/alexisdacquay/i
 SMOKE PASS https://immune-citadel-v4.onrender.com at ee4783d6577cc73b2c76f627cbf745d3832d5eb1: 4 Sentry requests held back, no player data in them; with play stats off or GPC, crash reports and no traces
 ```
 
+It means: the smoke test catches the page's Sentry requests ("held back") and inspects them; with play stats off, or Global Privacy Control (a browser's opt-out signal) on, only crash reports are sent.
+
 ## 10. Observability
 
 > **2 points:** "A key user journey is instrumented with metrics, traces, and structured logs that share a trace ID; no customer data or credentials are sent to telemetry; and the signals are collected, stored, and viewable in a UI."
@@ -179,9 +185,8 @@ SMOKE PASS https://immune-citadel-v4.onrender.com at ee4783d6577cc73b2c76f627cbf
 
 | Signal | Where | Proof |
 |---|---|---|
-| Structured log | Render's log line (JSON) | `{"trace_id":"e273c17a1ecc4b94b4627985857338e4","method":"PUT","route":"/api/save/:code","status":200,"ms":53,"msg":"request"}` |
 | Trace | Sentry: the request and its Postgres spans | screenshot 1 |
-| Log | Sentry Logs, found by the same trace ID | screenshot 2 |
+| Structured log | Sentry Logs, found by the same trace ID; the same JSON line is in Render's logs (login needed): `{"trace_id":"e273c17a1ecc4b94b4627985857338e4","method":"PUT","route":"/api/save/:code","status":200,"ms":53,"msg":"request"}` | screenshot 2 |
 | Metric | Sentry: `http.server.request.duration`, same trace ID | screenshot 3 |
 
 **1. Trace:** the request and its Postgres spans (4 spans, 1 log, 1 metric).
@@ -199,9 +204,10 @@ SMOKE PASS https://immune-citadel-v4.onrender.com at ee4783d6577cc73b2c76f627cbf
 **No customer data or credentials:**
 - the save code, the only key to a save, is replaced by `:code` everywhere;
 - no IP, no user agent, no request headers (so no cookies), no save content;
+- SQL in spans has placeholders only (`VALUES ($1, $2)`); values are never sent;
 - the API has no passwords or tokens to send.
 
-Checked three ways: [server/observability.test.js](../server/observability.test.js) on every pull request, CI's smoke test after every deploy (the `SMOKE PASS` line in [criterion 9](#9-cicd)), and the screenshots above.
+Checked by [server/observability.test.js](../server/observability.test.js) on every pull request and by CI's smoke test after every deploy (the `SMOKE PASS` line in [criterion 9](#9-cicd)).
 
 ## 11. Alerting on user impact
 
@@ -209,10 +215,10 @@ Checked three ways: [server/observability.test.js](../server/observability.test.
 
 - **The user impact:** a player's save or load fails.
 - **The alert:** any save API error emails the owner and opens a GitHub issue, which wakes the on-call agent ([observability/sentry-alert.json](../observability/sentry-alert.json)).
-- **It fired for real:** on 2026-11-06 (database down, local test) and on 2026-11-08 (the drill, criterion 12).
+- **Fired twice:** 2026-11-06 (database stopped on purpose, local stack) and 2026-11-08 (the drill, criterion 12).
 - **Also:** a game crash emails the owner, in dev and production ([observability/sentry-game-alert.json](../observability/sentry-game-alert.json)), and Better Stack emails when a site or an API is down.
 
-| Its two firings | Its two actions: email, and a GitHub issue |
+| Its two firings | Its two actions: an email to the owner (Sentry shows it as "Notify AI"; type `email` in sentry-alert.json) and a GitHub issue |
 |---|---|
 | ![Sentry alert "Save API error (a save or load failed): email owner, wake the on-call agent": 2 triggers, Nov 6 and Nov 8](screenshots/proof/alert-1-history.jpg) | ![The alert's actions: notify by email, create a GitHub issue in alexisdacquay](screenshots/proof/alert-2-actions.jpg) |
 
@@ -220,7 +226,7 @@ Checked three ways: [server/observability.test.js](../server/observability.test.
 
 > **2 points:** "An agent wakes up on an alert and fixes the issue."
 
-**First drill, 2026-11-08, on dev.** The save API had no 500 that real traffic could trigger, so a fault was planted on purpose ([#130](https://github.com/alexisdacquay/immune-citadel-v4/pull/130)). The agent was not told about it: its only input is the Sentry event and the files the stack trace names.
+**First drill, 2026-11-08, on dev.** The only known 500, a deeply nested save ([#126](https://github.com/alexisdacquay/immune-citadel-v4/issues/126)), did not reproduce on Render, so a fault was planted on purpose ([#130](https://github.com/alexisdacquay/immune-citadel-v4/pull/130)). The agent was never told about #130: its only input is the Sentry event and the files the stack trace names. Before its fix, `PUT {"save":{"owe":"x"}}` answered 500 on dev; after it, 200.
 
 | Time (UTC) | Step |
 |---|---|
@@ -231,14 +237,16 @@ Checked three ways: [server/observability.test.js](../server/observability.test.
 | 16:53:22 | the agent reports on the issue |
 | 16:54:40 | it opens fix [#132](https://github.com/alexisdacquay/immune-citadel-v4/pull/132), with a regression test |
 | 17:02:00 | CI and the QA agent pass; the fix merges itself into `dev` |
-| 17:04:06 | live: dev's `/health` names the fix's merge `411f62b`; the same request answers 200 |
+| 17:04:06 | live, checked by hand: dev's `/health` names the fix's merge `411f62b`; the same request answers 200 (a merge by the bot starts no CI push run, so no `deployed` job ran for it) |
 | 17:29:17 | promoted to production in [#134](https://github.com/alexisdacquay/immune-citadel-v4/pull/134) |
 
 **11 minutes from the error to the fix live, no human in the loop.** The agent's whole fix ([diff](https://github.com/alexisdacquay/immune-citadel-v4/pull/132/files)):
 
 ```diff
+# server/index.js (the fix)
 -        log.debug({ owed: save.owe ? save.owe.filter(Boolean).length : 0 }, 'cards owed');
 +        log.debug({ owed: Array.isArray(save.owe) ? save.owe.filter(Boolean).length : 0 }, 'cards owed');
+# server/test.js (the regression test)
 +  assert.equal((await put(code, { save: { owe: 'not an array' } })).status, 200, 'non-array owe is not a server error');
 ```
 
@@ -246,6 +254,8 @@ Checked three ways: [server/observability.test.js](../server/observability.test.
 |---|---|---|
 | ![Issue #131, opened by the sentry bot, "automatically created by Sentry via Save API error"](screenshots/proof/oncall-1-issue-by-sentry.jpg) | ![The on-call agent's comments on #131: awake, then fix proposed in #132](screenshots/proof/oncall-2-agent-comments.jpg) | ![PR #132, merged by github-actions[bot] into dev](screenshots/proof/oncall-3-fix-pr-merged.jpg) |
 
-Screenshot 2 shows "alexisdacquay added a commit": that is the agent's own commit, pushed with the repository's deploy key, which GitHub displays under the owner's name. Both commits of #132 are authored by `immune-citadel on-call agent` ([80a9a1c](https://github.com/alexisdacquay/immune-citadel-v4/commit/80a9a1c), [1b2dc9b](https://github.com/alexisdacquay/immune-citadel-v4/commit/1b2dc9b)). It pushes with a deploy key because GitHub starts no CI for its own token's pushes.
+- "alexisdacquay added a commit" in screenshot 2 is the agent's own push: GitHub shows the deploy key's owner.
+- Both commits of #132 are authored by `immune-citadel on-call agent` ([80a9a1c](https://github.com/alexisdacquay/immune-citadel-v4/commit/80a9a1c), [1b2dc9b](https://github.com/alexisdacquay/immune-citadel-v4/commit/1b2dc9b)).
+- Why a deploy key: GitHub starts no CI for pushes made with its own token.
 
 How it works and its safeguards: [OPERATIONS, On-call agent](OPERATIONS.md#on-call-agent).

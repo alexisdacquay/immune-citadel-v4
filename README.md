@@ -16,15 +16,15 @@
 
 **Play it in the browser:** https://immune-citadel-v4.onrender.com (production) · https://immune-citadel-v4-dev.onrender.com (dev, the newest changes). Free, no account, on a laptop, a tablet or a phone held sideways.
 
-**Reviewers:** every course criterion, with the points claimed, screenshots and raw output, is in [docs/PROOF.md](docs/PROOF.md); the summary table is in [For reviewers](#for-reviewers).
+**Reviewers:** [proof of all 12 criteria, with screenshots](docs/PROOF.md).
 
 [The problem](#the-problem) · [What it does](#what-it-does) · [Screenshots](#screenshots) · [Run it](#run-it) · [Test it](#test-it) · [How it fits together](#how-it-fits-together) · [How it is built](#how-it-is-built) · [For reviewers](#for-reviewers)
 
 ## The problem
 
-Immunology is usually taught as a list of names to memorise: neutrophil, macrophage, killer T cell, antibody. Teens learn the names without understanding what each cell does, or why the body needs so many kinds.
-
-Immune Citadel teaches the same content through play. To win a level you must use each cell for what it is really good at, so the lesson is something you do, not something you read.
+- **Today:** immunology is taught as a list of names to memorise: neutrophil, macrophage, killer T cell, antibody.
+- **The gap:** teens learn the names without understanding what each cell does, or why the body needs so many kinds.
+- **Immune Citadel:** you win a level only by using each cell for what it really does, so the lesson is something you do, not something you read.
 
 ## What it does
 
@@ -97,7 +97,9 @@ Needs Docker.
 docker compose up --build
 ```
 
-The game is at http://localhost:8080 and the save API at http://localhost:8787, with its own Postgres. To also send save API errors to Sentry, copy `.env.example` to `.env` and fill in `SENTRY_DSN`; without it, Sentry is off.
+- Game: http://localhost:8080
+- Save API: http://localhost:8787, with its own Postgres
+- Optional: copy `.env.example` to `.env` and set `SENTRY_DSN` to send save API errors to Sentry
 
 ## Test it
 
@@ -111,9 +113,9 @@ npm run test:game   # the game suite, about 6 minutes
 
 | Command | What it checks |
 |---|---|
-| `npm test` | Unit tests (seconds): the save API, its privacy scrub, the deploy proof, the QA tool. Then integration tests on the Docker stack: a save goes game → API → Postgres and back; a save continues on a second browser; gameplay events reach their table. |
+| `npm test` | Unit tests (seconds): the save API, its privacy scrub, the deploy check, the QA agent's tool. Then it starts the Docker stack and runs the integration tests: a save goes game → API → Postgres and back; a save continues on a second browser; gameplay events reach their table. |
 | `npm run test:game` | Onboarding with real clicks, a bot playing every level, saves, challenges, Memory, the Field Guide, and phone and tablet layouts ([tools/test.js](tools/test.js), [tools/touch.js](tools/touch.js)). |
-| `node tools/balance.js 10 <levels> none` | Gameplay balance: an unseeded bot prints the vitality left per run. |
+| `node tools/balance.js <runs> <levels> none` | Gameplay balance, for example `10 1-18 none`: a bot plays and prints the vitality left per run. |
 
 Every pull request into `dev` also gets an independent QA agent: see [How it is built](#how-it-is-built).
 
@@ -133,7 +135,7 @@ Every Render setting lives in [render.yaml](render.yaml). Environments, releases
 
 ## How it is built
 
-A small AI agent team builds the game, with one human owner who sets priorities, playtests and approves every production release. The main Claude Code session plans, designs and builds; an independent DeepSeek agent checks every change in CI; a DeepSeek on-call agent answers alerts with a fix. Roles and the loop: [docs/TEAM.md](docs/TEAM.md).
+A small AI agent team builds the game, with one human owner who sets priorities, playtests and gives the written go for every production release. Four agents: the main Claude Code session builds; a DeepSeek QA agent checks every change in CI; a DeepSeek on-call agent answers alerts with a fix; short-lived Claude panels audit and propose designs. Roles and the loop: [docs/TEAM.md](docs/TEAM.md).
 
 **From issue to production:**
 
@@ -141,13 +143,10 @@ A small AI agent team builds the game, with one human owner who sets priorities,
 
 1. Work starts as a [GitHub issue](https://github.com/alexisdacquay/immune-citadel-v4/issues) with acceptance criteria and is built on its own branch.
 2. The pull request into `dev` carries a `## QA checks` section written by the builder: one closed question per thing the change could break, phrased so YES means right.
-3. CI runs four jobs on it:
-   - `test` and `game`: the suites above.
-   - `qa`, stage 1, **required**: an AI reviewer answers each yes/no check 3 times and the majority counts. Checks come from the pull request and from [test/past-failures.md](test/past-failures.md). A check marked `[changes]` must fail on the old code, which proves it tests the change.
-   - `qa-review`, stage 2, **advisory**. An open review against the issue's acceptance criteria. It comments and never blocks; every finding is fixed or answered before a promotion.
-4. GitHub merges the pull request into `dev` as soon as `test`, `game` and `qa` are green. No human merges into `dev`.
+3. CI runs `test`, `game` and `qa` (the QA agent, required) on it, plus `qa-review` (advisory). Details: [docs/TEAM.md](docs/TEAM.md).
+4. GitHub merges the pull request into `dev` as soon as `test`, `game` and `qa` are green. Auto-merge is armed through the owner's login, so GitHub shows the owner as the merger.
 5. Render deploys every commit on `dev`, and CI's `deployed` job proves that commit is live, then runs a read-only smoke and privacy check on it ([tools/smoke.js](tools/smoke.js)).
-6. Production moves only through a promotion: a pull request from `dev` into `main`, merged once the owner gives a written go.
+6. Production moves only through a promotion: a pull request from `dev` into `main`, merged only on the owner's written go, never automatically.
 
 Where to read more:
 
@@ -165,19 +164,19 @@ Where to read more:
 
 Immune Citadel is a project for the [DataTalksClub AI Dev Tools Zoomcamp](https://github.com/DataTalksClub/ai-dev-tools-zoomcamp/tree/main/project). Each row links to its proof in [docs/PROOF.md](docs/PROOF.md): the rubric's words, screenshots, raw output, links that open without a login.
 
-| # | Criterion | Points | Proof in one line (screenshots and raw output behind each link) |
+| # | Criterion | Points | Proof (screenshots and raw output) |
 |---|---|---|---|
-| 1 | Problem description | 2 / 2 | [Proof](docs/PROOF.md#1-problem-description): README: the problem, what the game does, how it behaves |
-| 2 | Product specification | 2 / 2 | [Proof](docs/PROOF.md#2-product-specification): SPEC.md; public issues with acceptance criteria; agents open, work and judge issues and pull requests |
-| 3 | Agent team | 2 / 2 | [Proof](docs/PROOF.md#3-agent-team): 4 agents with roles and limits, one loop; their work is visible on every pull request |
-| 4 | Context management | 2 / 2 | [Proof](docs/PROOF.md#4-context-management): AGENTS.md points to STATUS, SPEC, TEAM, OPERATIONS |
-| 5 | Application | 2 / 2 | [Proof](docs/PROOF.md#5-application): one command; a click in the browser lands as a row in Postgres |
-| 6 | Testing | 2 / 2 | [Proof](docs/PROOF.md#6-testing): `npm test`: 46 unit and 4 integration tests pass on a fresh clone |
-| 7 | Containerization | 2 / 2 | [Proof](docs/PROOF.md#7-containerization): `docker compose up --build`: game, API and Postgres, all healthy |
-| 8 | Deployment | 2 / 2 | [Proof](docs/PROOF.md#8-deployment): [play it](https://immune-citadel-v4.onrender.com); `/health` and `/version.txt` name the live commit |
-| 9 | CI/CD | 3 / 3 | [Proof](docs/PROOF.md#9-cicd): CI on every pull request; CD to dev on every merge; production only by a pull request merged by hand |
-| 10 | Observability | 2 / 2 | [Proof](docs/PROOF.md#10-observability): one save: trace, log line and metric under one trace ID, in Sentry's UI |
-| 11 | Alerting on user impact | 1 / 1 | [Proof](docs/PROOF.md#11-alerting-on-user-impact): a failed save emails the owner and opens a GitHub issue |
-| 12 | On-call agent | 2 / 2 | [Proof](docs/PROOF.md#12-on-call-agent): a real alert on a deliberately planted fault: the agent fixed it, live on dev 11 minutes later, no human |
+| 1 | Problem description | 2 / 2 | [Proof](docs/PROOF.md#1-problem-description) |
+| 2 | Product specification | 2 / 2 | [Proof](docs/PROOF.md#2-product-specification) |
+| 3 | Agent team | 2 / 2 | [Proof](docs/PROOF.md#3-agent-team) |
+| 4 | Context management | 2 / 2 | [Proof](docs/PROOF.md#4-context-management) |
+| 5 | Application | 2 / 2 | [Proof](docs/PROOF.md#5-application) |
+| 6 | Testing | 2 / 2 | [Proof](docs/PROOF.md#6-testing) |
+| 7 | Containerization | 2 / 2 | [Proof](docs/PROOF.md#7-containerization) |
+| 8 | Deployment | 2 / 2 | [Proof](docs/PROOF.md#8-deployment) |
+| 9 | CI/CD | 3 / 3 | [Proof](docs/PROOF.md#9-cicd) |
+| 10 | Observability | 2 / 2 | [Proof](docs/PROOF.md#10-observability) |
+| 11 | Alerting on user impact | 1 / 1 | [Proof](docs/PROOF.md#11-alerting-on-user-impact) |
+| 12 | On-call agent | 2 / 2 | [Proof](docs/PROOF.md#12-on-call-agent) |
 
 **Claimed: 24 of 24 points.**

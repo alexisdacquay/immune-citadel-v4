@@ -2,7 +2,7 @@
 
 Where the project stands and what comes next, on one page. It is updated at the end of every step; the details live in the linked plans, and the backlog is [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues).
 
-Last update: 2026-11-08, about 17:10 UTC: production runs the launch release `ee4783d` ([#129](https://github.com/alexisdacquay/immune-citadel-v4/pull/129)), and the on-call agent's first drill answered a real alert with a fix live on `dev` in 11 minutes ([OPERATIONS, On-call agent](OPERATIONS.md#on-call-agent)).
+Last update: 2026-11-08, about 19:00 UTC: production runs `d3f7a43` ([#134](https://github.com/alexisdacquay/immune-citadel-v4/pull/134), the on-call drill record) on top of the launch release `ee4783d` ([#129](https://github.com/alexisdacquay/immune-citadel-v4/pull/129)); proof of every course criterion: [PROOF.md](PROOF.md).
 
 ## At a glance
 
@@ -16,7 +16,7 @@ Last update: 2026-11-08, about 17:10 UTC: production runs the launch release `ee
 | Environment | Commit | What it has |
 |---|---|---|
 | Production (`main`) | `d3f7a43` | what each promotion brought: [Promotions](#promotions) |
-| Dev (`dev`) | the head of `dev`: production plus every pull request merged since #113 | |
+| Dev (`dev`) | the head of `dev`: production plus every pull request merged since #134 | |
 
 ## Promotions
 
@@ -66,15 +66,14 @@ In the order the team loop uses: `P0` first, then the owner's latest priority, t
 | 2 | Finish #70 on `dev`: land #90 (the `observed` CI job) | the screenshots of one real dev save in Sentry are in [OPERATIONS, Follow one save](OPERATIONS.md#follow-one-save) (2026-11-08), and `SENTRY_DSN` is back on the production API; #90 would repeat the check after every deploy |
 | 3 | QA: count real catches and false alarms of both stages on each pull request until 2026-11-21, then decide what changes | set on 2026-11-07; stage 1 in its new form has run in CI on every pull request into `dev` since [#93](https://github.com/alexisdacquay/immune-citadel-v4/pull/93) |
 | 4 | P1 backlog: a backup model for QA (#83), body map zones in reading order (#78), trading-card design (#79, mock-ups first, the owner picks) | the owner's P1s that can start without the owner |
-| 5 | P2 backlog: a save whose `owe` is not a list blocks that code's cloud sync ([#101](https://github.com/alexisdacquay/immune-citadel-v4/issues/101); #102, the save code in our log line, is fixed on `dev` and ships with the next promotion); an unlocked level looks cleared on the body map (#84, a bug), more enemy variety (#80), game content out of `index.html` (#17), Chapter 2 (#11) | planned |
+| 5 | P2 backlog: a save whose `owe` is not a list blocks that code's cloud sync ([#101](https://github.com/alexisdacquay/immune-citadel-v4/issues/101)); an unlocked level looks cleared on the body map (#84, a bug), more enemy variety (#80), game content out of `index.html` (#17), Chapter 2 (#11) | planned |
 
 ## Waiting on the owner
 
 | Item | Why it waits |
 |---|---|
 | Playtest the campaign ([#18](https://github.com/alexisdacquay/immune-citadel-v4/issues/18)) | the balance bot cannot judge fun, clarity or repetition |
-| Sign the DPIA update ([#117](https://github.com/alexisdacquay/immune-citadel-v4/pull/117)) | its rows describe today's changes; only the owner signs |
-| Approve the next promotion | only the owner approves a merge into `main` |
+| Approve the next promotion | the owner's written go, given each time or as the standing go of 2026-11-08 |
 
 ## Parked by the owner
 

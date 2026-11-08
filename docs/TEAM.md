@@ -18,7 +18,7 @@ Immune Citadel v4 is built by AI agents and one human owner, Alexis Dacquay. Thi
 
 ## How QA works: two stages
 
-![QA in two stages on a pull request into dev. The builder's QA checks and the past failures in the changed files feed stage 1, the required job qa: closed YES or NO questions at low effort, 3 votes each. GitHub auto-merges into dev once test, game and qa are green; Render deploys dev and the deployed job proves the new commit is live; only the owner merges dev into main. Stage 2, the advisory job qa-review, runs after test and game pass and only comments; its findings are fixed or answered before a promotion](diagrams/qa-stages.svg)
+![QA in two stages on a pull request into dev. The builder's QA checks and the past failures in the changed files feed stage 1, the required job qa: closed YES or NO questions at low effort, 3 votes each. GitHub auto-merges into dev once test, game and qa are green; Render deploys dev and the deployed job proves the new commit is live; dev reaches main only on the owner's written go. Stage 2, the advisory job qa-review, runs after test and game pass and only comments; its findings are fixed or answered before a promotion](diagrams/qa-stages.svg)
 
 | | Stage 1: `qa` | Stage 2: `qa-review` |
 |---|---|---|

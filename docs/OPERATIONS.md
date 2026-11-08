@@ -252,7 +252,7 @@ D=$(mktemp -d) && ssh-keygen -q -t ed25519 -N "" -C "immune-citadel-v4 on-call a
 | 17:02:00 | `test`, `game` and `qa` green (and the advisory review); auto-merge merges it into `dev` | PR #132 |
 | 17:04:06 | `dev` serves the fix (`411f62b`); the same crafted save answers 200 | `/health` on the dev API |
 
-The merge was made with GitHub's own token, so `dev`'s push run (and its `deployed` proof) did not start for `411f62b`; Render deployed it, and the next merge into `dev` runs CI again. The planted line stays, now guarded, and reaches production with the next promotion as harmless debug logging.
+The merge was made with GitHub's own token, so `dev`'s push run (and its `deployed` proof) did not start for `411f62b`; Render deployed it, and the next merge into `dev` runs CI again. The planted line stays, now guarded, and reached production in #134 as harmless debug logging.
 
 ## Alert: save API error
 
