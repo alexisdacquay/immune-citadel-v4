@@ -466,19 +466,20 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 </style>
 <script>
 // Sentry: game crashes and load speed (docs/OBSERVABILITY-PLAN.md, step 3). Only on the dev and production sites, never locally or in tests.
-// Children's data stays home: no IP, cookies, headers or replay, and any save code is replaced before a report leaves the browser.
+// Children's data stays home: no IP, cookies, headers, replay, user agent or session tracking, and any save code is replaced before a report leaves the browser.
 // If the script is blocked (ad blockers, school filters), the game runs exactly the same.
 (() => {
   const env = { 'immune-citadel-v4.onrender.com': 'production', 'immune-citadel-v4-dev.onrender.com': 'dev' }[location.hostname];
   if (!env) return;
-  const scrub = x => JSON.parse(JSON.stringify(x).replace(/[A-HJ-NP-Z2-9]{16}/g, ':code'));
+  const scrub = x => JSON.parse(JSON.stringify(x, (k, v) => (/user.?agent/i.test(k) ? undefined : v)).replace(/[A-HJ-NP-Z2-9]{16}/g, ':code')); // spans carry user_agent.original (#94)
   const s = document.createElement('script');
   s.src = 'https://browser.sentry-cdn.com/11.9.0/bundle.tracing.min.js';
   s.integrity = 'sha384-cpMO6Dm2uco5jrSeSdsOuINfaahIkSnKggH/HUa3fvjv4pqg0Ps+c7LPK6/ZF1wL'; s.crossOrigin = 'anonymous';
   s.onload = () => fetch('/version.txt').then(r => (r.ok ? r.text() : '')).catch(() => '').then(v => Sentry.init({
     dsn: 'https://8a64357620418627c0ad9b402c812e8e@o4512385980235776.ingest.de.sentry.io/4512386038628432', // public by design: it only lets a browser send reports
     environment: env, release: v.trim() || undefined,
-    integrations: [Sentry.browserTracingIntegration({ shouldCreateSpanForRequest: u => !u.includes('/api/play') })], tracesSampleRate: 1, // every page load: a few thousand a month; gameplay events never become spans
+    integrations: d => [...d.filter(i => !['BrowserSession', 'CultureContext'].includes(i.name)), // sessions carry the user agent, culture the time zone and locale (#94)
+      Sentry.browserTracingIntegration({ shouldCreateSpanForRequest: u => !u.includes('/api/play') })], tracesSampleRate: 1, // every page load: a few thousand a month; gameplay events never become spans
     dataCollection: { userInfo: false, cookies: false, httpHeaders: false, httpBodies: [], urlQueryParams: false },
     beforeSend: scrub, beforeSendSpan: scrub, beforeBreadcrumb: b => (/\/api\/play/.test(JSON.stringify(b.data || {})) ? null : scrub(b)), // no third party sees play
   }));
