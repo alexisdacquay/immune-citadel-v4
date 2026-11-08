@@ -1,6 +1,6 @@
 # Product specification
 
-What the game must do for its players, written as player journeys with acceptance criteria. Each criterion below describes the game as it is: checked against `index.html` on 2026-11-08, the same game file on `dev` and in production since the promotion of 2026-11-07. What is known and not built yet is listed at the end, under [Not built yet](#not-built-yet).
+What the game must do for its players, written as player journeys with acceptance criteria. Each criterion below describes the game as it is: checked against `index.html` on 2026-11-08, the same game file on `dev` and in production since the promotion of 2026-11-08 (fonts #108, smoke #107). What is known and not built yet is listed at the end, under [Not built yet](#not-built-yet).
 
 ![A level in play: immune cells grown beside the infection route, the vitality, ATP and wave counters at the top left, the game controls at the top right, the hero and ability buttons at the bottom left](screenshots/play.jpg)
 

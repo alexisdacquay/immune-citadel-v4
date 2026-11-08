@@ -56,7 +56,7 @@ services:
     repo: https://github.com/alexisdacquay/immune-citadel-v4
     branch: main
     autoDeployTrigger: commit
-    buildCommand: mkdir -p public && cp index.html public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt
+    buildCommand: mkdir -p public && cp index.html public/ && { [ ! -d fonts ] || cp -r fonts public/; } && printf %s "$RENDER_GIT_COMMIT" > public/version.txt # shortcut: the fonts guard lets main build before fonts/ reaches it; drop it after the next promotion
     staticPublishPath: public
     envVars:
       - key: SKIP_INSTALL_DEPS
@@ -95,7 +95,7 @@ services:
     repo: https://github.com/alexisdacquay/immune-citadel-v4
     branch: dev
     autoDeployTrigger: commit
-    buildCommand: mkdir -p public && cp index.html public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt
+    buildCommand: mkdir -p public && cp index.html public/ && { [ ! -d fonts ] || cp -r fonts public/; } && printf %s "$RENDER_GIT_COMMIT" > public/version.txt # shortcut: the fonts guard lets main build before fonts/ reaches it; drop it after the next promotion
     staticPublishPath: public
     envVars:
       - key: SKIP_INSTALL_DEPS

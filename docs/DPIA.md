@@ -1,6 +1,6 @@
 # Data protection impact assessment
 
-Status: **signed by the owner on 2026-11-07**, and **re-signed the same day** for the save and load request records that now reach Sentry (rows marked *new*) (sign-off below); gameplay events may reach production at step 6. Dev runs them first: it has no real players, only the owner and the team, and its data proves the design this assessment describes. Headings follow the ICO template ([Children's Code, standard 2](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/childrens-information/childrens-code-guidance-and-resources/age-appropriate-design-a-code-of-practice-for-online-services/2-data-protection-impact-assessments/)). Review it when anything that leaves the browser changes.
+Status: **signed by the owner on 2026-11-07**, **re-signed the same day** for the save and load request records that now reach Sentry (rows marked *new*), and **re-signed on 2026-11-08** for three facts that changed (rows marked *2026-11-08*): gameplay events are live in production since 2026-11-07, each environment (production, dev) has its own database, and the game's fonts come from its own site instead of Google (sign-off below). Headings follow the ICO template ([Children's Code, standard 2](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/childrens-information/childrens-code-guidance-and-resources/age-appropriate-design-a-code-of-practice-for-online-services/2-data-protection-impact-assessments/)). Review it when anything that leaves the browser changes.
 
 ## The service
 
@@ -46,8 +46,9 @@ Status: **signed by the owner on 2026-11-07**, and **re-signed the same day** fo
 |---|---|---|
 | a sitting linked to a known child (e.g. a teacher watching a class) | date only, no time; page id dies with the page | low |
 | free text or identifiers smuggled into the table | server accepts only fixed values and formats ([server/play.js](../server/play.js)) | low |
-| the events table fills the shared disk and takes saves down | 20 events a request, 2,000 rows a day per server, 13-month deletion | low |
+| the events table fills its database disk and takes saves down | 20 events a request, 2,000 rows a day per server, 13-month deletion; *2026-11-08* each environment has its own database, so dev cannot fill production's | low |
 | play data seen by a third party | `/api/play` excluded from Sentry in the browser and the server; tested | low |
+| *2026-11-08* loading the game tells another company the child's IP address and browser identifier | fonts served by the game's own site (Google Fonts removed, [#99](https://github.com/alexisdacquay/immune-citadel-v4/issues/99)); the only other company the browser contacts is Sentry: its script comes from Sentry's CDN (run by Fastly, worldwide) and its reports go to Sentry in the EU; both see the IP address and browser identifier in transit, Sentry is set never to store the IP, and the game removes the browser identifier from what it sends | low |
 | *new* a child's device recognised by its browser identifier (user agent) in Sentry | removed by the server before anything leaves, in errors, traces, logs and metrics; tested | low |
 | strict member states (e.g. DE) do not accept the exemptions | stats switch and GPC honoured | medium, accepted by the owner |
 | saves never expire | none yet | open: decide a retention for saves |
@@ -58,3 +59,4 @@ Status: **signed by the owner on 2026-11-07**, and **re-signed the same day** fo
 |---|---|---|
 | owner | Alexis Dacquay | 2026-11-07 |
 | owner, re-signing for the *new* rows | Alexis Dacquay | 2026-11-07 |
+| owner, re-signing for the *2026-11-08* rows | Alexis Dacquay | 2026-11-08 |

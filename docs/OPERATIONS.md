@@ -12,7 +12,7 @@ How Immune Citadel runs: where it is deployed, how a change reaches players, wha
 | Dev | https://immune-citadel-v4-dev.onrender.com | https://immune-citadel-v4-api-dev.onrender.com | every commit on `dev` |
 | Local | http://localhost:8080 | http://localhost:8787 | `docker compose up` (or `npm start`) |
 
-**Which commit is live:** `GET /health` on a save API returns it (`{"ok":true,"commit":"…"}`), and `/version.txt` on a game site shows it. Render waits for `/health` to answer before a new API deploy takes traffic, so a broken build never does. Production was last promoted on 2026-11-07 ([PR #73](https://github.com/alexisdacquay/immune-citadel-v4/pull/73), commit `db0ae14`).
+**Which commit is live:** `GET /health` on a save API returns it (`{"ok":true,"commit":"…"}`), and `/version.txt` on a game site shows it. Render waits for `/health` to answer before a new API deploy takes traffic, so a broken build never does. Production was last promoted on 2026-11-08 (fonts #108, smoke #107); at that point dev and production ran the same code.
 
 ### What runs on Render
 
@@ -33,16 +33,16 @@ Locally, `docker compose up` ([compose.yaml](../compose.yaml)) runs the same thr
 
 [render.yaml](../render.yaml) declares all six resources, and Render applies it through Blueprint `exs-dbndeu7f3r2c738bllag`. Change a plan or a setting there, never in the dashboard: Render's API refuses a Free-to-paid change on a service, a Blueprint sync does not. The first sync (2026-11-06) adopted the existing services, moved both APIs from Free to Starter, and grew the dev database disk to 15 GB like production's.
 
-As last recorded (2026-11-07), the Blueprint reads `dev` with auto-sync off, so a change to `render.yaml` reaches Render only when someone plans and approves a sync. The plan was to point it at `main` with auto-sync on once `render.yaml` reached `main`, so that only the owner's merge changes infrastructure. `render.yaml` reached `main` with the 2026-11-07 promotion; that switch is not recorded as done.
+Since the promotion of 2026-11-08, the Blueprint reads `main` with auto-sync on, so a change to `render.yaml` reaches Render only when the owner promotes it. The last sync from `dev`, at about 07:58 UTC on 2026-11-08, made both game sites copy `fonts/`.
 
 Each database accepts outside connections only from an IP allowlist holding the owner's address. That address is personal, so it is set in Render only, never in `render.yaml` or anywhere in this repository (a Blueprint sync keeps a list the file leaves out).
 
 | Service | Build | Then |
 |---|---|---|
-| Game site | `mkdir -p public && cp index.html public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt` | publishes `public`, with `SKIP_INSTALL_DEPS=true` |
+| Game site | `mkdir -p public && cp index.html public/ && { [ ! -d fonts ] || cp -r fonts public/; } && printf %s "$RENDER_GIT_COMMIT" > public/version.txt` (the game and its self-hosted fonts) | publishes `public`, with `SKIP_INSTALL_DEPS=true` |
 | Save API | `cd server && npm ci --omit=dev` | starts `cd server && exec npm start` |
 
-Why: the site publishes only the game (Render's default would publish the whole checkout, server code and `node_modules` included), and `/version.txt` names its commit. With `exec`, Render's stop signal reaches npm, which passes it to the API instead of stopping at a shell. `exec` is in `render.yaml` on `dev` and reaches `main` at the next promotion; whether the running services already use it is not recorded.
+Why: the site publishes only the game (Render's default would publish the whole checkout, server code and `node_modules` included), and `/version.txt` names its commit. With `exec`, Render's stop signal reaches npm, which passes it to the API instead of stopping at a shell. `exec` is in `render.yaml` on both branches; whether the running services use it is not checked. The guard `{ [ ! -d fonts ] || cp -r fonts public/; }` only let the build pass before `fonts/` reached `main`; a follow-up into `dev` drops it.
 
 Save API variables: `SENTRY_DSN` (a secret set in Render: Sentry → the project → Client Keys; without it, Sentry is off), `SENTRY_ENVIRONMENT`, `DB_SCHEMA`, `ALLOWED_ORIGINS`, `DATABASE_URL` (from the database) and `NODE_VERSION`.
 
@@ -67,10 +67,10 @@ A change reaches players in five moves:
 | QA | `qa` (required) and `qa-review` (advisory) on every pull request into `dev`: [QA in two stages](#qa-in-two-stages) | [PR #92](https://github.com/alexisdacquay/immune-citadel-v4/pull/92) |
 | Auto-merge | armed with a person's token, never `GITHUB_TOKEN`: a merge by `GITHUB_TOKEN` starts no workflows, so there would be no deploy proof. The branch need not be up to date with `dev`: CI runs again on `dev` after every merge, and a red `dev` blocks the next promotion | [PR #45](https://github.com/alexisdacquay/immune-citadel-v4/pull/45) |
 | CD | Render's auto-deploy trigger is "on commit" on all four services; only green pull requests can put a commit on `dev` or `main` | [PIPELINE-PLAN.md](PIPELINE-PLAN.md), step 3 |
-| Deploy proof | CI job `deployed` on each push to `dev` or `main`: [tools/verify-deploy.js](../tools/verify-deploy.js) waits until the API's `/health` and the site's `/version.txt` serve the pushed commit, else the run goes red after 15 min (if a newer push arrives first, that push's own run takes over) | dev: [run 42221746028](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42221746028), live 58 s after the merge; production: [run 42388716983](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42388716983), live 73 s after the merge |
-| Promotion | [promotion.yml](../.github/workflows/promotion.yml): `dev-green` waits for `dev`'s own CI run on the same commit, deploy proof included, and fails unless it is green; then the owner merges | [PR #73](https://github.com/alexisdacquay/immune-citadel-v4/pull/73), 2026-11-07; [PR #96](https://github.com/alexisdacquay/immune-citadel-v4/pull/96), 2026-11-08 |
+| Deploy proof | CI job `deployed` on each push to `dev` or `main`: [tools/verify-deploy.js](../tools/verify-deploy.js) waits until the API's `/health` and the site's `/version.txt` serve the pushed commit, else the run goes red after 15 min (if a newer push arrives first, that push's own run takes over). Then [tools/smoke.js](../tools/smoke.js) plays the live site in Chromium, read-only (Sentry and the page's `/api/` calls are answered locally, nothing is sent or saved), and goes red on a wrong commit, an error, or a save code, user agent, an `ip_address` field, headers or play data in a Sentry payload, or a crash report that does not tell Sentry to drop the IP (`infer_ip` not `never`) | dev: [run 42221746028](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42221746028), live 58 s after the merge; production: [run 42388716983](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42388716983), live 73 s after the merge |
+| Promotion | [promotion.yml](../.github/workflows/promotion.yml): `dev-green` waits for `dev`'s own CI run on the same commit, deploy proof included, and fails unless it is green; then the owner merges | [PR #73](https://github.com/alexisdacquay/immune-citadel-v4/pull/73), 2026-11-07; [PR #96](https://github.com/alexisdacquay/immune-citadel-v4/pull/96) and [PR #98](https://github.com/alexisdacquay/immune-citadel-v4/pull/98), 2026-11-08 |
 
-**Production is the owner's.** Agents never merge, or arm auto-merge on, a pull request into `main`. This is a team rule ([AGENTS.md](../AGENTS.md)); GitHub does not enforce it. The one exception so far: the owner authorised the orchestrator in writing to merge PR #96 on 2026-11-08, once the pre-promotion mega test was green.
+**Production is the owner's.** Agents never merge, or arm auto-merge on, a pull request into `main`. This is a team rule ([AGENTS.md](../AGENTS.md)); GitHub does not enforce it. The exceptions so far, each authorised by the owner in writing: the orchestrator merged PR #96 on 2026-11-08 once the pre-promotion mega test was green, and the promotion of 2026-11-08 (fonts #108, smoke #107), approved in chat ("ok") after a pre-promotion check.
 
 ### QA in two stages
 
@@ -101,7 +101,7 @@ Both stages use the model `deepseek-flash` and the repository secret `DEEPSEEK_A
 - `[stays]`: something that must still hold. It must be YES on the new code.
 - Phrase each question so YES means right, about behaviour (never "does X appear"), and name the files that hold the answer: the model sees only those files, not library defaults. More guidance: [AGENTS.md](../AGENTS.md), **Test plan**.
 
-**Past failures.** [test/past-failures.md](../test/past-failures.md) turns every failure that reached a player, `dev` or a review into a closed question; today 15 failures as 17 questions. Each was proven on the real model when added: NO on the code just before its fix, YES after, 3 runs out of 3. A bug fix adds its line in the same pull request; because stage 1 reads the file from the base branch, a new line counts from the next pull request.
+**Past failures.** [test/past-failures.md](../test/past-failures.md) turns every failure that reached a player, `dev` or a review into a closed question; today 18 failures as 20 questions. Each was proven on the real model when added: NO on the code just before its fix, YES after, 3 runs out of 3. A bug fix adds its line in the same pull request; because stage 1 reads the file from the base branch, a new line counts from the next pull request.
 
 **Proof.** Local runs of stage 1 with the real model, 2026-11-07 ([PR #92](https://github.com/alexisdacquay/immune-citadel-v4/pull/92)):
 
@@ -112,8 +112,9 @@ Both stages use the model `deepseek-flash` and the repository secret `DEEPSEEK_A
 | PR #87 | PASS, 2 of 2; the old 5-minute timeout was answered NO | 4 s |
 | PR #92 itself | PASS, 9 of 9 | 14 s |
 
+In CI: PR #92's own `qa` job still ran the previous judge, so stage 1 in this form first ran on [PR #93](https://github.com/alexisdacquay/immune-citadel-v4/pull/93); it has since run on #95, #97, #107 and #108.
+
 **Not yet seen, and known gaps:**
-- On 2026-11-08, when PR #92 merged, stage 1 in this form had not yet run in CI: #92's own `qa` job ran the previous judge from `dev`. Its first CI run is the next pull request's.
 - GitHub reads `ci.yml` from the pull request, so a pull request that edits `ci.yml` can change its own `qa` job. Not fixed yet.
 
 ### Branch rules
@@ -143,7 +144,7 @@ GitHub rulesets on both branches; nobody bypasses them, and neither branch accep
 | a game site is down | Better Stack: HEAD on both sites every 5 min ([observability/betterstack.js](../observability/betterstack.js)) | email |
 | a save API is down | Better Stack: GET `/health` on both APIs every 5 min (monitors 5200741, 5200742) | email; [runbook](#alert-api-down) |
 | the game crashes on a player's device (dev and production sites) | Sentry, project `immune-citadel-game` | email when an issue is new or returns ([observability/sentry-game-alert.json](../observability/sentry-game-alert.json)) |
-| a save or load fails with a server error | Sentry alert: on dev today; on production once its `SENTRY_DSN` is set again | email; [runbook](#alert-save-api-error) |
+| a save or load fails with a server error | Sentry alert: on dev and production (the rule has no environment filter) | email; [runbook](#alert-save-api-error) |
 | CI never runs after a merge, or a dashboard rollback leaves an old commit live | not covered | accepted: [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md#open) |
 
 ### Rollback
@@ -161,8 +162,8 @@ Either of these:
 | Signal | Dev | Production |
 |---|---|---|
 | game errors and load speed (Sentry) | on | on since the 2026-11-07 promotion; no production test error recorded |
-| save API errors and traces (Sentry) | on | off: `SENTRY_DSN` removed on 2026-11-07 until the browser identifier fix ([#70](https://github.com/alexisdacquay/immune-citadel-v4/issues/70)) reaches production |
-| save log lines and metric in Sentry (#70) | on since PR #82 (2026-11-07) | not yet: needs the next promotion and `SENTRY_DSN` |
+| save API errors and traces (Sentry) | on | on since 2026-11-08: `SENTRY_DSN` set; at 07:47 UTC one load gave a trace reading the production database |
+| save log lines and metric in Sentry (#70) | on since PR #82 (2026-11-07) | on since 2026-11-08: a log line with environment `production` at 07:47 UTC; the metric not checked separately |
 | gameplay events (own Postgres) | on | the code is on `main` since the 2026-11-07 promotion; no production read is recorded |
 | uptime (Better Stack) and deploy proof (`deployed`) | on | on |
 

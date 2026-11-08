@@ -23,7 +23,7 @@ services:
 
   web:
     image: nginx:alpine
-    volumes: [./index.html:/usr/share/nginx/html/index.html:ro]
+    volumes: [./index.html:/usr/share/nginx/html/index.html:ro, ./fonts:/usr/share/nginx/html/fonts:ro]
     ports: ["8080:80"]
     healthcheck: { test: wget -qO- http://localhost/ >/dev/null, interval: 2s, retries: 30 }
     depends_on: { api: { condition: service_healthy } }
