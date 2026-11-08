@@ -26,7 +26,8 @@ async function startApi(dsn) {
   const api = spawn(process.execPath, ['index.js'], { cwd: __dirname, env });
   const out = { text: '' }; api.stdout.on('data', c => out.text += c); api.stderr.on('data', c => out.text += c);
   const exited = new Promise(r => api.on('exit', code => r(code)));
-  for (let i = 0; i < 100 && !out.text.includes('save API on'); i++) await new Promise(r => setTimeout(r, 50));
+  for (let i = 0; i < 300 && !out.text.includes('save API on'); i++) await new Promise(r => setTimeout(r, 50)); // up to 15 s: a slow CI runner took over 5 s (PR #95)
+  if (!out.text.includes('save API on')) { api.kill('SIGKILL'); throw new Error('the API did not start: ' + out.text.slice(-500)); }
   return { api, port, out, exited, base: `http://127.0.0.1:${port}` };
 }
 const lines = text => text.split('\n').filter(l => l.startsWith('{')).map(l => JSON.parse(l));
