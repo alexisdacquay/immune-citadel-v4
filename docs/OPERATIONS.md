@@ -241,7 +241,20 @@ When a Sentry alert fires, an agent wakes and proposes the fix, with no human in
 D=$(mktemp -d) && ssh-keygen -q -t ed25519 -N "" -C "immune-citadel-v4 on-call agent" -f "$D/k" && gh repo deploy-key add "$D/k.pub" -R alexisdacquay/immune-citadel-v4 --allow-write --title "on-call agent" && gh secret set ONCALL_DEPLOY_KEY -R alexisdacquay/immune-citadel-v4 < "$D/k" && gh api -X PUT repos/alexisdacquay/immune-citadel-v4/actions/permissions/workflow -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true && rm -rf "$D" && echo "on-call key set"
 ```
 
-**Status (2026-11-08):** built and merged into `dev` ([#118](https://github.com/alexisdacquay/immune-citadel-v4/pull/118), [#124](https://github.com/alexisdacquay/immune-citadel-v4/pull/124)). A dry run of its model step on the 500 that today's audit reproduced on a local Node 22 stack (a deeply nested save, [#126](https://github.com/alexisdacquay/immune-citadel-v4/issues/126)): it diagnosed the missing depth limit, proposed an iterative depth check that answers 400, with a regression test, and the server tests passed. The first real drill, a real alert on dev answered by the agent's pull request, comes after the owner's setup and the promotion, and is recorded here.
+**First drill, 2026-11-08: from an alert to a fix live on `dev` in 11 minutes, with no human in the loop.** The save API had no 500 that real traffic could trigger: the nested-save 500 (#126) does not reproduce on Render. So the drill planted a real defect on `dev`, as #27's spec asks: a debug line that counts the cards a save owes with `save.owe.filter(...)`, which throws when `owe` is not a list ([PR #130](https://github.com/alexisdacquay/immune-citadel-v4/pull/130), labelled a drill). The unit tests sent no `owe`, so CI passed it.
+
+| Time (UTC) | What happened | Proof |
+|---|---|---|
+| 16:52:52 | one crafted save on `dev`, `{"save":{"owe":"x"}}`, answers 500; Sentry opens IMMUNE-CITADEL-API-2, `TypeError: save.owe.filter is not a function` | Sentry issue, resolved with a comment |
+| 16:53:05 | the save API alert fires: it emails the owner and asks Sentry's GitHub integration for an issue | alert 1464000 |
+| 16:53:06 | `sentry[bot]` opens [#131](https://github.com/alexisdacquay/immune-citadel-v4/issues/131), labelled `incident` | the issue |
+| 16:53:13 | the On-call workflow wakes on it, running the agent from `main` | [run 42502143601](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42502143601) |
+| 16:53:22 | the agent reports on #131: awake, reading `server/index.js` and `server/test.js` | comment on #131 |
+| 16:54:40 | first attempt: the cause (it calls `.filter` on untrusted input), an `Array.isArray` guard and a regression test; unit tests green, sealed; it opens [PR #132](https://github.com/alexisdacquay/immune-citadel-v4/pull/132) and pushes with the deploy key, so CI starts | PR #132 |
+| 17:02:00 | `test`, `game` and `qa` green (and the advisory review); auto-merge merges it into `dev` | PR #132 |
+| 17:04:06 | `dev` serves the fix (`411f62b`); the same crafted save answers 200 | `/health` on the dev API |
+
+The merge was made with GitHub's own token, so `dev`'s push run (and its `deployed` proof) did not start for `411f62b`; Render deployed it, and the next merge into `dev` runs CI again. The planted line stays, now guarded, and reaches production with the next promotion as harmless debug logging.
 
 ## Alert: save API error
 
