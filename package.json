@@ -5,7 +5,7 @@
     "postinstall": "npm ci --prefix server && playwright install chromium",
     "start": "docker compose up --build",
     "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "node --test --test-timeout=30000 server/test.js server/telemetry.test.js server/sentry.test.js server/observability.test.js test/config.test.js test/verify-deploy.test.js test/smoke.test.js test/qa.test.js test/oncall.test.js",
+    "test:unit": "node --test --test-timeout=30000 server/test.js server/telemetry.test.js server/sentry.test.js server/observability.test.js test/config.test.js test/verify-deploy.test.js test/smoke.test.js test/qa.test.js test/oncall.test.js test/verify-sentry.test.js",
     "test:integration": "docker compose up -d --build --wait db api web && node --test test/integration.test.js",
     "test:game": "node tools/test.js shots/game"
   },

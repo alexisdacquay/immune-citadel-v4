@@ -122,6 +122,7 @@ GitHub rulesets on both branches; nobody bypasses them, and neither branch accep
 | a save API is down | Better Stack: GET `/health` on both APIs every 5 min (monitors 5200741, 5200742) | email; [runbook](#alert-api-down) |
 | the game crashes on a player's device (dev and production sites) | Sentry, project `immune-citadel-game` | email when an issue is new or returns ([observability/sentry-game-alert.json](../observability/sentry-game-alert.json)), and again when it first reaches production ([observability/sentry-game-alert-production.json](../observability/sentry-game-alert-production.json)) |
 | a save or load fails with a server error | Sentry alert: on dev and production (the rule has no environment filter) | email; [runbook](#alert-save-api-error) |
+| monitoring stops (a missing `SENTRY_DSN`, a broken SDK) while Sentry shows nothing | CI's `deployed` job: one save under a known trace ID must reach Sentry as a trace, a log line and a metric within 5 minutes ([tools/verify-sentry.js](../tools/verify-sentry.js)) | red run; GitHub emails the owner |
 | CI never runs after a merge, or a dashboard rollback leaves an old commit live | not covered | accepted: [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md#open) |
 
 ### Rollback
