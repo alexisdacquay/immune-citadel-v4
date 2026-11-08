@@ -39,7 +39,7 @@ Each database accepts outside connections only from an IP allowlist holding the 
 
 | Service | Build | Then |
 |---|---|---|
-| Game site | `mkdir -p public && cp index.html public/ && printf %s "$RENDER_GIT_COMMIT" > public/version.txt` | publishes `public`, with `SKIP_INSTALL_DEPS=true` |
+| Game site | `mkdir -p public && cp index.html public/ && { [ ! -d fonts ] || cp -r fonts public/; } && printf %s "$RENDER_GIT_COMMIT" > public/version.txt` (the game and its self-hosted fonts) | publishes `public`, with `SKIP_INSTALL_DEPS=true` |
 | Save API | `cd server && npm ci --omit=dev` | starts `cd server && exec npm start` |
 
 Why: the site publishes only the game (Render's default would publish the whole checkout, server code and `node_modules` included), and `/version.txt` names its commit. With `exec`, Render's stop signal reaches npm, which passes it to the API instead of stopping at a shell. `exec` is in `render.yaml` on `dev` and reaches `main` at the next promotion; whether the running services already use it is not recorded.

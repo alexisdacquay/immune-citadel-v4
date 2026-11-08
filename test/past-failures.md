@@ -23,3 +23,4 @@ A bug fix adds its line here in the same pull request, in the same form: `- [<is
 - [PR #82] server/sentry.js: In every string value of every event, span, log and metric sent to Sentry, other than the trace_id, span_id and parent_span_id fields, is every 16-character run from the save-code alphabet replaced, including one made only of the digits 2-9?
 - [#94] index.html: Does the game's browser error reporting keep the browser's user agent out of everything it sends to Sentry, with no session tracking and any field named like user agent removed from events and spans?
 - [#106] tools/smoke.js: Does a Sentry payload whose only mention of a user agent is Sentry's own setting named infer_user_agent pass the leak check, with no user agent failure reported?
+- [#99] index.html: Does the game load its fonts only from font files on its own site, with no request of any kind to fonts.googleapis.com or fonts.gstatic.com?
