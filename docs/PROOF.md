@@ -27,6 +27,8 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 - **What it does:** a tower-defence game inside the body, 18 levels; each threat and cell is introduced when it first appears ([README, What it does](../README.md#what-it-does)).
 - **Expected behaviour:** [README, Play in 30 seconds](../README.md#play-in-30-seconds) and the campaign table; full player journeys with acceptance criteria in [SPEC.md](SPEC.md).
 
+![What it does: level 1 in play, immune cells grown beside the route, the red marker that calls the next wave](screenshots/play.jpg)
+
 ## 2. Product specification
 
 > **2 points:** "A specification exists and there's a publicly accessible task tracker. The tasks define acceptance criteria and there's evidence that the agents used the tracker."
@@ -65,7 +67,23 @@ Two agents on one pull request: the on-call agent's fix, judged by the QA agent,
 
 > **2 points:** "AGENTS.md exists and it also points to modular docs (process, teams, etc.)."
 
-[AGENTS.md](../AGENTS.md), loaded by [CLAUDE.md](../CLAUDE.md), points every agent to:
+[AGENTS.md](../AGENTS.md), loaded by [CLAUDE.md](../CLAUDE.md), points every agent to the modular docs:
+
+```
+$ cat CLAUDE.md
+@AGENTS.md
+$ grep -o 'docs/[A-Z-]*\.md' AGENTS.md | sort -u
+docs/DPIA.md
+docs/EVENTS.md
+docs/OBSERVABILITY-PLAN.md
+docs/OPERATIONS.md
+docs/PIPELINE-PLAN.md
+docs/SPEC.md
+docs/STATUS.md
+docs/TEAM.md
+```
+
+The main ones:
 
 | Doc | What it holds |
 |---|---|
