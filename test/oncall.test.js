@@ -30,6 +30,10 @@ test('frames map to repository files, on Docker, on Render and in the browser', 
   assert.equal(localFile('/opt/render/project/src/server/play.js'), 'server/play.js');
   assert.equal(localFile('https://immune-citadel-v4.onrender.com/'), 'index.html');
   assert.equal(localFile('/app/nowhere.js'), null);
+  assert.equal(localFile('https://immune-citadel-v4-dev.onrender.com/'), 'index.html');
+  // a crafted event names the files the model may edit: only the game page and the save API's own files ever map (review of #118)
+  for (const f of ['./.github/workflows/ci.yml', './package.json', 'tools/verify-deploy.js', '.github/workflows/ci.yml', '/', 'https://browser.sentry-cdn.com/11.9.0/bundle.tracing.min.js', 'https://evil.example/'])
+    assert.equal(localFile(f), null, f);
   const ctx = sourceContext({ exceptions: [{ frames: [{ file: '/app/index.js', line: 89 }] }] });
   assert.deepEqual(ctx.files, ['server/index.js', 'server/test.js'], 'a server error also gets the test file a fix must extend');
   assert.match(ctx.text, /### server\/index\.js\n {4}1\| /);
@@ -37,11 +41,13 @@ test('frames map to repository files, on Docker, on Render and in the browser', 
 
 test('edits are refused unless exact, small and inside the files shown', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'oncall-')); fs.mkdirSync(path.join(dir, 'server')); fs.mkdirSync(path.join(dir, '.github'));
-  fs.writeFileSync(path.join(dir, 'server/index.js'), 'a\nb\nb\n'); fs.writeFileSync(path.join(dir, '.github/ci.yml'), 'x');
-  const shown = ['server/index.js', '.github/ci.yml'];
+  fs.writeFileSync(path.join(dir, 'server/index.js'), 'a\nb\nb\n'); fs.writeFileSync(path.join(dir, '.github/ci.yml'), 'x'); fs.writeFileSync(path.join(dir, 'package.json'), '{}');
+  const shown = ['server/index.js', '.github/ci.yml', './package.json'];
   assert.throws(() => applyEdits([{ file: 'server/index.js', find: 'b', replace: 'c' }], shown, dir), /occurs 2 times/);
   assert.throws(() => applyEdits([{ file: 'server/play.js', find: 'a', replace: 'c' }], shown, dir), /not one of the files shown/);
-  assert.throws(() => applyEdits([{ file: '.github/ci.yml', find: 'x', replace: 'y' }], shown, dir), /protected/, 'CI is never the agent\'s to edit');
+  assert.throws(() => applyEdits([{ file: '.github/ci.yml', find: 'x', replace: 'y' }], shown, dir), /not editable/, 'CI is never the agent\'s to edit');
+  assert.throws(() => applyEdits([{ file: './package.json', find: '{}', replace: '{"scripts":{}}' }], shown, dir), /not editable/, 'nor dependencies, however the path is written');
+  assert.throws(() => applyEdits([{ file: 'server/index.js', find: 'a', replace: 'z'.repeat(30000) }], shown, dir), /on-call fixes stay small/, 'one huge line counts too');
   assert.throws(() => applyEdits([{ file: 'server/index.js', find: 'a', replace: 'z\n'.repeat(200) }], shown, dir), /on-call fixes stay small/);
   assert.throws(() => applyEdits([{ file: 'server/index.js', find: 'a', replace: 'ok' }, { file: 'server/index.js', find: 'nope', replace: '' }], shown, dir), /occurs 0 times/);
   assert.equal(fs.readFileSync(path.join(dir, 'server/index.js'), 'utf8'), 'a\nb\nb\n', 'a refused set of edits leaves every file untouched');

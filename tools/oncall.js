@@ -4,17 +4,22 @@
 //   2. gives DeepSeek the error and the source files its stack names, and asks for the smallest fix plus a regression test;
 //   3. applies the edits, runs the unit tests, and on red sends the failure back (3 attempts at most);
 //   4. on green opens a pull request into dev, which merges like any other: test, game and qa must pass. Production stays the owner's.
-// It reports every step on the issue, never touches main, never edits CI, dependencies or the DPIA, and runs once per issue.
+// It reports every step on the issue, never touches main, and edits only the game (index.html) and the save API's own files (server/*.js).
+// The tests of a fix run sealed in Docker: no network, no secrets, the checkout read-only (the model's code never sees a key).
+// Save API incidents merge into dev on green; game incidents wait for a human, because the game's Sentry key is public by design,
+// so anyone can make a game error and write the text the model reads.
 // Env: ISSUE (GitHub issue number), SENTRY_ISSUE (optional: a Sentry issue id or short id; else read from the issue), GH_TOKEN,
 // SENTRY_AUTH_TOKEN (event:read), DEEPSEEK_API_KEY, ONCALL_MODEL (default deepseek-v4-pro), SENTRY_URL (default https://de.sentry.io,
-// the EU region), SENTRY_ORG (default myown-76), AUTOMERGE (set: arm auto-merge on the pull request), RUN_URL, DRY_RUN (set: no push,
-// no pull request, no comment; prints instead).
+// the EU region), SENTRY_ORG (default myown-76), AUTOMERGE (set: auto-merge is allowed, i.e. a person's token pushes), RUN_URL,
+// DRY_RUN (set: no push, no pull request, no comment; prints instead).
 const { execFileSync } = require('node:child_process'), fs = require('node:fs'), path = require('node:path');
 const { parseChecks } = require('./qa.js');
 
 const run = (cmd, args, opts = {}) => execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 64 << 20, ...opts });
-const FORBIDDEN = /^(\.github\/|tools\/qa\.js$|tools\/oncall\.js$|package(-lock)?\.json$|server\/package(-lock)?\.json$|render\.yaml$|docs\/DPIA\.md$)/;
-const MAX_CHANGED_LINES = 150, WINDOW = 60, WHOLE_FILE = 40000;
+const EDITABLE = /^(index\.html|server\/[\w-]+\.js)$/; // an allow-list: never CI, dependencies, tools, docs or this agent
+const GAME_PAGE = /^https?:\/\/(immune-citadel-v4(-dev)?\.onrender\.com|localhost(:\d+)?|127\.0\.0\.1(:\d+)?)\//;
+const PROJECTS = { 'immune-citadel-api': { automerge: true }, 'immune-citadel-game': { automerge: false } };
+const MAX_CHANGED_LINES = 150, MAX_CHARS = 20000, WINDOW = 60, WHOLE_FILE = 40000;
 
 // The Sentry issue a GitHub issue links to: its numeric id from a link, else a short id such as IMMUNE-CITADEL-API-2.
 function sentryRef(text) {
@@ -43,10 +48,8 @@ function incident(event) {
 // /opt/render/project/src/server/index.js on Render) is the same name under server/, else at the root.
 function localFile(file, root = '.') {
   if (!file) return null;
-  if (/^https?:\/\//.test(file)) return 'index.html';
-  const tail = file.replace(/\\/g, '/').split('/server/').pop(), base = path.posix.basename(tail);
-  for (const c of [tail.startsWith('/') ? null : tail, `server/${base}`, base]) if (c && fs.existsSync(path.join(root, c))) return c;
-  return null;
+  const c = GAME_PAGE.test(file) ? 'index.html' : /^https?:/.test(file) ? null : `server/${path.posix.basename(file.replace(/\\/g, '/'))}`;
+  try { return c && EDITABLE.test(c) && fs.statSync(path.join(root, c)).isFile() ? c : null; } catch { return null; }
 }
 
 // The source the model sees: each file the stack names (whole if small, else the lines around each frame), plus the test file a
@@ -70,16 +73,16 @@ function sourceContext(inc, root = '.') {
 // agent was shown; every edit is checked in memory before any file is written.
 function applyEdits(edits, allowed, root = '.') {
   if (!Array.isArray(edits) || !edits.length) throw new Error('no edits');
-  const next = new Map(); let changed = 0;
+  const next = new Map(); let changed = 0, chars = 0;
   for (const e of edits) {
     const f = String(e.file || '');
-    if (FORBIDDEN.test(f) || !allowed.includes(f)) throw new Error(`edit refused: ${f} is not one of the files shown (${allowed.join(', ')}) or is protected`);
+    if (!EDITABLE.test(f) || !allowed.includes(f)) throw new Error(`edit refused: ${f} is not one of the files shown (${allowed.join(', ')}) or is not editable`);
     const text = next.get(f) ?? fs.readFileSync(path.join(root, f), 'utf8'), n = e.find ? text.split(e.find).length - 1 : 0;
     if (n !== 1) throw new Error(`edit refused: the text to replace occurs ${n} times in ${f}, it must occur exactly once`);
     next.set(f, text.replace(e.find, () => e.replace));
-    changed += String(e.find).split('\n').length + String(e.replace).split('\n').length;
+    changed += String(e.find).split('\n').length + String(e.replace).split('\n').length; chars += String(e.replace).length;
   }
-  if (changed > MAX_CHANGED_LINES) throw new Error(`edit refused: ${changed} changed lines, over ${MAX_CHANGED_LINES}; on-call fixes stay small`);
+  if (changed > MAX_CHANGED_LINES || chars > MAX_CHARS) throw new Error(`edit refused: ${changed} changed lines, ${chars} characters, over ${MAX_CHANGED_LINES} or ${MAX_CHARS}; on-call fixes stay small`);
   for (const [f, text] of next) fs.writeFileSync(path.join(root, f), text);
   return changed;
 }
@@ -97,10 +100,14 @@ const TASK = 'You are the on-call engineer for Immune Citadel, a browser game fo
   + 'Reply with JSON only: {"diagnosis":"the cause, 1-3 sentences","summary":"the fix, one sentence","title":"pull request title",'
   + '"edits":[{"file":"","find":"","replace":""}],"qa_checks":["- [changes] file: question?"]}';
 
+// The tests of a fix run in a container with no network and no environment, on a read-only copy of the checkout: the model's code
+// can neither read a secret, nor reach the internet, nor change a file that the later commit would pick up.
+const sealedTests = () => run('docker', ['run', '--rm', '--network', 'none', '-v', `${process.cwd()}:/w:ro`, '-w', '/w', 'node:22', 'npm', 'run', 'test:unit'], { stdio: 'pipe', timeout: 10 * 60000 });
+
 async function deepseek(messages, { key = process.env.DEEPSEEK_API_KEY, model = process.env.ONCALL_MODEL || 'deepseek-v4-pro' } = {}) {
   const body = JSON.stringify({ model, temperature: 0, reasoning_effort: 'high', max_tokens: 32000, response_format: { type: 'json_object' }, messages });
   for (let i = 1; ; i++) {
-    let r, err; try { r = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST', headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' }, body, signal: AbortSignal.timeout(600000) }); } catch (e) { err = e; }
+    let r, err; try { r = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST', headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' }, body, signal: AbortSignal.timeout(420000) }); } catch (e) { err = e; }
     if (r && r.ok) { const c = (await r.json()).choices?.[0]?.message?.content; return JSON.parse(c); }
     if (i === 3 || (r && r.status !== 429 && r.status < 500)) throw err || new Error(`DeepSeek: HTTP ${r.status}`);
     await new Promise(res => setTimeout(res, 5000 * i));
@@ -118,12 +125,15 @@ async function main() {
   const { ISSUE: n, DRY_RUN: dry, RUN_URL: runUrl = '', AUTOMERGE: automerge } = process.env, org = process.env.SENTRY_ORG || 'myown-76';
   const gh = (...a) => run('gh', a), say = body => (dry ? console.log(`[comment on #${n}]\n${body}`) : gh('issue', 'comment', n, '--body', body));
   const started = new Date().toISOString(), branch = `oncall/issue-${n}`;
-  if (!dry && JSON.parse(gh('pr', 'list', '--head', branch, '--state', 'all', '--json', 'number')).length) return console.log(`#${n} already has a pull request from ${branch}: nothing to do`);
+  if (!dry && JSON.parse(gh('pr', 'list', '--head', branch, '--state', 'open', '--json', 'number')).length) return console.log(`#${n} already has an open pull request from ${branch}: nothing to do`);
   const issue = JSON.parse(gh('issue', 'view', n, '--json', 'title,body,createdAt'));
-  const ref = process.env.SENTRY_ISSUE ? sentryRef(`sentry.io/issues/${process.env.SENTRY_ISSUE}/ ${process.env.SENTRY_ISSUE}`) : sentryRef(`${issue.title}\n${issue.body}`);
+  // the body first: Sentry writes its link there, while the title is the error's own (attacker-writable) text
+  const ref = process.env.SENTRY_ISSUE ? sentryRef(`sentry.io/issues/${process.env.SENTRY_ISSUE}/ ${process.env.SENTRY_ISSUE}`) : sentryRef(`${issue.body}\n${issue.title}`);
   if (!ref) return say(`On-call agent: this issue names no Sentry issue, so there is nothing to investigate. ${runUrl}`);
   const id = ref.id || (await sentry(`/api/0/organizations/${org}/shortids/${ref.shortId}/`)).groupId;
-  const group = await sentry(`/api/0/organizations/${org}/issues/${id}/`), event = await sentry(`/api/0/organizations/${org}/issues/${id}/events/latest/`);
+  const group = await sentry(`/api/0/organizations/${org}/issues/${id}/`), project = PROJECTS[group.project?.slug];
+  if (!project) return say(`On-call agent: Sentry issue ${group.shortId} is not in the game's or the save API's project, so I leave it. ${runUrl}`);
+  const event = await sentry(`/api/0/organizations/${org}/issues/${id}/events/latest/`);
   const inc = incident(event), ctx = sourceContext(inc);
   if (!ctx.files.length) return say(`On-call agent: Sentry ${group.shortId} has no frame in this repository's code, so I cannot locate a fix. A human should look. ${runUrl}`);
   say(`On-call agent awake at ${started} for Sentry [${group.shortId}](${group.permalink}) (first seen ${group.firstSeen}, ${group.count} events, environment ${inc.environment || '?'}).\nReading ${ctx.files.join(', ')}. ${runUrl}`);
@@ -137,7 +147,7 @@ async function main() {
       const checks = parseChecks((fix.qa_checks || []).join('\n'));
       if (!checks.some(c => c.label === 'changes') || checks.some(c => !['changes', 'stays'].includes(c.label))) throw new Error('qa_checks: need at least one "- [changes] file: question?" line and only [changes] or [stays]');
       applyEdits(fix.edits, ctx.files);
-      run('npm', ['run', 'test:unit'], { stdio: 'pipe', timeout: 10 * 60000 });
+      sealedTests();
       fix.attempt = attempt; break;
     } catch (e) {
       tail = `${e.message}\n${e.stdout || ''}${e.stderr || ''}`.slice(-4000);
@@ -148,17 +158,21 @@ async function main() {
   }
   if (!fix) { run('git', ['checkout', '--', '.']); return say(`On-call agent: no fix passed the unit tests in 3 attempts, so I opened nothing. A human should take it from here.\nLast failure:\n\`\`\`\n${tail.slice(-1500)}\n\`\`\`\n${runUrl}`); }
 
-  const diff = run('git', ['diff', '--stat']);
+  const diff = run('git', ['diff', '--stat']), merges = automerge && project.automerge, game = ctx.files.includes('index.html');
   const body = `Fixes #${n}: the on-call agent's fix for Sentry [${group.shortId}](${group.permalink}).\n\n`
     + `**Alert:** ${inc.title} (environment ${inc.environment || '?'}, release ${String(inc.release || '?').slice(0, 7)}, first seen ${group.firstSeen}).\n\n`
-    + `**Cause:** ${fix.diagnosis}\n\n**Fix:** ${fix.summary}\n\n**Proof:** \`npm run test:unit\` passed in the on-call run (attempt ${fix.attempt} of 3): ${runUrl}\n\n`
+    + `**Cause:** ${fix.diagnosis}\n\n**Fix:** ${fix.summary}\n\n**Proof:** \`npm run test:unit\` passed, sealed (no network, no secrets), in the on-call run (attempt ${fix.attempt} of 3): ${runUrl}${game ? '. For the game, CI\'s `game` job on this pull request is the real proof: the unit tests do not play it' : ''}\n\n`
     + `## QA checks\n${fix.qa_checks.join('\n')}\n\n_Opened by the on-call agent (tools/oncall.js, ${process.env.ONCALL_MODEL || 'deepseek-v4-pro'}). It merges into dev like any other pull request; production stays the owner's._`;
   if (dry) return console.log(`[dry run] would open "${fix.title}"\n${diff}\n${run('git', ['diff'])}\n${body}`);
-  run('git', ['checkout', '-b', branch]); run('git', ['commit', '-am', `${fix.title} (on-call agent, #${n})`]); run('git', ['push', '-u', 'origin', branch]);
+  run('git', ['checkout', '-B', branch]); run('git', ['commit', '-am', `${fix.title} (on-call agent, #${n})`]);
+  run('gh', ['auth', 'setup-git']); run('git', ['push', '--force', '-u', 'origin', branch]); // its own branch: a retry replaces an unmerged attempt
   const url = gh('pr', 'create', '--base', 'dev', '--head', branch, '--title', fix.title, '--body', body).trim();
-  if (automerge) gh('pr', 'merge', url, '--auto', '--merge');
-  say(`On-call agent: fix proposed in ${url} at ${new Date().toISOString()} (unit tests green, attempt ${fix.attempt} of 3).\n**Cause:** ${fix.diagnosis}\n${automerge ? 'It merges into dev once test, game and qa pass.' : 'Auto-merge is off (no ONCALL_TOKEN): a maintainer arms it.'}`);
+  if (merges) gh('pr', 'merge', url, '--auto', '--merge');
+  say(`On-call agent: fix proposed in ${url} at ${new Date().toISOString()} (unit tests green, attempt ${fix.attempt} of 3).\n**Cause:** ${fix.diagnosis}\n${merges ? 'It merges into dev once test, game and qa pass.' : project.automerge ? 'Auto-merge is off (no ONCALL_TOKEN): a maintainer arms it.' : 'A game incident: a maintainer reads the diff and arms auto-merge (the game\'s Sentry key is public, so its errors are untrusted).'}`);
 }
 
-if (require.main === module) main().catch(e => { console.error('on-call agent failed:', e.message); process.exitCode = 1; });
+if (require.main === module) main().catch(e => {
+  console.error('on-call agent failed:', e.message); process.exitCode = 1;
+  if (!process.env.DRY_RUN) try { run('gh', ['issue', 'comment', process.env.ISSUE, '--body', `On-call agent stopped: ${String(e.message).split('\n')[0].slice(0, 300)}. A human should look. ${process.env.RUN_URL || ''}`]); } catch { /* the workflow's failure step still reports */ }
+});
 module.exports = { sentryRef, incident, localFile, sourceContext, applyEdits, deepseek, TASK };

@@ -1,8 +1,8 @@
 # On-call agent (#27): a Sentry alert opens an issue in this repository through Sentry's GitHub integration, and this job wakes on it.
-# tools/oncall.js reads the error from Sentry, asks DeepSeek for the smallest fix with a regression test, runs the unit tests, and opens
-# a pull request into dev, which merges like any other on test, game and qa. Production stays the owner's.
-# Only Sentry's own issues, or an issue a maintainer labels "incident", wake it: a stranger's issue never does. A maintainer can also
-# run it by hand on an issue (Actions > On-call > Run workflow).
+# tools/oncall.js reads the error from Sentry, asks DeepSeek for the smallest fix with a regression test, runs the unit tests sealed in
+# Docker (no network, no secrets), and opens a pull request into dev. Save API fixes merge on test, game and qa like any other; game
+# fixes wait for a human, because the game's Sentry key is public. Production stays the owner's.
+# Only an issue opened by Sentry's GitHub App (sentry[bot]), an issue the owner labels "incident", or a manual run wakes it.
 name: On-call
 on:
   issues:
@@ -15,32 +15,41 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
-concurrency: # one agent per incident: a second alert or label on the same issue waits, then finds the pull request and stops
-  group: oncall-${{ github.event.issue.number || inputs.issue }}
-  cancel-in-progress: false
 
 jobs:
   respond:
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      (github.event.action == 'opened' && github.event.issue.user.type == 'Bot' && contains(github.event.issue.user.login, 'sentry')) ||
-      (github.event.action == 'labeled' && github.event.label.name == 'incident')
+      (github.event.action == 'opened' && github.event.issue.user.login == 'sentry[bot]') ||
+      (github.event.action == 'labeled' && github.event.label.name == 'incident' && github.event.sender.login == github.repository_owner)
+    # One agent at a time across all incidents: a flood of alerts keeps one run and one waiting, the rest are dropped.
+    concurrency: { group: oncall, cancel-in-progress: false }
     runs-on: ubuntu-latest
-    timeout-minutes: 30 # a model answer takes up to a few minutes, the unit tests about one; at most 3 attempts
+    timeout-minutes: 30
+    env:
+      ISSUE: ${{ github.event.issue.number || inputs.issue }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      GH_TOKEN: ${{ secrets.ONCALL_TOKEN || github.token }}
     steps:
       # A person's token (ONCALL_TOKEN), when set, so the agent's push and pull request start CI: GitHub starts no workflow for GITHUB_TOKEN.
+      # No credentials are left in .git/config: the agent sets them up only for its final push.
       - uses: actions/checkout@v5
-        with: { ref: dev, fetch-depth: 0, token: '${{ secrets.ONCALL_TOKEN || github.token }}' }
+        with: { ref: dev, fetch-depth: 0, persist-credentials: false }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      - run: git config user.name 'immune-citadel on-call agent' && git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-      - run: node tools/oncall.js
+        env: { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1' } # the unit tests need no browser
+      # The agent itself comes from main (this workflow's commit), never from dev: a change merged into dev cannot rewrite it.
+      - run: |
+          git show "${{ github.sha }}:tools/oncall.js" > "$RUNNER_TEMP/oncall.js"
+          git show "${{ github.sha }}:tools/qa.js" > "$RUNNER_TEMP/qa.js"
+          git config user.name 'immune-citadel on-call agent' && git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - run: node "$RUNNER_TEMP/oncall.js"
+        timeout-minutes: 25 # 3 attempts of one model answer (up to 7 min) and the sealed tests
         env:
-          ISSUE: ${{ github.event.issue.number || inputs.issue }}
           SENTRY_ISSUE: ${{ inputs.sentry_issue }}
-          GH_TOKEN: ${{ secrets.ONCALL_TOKEN || github.token }}
           AUTOMERGE: ${{ secrets.ONCALL_TOKEN != '' && '1' || '' }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - if: failure() || cancelled()
+        run: gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "On-call agent stopped before finishing (see the run). A human should look. $RUN_URL" || true
