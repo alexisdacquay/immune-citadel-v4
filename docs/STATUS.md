@@ -44,18 +44,15 @@ In the order the team loop uses: `P0` first, then the owner's latest priority, t
 |---|---|---|
 | 1 | Rubric: full marks with margin, obvious to any reviewer ([#77](https://github.com/alexisdacquay/immune-citadel-v4/issues/77), P0): README's "For reviewers" table, then at least three independent cold reviews | the only P0; no review report is linked yet |
 | 2 | Finish #70 on `dev`: land #90, and add screenshots of one real save to [OPERATIONS, Follow one save](OPERATIONS.md#follow-one-save) | #70's after-merge item: one save on `dev` shown in Sentry as trace, log line and metric, with screenshots; the other one, `SENTRY_DSN` back on the production API, waits on the owner (below) |
-| 3 | Fonts served from this site instead of Google, once the owner agrees (see below) | every page load gives Google the player's IP address and browser identifier |
-| 4 | QA: count real catches and false alarms of both stages on each pull request until 2026-11-21, then decide what changes | set on 2026-11-07; stage 1 in its new form starts with the next pull request |
-| 5 | P1 backlog: a backup model for QA (#83), body map zones in reading order (#78), trading-card design (#79, mock-ups first, the owner picks) | the owner's P1s that can start without the owner |
-| 6 | P2 backlog: an unlocked level looks cleared on the body map (#84, a bug), more enemy variety (#80), game content out of `index.html` (#17), Chapter 2 (#11) | planned |
+| 3 | QA: count real catches and false alarms of both stages on each pull request until 2026-11-21, then decide what changes | set on 2026-11-07; stage 1 in its new form starts with the next pull request |
+| 4 | P1 backlog: a backup model for QA (#83), body map zones in reading order (#78), trading-card design (#79, mock-ups first, the owner picks) | the owner's P1s that can start without the owner |
+| 5 | P2 backlog: an unlocked level looks cleared on the body map (#84, a bug), more enemy variety (#80), game content out of `index.html` (#17), Chapter 2 (#11) | planned |
 
 ## Waiting on the owner
 
 | Item | Why it waits |
 |---|---|
 | Set `SENTRY_DSN` on the production save API in Render (`sync: false` in render.yaml, so only the owner can) | until then a failed save in production raises no alert |
-| Google Fonts: every page load sends the player's IP address and browser identifier to Google, which the DPIA and the in-game "Your data" text do not mention. Serve the fonts from the site, or name Google there | the rule that no third party gets a child's IP or browser identifier |
-| The signed DPIA: two facts changed after signing (gameplay events are live in production; each environment has its own database). Re-sign or add a dated note | only the owner signs it |
 | Point the Render Blueprint at `main` with auto-sync on | today it reads `dev`, so a sync would apply dev's render.yaml to production |
 | The owner's home IP still shows in one QA bot comment (PR #69) and one Actions log | only the owner should edit or delete those |
 | Discard #91 | superseded by #92 |

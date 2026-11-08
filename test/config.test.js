@@ -41,3 +41,12 @@ test('the game loads Sentry only on the dev and production sites, pinned and che
   assert.match(block, /shouldCreateSpanForRequest: u => !u\.includes\('\/api\/play'\)/, 'gameplay events never reach Sentry');
   assert.doesNotMatch(block, /replayIntegration/, 'no session replay');
 });
+
+test('the game takes its fonts from its own site, never from Google, and both sites publish them (#99)', () => {
+  const html = read('index.html'), files = [...html.matchAll(/src:url\((fonts\/[\w-]+\.woff2)\)/g)].map(m => m[1]);
+  assert.doesNotMatch(html, /fonts\.(googleapis|gstatic)\.com/, 'Google would get the player\'s IP and browser identifier');
+  assert.ok(files.length >= 2, 'self-hosted font faces');
+  for (const f of files) assert.ok(fs.existsSync(path.join(__dirname, '..', f)), `${f} is missing`);
+  assert.equal(read('render.yaml').match(/cp -r fonts public\//g).length, 2, 'both static sites publish fonts/');
+  assert.match(compose, /\.\/fonts:\/usr\/share\/nginx\/html\/fonts/, 'Compose serves fonts/ too');
+});
