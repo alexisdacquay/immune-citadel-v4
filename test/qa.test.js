@@ -31,9 +31,9 @@ test('stage 1: YES on the new code passes; a [changes] check must also be NO on 
   assert.equal(judge({ label: 'changes' }, yes, no).pass, true);
   assert.equal(judge({ label: 'changes' }, yes, unsure).pass, true); // the old code cannot show it: still not a YES
   assert.match(judge({ label: 'changes' }, yes, yes).why, /does not test the change/);
-  const failed = { answer: 'UNSURE', why: 'no answer: DeepSeek: HTTP 503; backup google/gemini-3.5-flash: HTTP 401' };
+  const none = { answer: 'UNSURE', why: 'no answer: DeepSeek: HTTP 503; backup google/gemini-3.5-flash: HTTP 401' }, failed = majority([none, none, none]);
   assert.equal(judge({ label: 'changes' }, yes, failed).pass, false); // both models failed on the old code: never judged
-  assert.match(judge({ label: 'changes' }, yes, failed).why, /old code was never judged \(no answer: DeepSeek: HTTP 503/);
+  assert.match(judge({ label: 'changes' }, yes, failed).why, /old code was never judged: 3 of 3 asks got no answer \(no answer: DeepSeek: HTTP 503/);
   assert.equal(judge({ label: 'stays' }, yes, null).pass, true);
   assert.equal(judge({ label: '#9' }, no, null).pass, false);
   assert.equal(judge({ label: 'stays' }, unsure, null).pass, false);
@@ -82,6 +82,19 @@ test('both models failing fails closed, with both errors in the answer; without 
   calls.length = 0;
   await assert.rejects(ask(check, 'HEAD', { env: { DEEPSEEK_API_KEY: 'k' }, wait: 0 }), /^Error: DeepSeek: HTTP 503$/);
   assert.equal(calls.filter(u => !u.includes('deepseek')).length, 0);
+});
+
+test('the old code counts as never judged when 2 of its 3 asks got no answer, whichever vote majority() returns', async t => {
+  // asks run in order; each takes the next reply: a model's UNSURE, or HTTP 400 (no retry, no backup secrets), i.e. no answer
+  const run = async replies => { t.mock.method(globalThis, 'fetch', async () => replies.shift() === 'model' ? answer('{"answer":"UNSURE","quote":"","why":"cannot tell"}') : new Response('', { status: 400 }));
+    const before = await vote(check, 'HEAD', { env: { DEEPSEEK_API_KEY: 'k' }, wait: 0 }); t.mock.restoreAll(); return [before, judge({ label: 'changes' }, { answer: 'YES' }, before)]; };
+  const [b1, j1] = await run(['model', 'none', 'none']);
+  assert.equal(b1.why, 'cannot tell'); // majority() returns the model's UNSURE...
+  assert.equal(j1.pass, false); // ...but 2 of 3 asks were never answered
+  assert.match(j1.why, /never judged: 2 of 3 asks got no answer \(no answer: DeepSeek: HTTP 400\)/);
+  const [b2, j2] = await run(['none', 'model', 'model']);
+  assert.match(b2.why, /^no answer:/); // majority() returns the no-answer vote...
+  assert.equal(j2.pass, true); // ...but two models answered UNSURE: judged
 });
 
 test('stage 2 names the changed files left out of its diff, in the prompt and in the report', () => {

@@ -78,7 +78,8 @@ async function ask(check, rev, opts) {
 // (PR #82's closed-tab check: YES, then NO, on the same file, 2026-11-07).
 function majority(votes) {
   const top = ['YES', 'NO', 'UNSURE'].find(a => votes.filter(v => v.answer === a).length >= 2);
-  return { ...(top ? votes.find(v => v.answer === top) : { answer: 'UNSURE', quote: '', why: 'three different answers' }), votes: votes.map(v => v.answer), models: votes.map(v => v.model).filter(Boolean) };
+  return { ...(top ? votes.find(v => v.answer === top) : { answer: 'UNSURE', quote: '', why: 'three different answers' }), votes: votes.map(v => v.answer), models: votes.map(v => v.model).filter(Boolean),
+    unanswered: votes.map(v => v.why).filter(w => w?.startsWith('no answer:')) };
 }
 const vote = (check, rev, opts) => Promise.all([0, 1, 2].map(() => ask(check, rev, opts).catch(e => ({ answer: 'UNSURE', quote: '', why: `no answer: ${e.message}` })))).then(majority);
 
@@ -86,8 +87,9 @@ const vote = (check, rev, opts) => Promise.all([0, 1, 2].map(() => ask(check, re
 function judge(check, now, before) {
   if (now.answer !== 'YES') return { pass: false, why: `${now.answer} on the new code` };
   if (check.label === 'changes' && before.answer === 'YES') return { pass: false, why: 'YES on the old code too: it does not test the change' };
-  // both models failing gives UNSURE, which must not count as the old code being judged
-  if (check.label === 'changes' && before.why?.startsWith('no answer:')) return { pass: false, why: `the old code was never judged (${before.why})` };
+  // both models failing gives UNSURE, which must not count as the old code being judged; counted over all 3 votes, since the
+  // vote majority() returns is only the first with the winning answer and a no-answer UNSURE ties with a model's UNSURE
+  if (check.label === 'changes' && before.unanswered?.length >= 2) return { pass: false, why: `the old code was never judged: ${before.unanswered.length} of 3 asks got no answer (${before.unanswered[0]})` };
   return { pass: true, why: '' };
 }
 
