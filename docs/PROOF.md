@@ -188,7 +188,7 @@ $ curl -s https://immune-citadel-v4-api.onrender.com/health
 
 - **The merge is the manual step:** Render deploys `main` on merge, and nothing automatic (workflow, auto-merge, schedule) targets `main`.
 - **GitHub enforces:** a pull request only; green CI; `dev` green on the same commit. The owner's go is a team rule, which GitHub does not enforce.
-- **Every promotion followed the owner's written go:** its own go ("Yes, promote"), the go of a promotion covering its docs-only follow-up, or the owner's standing go of 2026-11-08, "In the future, please proxy for me" (merged by the orchestrator). These promotions were merged in the original repository; each go is quoted in its pull request there and listed in [STATUS, Promotions](STATUS.md#promotions). The screenshot below shows one.
+- **Every promotion followed the owner's written go:** its own go ("Yes, promote"), the go of a promotion covering its docs-only follow-up, or the owner's standing go of 2026-11-08, "In the future, please proxy for me" (merged by the orchestrator). These promotions were merged in the original repository, whose pull requests are not public; [STATUS, Promotions](STATUS.md#promotions) lists each one by its merge commit on `main` here. The screenshot below shows one.
 
 | The rules on `dev` and `main` | A promotion, with the owner's written go |
 |---|---|

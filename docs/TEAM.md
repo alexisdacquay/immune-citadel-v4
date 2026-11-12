@@ -98,7 +98,7 @@ When the owner says **continue**, the orchestrator runs one turn of this loop. T
 6. **Integrate.** GitHub merges the pull request once `test`, `game` and `qa` are green, with no human. Render deploys the new `dev` commit, and CI's `deployed` job proves it is live.
 7. **Report.** One short message to the owner: what shipped, what is not verified, what needs them.
 
-**Promotion** is separate and needs the owner: every promotion of `dev` into `main` (production) needs the owner's written go; then the owner or, on that go, the orchestrator clicks merge. Each go is recorded in the [STATUS promotions table](STATUS.md#promotions). Issues close then, each with a "Shipped to production" comment. Until then a finished issue stays open, with the label `status:on-dev`.
+**Promotion** is separate and needs the owner: every promotion of `dev` into `main` (production) needs the owner's written go; then the owner or, on that go, the orchestrator clicks merge. How each go was given: [PROOF, CI/CD](PROOF.md#9-cicd). Issues close then, each with a "Shipped to production" comment. Until then a finished issue stays open, with the label `status:on-dev`.
 
 ## Gates
 

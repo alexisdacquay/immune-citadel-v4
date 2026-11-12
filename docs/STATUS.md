@@ -20,26 +20,28 @@ Last update: 2026-11-08, about 19:00 UTC: production runs `d3f7a43` ([#134](http
 
 ## Promotions
 
-Every merge into `main`, the production branch. Each needed the owner's written go; then the owner or, on that go, the orchestrator clicked merge. The proof run is `main`'s CI run on that commit: `test`, `game` and `deployed` (the commit is live) green.
+Every promotion of `dev` into `main`, the production branch, each after the owner's written go ([PROOF, CI/CD](PROOF.md#9-cicd)). They were made in the project's original repository, whose pull requests and CI runs are not public; each merge commit below is the same commit on `main` here. Each one's CI run on `main` there was green: `test`, `game` and `deployed` (the commit is live).
 
-| PR | Commit | Merged (UTC) | What it brought | The owner's go | Proof run |
-|---|---|---|---|---|---|
-| [#73](https://github.com/alexisdacquay/immune-citadel-v4/pull/73) | `db0ae14` | 2026-11-07 15:55 | the first promotion: the 18-level campaign, cloud saves, Sentry in the game, gameplay events, the deploy pipeline | in chat: "promote the repo" | [42388716983](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42388716983) |
-| [#96](https://github.com/alexisdacquay/immune-citadel-v4/pull/96) | `ee5728d` | 2026-11-08 01:38 | the save API's trace, log line and metric under one trace ID (#82); no browser identifier in the game's crash reports (#94, [#95](https://github.com/alexisdacquay/immune-citadel-v4/pull/95)); QA stage 1 (#92) | in chat, in writing: promote "once the mega-test is green", a pre-promotion test of every suite, the live dev site and the save API, which was green | [42435143169](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42435143169) |
-| [#98](https://github.com/alexisdacquay/immune-citadel-v4/pull/98) | `a296382` | 2026-11-08 02:05 | docs only: STATUS and OPERATIONS for #96 (#97) | the written go of #96, read as covering this docs-only follow-up | [42437059743](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42437059743) |
-| [#110](https://github.com/alexisdacquay/immune-citadel-v4/pull/110) | `274d452` | 2026-11-08 08:33 | the game's fonts from its own site, so a player's browser no longer contacts Google (#108, #99); the smoke and privacy check in `deployed` (#107); the "Your data" wording on Sentry (#109); the DPIA re-signed | in chat: "ok" to five steps, among them this promotion and the Blueprint on `main` | [42463417842](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42463417842) |
-| [#113](https://github.com/alexisdacquay/immune-citadel-v4/pull/113) | `9aa33f5` | 2026-11-08 12:09 | the "Your data" and cloud popovers fit a landscape phone, so the Play stats switch can be reached (#112); the fonts build without its guard (#111) | in chat: "Yes, promote" | [42478940135](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42478940135) |
-| [#129](https://github.com/alexisdacquay/immune-citadel-v4/pull/129) | `ee4783d` | 2026-11-08 16:40 | the launch release: reviewer docs and Sentry screenshots, phone and laptop fixes, Sentry traces that follow Play stats, save retention, the #102 log fix, the on-call agent, the DPIA re-signed | the owner, in chat: "Yes, promote", then "I approve. In the future, please proxy for me" | [42501133770](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42501133770) |
-| [#134](https://github.com/alexisdacquay/immune-citadel-v4/pull/134) | `d3f7a43` | 2026-11-08 17:29 | the on-call agent's first drill, recorded (#133), and its fix (#132) of the drill's planted fault (#130) | the owner's standing written go: "In the future, please proxy for me" (2026-11-08), quoted in the pull request | [42505199017](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42505199017) |
+| Merge commit | Merged (UTC) | What it brought |
+|---|---|---|
+| [`db0ae14`](https://github.com/alexisdacquay/immune-citadel-v4/commit/db0ae14) | 2026-11-07 15:55 | the first promotion: the 18-level campaign, cloud saves, Sentry in the game, gameplay events, the deploy pipeline |
+| [`ee5728d`](https://github.com/alexisdacquay/immune-citadel-v4/commit/ee5728d) | 2026-11-08 01:38 | the save API's trace, log line and metric under one trace ID; no browser identifier in the game's crash reports ([#48](https://github.com/alexisdacquay/immune-citadel-v4/issues/48)); QA stage 1 |
+| [`a296382`](https://github.com/alexisdacquay/immune-citadel-v4/commit/a296382) | 2026-11-08 02:05 | docs only: STATUS and OPERATIONS for the promotion before it |
+| [`274d452`](https://github.com/alexisdacquay/immune-citadel-v4/commit/274d452) | 2026-11-08 08:33 | the game's fonts from its own site, so a player's browser no longer contacts Google ([#49](https://github.com/alexisdacquay/immune-citadel-v4/issues/49)); the smoke and privacy check in `deployed`; the "Your data" wording on Sentry; the DPIA re-signed |
+| [`9aa33f5`](https://github.com/alexisdacquay/immune-citadel-v4/commit/9aa33f5) | 2026-11-08 12:09 | the "Your data" and cloud popovers fit a landscape phone, so the Play stats switch can be reached; the fonts build without its guard |
+| [`ee4783d`](https://github.com/alexisdacquay/immune-citadel-v4/commit/ee4783d) | 2026-11-08 16:40 | the launch release: reviewer docs and Sentry screenshots, phone and laptop fixes, Sentry traces that follow Play stats, save retention, the log fix of [#52](https://github.com/alexisdacquay/immune-citadel-v4/issues/52), the on-call agent, the DPIA re-signed |
+| [`d3f7a43`](https://github.com/alexisdacquay/immune-citadel-v4/commit/d3f7a43) | 2026-11-08 17:29 | the on-call agent's first drill, recorded, and its fix of the drill's planted fault |
+| [`5ec8a26`](https://github.com/alexisdacquay/immune-citadel-v4/commit/5ec8a26) | 2026-11-08 19:07 | docs only: the proof page for course reviewers ([PROOF.md](PROOF.md)), every rubric criterion with screenshots and raw output, linked from the README |
+| [`cbe012e`](https://github.com/alexisdacquay/immune-citadel-v4/commit/cbe012e) | 2026-11-08 19:49 | a check in CI's `deployed` job: after every deploy, one save under a known trace ID must reach Sentry as a trace, a log line and a metric, on dev and production; no change to the game or the save API |
 
 Infrastructure and telemetry events around them:
 
 - **2026-11-06:** the first Blueprint sync adopted the existing services, moved both APIs from Free to Starter, and grew the dev database disk to 15 GB like production's.
 - **2026-11-08, 07:41 UTC:** the owner set `SENTRY_DSN` on the production save API. At 07:47 UTC one load on production gave a Sentry trace reading the production database and a log line with environment `production`; `http.server.request.duration` points with environment `production` are in Sentry too (checked 2026-11-08).
 - **2026-11-08, about 07:58 UTC:** the last Blueprint sync from `dev` made both game sites copy `fonts/`.
-- **2026-11-08, 08:34 UTC,** after #110: the Blueprint switched to `main` with auto-sync on; its first plan from `main` found no changes.
-- **2026-11-08, 12:09:54 UTC:** the first sync after a change on `main` (#113) dropped the fonts guard from both sites' build and redeployed both sites.
-- **After #113:** an independent check in a real browser at 844x390, 932x430, 1180x820 and 1440x900 found the Play stats switch reachable and working at every size; on most landscape phones it sits below the popover's fold, with nothing showing that the popover scrolls.
+- **2026-11-08, 08:34 UTC,** after `274d452`: the Blueprint switched to `main` with auto-sync on; its first plan from `main` found no changes.
+- **2026-11-08, 12:09:54 UTC:** the first sync after a change on `main` (`9aa33f5`) dropped the fonts guard from both sites' build and redeployed both sites.
+- **After `9aa33f5`:** an independent check in a real browser at 844x390, 932x430, 1180x820 and 1440x900 found the Play stats switch reachable and working at every size; on most landscape phones it sits below the popover's fold, with nothing showing that the popover scrolls.
 
 How the parts connect: [README, How it fits together](../README.md#how-it-fits-together). How QA works: [TEAM.md](TEAM.md#how-qa-works-two-stages).
 
