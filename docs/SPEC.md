@@ -1,6 +1,6 @@
 # Product specification
 
-What the game must do for its players, written as player journeys with acceptance criteria. Each criterion below describes the game as it is: checked against `index.html` at `f07f748` (2026-11-08); that `index.html` reached production with the promotion `ee4783d`. Promotion [#69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69) then shipped three changes to `index.html`: [#61](https://github.com/alexisdacquay/immune-citadel-v4/pull/61) (a cloud save whose `owe` is not a list), [#62](https://github.com/alexisdacquay/immune-citadel-v4/pull/62) (the first cloud save of a new code) and [#65](https://github.com/alexisdacquay/immune-citadel-v4/pull/65) (an unlocked level no longer looks cleared). Those three are covered by their pull requests' QA checks and the game suite, not by a new pass over the criteria below.
+What the game must do for its players, written as player journeys with acceptance criteria. Each criterion below describes the game as it is: checked against `index.html` at `f07f748` (2026-11-08). Every later change to `index.html` ([its history](https://github.com/alexisdacquay/immune-citadel-v4/commits/main/index.html)) went through its pull request's QA checks and the game suite, not a new pass over the criteria below.
 
 ![A level in play: immune cells grown beside the infection route, the vitality, ATP and wave counters at the top left, the game controls at the top right, the hero and ability buttons at the bottom left](screenshots/play.jpg)
 
