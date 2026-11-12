@@ -115,7 +115,10 @@ test('one address gets 100 new save codes a day; its existing saves still update
   t.after(() => srv.close());
   const base = `http://localhost:${srv.address().port}`, A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', code = i => 'ABCDEFGHJKMNPQ' + A[i >> 5] + A[i & 31];
   const put = (c, ip) => fetch(`${base}/api/save/${c}`, { method: 'PUT', headers: { 'cf-connecting-ip': ip }, body: JSON.stringify({ save: { st: [1] } }) });
-  for (let i = 0; i < 100; i++) assert.equal((await put(code(i), '7.7.7.7')).status, 200);
+  t.mock.method(store, 'put', async () => null); // the server's cap is full
+  for (let i = 0; i < 5; i++) assert.equal((await put(code(0), '7.7.7.7')).status, 429, 'a first save refused by the server cap');
+  t.mock.restoreAll();
+  for (let i = 0; i < 100; i++) assert.equal((await put(code(i), '7.7.7.7')).status, 200, 'its retries did not use up the budget');
   assert.equal((await put(code(100), '7.7.7.7')).status, 429, 'the 101st new code from one address is refused');
   assert.equal(await store.get(code(100)), null, 'and nothing is stored');
   assert.equal((await put(code(0), '7.7.7.7')).status, 200, 'a save that exists still updates from that address');

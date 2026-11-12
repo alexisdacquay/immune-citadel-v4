@@ -108,13 +108,14 @@ function pgStore(url) {
 function limiter(max, ms = 60000) {
   const hits = new Map(); // IPs live here only, never on disk or in logs, and are forgotten within a minute after their window ends
   setInterval(() => { const now = Date.now(); for (const [k, v] of hits) if (now - v.t > ms) hits.delete(k); }, 60000).unref();
-  return ip => {
+  return (ip, peek = false) => { // peek: is this IP already at max, without counting
     const now = Date.now(), h = hits.get(ip);
     if (!h || now - h.t > ms) {
+      if (peek) return false;
       if (hits.size > 10000) for (const [k, v] of hits) if (now - v.t > ms) hits.delete(k); // drop expired windows, never live ones
       hits.set(ip, { t: now, n: 1 }); return false;
     }
-    return ++h.n > max;
+    return peek ? h.n >= max : ++h.n > max;
   };
 }
 const limited = limiter(WRITES_PER_MIN), playLimited = limiter(PLAY_PER_MIN);
@@ -178,7 +179,8 @@ function createServer(store) {
         if (tooDeep(save)) return send(400, { error: 'save nested too deep' });
         if (save.owe !== undefined && !Array.isArray(save.owe)) return send(400, { error: 'owe must be a list' }); // a stored non-list owe broke every sync for its code (#51)
         log.debug({ owed: Array.isArray(save.owe) ? save.owe.filter(Boolean).length : 0 }, 'cards owed'); // how many cards the save still owes the player, at debug level
-        if (!(await store.get(code)) && newLimited(clientIp(req))) return send(429, { error: 'too many new saves from this address today, try again tomorrow' }); // only new codes count: an existing save always updates
+        const fresh = !(await store.get(code)); // only new codes count: an existing save always updates
+        if (fresh && newLimited(clientIp(req), true)) return send(429, { error: 'too many new saves from this address today, try again tomorrow' });
         const updatedAt = await store.put(code, save);
         if (!updatedAt) { // the player's progress stays on the device and syncs later
           log.warn('new saves daily cap reached');
@@ -186,6 +188,7 @@ function createServer(store) {
           if (capReported !== day) { capReported = day; Sentry.captureMessage('new saves daily cap reached', 'warning'); } // once a day, so the Sentry alert emails once; no code, IP or save in it
           return send(429, { error: 'too many new saves today, try again tomorrow' });
         }
+        if (fresh) newLimited(clientIp(req)); // counted once stored, so a player retrying a refused first save does not use up the address's budget
         return send(200, { updatedAt });
       }
       send(405, { error: 'method not allowed' });
