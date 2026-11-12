@@ -1,4 +1,4 @@
-// An independent QA agent (DeepSeek) checks every pull request into dev. Two stages (owner, 2026-11-07):
+// An independent QA agent (DeepSeek) checks every pull request into dev. Two stages:
 // - Stage 1, CI job "qa" (QA_MODE unset), required: closed questions, each answered YES, NO or UNSURE at low effort from the files
 //   it names, 3 times (the majority answer counts). The questions are the pull request's own ("## QA checks" in its description,
 //   written by the builder: what the change could break) and the past failures (test/past-failures.md) whose files the pull
@@ -40,8 +40,9 @@ const CHECK = 'You answer one yes/no question about the code of a web game and i
 
 // One chat completion. DeepSeek first, tried `tries` times on a network error, a timeout, 429 or 5xx; if it still fails, the same
 // request once on the backup: a model from another provider behind an OpenAI-compatible gateway (Kilo), so one provider's outage or
-// timeout does not block a merge (PR #82, 2026-11-07). Without the gateway's secrets there is no backup. Both failing throws both
-// errors, so the job fails closed and says why. Returns the first choice and the model that gave it.
+// timeout does not block a merge (one held up the pull request merged as 736fda6, 2026-11-07). Without the gateway's secrets there
+// is no backup. Both failing throws both errors, so the job fails closed and says why. Returns the first choice and the model that
+// gave it.
 async function complete(req, { tries = 1, timeout, wait = 5000, env = process.env } = {}) {
   const call = async (url, key, model, n) => {
     const body = JSON.stringify({ ...req, model });
@@ -75,7 +76,7 @@ async function ask(check, rev, opts) {
 }
 
 // The same question asked 3 times gives one answer: the one at least 2 gave, else UNSURE. A single answer at low effort can flip
-// (PR #82's closed-tab check: YES, then NO, on the same file, 2026-11-07).
+// (the closed-tab check of the pull request merged as 736fda6: YES, then NO, on the same file, 2026-11-07).
 function majority(votes) {
   const top = ['YES', 'NO', 'UNSURE'].find(a => votes.filter(v => v.answer === a).length >= 2);
   return { ...(top ? votes.find(v => v.answer === top) : { answer: 'UNSURE', quote: '', why: 'three different answers' }), votes: votes.map(v => v.answer), models: votes.map(v => v.model).filter(Boolean),
@@ -151,14 +152,14 @@ async function review(env, gh) {
   const names = (...p) => git('diff', '--name-only', range, '--', ...p).split('\n').filter(Boolean), shown = new Set(names(...keep)), left = names().filter(f => !shown.has(f));
   const diff = git('diff', '--unified=3', range, '--', ...keep);
   const { choice, model } = await complete({ temperature: 0, response_format: { type: 'json_object' }, messages: [{ role: 'system', content: REVIEW }, { role: 'user', content: reviewPrompt(env.PR, pr, specs, diff, left) }] },
-    { timeout: 720000, env }); // 12 min a try: PR #82's prompt took 231 s and 38k reasoning tokens (2026-11-07), and 5 min timed out twice
+    { timeout: 720000, env }); // 12 min a try: the prompt of the pull request merged as 736fda6 took 231 s and 38k reasoning tokens (2026-11-07), and 5 min timed out twice
   if (choice?.finish_reason === 'length') throw new Error('the model reached its answer limit before giving a verdict');
   const v = readVerdict(choice?.message?.content, { needCriteria: specs.length > 0 });
   return { md: report(v, issues, 'QA review (advisory, does not block)', { model, left }), pass: v.verdict === 'PASS' };
 }
 
-// The open review's prompt. Files left out of the diff are named, so the model does not report them as missing (PR #82 reported the
-// regenerated docs/diagrams/observability.svg as missing).
+// The open review's prompt. Files left out of the diff are named, so the model does not report them as missing (the review of the pull
+// request merged as 736fda6 reported the regenerated docs/diagrams/observability.svg as missing).
 const reviewPrompt = (n, pr, specs, diff, left) => `## Pull request #${n}: ${pr.title}\n${pr.body || ''}\n\n## Acceptance criteria\n${specs.join('\n\n') || '(no issue named: use the pull request description as the specification)'}\n\n## Diff\n${diff}`
   + (left.length ? `\n\n## Changed files left out of the diff\nGenerated files (lockfiles, diagram SVG exports): changed in this pull request, not missing.\n${left.map(f => `- ${f}`).join('\n')}` : '');
 
