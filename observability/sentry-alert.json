@@ -1,11 +1,13 @@
 {
-  "_comment": "Sentry alert 1464000 (org myown-76, de.sentry.io), applied by the agent through the Sentry MCP (create_alert_rule / update_alert_rule). Every save API error emails the owner, at most once per 30 min per issue, and opens a GitHub issue labelled incident through Sentry's GitHub integration (integration 558317, installed 2026-11-08): that issue wakes the on-call agent (.github/workflows/oncall.yml). Sentry opens one GitHub issue per Sentry issue.",
+  "_comment": "Sentry alert 1464000 (org myown-76, de.sentry.io), applied by the agent through the Sentry MCP (create_alert_rule / update_alert_rule). Errors (level error or worse): every save API error emails the owner, at most once per 30 min per issue, and opens a GitHub issue labelled incident through Sentry's GitHub integration (integration 558317, installed 2026-11-08): that issue wakes the on-call agent (.github/workflows/oncall.yml). Sentry opens one GitHub issue per Sentry issue. Warnings (level warning: only the 'new saves daily cap reached' message from server/index.js) email the owner and nothing else: the on-call agent fixes code from a stack trace, a warning has none, so waking it would only open a public incident issue it hands back to a human.",
   "name": "Save API error (a save or load failed): email owner, wake the on-call agent",
   "projectSlugs": ["immune-citadel-api"],
   "triggers": { "logicType": "any-short", "conditions": [{ "type": "every_event", "comparison": true, "conditionResult": true }] },
-  "actionFilters": [{ "logicType": "all", "conditions": [], "actions": [
+  "actionFilters": [{ "logicType": "all", "conditions": [{ "type": "level", "comparison": { "level": 40, "match": "gte" }, "conditionResult": true }], "actions": [
     { "type": "email", "config": { "targetType": "user", "targetIdentifier": "5157255" }, "data": {} },
     { "type": "github", "integrationId": "558317", "config": { "targetType": "specific" }, "data": { "additional_fields": { "repo": "alexisdacquay/immune-citadel-v4", "labels": ["incident"] }, "dynamic_form_fields": [] } }
+  ] }, { "logicType": "all", "conditions": [{ "type": "level", "comparison": { "level": 30, "match": "eq" }, "conditionResult": true }], "actions": [
+    { "type": "email", "config": { "targetType": "user", "targetIdentifier": "5157255" }, "data": {} }
   ] }],
   "frequencyMinutes": 30
 }

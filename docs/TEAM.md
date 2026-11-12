@@ -12,7 +12,7 @@ Immune Citadel v4 is built by AI agents and one human owner, Alexis Dacquay. Thi
 | **On-call agent** | an independent DeepSeek agent ([tools/oncall.js](../tools/oncall.js), model `deepseek-v4-pro`), woken by a Sentry alert through the issue it opens ([OPERATIONS, On-call agent](OPERATIONS.md#on-call-agent)) | an incident: reads the error from Sentry, finds the cause, opens a pull request into `dev` with the fix, a regression test and QA checks, and reports on the incident issue | merge into `main`; edit anything but `index.html` and `server/*.js`; run the fix's tests with access to a secret or the network |
 | **Panels** | groups of short-lived Claude subagents run as one workflow | wide questions one agent should not answer alone: design options (designers, then judges) and audits (finders, then independent verifiers) | decide: a panel returns options and evidence, and the orchestrator decides |
 
-**Paused by the owner:** the bug-fixer subagent [`ic-bug-fixer`](../.claude/agents/ic-bug-fixer.md), which fixed one `bug` issue on its own branch, and the Opus QA subagent [`ic-qa`](../.claude/agents/ic-qa.md), which posted a QA verdict on the issue. QA moved into CI on 2026-11-07 ([#61](https://github.com/alexisdacquay/immune-citadel-v4/issues/61)). Issue [#21](https://github.com/alexisdacquay/immune-citadel-v4/issues/21) shows that older route end to end: spec, engineer report, QA verdict FAIL, second round, PASS.
+**Paused by the owner:** the bug-fixer subagent [`ic-bug-fixer`](../.claude/agents/ic-bug-fixer.md), which fixed one `bug` issue on its own branch, and the Opus QA subagent [`ic-qa`](../.claude/agents/ic-qa.md), which posted a QA verdict on the issue. QA moved into CI on 2026-11-07 ([#34](https://github.com/alexisdacquay/immune-citadel-v4/issues/34)). Issue [#21](https://github.com/alexisdacquay/immune-citadel-v4/issues/21) went through that older route end to end: spec, engineer report, QA verdict FAIL, second round, PASS. Those comments stayed in the original repository. A screenshot kept here shows only the QA subagent's part: [its round-2 verdict](screenshots/proof/spec-qa-verdict.jpg) on [#24](https://github.com/alexisdacquay/immune-citadel-v4/issues/24), a chore the builder fixed, not the bug-fixer.
 
 **Why this split.** Design, content and balance carry intent that gets lost in a handoff, and the game is one file (`index.html`), so parallel builders would collide: one builder is safer. The checking is kept independent: a different model from a different provider answers the questions from the code alone, so the builder's confidence cannot leak into the verdict.
 
@@ -24,8 +24,9 @@ Immune Citadel v4 is built by AI agents and one human owner, Alexis Dacquay. Thi
 |---|---|---|
 | **Question** | closed: YES, NO or UNSURE | open: judge the change against its acceptance criteria and list real defects |
 | **Questions come from** | the pull request's `## QA checks`, written by the builder, and the past failures in [test/past-failures.md](../test/past-failures.md) that name a file the change touches | the acceptance criteria of the issues the pull request names |
-| **The agent sees** | the full text of the files each question names, in the merge that would land (and, for a `[changes]` check, in the code before the change) | the diff (without lockfiles and diagram SVGs), the pull request description, the issues |
+| **The agent sees** | the full text of the files each question names, in the merge that would land (and, for a `[changes]` check, in the code before the change) | the diff (without lockfiles and diagram SVGs, which are named as left out), the pull request description, the issues |
 | **How the model is asked** | low reasoning effort, up to 64,000 tokens, each question 3 times: the answer given at least twice counts, otherwise UNSURE; a failed call is retried | once, up to 12 minutes |
+| **When DeepSeek fails** | after its retries, the same request once on a backup model from another provider (`google/gemini-3.5-flash` through the Kilo gateway); the comment names the models that answered. Both failing: the question is UNSURE with both errors, so the check fails | the same request once on the backup; the comment names the model |
 | **When** | beside `test` and `game`, so it adds no wait | after `test` and `game` pass |
 | **Result** | a **QA checks: PASS/FAIL** comment: one row per question, with the old and new answers and the line of code that decided | a **QA review (advisory, does not block)** comment: criteria, evidence, defects |
 | **Blocks the merge?** | yes: it is a required check on `dev` | no; before a promotion, every finding is fixed or answered |
@@ -38,26 +39,26 @@ A stage 1 check passes only when:
 
 The agent must quote the code that decides its answer. Code comments do not count as evidence, because a comment can claim what the code does not do.
 
-Both jobs run only on pull requests into `dev`. A promotion into `main` is not judged again (owner, 2026-11-07, [#75](https://github.com/alexisdacquay/immune-citadel-v4/issues/75)): each change already passed QA on its way into `dev`, and judging the whole release diff at once produced false alarms. The judge itself, `tools/qa.js`, and the past failures are read from the base branch, so a pull request cannot rewrite the script or drop the questions that judge it; a change to either applies from the next pull request.
+Both jobs run only on pull requests into `dev`. A promotion into `main` is not judged again (owner, 2026-11-07, [#38](https://github.com/alexisdacquay/immune-citadel-v4/issues/38)): each change already passed QA on its way into `dev`, and judging the whole release diff at once produced false alarms. The judge itself, `tools/qa.js`, and the past failures are read from the base branch, so a pull request cannot rewrite the script or drop the questions that judge it; a change to either applies from the next pull request.
 
 ### Why closed questions
 
-Until 2026-11-07, QA was a single open review. Its record on every blocking verdict: 8 real defects caught, 7 false alarms, and 3 runs that blocked with no verdict because the model ran out of time or tokens ([#88](https://github.com/alexisdacquay/immune-citadel-v4/issues/88)). A first two-stage design ([#89](https://github.com/alexisdacquay/immune-citadel-v4/pull/89)), a short prompt judging the acceptance criteria, passed real defects on a benchmark: it was merged, then replaced by [#92](https://github.com/alexisdacquay/immune-citadel-v4/pull/92) after the owner rejected it. The owner's design, approved on 2026-11-08: give the agent simple, closed tasks at low effort, many of them, for quick signals, and let the builder, who knows what the change could break, write the questions.
+Until 2026-11-07, QA was a single open review. Its record on every blocking verdict: 8 real defects caught, 7 false alarms, and 3 runs that blocked with no verdict because the model ran out of time or tokens ([#47](https://github.com/alexisdacquay/immune-citadel-v4/issues/47)). A first two-stage design, a short prompt judging the acceptance criteria, passed real defects on a benchmark: it was merged, then replaced after the owner rejected it. The owner's design, approved on 2026-11-08: give the agent simple, closed tasks at low effort, many of them, for quick signals, and let the builder, who knows what the change could break, write the questions.
 
-Stage 1 in this form arrived with [#92](https://github.com/alexisdacquay/immune-citadel-v4/pull/92) on 2026-11-08. That pull request's own `qa` job still ran the previous judge, so the first pull request judged by the new stage 1 in CI was [#93](https://github.com/alexisdacquay/immune-citadel-v4/pull/93); every pull request into `dev` since then has been judged by it. Before merging, the builder ran it locally with the real model:
+Stage 1 in this form arrived with a pull request on 2026-11-08, in the original repository. That pull request's own `qa` job still ran the previous judge, so the first pull request judged by the new stage 1 in CI was the next one; every pull request into `dev` since then has been judged by it. Before merging, the builder ran it locally with the real model:
 
 | Change judged | Stage 1 result | Time |
 |---|---|---|
-| PR #82, buggy version | FAIL, on the real defect: a save code made only of digits reached Sentry | 57 s |
-| PR #82, final version | PASS, 6 of 6 | 46 s |
-| PR #87 | PASS, 2 of 2; the old 5-minute timeout was answered NO | 4 s |
-| PR #92 itself | PASS, 9 of 9 | 14 s |
+| the fix for #37, buggy version | FAIL, on the real defect: a save code made only of digits reached Sentry | 57 s |
+| the fix for #37, final version | PASS, 6 of 6 | 46 s |
+| the fix for #46 | PASS, 2 of 2; the old 5-minute timeout was answered NO | 4 s |
+| the stage 1 pull request itself | PASS, 9 of 9 | 14 s |
 
 ## The builder owns the test plan
 
 The test plan is two things: each pull request's `## QA checks`, and [test/past-failures.md](../test/past-failures.md). The builder writes both and keeps improving them.
 
-**QA checks.** In the pull request description, under `## QA checks`, one line per thing the change could break. Two real lines from PR #92:
+**QA checks.** In the pull request description, under `## QA checks`, one line per thing the change could break. Two real lines from the stage 1 pull request:
 
 ```markdown
 ## QA checks
@@ -97,7 +98,7 @@ When the owner says **continue**, the orchestrator runs one turn of this loop. T
 6. **Integrate.** GitHub merges the pull request once `test`, `game` and `qa` are green, with no human. Render deploys the new `dev` commit, and CI's `deployed` job proves it is live.
 7. **Report.** One short message to the owner: what shipped, what is not verified, what needs them.
 
-**Promotion** is separate and needs the owner: every promotion of `dev` into `main` (production) needs the owner's written go; then the owner or, on that go, the orchestrator clicks merge. Each go is recorded in the [STATUS promotions table](STATUS.md#promotions). Issues close then, each with a "Shipped to production" comment. Until then a finished issue stays open, with the label `status:on-dev`.
+**Promotion** is separate and needs the owner: every promotion of `dev` into `main` (production) needs the owner's written go; then the owner or, on that go, the orchestrator clicks merge. How each go was given: [PROOF, CI/CD](PROOF.md#9-cicd). Issues close then, each with a "Shipped to production" comment. Until then a finished issue stays open, with the label `status:on-dev`.
 
 ## Gates
 
@@ -110,16 +111,16 @@ When the owner says **continue**, the orchestrator runs one turn of this loop. T
 
 ## Where to see it
 
-The agents post through the owner's `gh` login, so on GitHub their comments show the owner's name. Tell them apart by their heading: **Spec (orchestrator)**, **Build notes**, **Engineer report**, **QA verdict** (the paused subagents, as on [#21](https://github.com/alexisdacquay/immune-citadel-v4/issues/21)). The CI QA agent posts as `github-actions`, for example the [QA checks comment on #114](https://github.com/alexisdacquay/immune-citadel-v4/pull/114#issuecomment-6721457780).
+The agents post through the owner's `gh` login, so on GitHub their comments show the owner's name. Tell them apart by their heading: **Spec (orchestrator)**, **Build notes**, **Engineer report**, **QA verdict** (the paused subagents, as in [this QA verdict](screenshots/proof/spec-qa-verdict.jpg)). The CI QA agent posts as `github-actions`, for example its [QA checks comment on the on-call fix](screenshots/proof/team-qa-on-oncall-pr.jpg).
 
 | To see | Open |
 |---|---|
 | the backlog and priorities | [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues): labels `P0`-`P4`, type (`bug`, `type:feature`, `type:content`, `type:chore`, `type:design`), status, `needs-owner`, `roadmap` |
-| a spec with acceptance criteria | any recent issue, for example [#88](https://github.com/alexisdacquay/immune-citadel-v4/issues/88) or [#70](https://github.com/alexisdacquay/immune-citadel-v4/issues/70) |
-| a builder's test plan and both QA verdicts | the description and comments of a pull request into `dev`, for example [#92](https://github.com/alexisdacquay/immune-citadel-v4/pull/92) (its stage 1 verdict came from the previous judge), or [#93](https://github.com/alexisdacquay/immune-citadel-v4/pull/93) for the first **QA checks** comment from the new stage 1 |
+| a spec with acceptance criteria | any recent issue, for example [#47](https://github.com/alexisdacquay/immune-citadel-v4/issues/47) or [#37](https://github.com/alexisdacquay/immune-citadel-v4/issues/37) |
+| a builder's test plan and both QA verdicts | the description and comments of any pull request into `dev`, for example the [QA checks comment on the on-call fix](screenshots/proof/team-qa-on-oncall-pr.jpg) |
 | the past failures stage 1 keeps asking | [test/past-failures.md](../test/past-failures.md) |
-| the older bug-fixer and QA subagent route | [#21](https://github.com/alexisdacquay/immune-citadel-v4/issues/21) |
-| which issue a commit belongs to | the `(#n)` at the end of each commit message on `dev` |
+| the older QA subagent's verdict on an issue | [#24](https://github.com/alexisdacquay/immune-citadel-v4/issues/24): [its spec](screenshots/proof/spec-issue-acceptance.jpg) and [the QA subagent's round-2 verdict](screenshots/proof/spec-qa-verdict.jpg) |
+| which issue a commit belongs to | from 2026-11-12 on: the `(#n)` at the end of a commit message on `dev`, or the `issue/<n>-…` branch named in its merge commit. Earlier commits carry the original repository's numbers; some match an issue here, others are missing or name another item |
 
 ## Tools the team uses
 
@@ -136,6 +137,5 @@ The agents post through the owner's `gh` login, so on GitHub their comments show
 
 ## Known gaps
 
-- **No backup model for QA.** When DeepSeek fails, stage 1 fails closed and blocks the merge until a re-run. A backup model is on the roadmap as P1 ([#83](https://github.com/alexisdacquay/immune-citadel-v4/issues/83)).
 - **A pull request that edits `ci.yml` can change its own `qa` job,** because GitHub reads the workflow file from the pull request. Not fixed yet.
 - **The paused issue-cycle workflow** ([.claude/workflows/issue-cycle.js](../.claude/workflows/issue-cycle.js)) still sends bugs to `ic-bug-fixer` and verification to `ic-qa`, both paused. It is kept for reference and not run; the loop above, in the [`team-loop` skill](../.claude/skills/team-loop/SKILL.md), is what the team does today.

@@ -207,7 +207,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 #mstage{position:absolute;left:0;top:0;width:1440px;height:900px;transform-origin:0 0}
 #mapCv,#bodymap{position:absolute;inset:0;width:1440px;height:900px}
 .mhud{position:absolute;left:22px;top:74px;font:500 10px var(--mono);letter-spacing:.16em;color:rgba(127,149,170,.75);white-space:pre;pointer-events:none}.mhud.r{left:auto;right:22px;text-align:right}
-/* level nodes: a stained cell in its place's colour; the next level pulses; locked ones are dark with a padlock */
+/* level nodes: a cleared level is a stained cell in its place's colour; the next level pulses; an unlocked one not yet cleared is dark with a ring in that colour; locked ones are dark with a padlock */
 .lnode,.lch{position:absolute;width:54px;height:54px;margin:-27px 0 0 -27px;padding:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;outline:none;color:#fff;
   background:radial-gradient(circle at 50% 50%,rgba(91,140,255,.95) 0 9px,rgba(91,140,255,0) 15px),radial-gradient(circle at 38% 32%,color-mix(in srgb,var(--c) 70%,#fff) 0,var(--c) 30%,color-mix(in srgb,var(--c) 35%,#000) 78%);
   border:2px solid color-mix(in srgb,var(--c) 60%,#fff);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 22%,transparent),0 0 22px 2px color-mix(in srgb,var(--c) 70%,transparent),inset 0 -6px 12px rgba(0,0,0,.45),inset 0 3px 6px rgba(255,255,255,.35)}
@@ -219,6 +219,8 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 .lnode.next::before{content:"";position:absolute;inset:-12px;border-radius:50%;border:2px solid var(--c);opacity:.8;animation:nring 1.6s ease-out infinite;pointer-events:none}
 @keyframes npulse{50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--c) 30%,transparent),0 0 44px 10px color-mix(in srgb,var(--c) 80%,transparent),inset 0 -6px 12px rgba(0,0,0,.45),inset 0 3px 6px rgba(255,255,255,.35)}}
 @keyframes nring{from{transform:scale(.8);opacity:.9}to{transform:scale(1.45);opacity:0}}
+.lnode.open{background:radial-gradient(circle at 40% 35%,#1d2a38,#0a1119 80%);border:2px solid var(--c);box-shadow:0 0 0 3px rgba(2,4,7,.7),0 0 12px color-mix(in srgb,var(--c) 45%,transparent),inset 0 -4px 10px rgba(0,0,0,.5)}
+.lnode.open i{color:color-mix(in srgb,var(--c) 70%,#fff)}
 .lnode.sel,.lnode:focus-visible,.lch:focus-visible{outline:3px solid #ffd27a;outline-offset:5px}
 .lnode.locked,.lch.locked{cursor:default;background:radial-gradient(circle at 40% 35%,#1d2a38,#0a1119 80%);border:2px solid rgba(140,205,255,.28);box-shadow:0 0 0 3px rgba(2,4,7,.7),inset 0 -4px 10px rgba(0,0,0,.5)}
 .lnode.locked i{color:#6c8196;font-size:14px}
@@ -1534,7 +1536,7 @@ function persist() { save.at = Math.max(Date.now(), (save.at || 0) + 1); persist
 // Hosts without an API (file://) play exactly as before.
 const CLOUD_API = { 'immune-citadel-v4.onrender.com': 'https://immune-citadel-v4-api.onrender.com', 'immune-citadel-v4-dev.onrender.com': 'https://immune-citadel-v4-api-dev.onrender.com', localhost: 'http://localhost:8787', '127.0.0.1': 'http://localhost:8787' }[location.hostname] || null;
 const CODE_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', CODE_RE = /^[A-HJ-NP-Z2-9]{16}$/; // no I, O, 0, 1: codes get read aloud and retyped
-const cloud = { code: null, st: 'idle', at: 0, busy: false, again: false, timer: 0 };
+const cloud = { code: null, st: 'idle', at: 0, busy: false, again: false, timer: 0, fresh: false };
 try { const c = localStorage.getItem('immune-citadel-v4-code'); if (CODE_RE.test(c)) cloud.code = c; } catch (e) {}
 // two saves of one player: progress only grows (best stars, every challenge won, everything seen); choices (memory, settings) follow the newer save
 function mergeSave(a, b) {
@@ -1544,7 +1546,7 @@ function mergeSave(a, b) {
   for (const k of ['st', 'hc', 'ic']) out[k] = fa[k].map((v, i) => Math.max(v, fb[k][i]));
   out.rch = Math.max(fa.rch, fb.rch);
   const met = new Set([...arr(a, 'seen'), ...arr(b, 'seen')]); // an owed card shown on either device stays shown: 'owed:<id>' in seen
-  const owe = [...new Set([...(fa.owe || a.owe || []), ...(fb.owe || b.owe || [])])].filter(id => !met.has('owed:' + id)); if (owe.length) out.owe = owe; else delete out.owe;
+  const owe = [...new Set([...(fa.owe || arr(a, 'owe')), ...(fb.owe || arr(b, 'owe'))])].filter(id => !met.has('owed:' + id)); if (owe.length) out.owe = owe; else delete out.owe;
   for (const k of ['seen', 'viewed', 'hints']) out[k] = [...new Set([...arr(a, k), ...arr(b, k)])].filter(v => typeof v === 'string');
   if (!out.mem || typeof out.mem !== 'object' || Array.isArray(out.mem)) out.mem = {};
   if (!DIFF[out.diff]) out.diff = 'normal';
@@ -3169,15 +3171,17 @@ async function cloudSync() {
     if (!cloud.code) { // first save on this device: mint a code
       cloud.code = Array.from(crypto.getRandomValues(new Uint8Array(16)), v => CODE_ABC[v & 31]).join('');
       try { localStorage.setItem('immune-citadel-v4-code', cloud.code); } catch (e) {}
+      cloud.fresh = true; // nothing can be stored under a code minted here until its first push: no pull, whose 404 the browser logs as an error
     }
-    const url = `${CLOUD_API}/api/save/${cloud.code}`, r = await fetch(url, { cache: 'no-store' });
-    if (!r.ok && r.status !== 404) throw new Error('pull ' + r.status);
-    const local = snapshot(), remote = r.ok ? ((await r.json()).save || {}) : null, merged = remote ? mergeSave(local, remote) : local;
+    const url = `${CLOUD_API}/api/save/${cloud.code}`, r = cloud.fresh ? null : await fetch(url, { cache: 'no-store' });
+    if (r && !r.ok && r.status !== 404) throw new Error('pull ' + r.status);
+    const local = snapshot(), remote = r?.ok ? ((await r.json()).save || {}) : null, merged = remote ? mergeSave(local, remote) : local;
     if (JSON.stringify(merged) !== JSON.stringify(local)) cloudApply(merged);
     if (!remote || JSON.stringify(merged) !== JSON.stringify(remote)) {
       const w = await fetch(url, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ save: merged }) });
       if (!w.ok) throw new Error('push ' + w.status);
     }
+    cloud.fresh = false;
     cloud.st = 'ok'; cloud.at = Date.now();
   } catch (e) { cloud.st = 'err'; } // the save is safe in this browser; the next save or visit retries
   cloud.busy = false; cloudShow();
@@ -3206,7 +3210,7 @@ async function cloudLoad() { // continue a save made on another device; this dev
     if (r.status === 404) return cloudShow('No save under that code. Check it on the other device.');
     if (!r.ok) throw new Error(r.status);
   } catch (e) { return cloudShow('Cloud unreachable. Try again in a minute.'); }
-  cloud.code = code; try { localStorage.setItem('immune-citadel-v4-code', code); } catch (e) {}
+  cloud.code = code; cloud.fresh = false; try { localStorage.setItem('immune-citadel-v4-code', code); } catch (e) {}
   save.at = 0; // the save being continued keeps its memory and settings; this device adds only its progress
   $('#cloudIn').value = ''; sfx('up'); await cloudSync();
 }

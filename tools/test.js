@@ -102,6 +102,9 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   // an owed card shown on one device must not come back from the other device's copy (it did: "Fever spike" shown as new at every level)
   const owed = await p.evaluate(() => { const shown = { owe: [], seen: ['owed:fever'], at: 2 }, cloud = { owe: ['fever'], seen: [], at: 1 }; return [IC.mergeSave(shown, cloud), IC.mergeSave(cloud, shown)].map(m => (m.owe || []).join()).join('|'); });
   if (owed !== '|') errs.push('an owed card shown on one device came back from the other: ' + owed);
+  // a save whose owe is not a list counts as owing nothing: merging must not throw, or every cloud sync for that code fails (#51)
+  const badOwe = await p.evaluate(() => ['x', 5, { a: 1 }, null].map(owe => { try { return [IC.mergeSave({ owe, at: 2 }, { owe: ['fever'], at: 1 }), IC.mergeSave({ owe: ['fever'], at: 2 }, { owe, at: 1 })].map(m => (m.owe || []).join()).join('|'); } catch (e) { return e.message; } }));
+  if (badOwe.some(r => r !== 'fever|fever')) errs.push('merging a save whose owe is not a list: ' + badOwe.join(', '));
   console.log('route problems:', route.length ? route : 'none'); errs.push(...route);
   const results = []; let used = {}; // specialists bought by the bot, across all runs
   const nLv = await p.evaluate(() => IC.LEVELS.length), lmark = await p.evaluate(() => IC.LMARK);
@@ -289,6 +292,11 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
     return e.querySelectorAll('.chb').length !== (full && won ? 2 : 0) || (!full && won) !== (!!chn && /Challenges open at Level 17/.test(chn.textContent)); }).map(e => e.dataset.i), full)); } return bad; };
   const noKit = await (async () => { await p.evaluate(() => { window._rch = IC.save.rch; IC.save.rch = IC.KITFULL - 1; IC.showTitle(); }); const b = await chipPages(false); await p.evaluate(() => { IC.save.rch = window._rch; IC.showTitle(); }); return b; })();
   cc(!noKit.length, 'before Level 17 a won full map must show the challenges note and no chips: slides ' + noKit);
+  // body map (#45): in one region (lung: 04 cleared, 05 next, 06 unlocked) an unlocked level not yet cleared must not look cleared, and has no padlock
+  const look = await p.evaluate(() => { window._st = IC.save.st; IC.save.st = IC.save.st.map((v, i) => i === 4 || i === 5 ? 0 : Math.max(v, 1)); IC.showTitle();
+    return [3, 4, 5].map(i => { const e = document.querySelector(`.lnode[data-i="${i}"]`), s = getComputedStyle(e); return { cls: e.classList[1], bg: s.backgroundImage, border: s.borderTopColor, pad: getComputedStyle(e, '::after').content }; }); });
+  await p.screenshot({ path: `${out}/33-map-open.png` }); await p.evaluate(() => { IC.save.st = window._st; IC.showTitle(); });
+  if (look.map(l => l.cls).join() !== 'done,next,open' || look[2].bg === look[0].bg || look[2].border === look[0].border || look[2].pad !== 'none') errs.push('body map: an unlocked level must look unlike a cleared one, without a padlock: ' + JSON.stringify(look));
   const chipBad = await chipPages(true);
   cc(!chipBad.length, 'every won full-map specimen (and only those) offers Acute and Chronic: slides ' + chipBad);
   const camp = await p.evaluate(() => JSON.stringify(IC.save.st));

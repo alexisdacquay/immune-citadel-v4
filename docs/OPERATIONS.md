@@ -14,7 +14,7 @@ How Immune Citadel runs: where it is deployed, how a change reaches players, wha
 
 The save API answers only under `/health` and `/api/`; its bare host returns 404.
 
-**Which commit is live:** `GET /health` on a save API returns it (`{"ok":true,"commit":"…"}`), and `/version.txt` on a game site shows it. Render waits for `/health` to answer before a new API deploy takes traffic, so a broken build never does. Every promotion, with its commit and proof: [STATUS, Promotions](STATUS.md#promotions).
+**Which commit is live:** `GET /health` on a save API returns it (`{"ok":true,"commit":"…"}`), and `/version.txt` on a game site shows it. Render waits for `/health` to answer before a new API deploy takes traffic, so a broken build never does. Every promotion, with its merge commit: [STATUS, Promotions](STATUS.md#promotions).
 
 ### What runs on Render
 
@@ -65,20 +65,20 @@ A change reaches players in six moves:
 
 | Step | What | Proof |
 |---|---|---|
-| CI | [ci.yml](../.github/workflows/ci.yml) on every pull request and every push to `dev` and `main`: `test` (unit tests, then integration on the Docker stack; about 1 min) and `game` (a bot plays every level; saves, challenges, Field Guide, phone and tablet layouts; 6 to 7 min) | checks on PR [#112](https://github.com/alexisdacquay/immune-citadel-v4/pull/112); [a green `dev` run](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42480697284) |
-| QA | `qa` (required) and `qa-review` (advisory) on every pull request into `dev`: [TEAM, How QA works](TEAM.md#how-qa-works-two-stages) | [PR #114's QA checks comment](https://github.com/alexisdacquay/immune-citadel-v4/pull/114#issuecomment-6721457780) |
-| Auto-merge | armed with a person's token, never `GITHUB_TOKEN`: a merge by `GITHUB_TOKEN` starts no workflows, so there would be no deploy proof. The branch need not be up to date with `dev`: CI runs again on `dev` after every merge, and a red `dev` blocks the next promotion | [PR #45](https://github.com/alexisdacquay/immune-citadel-v4/pull/45) |
+| CI | [ci.yml](../.github/workflows/ci.yml) on every pull request and every push to `dev` and `main`: `test` (unit tests, then integration on the Docker stack; about 1 min) and `game` (a bot plays every level; saves, challenges, Field Guide, phone and tablet layouts; 6 to 7 min) | [green checks on a pull request](screenshots/proof/team-qa-on-oncall-pr.jpg); [a green push run on `main`](screenshots/proof/ci-main-run.jpg) |
+| QA | `qa` (required) and `qa-review` (advisory) on every pull request into `dev`: [TEAM, How QA works](TEAM.md#how-qa-works-two-stages) | [the QA checks comment on the on-call fix](screenshots/proof/team-qa-on-oncall-pr.jpg) |
+| Auto-merge | armed with a person's token, never `GITHUB_TOKEN`: a merge by `GITHUB_TOKEN` starts no workflows, so there would be no deploy proof. The branch need not be up to date with `dev`: CI runs again on `dev` after every merge, and a red `dev` blocks the next promotion | [PIPELINE-PLAN.md](PIPELINE-PLAN.md), step 4 |
 | CD | Render's auto-deploy trigger is "on commit" on all four services; only green pull requests can put a commit on `dev` or `main` | [PIPELINE-PLAN.md](PIPELINE-PLAN.md), step 3 |
-| Deploy proof | CI job `deployed` on each push to `dev` or `main`: [tools/verify-deploy.js](../tools/verify-deploy.js) waits until the API's `/health` and the site's `/version.txt` serve the pushed commit, else the run goes red after 15 min (if a newer push arrives first, that push's own run takes over). Then [tools/smoke.js](../tools/smoke.js) plays the live site in Chromium, read-only (Sentry and the page's `/api/` calls are answered locally, nothing is sent or saved), and goes red on a wrong commit, an error, or a save code, user agent, an `ip_address` field, headers or play data in a Sentry payload, or a crash report that does not tell Sentry to drop the IP (`infer_ip` not `never`) | dev: [run 42221746028](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42221746028), live 58 s after the merge; production: [run 42388716983](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42388716983), live 73 s after the merge; every promotion's run is in [STATUS, Promotions](STATUS.md#promotions) |
-| Promotion | [promotion.yml](../.github/workflows/promotion.yml): `dev-green` waits for `dev`'s own CI run on the same commit, deploy proof included, and fails unless it is green; then, on the owner's written go, the owner or the orchestrator merges | [STATUS, Promotions](STATUS.md#promotions): every promotion, its approval and its proof run |
+| Deploy proof | CI job `deployed` on each push to `dev` or `main`: [tools/verify-deploy.js](../tools/verify-deploy.js) waits until the API's `/health` and the site's `/version.txt` serve the pushed commit, else the run goes red after 15 min (if a newer push arrives first, that push's own run takes over). Then [tools/smoke.js](../tools/smoke.js) plays the live site in Chromium, read-only (Sentry and the page's `/api/` calls are answered locally, nothing is sent or saved), and goes red on a wrong commit, an error, or a save code, user agent, an `ip_address` field, headers or play data in a Sentry payload, or a crash report that does not tell Sentry to drop the IP (`infer_ip` not `never`) | dev: live 58 s after the merge; production: live 73 s after the merge (both in the original repository: [PIPELINE-PLAN.md](PIPELINE-PLAN.md), step 3); [a later production run, `deployed` green](screenshots/proof/ci-main-run.jpg); every promotion's merge commit is in [STATUS, Promotions](STATUS.md#promotions) |
+| Promotion | [promotion.yml](../.github/workflows/promotion.yml): `dev-green` waits for `dev`'s own CI run on the same commit, deploy proof included, and fails unless it is green; then, on the owner's written go, the owner or the orchestrator merges | [STATUS, Promotions](STATUS.md#promotions): every promotion, its date and its merge commit |
 
-**Every promotion needs the owner's written go.** Then the owner or, on that go, the orchestrator (the main Claude Code session) clicks merge. Since 2026-11-08 the owner's standing written go ("In the future, please proxy for me") lets the orchestrator give it; each pull request quotes the go it relies on. Each go is recorded in the [STATUS promotions table](STATUS.md#promotions). No agent arms auto-merge on a pull request into `main`. This is a team rule ([AGENTS.md](../AGENTS.md)); GitHub does not enforce it.
+**Every promotion needs the owner's written go.** Then the owner or, on that go, the orchestrator (the main Claude Code session) clicks merge. Since 2026-11-08 the owner's standing written go ("In the future, please proxy for me") lets the orchestrator give it; each pull request quotes the go it relies on. How each go was given: [PROOF, CI/CD](PROOF.md#9-cicd). No agent arms auto-merge on a pull request into `main`. This is a team rule ([AGENTS.md](../AGENTS.md)); GitHub does not enforce it.
 
 ### QA in two stages
 
 QA is an independent DeepSeek agent ([tools/qa.js](../tools/qa.js)) that runs as two CI jobs on every pull request into `dev`: `qa`, stage 1, required, asks closed YES or NO questions; `qa-review`, stage 2, advisory, is an open review. The full process, its rules and its proof: [TEAM, How QA works](TEAM.md#how-qa-works-two-stages).
 
-**Writing QA checks.** The builder owns this test plan. One line per thing the change could break, under `## QA checks` in the pull request description, for example (from PR #92):
+**Writing QA checks.** The builder owns this test plan. One line per thing the change could break, under `## QA checks` in the pull request description, for example (from the stage 1 pull request):
 
 ```markdown
 ## QA checks
@@ -100,14 +100,14 @@ GitHub rulesets on both branches; nobody bypasses them, and neither branch accep
 
 | | `dev` | `main` |
 |---|---|---|
-| Ruleset | 26753396, [.github/rulesets/dev.json](../.github/rulesets/dev.json) | 26693579, [.github/rulesets/main.json](../.github/rulesets/main.json) |
+| Ruleset | 27124769, [.github/rulesets/dev.json](../.github/rulesets/dev.json) | 27124774, [.github/rulesets/main.json](../.github/rulesets/main.json) |
 | Changes only through a pull request | yes | yes |
 | Required checks | `test`, `game`, `qa` | `test`, `game`, `dev-green` |
 | Branch must be up to date | no, so auto-merge never stalls | yes |
 
-- `dev-green` lives in its own workflow, [promotion.yml](../.github/workflows/promotion.yml), which runs only on pull requests into `main`. Inside `ci.yml` it would be skipped on every push, and GitHub counts a skipped check as passing ([#75](https://github.com/alexisdacquay/immune-citadel-v4/issues/75)).
+- `dev-green` lives in its own workflow, [promotion.yml](../.github/workflows/promotion.yml), which runs only on pull requests into `main`. Inside `ci.yml` it would be skipped on every push, and GitHub counts a skipped check as passing ([#38](https://github.com/alexisdacquay/immune-citadel-v4/issues/38)).
 - No merge queue: GitHub offers it only to repositories owned by an organisation, and this one belongs to a personal account. So the strict guarantee sits on the promotion, as trunk-based development advises. Decision: the owner, 2026-11-07.
-- Re-apply a ruleset after editing its file: `gh api -X PUT repos/alexisdacquay/immune-citadel-v4/rulesets/<id> --input .github/rulesets/<file>.json`.
+- Re-apply a ruleset after editing its file: `gh api -X PUT repos/alexisdacquay/immune-citadel-v4/rulesets/27124769 --input .github/rulesets/dev.json` for `dev`, `gh api -X PUT repos/alexisdacquay/immune-citadel-v4/rulesets/27124774 --input .github/rulesets/main.json` for `main`.
 
 ### What goes wrong, and who notices
 
@@ -153,7 +153,7 @@ A restore brings the data back as it was at that time, so rows deleted since the
 |---|---|---|
 | game errors and load speed (Sentry) | on | on since the 2026-11-07 promotion; no production test error recorded |
 | save API errors and traces (Sentry) | on | on since 2026-11-08 (`SENTRY_DSN` set) |
-| save log lines and metric in Sentry (#70) | on since PR #82 (2026-11-07) | on since 2026-11-08: a trace and a log line with environment `production` at 07:47 UTC, and `http.server.request.duration` points with environment `production` in Sentry (checked 2026-11-08) |
+| save log lines and metric in Sentry (#37) | on since 2026-11-07 | on since 2026-11-08: a trace and a log line with environment `production` at 07:47 UTC, and `http.server.request.duration` points with environment `production` in Sentry (checked 2026-11-08) |
 | gameplay events (own Postgres) | on | the code is on `main` since the 2026-11-07 promotion; no production read is recorded |
 | uptime (Better Stack) and deploy proof (`deployed`) | on | on |
 
@@ -232,7 +232,7 @@ When a Sentry alert fires, an agent wakes and proposes the fix, with no human in
 5. **It opens a pull request into `dev`.** A save API fix merges like any other, on `test`, `game` and `qa`. A game fix waits for a human, because the game's Sentry key is public by design, so anyone can raise a game error and write the text the model reads. Production stays the owner's.
 6. **It reports on the incident issue:** when it woke, what it read, the pull request, or why it stopped.
 
-**Guard rails.** It edits only `index.html` and `server/<name>.js` (an allow-list), at most 150 lines and 20,000 characters. The agent's own code runs from `main`, never from `dev`. The error text is untrusted data in its prompt. One agent runs at a time, and a retry replaces its own unmerged branch. The design was reviewed independently on 2026-11-08 ([#124](https://github.com/alexisdacquay/immune-citadel-v4/pull/124)).
+**Guard rails.** It edits only `index.html` and `server/<name>.js` (an allow-list), at most 150 lines and 20,000 characters. The agent's own code runs from `main`, never from `dev`. The error text is untrusted data in its prompt. One agent runs at a time, and a retry replaces its own unmerged branch. The design was reviewed independently on 2026-11-08.
 
 **Setup (done 2026-11-08), once, by the owner:** install Sentry's GitHub integration on this repository (Sentry → Settings → Integrations → GitHub), so that the orchestrator can add "Create a GitHub issue" to the alert rules. Then run, once, the command below. It creates a write deploy key for this repository only, stores its private half as the `ONCALL_DEPLOY_KEY` secret without showing it, and lets GitHub Actions open pull requests. The agent pushes with that key because GitHub starts no CI for what its own `GITHUB_TOKEN` pushes. No personal token is needed. An issue-triggered workflow runs from the default branch, so the agent wakes only once it is on `main`. The `incident` label is for a manual wake-up by the owner.
 
@@ -240,20 +240,20 @@ When a Sentry alert fires, an agent wakes and proposes the fix, with no human in
 D=$(mktemp -d) && ssh-keygen -q -t ed25519 -N "" -C "immune-citadel-v4 on-call agent" -f "$D/k" && gh repo deploy-key add "$D/k.pub" -R alexisdacquay/immune-citadel-v4 --allow-write --title "on-call agent" && gh secret set ONCALL_DEPLOY_KEY -R alexisdacquay/immune-citadel-v4 < "$D/k" && gh api -X PUT repos/alexisdacquay/immune-citadel-v4/actions/permissions/workflow -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true && rm -rf "$D" && echo "on-call key set"
 ```
 
-**First drill, 2026-11-08: from an alert to a fix live on `dev` in 11 minutes, with no human in the loop.** The save API had no 500 that real traffic could trigger: the nested-save 500 (#126) does not reproduce on Render. So the drill planted a real defect on `dev`, as #27's spec asks: a debug line that counts the cards a save owes with `save.owe.filter(...)`, which throws when `owe` is not a list ([PR #130](https://github.com/alexisdacquay/immune-citadel-v4/pull/130), labelled a drill). The unit tests sent no `owe`, so CI passed it.
+**First drill, 2026-11-08: from an alert to a fix live on `dev` in 11 minutes, with no human in the loop.** The save API had no 500 that real traffic could trigger: the nested-save 500 (#57) does not reproduce on Render. So the drill planted a real defect on `dev`, as #27's spec asks: a debug line that counts the cards a save owes with `save.owe.filter(...)`, which throws when `owe` is not a list (a pull request labelled a drill, in the original repository). The unit tests sent no `owe`, so CI passed it.
 
 | Time (UTC) | What happened | Proof |
 |---|---|---|
 | 16:52:52 | one crafted save on `dev`, `{"save":{"owe":"x"}}`, answers 500; Sentry opens IMMUNE-CITADEL-API-2, `TypeError: save.owe.filter is not a function` | Sentry issue, resolved with a comment |
 | 16:53:05 | the save API alert fires: it emails the owner and asks Sentry's GitHub integration for an issue | alert 1464000 |
-| 16:53:06 | `sentry[bot]` opens [#131](https://github.com/alexisdacquay/immune-citadel-v4/issues/131), labelled `incident` | the issue |
-| 16:53:13 | the On-call workflow wakes on it, running the agent from `main` | [run 42502143601](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42502143601) |
-| 16:53:22 | the agent reports on #131: awake, reading `server/index.js` and `server/test.js` | comment on #131 |
-| 16:54:40 | first attempt: the cause (it calls `.filter` on untrusted input), an `Array.isArray` guard and a regression test; unit tests green, sealed; it opens [PR #132](https://github.com/alexisdacquay/immune-citadel-v4/pull/132) and pushes with the deploy key, so CI starts | PR #132 |
-| 17:02:00 | `test`, `game` and `qa` green (and the advisory review); auto-merge merges it into `dev` | PR #132 |
+| 16:53:06 | `sentry[bot]` opens an issue in the original repository, labelled `incident` (copied here as [#58](https://github.com/alexisdacquay/immune-citadel-v4/issues/58)) | [the issue](screenshots/proof/oncall-1-issue-by-sentry.jpg) |
+| 16:53:13 | the On-call workflow wakes on it, running the agent from `main` | [its run, linked in the agent's first comment](screenshots/proof/oncall-2-agent-comments.jpg) |
+| 16:53:22 | the agent reports on the issue: awake, reading `server/index.js` and `server/test.js` | [comment on the issue](screenshots/proof/oncall-2-agent-comments.jpg) |
+| 16:54:40 | first attempt: the cause (it calls `.filter` on untrusted input), an `Array.isArray` guard and a regression test; unit tests green, sealed; it opens a pull request and pushes with the deploy key, so CI starts | [the pull request](screenshots/proof/oncall-3-fix-pr-merged.jpg) |
+| 17:02:00 | `test`, `game` and `qa` green (and the advisory review); auto-merge merges it into `dev` | [its checks and merge](screenshots/proof/team-qa-on-oncall-pr.jpg) |
 | 17:04:06 | `dev` serves the fix (`411f62b`); the same crafted save answers 200 | `/health` on the dev API |
 
-The merge was made with GitHub's own token, so `dev`'s push run (and its `deployed` proof) did not start for `411f62b`; Render deployed it, and the next merge into `dev` runs CI again. The planted line stays, now guarded, and reached production in #134 as harmless debug logging.
+The merge was made with GitHub's own token, so `dev`'s push run (and its `deployed` proof) did not start for `411f62b`; Render deployed it, and the next merge into `dev` runs CI again. The planted line stays, now guarded, and reached production with the next promotion as harmless debug logging.
 
 ## Alert: save API error
 
@@ -261,7 +261,7 @@ The merge was made with GitHub's own token, so `dev`'s push run (and its `deploy
 |---|---|
 | ![The save API alert: 2 triggers, Nov 6 and Nov 8](screenshots/proof/alert-1-history.jpg) | ![The alert's actions: notify by email, create a GitHub issue](screenshots/proof/alert-2-actions.jpg) |
 
-**"Save API error (a save or load failed): email owner, wake the on-call agent"**: every error in Sentry project `immune-citadel-api` emails the owner, at most once per 30 min per issue, and opens a GitHub issue that wakes the [on-call agent](#on-call-agent). Defined in [observability/sentry-alert.json](../observability/sentry-alert.json) (Sentry alert 1464000) and applied through the Sentry MCP.
+**"Save API error (a save or load failed): email owner, wake the on-call agent"**: every error in Sentry project `immune-citadel-api` emails the owner, at most once per 30 min per issue, and opens a GitHub issue that wakes the [on-call agent](#on-call-agent). A warning (only "new saves daily cap reached", sent once a day when the API starts refusing new save codes) emails the owner and opens no issue: it has no stack trace for the agent to fix. Defined in [observability/sentry-alert.json](../observability/sentry-alert.json) (Sentry alert 1464000) and applied through the Sentry MCP.
 
 | | |
 |---|---|
