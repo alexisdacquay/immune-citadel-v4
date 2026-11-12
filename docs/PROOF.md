@@ -2,7 +2,7 @@
 
 For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoomcamp/tree/main/project)). Each section: the rubric's words, what was built, then screenshots or raw output with links. Every link opens without a login, except GitHub Actions job logs (GitHub requires one); their key lines are quoted here.
 
-**Claimed: 24 of 24.** Evidence captured on 2026-11-08.
+**Claimed: 24 of 24.** Evidence captured on 2026-11-08. Screenshots show the numbers of that date: issue #131 is now #58.
 
 | # | Criterion | Points | The proof in one line |
 |---|---|---|---|
@@ -36,8 +36,8 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 - **Specification:** [SPEC.md](SPEC.md), player journeys, each with acceptance criteria.
 - **Public tracker:** [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues?q=is%3Aissue): 58 issues (23 open) and 73 merged pull requests. 27 issues carry an "Acceptance criteria" section ([search](https://github.com/alexisdacquay/immune-citadel-v4/issues?q=is%3Aissue%20%22acceptance%20criteria%22)); most of the rest are bug reports, roadmap ideas, or early features from before that rule.
 - **Agents used the tracker** (bot accounts, so no doubt who wrote it):
-  - [#131](https://github.com/alexisdacquay/immune-citadel-v4/issues/131): opened by `sentry[bot]`, worked by the on-call agent as `github-actions` (criterion 12);
-  - every pull request into `dev`: the QA agent posts its verdict as `github-actions`, for example on [#132](https://github.com/alexisdacquay/immune-citadel-v4/pull/132) (criterion 3).
+  - [#58](https://github.com/alexisdacquay/immune-citadel-v4/issues/58): opened by `sentry[bot]`, worked by the on-call agent as `github-actions` (criterion 12);
+  - every pull request into `dev`: the QA agent posts its verdict as `github-actions`, for example on [#132](screenshots/proof/team-qa-on-oncall-pr.jpg) (criterion 3).
 - **The orchestrator on issues:** it runs on the owner's machine, so GitHub shows the owner's login; the heading names the role ("Build notes", "QA verdict"), for example [#24](https://github.com/alexisdacquay/immune-citadel-v4/issues/24):
 
 | Acceptance criteria, ticked when verified | The QA verdict on the same issue (posted through the owner's login) |
@@ -139,7 +139,7 @@ $ npm test
 
 - **Unit:** [server/test.js](../server/test.js), [server/observability.test.js](../server/observability.test.js) and the other files in `package.json` (`test:unit`).
 - **Integration:** [test/integration.test.js](../test/integration.test.js), against the real Postgres.
-- **In CI:** the same suite is green on the release commit, [run 42505199017](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42505199017), job `test`. CI also runs `npm run test:game`, a browser bot that plays all 18 levels.
+- **In CI:** the same suite is green on promotion #129's release commit `ee4783d`, job `test` ([screenshot](screenshots/proof/ci-main-run.jpg)). CI also runs `npm run test:game`, a browser bot that plays all 18 levels.
 
 ## 7. Containerization
 
@@ -181,8 +181,8 @@ $ curl -s https://immune-citadel-v4-api.onrender.com/health
 
 | Step | What happens | Proof |
 |---|---|---|
-| CI | every pull request runs `test` (unit and integration) and `game` (the bot plays every level); every pull request into `dev` also runs `qa` (the QA agent) | [ci.yml](../.github/workflows/ci.yml); the green checks on [#132](https://github.com/alexisdacquay/immune-citadel-v4/pull/132) |
-| CD to dev | a green pull request merges into `dev`; Render deploys every commit on `dev`; CI's `deployed` job waits until the live site serves it, then tests it | [render.yaml](../render.yaml) (`branch: dev`, `autoDeployTrigger: commit`); [a dev run, `deployed` green](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42503983315) |
+| CI | every pull request runs `test` (unit and integration) and `game` (the bot plays every level); every pull request into `dev` also runs `qa` (the QA agent) | [ci.yml](../.github/workflows/ci.yml); the green checks on [#132](screenshots/proof/team-qa-on-oncall-pr.jpg) |
+| CD to dev | a green pull request merges into `dev`; Render deploys every commit on `dev`; CI's `deployed` job waits until the live site serves it, then tests it | [render.yaml](../render.yaml) (`branch: dev`, `autoDeployTrigger: commit`); [a dev run, `deployed` green](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43239236141) |
 | Manual deploy to production | a promotion pull request `dev` → `main`, merged only on the owner's written go, never automatically | [rulesets](https://github.com/alexisdacquay/immune-citadel-v4/rules), [STATUS, Promotions](STATUS.md#promotions) |
 | Rollback | redeploy the last good commit in Render, or revert the pull request | [OPERATIONS, Rollback](OPERATIONS.md#rollback) |
 
@@ -198,7 +198,7 @@ After promotion #129 (`ee4783d`), the push run on `main` ran the tests, then che
 
 ![Push run on main after promotion #129: test, game and deployed green](screenshots/proof/ci-main-run.jpg)
 
-Its `deployed` job printed ([run 42501133770](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42501133770)):
+Its `deployed` job ([the run above](screenshots/proof/ci-main-run.jpg)) printed:
 
 ```
 SMOKE PASS https://immune-citadel-v4.onrender.com at ee4783d6577cc73b2c76f627cbf745d3832d5eb1: 4 Sentry requests held back, no player data in them; with play stats off or GPC, crash reports and no traces
@@ -255,21 +255,21 @@ Checked by [server/observability.test.js](../server/observability.test.js) on ev
 
 > **2 points:** "An agent wakes up on an alert and fixes the issue."
 
-**First drill, 2026-11-08, on dev.** The only known 500, a deeply nested save ([#126](https://github.com/alexisdacquay/immune-citadel-v4/issues/126)), did not reproduce on Render, so a fault was planted on purpose ([#130](https://github.com/alexisdacquay/immune-citadel-v4/pull/130)). The agent was never told about #130: its prompt is built only from the Sentry event and the files its stack trace names ([tools/oncall.js](../tools/oncall.js), `incident()` and `sourceContext()`); its first comment on #131 lists them: `server/index.js`, `server/test.js`. Before its fix, `PUT {"save":{"owe":"x"}}` answered 500 on dev; after it, 200.
+**First drill, 2026-11-08, on dev.** The only known 500, a deeply nested save ([#57](https://github.com/alexisdacquay/immune-citadel-v4/issues/57)), did not reproduce on Render, so a fault was planted on purpose ([#130](https://github.com/alexisdacquay/immune-citadel-v4/commit/d70e778)). The agent was never told about #130: its prompt is built only from the Sentry event and the files its stack trace names ([tools/oncall.js](../tools/oncall.js), `incident()` and `sourceContext()`); its first comment on #58 lists them: `server/index.js`, `server/test.js`. Before its fix, `PUT {"save":{"owe":"x"}}` answered 500 on dev; after it, 200.
 
 | Time (UTC) | Step |
 |---|---|
 | 16:52:52 | a crafted save hits the fault: the API answers 500 |
 | 16:53:05 | the alert fires |
-| 16:53:06 | Sentry opens issue [#131](https://github.com/alexisdacquay/immune-citadel-v4/issues/131) |
-| 16:53:13 | GitHub starts [the On-call run](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42502143601) on that issue's `opened` event: no polling, no schedule ([oncall.yml](../.github/workflows/oncall.yml), `on: issues`) |
+| 16:53:06 | Sentry opens issue [#58](https://github.com/alexisdacquay/immune-citadel-v4/issues/58) |
+| 16:53:13 | GitHub starts [the On-call run](screenshots/proof/oncall-2-agent-comments.jpg) on that issue's `opened` event: no polling, no schedule ([oncall.yml](../.github/workflows/oncall.yml), `on: issues`) |
 | 16:53:22 | the agent reports on the issue |
-| 16:54:40 | it opens fix [#132](https://github.com/alexisdacquay/immune-citadel-v4/pull/132), with a regression test |
+| 16:54:40 | it opens fix [#132](screenshots/proof/oncall-3-fix-pr-merged.jpg), with a regression test |
 | 17:02:00 | CI and the QA agent pass; the fix merges itself into `dev` |
-| 17:04:06 | live: dev's `/health` names the fix's merge `411f62b`, and the crafted save answers 200 (checked afterwards with curl; nothing was done to the system). The next dev run's `deployed` job covers it: [42503983315](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/42503983315) |
-| 17:29:17 | promoted to production in [#134](https://github.com/alexisdacquay/immune-citadel-v4/pull/134) |
+| 17:04:06 | live: dev's `/health` names the fix's merge `411f62b`, and the crafted save answers 200 (checked afterwards with curl; nothing was done to the system). The next dev run's `deployed` job covers it. |
+| 17:29:17 | promoted to production in [#134](https://github.com/alexisdacquay/immune-citadel-v4/commit/d3f7a43) |
 
-**11 minutes from the error to the fix live, no human in the loop.** The agent's whole fix ([diff](https://github.com/alexisdacquay/immune-citadel-v4/pull/132/files)):
+**11 minutes from the error to the fix live, no human in the loop.** The agent's whole fix ([diff](https://github.com/alexisdacquay/immune-citadel-v4/commit/80a9a1c)):
 
 ```diff
 # server/index.js (the fix)
@@ -279,7 +279,7 @@ Checked by [server/observability.test.js](../server/observability.test.js) on ev
 +  assert.equal((await put(code, { save: { owe: 'not an array' } })).status, 200, 'non-array owe is not a server error');
 ```
 
-The fix removes the 500. Rejecting a non-list `owe` outright is a separate open issue, [#101](https://github.com/alexisdacquay/immune-citadel-v4/issues/101).
+The fix removes the 500. Rejecting a non-list `owe` outright is a separate open issue, [#51](https://github.com/alexisdacquay/immune-citadel-v4/issues/51).
 
 | 1. The alert opens an issue | 2. The agent reports on it | 3. Its fix, merged by the bot |
 |---|---|---|
