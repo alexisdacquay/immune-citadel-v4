@@ -1,6 +1,6 @@
 # Immune Citadel
 
-[![CI on dev](https://github.com/alexisdacquay/immune-citadel-v4/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/alexisdacquay/immune-citadel-v4/actions/workflows/ci.yml?query=branch%3Adev)
+[![CI on main](https://github.com/alexisdacquay/immune-citadel-v4/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/alexisdacquay/immune-citadel-v4/actions/workflows/ci.yml?query=branch%3Amain+event%3Apush)
 
 **A tower-defence game inside the human body, for teens aged 12 to 15.** Bacteria, viruses, fungi and parasites pour into the body, and you grow immune cells beside their route to stop them. Each cell fights the way it really does in the body, so to win you have to learn what each one is good at.
 
@@ -162,22 +162,24 @@ Where to read more:
 
 ## For reviewers
 
+**About this repository.** It was created on 2026-11-12 under the same name as the project's original repository, which was renamed and made private the same day, to publish the course submission without later product work. It keeps the full commit history; issues #1 to #58 were copied without their comments, each starting with a "_Copy of_" note. The original's pull requests, Actions runs and issue comments are not public, so the screenshots of issue #131, pull request #132 and run 42502143601 in [docs/PROOF.md](docs/PROOF.md) show the original repository under this same name; those numbers do not point to them here. Likewise, #numbers in commit messages before 2026-11-12 refer to the original repository, and GitHub links them to unrelated items here. The licence commit [`3d488f8`](https://github.com/alexisdacquay/immune-citadel-v4/commit/3d488f8) went to `main` directly during the re-creation, before the branch rules applied; every change since went through a pull request.
+
 Immune Citadel is a project for the [DataTalksClub AI Dev Tools Zoomcamp](https://github.com/DataTalksClub/ai-dev-tools-zoomcamp/tree/main/project). Each row links to its proof in [docs/PROOF.md](docs/PROOF.md): the rubric's words, screenshots, raw output, links that open without a login.
 
 | # | Criterion | Points | Proof (screenshots and raw output) |
 |---|---|---|---|
-| 1 | Problem description | 2 / 2 | [Proof](docs/PROOF.md#1-problem-description) |
-| 2 | Product specification | 2 / 2 | [Proof](docs/PROOF.md#2-product-specification) |
-| 3 | Agent team | 2 / 2 | [Proof](docs/PROOF.md#3-agent-team) |
-| 4 | Context management | 2 / 2 | [Proof](docs/PROOF.md#4-context-management) |
+| 1 | Problem Description | 2 / 2 | [Proof](docs/PROOF.md#1-problem-description) |
+| 2 | Product Specification | 2 / 2 | [Proof](docs/PROOF.md#2-product-specification) |
+| 3 | Agent Team Specification | 2 / 2 | [Proof](docs/PROOF.md#3-agent-team-specification) |
+| 4 | Context Management | 2 / 2 | [Proof](docs/PROOF.md#4-context-management) |
 | 5 | Application | 2 / 2 | [Proof](docs/PROOF.md#5-application) |
 | 6 | Testing | 2 / 2 | [Proof](docs/PROOF.md#6-testing) |
 | 7 | Containerization | 2 / 2 | [Proof](docs/PROOF.md#7-containerization) |
 | 8 | Deployment | 2 / 2 | [Proof](docs/PROOF.md#8-deployment) |
 | 9 | CI/CD | 3 / 3 | [Proof](docs/PROOF.md#9-cicd) |
 | 10 | Observability | 2 / 2 | [Proof](docs/PROOF.md#10-observability) |
-| 11 | Alerting on user impact | 1 / 1 | [Proof](docs/PROOF.md#11-alerting-on-user-impact) |
-| 12 | On-call agent | 2 / 2 | [Proof](docs/PROOF.md#12-on-call-agent) |
+| 11 | Alerting on User Impact | 1 / 1 | [Proof](docs/PROOF.md#11-alerting-on-user-impact) |
+| 12 | On-Call Agent | 2 / 2 | [Proof](docs/PROOF.md#12-on-call-agent) |
 
 **Claimed: 24 of 24 points.**
 

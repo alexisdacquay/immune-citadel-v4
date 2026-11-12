@@ -24,6 +24,8 @@ test('save API', async t => {
   assert.equal((await put(code, 'not json')).status, 400);
   assert.equal((await put(code, { save: [1, 2] })).status, 400, 'save must be an object');
   for (const owe of ['not an array', 5, { a: 1 }, null]) assert.equal((await put(code, { save: { owe } })).status, 400, `non-list owe ${JSON.stringify(owe)} is refused`);
+  assert.equal((await put(code, { save: { rch: 2 } })).status, 200, 'a save with a reached specimen and no stars list is stored, not a 500 (#142)');
+  assert.deepEqual((await (await fetch(`${base}/api/save/${code}`)).json()).save, { rch: 2 });
   assert.equal((await put(code, { save: { owe: ['fever'] } })).status, 200, 'a list of owed cards is kept');
   assert.equal((await put(code, { nope: 1 })).status, 400);
   assert.equal((await put(code, { save: { x: 'y'.repeat(9000) } })).status, 413);
@@ -143,6 +145,15 @@ test('a new code whose store fails does not use up the budget of its address (#8
   for (let i = 0; i < 12; i++) assert.equal((await put(i)).status, 500, 'the database is down');
   down.mock.restore();
   assert.equal((await put(12)).status, 200, 'once it is back, the same address still starts a new code');
+});
+
+test('two different errors in the save API are two Sentry issues: the fingerprint adds the type and message to the default grouping', async t => {
+  const errors = [new Error('database down'), new TypeError('save.owe.filter is not a function')];
+  const srv = createServer({ get: async () => null, put: async () => { throw errors.shift(); } }), sent = t.mock.method(Sentry, 'captureException', () => {});
+  await new Promise(r => srv.listen(0, r)); t.after(() => srv.close());
+  const put = () => fetch(`http://localhost:${srv.address().port}/api/save/ABCDEFGHJKMNPQR5`, { method: 'PUT', body: JSON.stringify({ save: { st: [1] } }) });
+  assert.equal((await put()).status, 500); assert.equal((await put()).status, 500);
+  assert.deepEqual(sent.mock.calls.map(c => c.arguments[1].fingerprint), [['{{ default }}', 'Error', 'database down'], ['{{ default }}', 'TypeError', 'save.owe.filter is not a function']]);
 });
 
 test('IPv6: the new-code budget is per /64, so one host cannot rotate addresses inside it (#86)', async t => {

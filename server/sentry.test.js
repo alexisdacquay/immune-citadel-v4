@@ -22,6 +22,7 @@ test('a failed save is reported to Sentry without the save code, the save, the I
     const out = JSON.stringify(sent);
     assert.match(out, /database down while saving :code/, 'the error is reported, with the code replaced');
     assert.match(out, /"route":"\/api\/save\/:code"/, 'tagged with the route');
+    assert.match(out, /"fingerprint":\["\{\{ default \}\}","Error","database down while saving :code"\]/, 'grouped by its type and message, with the code replaced there too');
     assert.doesNotMatch(out, new RegExp(`${CODE}|${SECRET}|${IP.replace(/\./g, '\\.')}|${COOKIE}`), 'nothing that identifies the player');
   } finally { srv.close(); }
 });

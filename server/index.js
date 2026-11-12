@@ -198,7 +198,8 @@ function createServer(store) {
       send(405, { error: 'method not allowed' });
     } catch (e) {
       if (!req.complete) return log.warn({ method: req.method, route: route(req.url) }, 'client left mid-upload'); // a closed tab is not a server error: no Sentry, no email
-      Sentry.captureException(e, { tags: { method: req.method, route: route(req.url) } }); // a failed save emails the owner (alert rule in Sentry)
+      // the fingerprint: every error here shares this one handler's stack, so Sentry's default grouping alone files a new bug under an old Sentry issue, which opens no new incident; sentry.js scrubs save codes from it like the message
+      Sentry.captureException(e, { tags: { method: req.method, route: route(req.url) }, fingerprint: ['{{ default }}', String(e.name), String(e.message)] }); // a failed save emails the owner (alert rule in Sentry)
       log.error({ err: e.message }, 'request failed'); send(500, { error: 'server error' });
     }
   });

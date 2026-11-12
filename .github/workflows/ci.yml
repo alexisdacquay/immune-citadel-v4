@@ -40,9 +40,9 @@ jobs:
           if [ "${{ github.event_name }}" = pull_request ] && files=$(git diff --name-only --no-renames "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}") && [ -n "$files" ] && ! printf '%s\n' "$files" | grep -qvE '^docs/|\.md$'; then code=false; fi
           echo "code=$code" >> "$GITHUB_OUTPUT"; echo "game needed: $code"
 
-  game: # skipped (which a required check counts as passed) on a docs-only pull request; always on pushes to dev and main
+  game: # skipped (which a required check counts as passed) only when changes succeeded and found a docs-only pull request; always on pushes to dev and main
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.code == 'true') }} # fails closed: a failed or timed-out changes job runs game
     runs-on: ubuntu-latest
     timeout-minutes: 25 # usually 6-7 min, up to ~16 on a slow runner; a hang must not block deploys for GitHub's default 6 h
     steps:
@@ -110,9 +110,10 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           QA_MODE: review
 
-  deployed: # after a push to dev or main: proof that Render now serves this commit (API /health and site /version.txt), then a read-only browser check of the live site, red otherwise
+  deployed: # after a push to dev or main: proof that Render now serves this commit (API /health and site /version.txt), then a read-only browser check of the live site, then the on-call wiring check, red otherwise
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions: { contents: read, issues: read } # issues: the on-call check reads the incident label
     timeout-minutes: 30 # verify-deploy gives up after 15; npm ci, the smoke check and the Sentry check (up to 5) take the rest
     env:
       SHA: ${{ github.sha }}
@@ -132,3 +133,12 @@ jobs:
       # metric within 5 minutes, or this goes red and GitHub emails the owner. It overwrites one fixed save code, so the database never grows.
       - run: node tools/verify-sentry.js
         env: { SENTRY_AUTH_TOKEN: '${{ secrets.SENTRY_AUTH_TOKEN }}' }
+      # The on-call wiring still works (tools/oncall-preflight.js): its secrets and deploy key, the Sentry alert that opens the incident issue,
+      # the incident label. It runs even when a step above failed, so neither failure hides the other. The items CI cannot read stay manual:
+      # docs/OPERATIONS.md#on-call-setup-checklist.
+      - if: ${{ !cancelled() }}
+        run: node tools/oncall-preflight.js
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          ONCALL_DEPLOY_KEY: ${{ secrets.ONCALL_DEPLOY_KEY }} # only this step has it; the check pushes with --dry-run, so nothing is sent

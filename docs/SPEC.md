@@ -1,6 +1,6 @@
 # Product specification
 
-What the game must do for its players, written as player journeys with acceptance criteria. Each criterion below describes the game as it is: checked against `index.html` at `f07f748` (2026-11-08). Every later change to `index.html` ([its history](https://github.com/alexisdacquay/immune-citadel-v4/commits/main/index.html)) went through its pull request's QA checks and the game suite, not a new pass over the criteria below.
+What the game must do for its players, written as player journeys with acceptance criteria. From issue [#24](https://github.com/alexisdacquay/immune-citadel-v4/issues/24) on, features and tasks were specified as GitHub issues, most with acceptance criteria ([search](https://github.com/alexisdacquay/immune-citadel-v4/issues?q=is%3Aissue%20%22acceptance%20criteria%22)), before each was built. This page collects the game's player journeys in one place: written on 2026-11-05, and each criterion below checked against `index.html` at `f07f748` (2026-11-08), so it describes the game as it is. Every later change to `index.html` ([its history](https://github.com/alexisdacquay/immune-citadel-v4/commits/main/index.html)) went through its pull request's QA checks and the game suite, not a new pass over the criteria below.
 
 ![A level in play: immune cells grown beside the infection route, the vitality, ATP and wave counters at the top left, the game controls at the top right, the hero and ability buttons at the bottom left](screenshots/play.jpg)
 
