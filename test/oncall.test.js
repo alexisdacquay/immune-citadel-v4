@@ -1,6 +1,6 @@
 // The on-call agent's own logic (tools/oncall.js), without Sentry, GitHub or a model.
 const test = require('node:test'), assert = require('node:assert'), fs = require('node:fs'), os = require('node:os'), path = require('node:path');
-const { sentryRef, incident, localFile, sourceContext, applyEdits } = require('../tools/oncall.js');
+const { sentryRef, incident, localFile, sourceContext, applyEdits, qaChecks, fallbackCheck } = require('../tools/oncall.js');
 
 test('the Sentry issue is read from the GitHub issue Sentry opened', () => {
   assert.deepEqual(sentryRef('Sentry Issue: [IMMUNE-CITADEL-API-2](https://myown-76.sentry.io/organizations/myown-76/issues/7012345678/?referrer=github_integration)'), { id: '7012345678' });
@@ -54,4 +54,24 @@ test('edits are refused unless exact, small and inside the files shown', () => {
   assert.throws(() => applyEdits([], shown, dir), /no edits/);
   applyEdits([{ file: 'server/index.js', find: 'a\n', replace: 'a $& $1\n' }], shown, dir);
   assert.equal(fs.readFileSync(path.join(dir, 'server/index.js'), 'utf8'), 'a $& $1\nb\nb\n', 'the replacement is literal text');
+});
+
+test('QA checks are kept only when stage 1 can answer them', () => {
+  const asked149 = '- [stays] server/index.js: Are all existing validations and rate limits unchanged?';
+  const good = ['- [changes] server/index.js: Does a PUT with save {rch:2} (no st) return 200 instead of 500?', '- [stays] server/index.js, server/test.js: Does a PUT whose body is not JSON still get a 400?'];
+  assert.deepEqual(qaChecks([asked149, ...good]), good, 'the [stays] check of #149 compares with the old code, which stage 1 never sees: dropped');
+  for (const l of ['- [stays] server/index.js: Does the save route stay the same?', '- [stays] server/index.js: Is the validation not modified?', '- [stays] server/index.js: Does a load work as before?',
+    '- [stays] server/index.js: Does it match the previous behaviour?', '- [changes] server/nowhere.js: Is it fixed?', '- [changes] ../server/index.js: Is it fixed?', '- [changes] /etc/hosts: Is it fixed?',
+    '- [changes] server/index.js: Is it fixed', '- [review] server/index.js: Is it fixed?', '[changes] server/index.js: Is it fixed?', '- [changes] server/index.js: Is it\n- [stays] server/index.js: fixed?'])
+    assert.deepEqual(qaChecks([l]), [], l);
+  assert.deepEqual(qaChecks(undefined), []);
+  assert.deepEqual(qaChecks(['  - [changes] server/index.js: Is it fixed?\n']), ['- [changes] server/index.js: Is it fixed?']);
+});
+
+test('with no valid [changes] check, the agent adds one: the failing request now gets an answer', () => {
+  const inc = { title: "TypeError: Cannot read properties of undefined (reading '2')", method: 'PUT', route: '/api/save/:code',
+    exceptions: [{ frames: [{ file: '/app/index.js', line: 186, code: "log.debug({ reached: save.rch, stars: save.rch ? save.st[save.rch] : 0 }, 'furthest specimen');" }] }] };
+  const c = fallbackCheck(inc);
+  assert.equal(c, '- [changes] server/index.js: Does the request PUT /api/save/:code that threw "TypeError: Cannot read properties of undefined (reading \'2\')" at `log.debug({ reached: save.rch, stars: save.rch ? save.st[save.rch] : 0 }, \'furthest specimen\');` now get an answer instead of that error?');
+  assert.deepEqual(qaChecks([c]), [c], 'the generated check passes the same validation');
 });
