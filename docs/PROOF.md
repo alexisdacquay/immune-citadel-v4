@@ -8,20 +8,20 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 
 | # | Criterion | Points | The proof in one line |
 |---|---|---|---|
-| [1](#1-problem-description) | Problem description | 2 / 2 | README: the problem, what the game does, how it behaves |
-| [2](#2-product-specification) | Product specification | 2 / 2 | SPEC.md; issues with acceptance criteria; bot accounts post QA verdicts on every pull request into `dev` and, in the on-call drill, opened and worked an issue |
-| [3](#3-agent-team) | Agent team | 2 / 2 | 4 agents with roles and limits, one loop; their work is visible on every pull request |
-| [4](#4-context-management) | Context management | 2 / 2 | AGENTS.md points to STATUS, SPEC, TEAM, OPERATIONS |
+| [1](#1-problem-description) | Problem Description | 2 / 2 | README: the problem, what the game does, how it behaves |
+| [2](#2-product-specification) | Product Specification | 2 / 2 | SPEC.md; issues with acceptance criteria; bot accounts post QA verdicts on every pull request into `dev` and, in the on-call drill, opened and worked an issue |
+| [3](#3-agent-team-specification) | Agent Team Specification | 2 / 2 | 4 agents with roles and limits, one loop; their work is visible on every pull request |
+| [4](#4-context-management) | Context Management | 2 / 2 | AGENTS.md points to STATUS, SPEC, TEAM, OPERATIONS |
 | [5](#5-application) | Application | 2 / 2 | one command; a click in the browser lands as a row in Postgres |
 | [6](#6-testing) | Testing | 2 / 2 | `npm test`: 61 unit and 5 integration tests pass, in CI on `a8e90f0` |
 | [7](#7-containerization) | Containerization | 2 / 2 | `docker compose up --build`: game, API and Postgres, all healthy |
 | [8](#8-deployment) | Deployment | 2 / 2 | public URL; `/health` and `/version.txt` name the live commit |
 | [9](#9-cicd) | CI/CD | 3 / 3 | CI on every pull request; CD to dev on every merge; production is manual: a promotion is merged only on the owner's go for that release |
 | [10](#10-observability) | Observability | 2 / 2 | one save: trace, log line and metric under one trace ID, in Sentry's UI |
-| [11](#11-alerting-on-user-impact) | Alerting on user impact | 1 / 1 | a failed save emails the owner and opens a GitHub issue |
-| [12](#12-on-call-agent) | On-call agent | 2 / 2 | a real alert on a deliberately planted fault: the agent fixed it, live on dev 11 minutes later, no human |
+| [11](#11-alerting-on-user-impact) | Alerting on User Impact | 1 / 1 | a failed save emails the owner and opens a GitHub issue |
+| [12](#12-on-call-agent) | On-Call Agent | 2 / 2 | a real alert on a deliberately planted fault: the agent fixed it, live on dev 11 minutes later, no human |
 
-## 1. Problem description
+## 1. Problem Description
 
 > **2 points:** "The README clearly describes the problem, the system functionality, and expected behavior."
 
@@ -31,7 +31,7 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 
 ![What it does: level 1 in play, immune cells grown beside the route, the red marker that calls the next wave](screenshots/play.jpg)
 
-## 2. Product specification
+## 2. Product Specification
 
 > **2 points:** "A specification exists and there's a publicly accessible task tracker. The tasks define acceptance criteria and there's evidence that the agents used the tracker."
 
@@ -46,7 +46,7 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 |---|---|
 | ![Issue #24: Why, What, and four ticked acceptance criteria](screenshots/proof/spec-issue-acceptance.jpg) | ![Issue #24: "QA verdict (round 2): PASS", one row per criterion with evidence](screenshots/proof/spec-qa-verdict.jpg) |
 
-## 3. Agent team
+## 3. Agent Team Specification
 
 > **2 points:** "The project defines the agent team and process of how they work together."
 
@@ -67,7 +67,7 @@ In the original repository: the on-call agent's fix, judged by the QA agent, the
 
 ![PR #132: commits and auto-merge by the on-call agent, then the QA agent's "QA checks: PASS"](screenshots/proof/team-qa-on-oncall-pr.jpg)
 
-## 4. Context management
+## 4. Context Management
 
 > **2 points:** "AGENTS.md exists and it also points to modular docs (process, teams, etc.)."
 
@@ -240,7 +240,7 @@ It means: the smoke test catches the page's Sentry requests ("held back") and in
 
 Checked by [server/observability.test.js](../server/observability.test.js) on every pull request and by CI's smoke test after every deploy (the `SMOKE PASS` line in [criterion 9](#9-cicd)).
 
-## 11. Alerting on user impact
+## 11. Alerting on User Impact
 
 > **1 point:** "At least one alert exists." The course asks to alert "on real user impact instead of CPU graphs".
 
@@ -253,7 +253,7 @@ Checked by [server/observability.test.js](../server/observability.test.js) on ev
 |---|---|
 | ![Sentry alert "Save API error (a save or load failed): email owner, wake the on-call agent": 2 triggers, Nov 6 and Nov 8](screenshots/proof/alert-1-history.jpg) | ![The alert's actions: notify by email, create a GitHub issue in alexisdacquay](screenshots/proof/alert-2-actions.jpg) |
 
-## 12. On-call agent
+## 12. On-Call Agent
 
 > **2 points:** "An agent wakes up on an alert and fixes the issue."
 

@@ -168,18 +168,18 @@ Immune Citadel is a project for the [DataTalksClub AI Dev Tools Zoomcamp](https:
 
 | # | Criterion | Points | Proof (screenshots and raw output) |
 |---|---|---|---|
-| 1 | Problem description | 2 / 2 | [Proof](docs/PROOF.md#1-problem-description) |
-| 2 | Product specification | 2 / 2 | [Proof](docs/PROOF.md#2-product-specification) |
-| 3 | Agent team | 2 / 2 | [Proof](docs/PROOF.md#3-agent-team) |
-| 4 | Context management | 2 / 2 | [Proof](docs/PROOF.md#4-context-management) |
+| 1 | Problem Description | 2 / 2 | [Proof](docs/PROOF.md#1-problem-description) |
+| 2 | Product Specification | 2 / 2 | [Proof](docs/PROOF.md#2-product-specification) |
+| 3 | Agent Team Specification | 2 / 2 | [Proof](docs/PROOF.md#3-agent-team-specification) |
+| 4 | Context Management | 2 / 2 | [Proof](docs/PROOF.md#4-context-management) |
 | 5 | Application | 2 / 2 | [Proof](docs/PROOF.md#5-application) |
 | 6 | Testing | 2 / 2 | [Proof](docs/PROOF.md#6-testing) |
 | 7 | Containerization | 2 / 2 | [Proof](docs/PROOF.md#7-containerization) |
 | 8 | Deployment | 2 / 2 | [Proof](docs/PROOF.md#8-deployment) |
 | 9 | CI/CD | 3 / 3 | [Proof](docs/PROOF.md#9-cicd) |
 | 10 | Observability | 2 / 2 | [Proof](docs/PROOF.md#10-observability) |
-| 11 | Alerting on user impact | 1 / 1 | [Proof](docs/PROOF.md#11-alerting-on-user-impact) |
-| 12 | On-call agent | 2 / 2 | [Proof](docs/PROOF.md#12-on-call-agent) |
+| 11 | Alerting on User Impact | 1 / 1 | [Proof](docs/PROOF.md#11-alerting-on-user-impact) |
+| 12 | On-Call Agent | 2 / 2 | [Proof](docs/PROOF.md#12-on-call-agent) |
 
 **Claimed: 24 of 24 points.**
 
