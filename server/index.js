@@ -183,6 +183,7 @@ function createServer(store) {
         if (tooDeep(save)) return send(400, { error: 'save nested too deep' });
         if (save.owe !== undefined && !Array.isArray(save.owe)) return send(400, { error: 'owe must be a list' }); // a stored non-list owe broke every sync for its code (#51)
         log.debug({ owed: Array.isArray(save.owe) ? save.owe.filter(Boolean).length : 0 }, 'cards owed'); // how many cards the save still owes the player, at debug level
+        log.debug({ difficulty: save.diff, skills: save.diff ? Object.keys(save.mem).length : 0 }, 'immune skills'); // how many immune skills the player has learnt at their difficulty, at debug level
         const fresh = !(await store.get(code)), net = net64(clientIp(req)); // only new codes count: an existing save always updates
         if (fresh && newLimited(net)) return send(429, { error: 'too many new saves from this address, try again in a few minutes' }); // counted now, so parallel new codes cannot all pass
         let updatedAt; try { updatedAt = await store.put(code, save); } catch (e) { if (fresh) newLimited(net, true); throw e; } // a failed store gives the count back too, so retries during a database outage do not use up the address's budget
