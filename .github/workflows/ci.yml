@@ -54,8 +54,8 @@ jobs:
 
   qa: # stage 1, required on dev: an independent QA agent answers closed questions, YES or NO at low effort (tools/qa.js):
     # the pull request's own "## QA checks" and the past failures in the files it changes (test/past-failures.md).
-    # Not on promotions into main (owner, 2026-11-07): each change already passed it into dev, and judging the whole release
-    # diff at once produced false alarms (#73); main is gated by test, game, dev-green and the owner.
+    # Not on promotions into main: each change already passed it into dev, and judging the whole release
+    # diff at once produced false alarms; main is gated by test, game, dev-green and the owner.
     # No "needs": it reads code, not test results, so it runs beside test and game and adds no wait.
     if: github.event_name == 'pull_request' && github.base_ref == 'dev'
     runs-on: ubuntu-latest
@@ -80,11 +80,11 @@ jobs:
           HEAD: ${{ github.sha }} # the merge this pull request would make, so a branch behind dev is judged on what lands
           GITHUB_TOKEN: ${{ github.token }}
 
-  # Stage 2 (owner, 2026-11-07): the open review, unchanged, advisory. It comments on the pull request and never blocks
+  # Stage 2: the open review, unchanged, advisory. It comments on the pull request and never blocks
   # (not a required check, and tools/qa.js exits 0); before a promotion every finding it raises is fixed or answered.
   qa-review: # stage 2, advisory: the open review (tools/qa.js, QA_MODE=review); not required.
-    # Not on promotions into main (owner, 2026-11-07): each change already passed it into dev, and judging the whole release
-    # diff at once produced false alarms (#73); main is gated by test, game, dev-green and the owner.
+    # Not on promotions into main: each change already passed it into dev, and judging the whole release
+    # diff at once produced false alarms; main is gated by test, game, dev-green and the owner.
     if: github.event_name == 'pull_request' && github.base_ref == 'dev' && !cancelled() && needs.test.result == 'success' && needs.game.result != 'failure' # a skipped game (docs only) still gets the review
     needs: [test, game]
     runs-on: ubuntu-latest
