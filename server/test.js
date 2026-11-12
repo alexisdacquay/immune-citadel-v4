@@ -25,6 +25,9 @@ test('save API', async t => {
   assert.equal((await put(code, { save: { owe: 'not an array' } })).status, 200, 'non-array owe is not a server error');
   assert.equal((await put(code, { nope: 1 })).status, 400);
   assert.equal((await put(code, { save: { x: 'y'.repeat(9000) } })).status, 413);
+  const deep = '{"save":{"a":' + '['.repeat(4000) + ']'.repeat(4000) + '}}'; // fits in 8 KB; overflowed the stack writing to Postgres on Node 22 (#57)
+  assert.equal((await put(code, deep)).status, 400, 'a save nested thousands of levels deep is refused');
+  assert.deepEqual((await (await fetch(`${base}/api/save/${code}`)).json()).save, { owe: 'not an array' }, 'and never reaches the store');
   assert.equal((await fetch(`${base}/api/save/${code}`, { method: 'OPTIONS', headers: { origin: 'https://game.example' } })).status, 204);
   assert.equal((await fetch(`${base}/api/save/${code}`, { method: 'DELETE' })).status, 405);
 

@@ -100,14 +100,14 @@ GitHub rulesets on both branches; nobody bypasses them, and neither branch accep
 
 | | `dev` | `main` |
 |---|---|---|
-| Ruleset | 26753396, [.github/rulesets/dev.json](../.github/rulesets/dev.json) | 26693579, [.github/rulesets/main.json](../.github/rulesets/main.json) |
+| Ruleset | 27124769, [.github/rulesets/dev.json](../.github/rulesets/dev.json) | 27124774, [.github/rulesets/main.json](../.github/rulesets/main.json) |
 | Changes only through a pull request | yes | yes |
 | Required checks | `test`, `game`, `qa` | `test`, `game`, `dev-green` |
 | Branch must be up to date | no, so auto-merge never stalls | yes |
 
 - `dev-green` lives in its own workflow, [promotion.yml](../.github/workflows/promotion.yml), which runs only on pull requests into `main`. Inside `ci.yml` it would be skipped on every push, and GitHub counts a skipped check as passing ([#75](https://github.com/alexisdacquay/immune-citadel-v4/issues/75)).
 - No merge queue: GitHub offers it only to repositories owned by an organisation, and this one belongs to a personal account. So the strict guarantee sits on the promotion, as trunk-based development advises. Decision: the owner, 2026-11-07.
-- Re-apply a ruleset after editing its file: `gh api -X PUT repos/alexisdacquay/immune-citadel-v4/rulesets/<id> --input .github/rulesets/<file>.json`.
+- Re-apply a ruleset after editing its file: `gh api -X PUT repos/alexisdacquay/immune-citadel-v4/rulesets/27124769 --input .github/rulesets/dev.json` for `dev`, `gh api -X PUT repos/alexisdacquay/immune-citadel-v4/rulesets/27124774 --input .github/rulesets/main.json` for `main`.
 
 ### What goes wrong, and who notices
 
