@@ -152,7 +152,7 @@ A player, a parent or a teacher can see what leaves the browser and turn the pla
 
 ## Checked by
 
-Continuous integration runs `test` and `game` on every pull request and every push to `dev` or `main`; a pull request into `dev` merges automatically once `test`, `game` and `qa` are green, the three checks GitHub's rule on `dev` requires (jobs in [ci.yml](../.github/workflows/ci.yml)).
+Continuous integration runs `test` and `game` on every pull request and every push to `dev` or `main` (`game` is skipped on a pull request that changes only `docs/` or `*.md` files); a pull request into `dev` merges automatically once `test`, `game` and `qa` are green, the three checks GitHub's rule on `dev` requires (jobs in [ci.yml](../.github/workflows/ci.yml)).
 
 | Journey | Checked by | What it proves |
 |---|---|---|
