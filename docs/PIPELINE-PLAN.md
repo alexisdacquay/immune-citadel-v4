@@ -4,7 +4,7 @@
 
 **Status: closed.** Steps 1 to 4 were done and proven on 2026-11-06; step 5 moved to [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md). The deploy proof first ran on production at the 2026-11-07 promotion. How the pipeline works today: [OPERATIONS.md, Releases](OPERATIONS.md#releases).
 
-Agreed with the owner on 2026-11-06. One step at a time, each verified before the next started; a step is marked done only when its proof is recorded here.
+One step at a time, each verified before the next started; a step is marked done only when its proof is recorded here.
 
 ## Why
 
@@ -67,4 +67,4 @@ Replaced on 2026-11-06 by [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Better
 
 ## Checked and cleared
 
-- Postgres expiry: both v4 databases are on a paid plan (`basic-256mb`), not Free. The v3 services and databases were deleted on 2026-11-06 on the owner's instruction.
+- Postgres expiry: both v4 databases are on a paid plan (`basic-256mb`), not Free. The v3 services and databases were deleted on 2026-11-06.

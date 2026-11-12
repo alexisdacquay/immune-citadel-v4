@@ -18,7 +18,7 @@ The save API answers only under `/health` and `/api/`; its bare host returns 404
 
 ### What runs on Render
 
-Everything runs on Render in Frankfurt. Dev mirrors production (owner, 2026-11-06: everything is production grade): the same services on the same plans, differing only in data, secrets, branch and allowed origins.
+Everything runs on Render in Frankfurt. Everything is production grade, and dev mirrors production: the same services on the same plans, differing only in data, secrets, branch and allowed origins.
 
 | | Production | Dev |
 |---|---|---|
@@ -106,7 +106,7 @@ GitHub rulesets on both branches; nobody bypasses them, and neither branch accep
 | Branch must be up to date | no, so auto-merge never stalls | yes |
 
 - `dev-green` lives in its own workflow, [promotion.yml](../.github/workflows/promotion.yml), which runs only on pull requests into `main`. Inside `ci.yml` it would be skipped on every push, and GitHub counts a skipped check as passing ([#38](https://github.com/alexisdacquay/immune-citadel-v4/issues/38)).
-- No merge queue: GitHub offers it only to repositories owned by an organisation, and this one belongs to a personal account. So the strict guarantee sits on the promotion, as trunk-based development advises. Decision: the owner, 2026-11-07.
+- No merge queue: GitHub offers it only to repositories owned by an organisation, and this one belongs to a personal account. So the strict guarantee sits on the promotion, as trunk-based development advises.
 - Re-apply a ruleset after editing its file: `gh api -X PUT repos/alexisdacquay/immune-citadel-v4/rulesets/27124769 --input .github/rulesets/dev.json` for `dev`, `gh api -X PUT repos/alexisdacquay/immune-citadel-v4/rulesets/27124774 --input .github/rulesets/main.json` for `main`.
 
 ### What goes wrong, and who notices

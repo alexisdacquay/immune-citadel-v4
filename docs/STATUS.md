@@ -96,7 +96,7 @@ In the order the team loop uses: `P0` first, then the owner's latest priority, t
 
 | Decision | Instead of |
 |---|---|
-| QA stage 1 asks closed YES/NO questions, each 3 times at low effort: the builder's QA checks and the past failures in the files a change touches. The builder owns the test plan (owner's design, #47) | a short prompt judging the issues' acceptance criteria, which passed real defects on the benchmark |
+| QA stage 1 asks closed YES/NO questions, each 3 times at low effort: the builder's QA checks and the past failures in the files a change touches. The builder owns the test plan (#47) | a short prompt judging the issues' acceptance criteria, which passed real defects on the benchmark |
 
 ### 2026-11-07
 

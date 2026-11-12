@@ -4,7 +4,7 @@ What anonymous play data the game sends, why, and what it never sends.
 
 | | |
 |---|---|
-| **Status** | **approved by the owner 2026-11-06** (stats on by default); built in [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 5 |
+| **Status** | **live in production** (stats on by default); built in [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md) step 5 |
 | **Review** | 2026-11-06: draft checked by 4 independent reviewers (code accuracy, children's privacy, usefulness, abuse and cost); this version re-checked against their findings and the code |
 | **Code** | [server/play.js](../server/play.js) (accepted shapes), [server/index.js](../server/index.js) (`/api/play`, table, views), [index.html](../index.html) (`playEv`, `runEnd`, "Your data") |
 | **Privacy** | the data protection impact assessment, signed by the owner: [DPIA.md](DPIA.md) |
