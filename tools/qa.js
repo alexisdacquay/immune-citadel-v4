@@ -86,6 +86,8 @@ const vote = (check, rev, opts) => Promise.all([0, 1, 2].map(() => ask(check, re
 function judge(check, now, before) {
   if (now.answer !== 'YES') return { pass: false, why: `${now.answer} on the new code` };
   if (check.label === 'changes' && before.answer === 'YES') return { pass: false, why: 'YES on the old code too: it does not test the change' };
+  // both models failing gives UNSURE, which must not count as the old code being judged
+  if (check.label === 'changes' && before.why?.startsWith('no answer:')) return { pass: false, why: `the old code was never judged (${before.why})` };
   return { pass: true, why: '' };
 }
 
