@@ -14,7 +14,7 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 | [6](#6-testing) | Testing | 2 / 2 | `npm test`: 46 unit and 4 integration tests pass on a fresh clone |
 | [7](#7-containerization) | Containerization | 2 / 2 | `docker compose up --build`: game, API and Postgres, all healthy |
 | [8](#8-deployment) | Deployment | 2 / 2 | public URL; `/health` and `/version.txt` name the live commit |
-| [9](#9-cicd) | CI/CD | 3 / 3 | CI on every pull request; CD to dev on every merge; production only by a promotion merged on the owner's written go |
+| [9](#9-cicd) | CI/CD | 3 / 3 | CI on every pull request; CD to dev on every merge; production is manual: a promotion is merged only on the owner's go for that release |
 | [10](#10-observability) | Observability | 2 / 2 | one save: trace, log line and metric under one trace ID, in Sentry's UI |
 | [11](#11-alerting-on-user-impact) | Alerting on user impact | 1 / 1 | a failed save emails the owner and opens a GitHub issue |
 | [12](#12-on-call-agent) | On-call agent | 2 / 2 | a real alert on a deliberately planted fault: the agent fixed it, live on dev 11 minutes later, no human |
@@ -50,7 +50,7 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 
 | Agent | Runs on | Does | Never does |
 |---|---|---|---|
-| Orchestrator | Claude Code (the main session) | specs each issue, builds it, writes its QA checks, opens the pull request | merges into production without the owner's written go |
+| Orchestrator | Claude Code (the main session) | specs each issue, builds it, writes its QA checks, opens the pull request | merges a promotion into `main` without the owner's go for that release |
 | QA | DeepSeek, in CI on every pull request into `dev` ([tools/qa.js](../tools/qa.js)) | answers yes/no checks (required); writes an open review (advisory) | edit code |
 | On-call | DeepSeek, woken by a Sentry alert ([tools/oncall.js](../tools/oncall.js)) | finds the cause, opens a fix pull request with a regression test | touch `main`, CI, dependencies, or files outside the game and the save API |
 | Panels | short-lived Claude subagents, started by the orchestrator | audit a change or propose designs; a second subagent re-checks each finding | decide or merge |
@@ -183,16 +183,17 @@ $ curl -s https://immune-citadel-v4-api.onrender.com/health
 |---|---|---|
 | CI | every pull request runs `test` (unit and integration) and `game` (the bot plays every level); every pull request into `dev` also runs `qa` (the QA agent) | [ci.yml](../.github/workflows/ci.yml); the green checks on the on-call agent's fix ([screenshot](screenshots/proof/team-qa-on-oncall-pr.jpg)) |
 | CD to dev | a green pull request merges into `dev`; Render deploys every commit on `dev`; CI's `deployed` job waits until the live site serves it, then tests it | [render.yaml](../render.yaml) (`branch: dev`, `autoDeployTrigger: commit`); [a dev run, `deployed` green](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43239236141) |
-| Manual deploy to production | a promotion pull request `dev` → `main`, merged only on the owner's written go, never automatically | [rulesets](https://github.com/alexisdacquay/immune-citadel-v4/rules), [STATUS, Promotions](STATUS.md#promotions) |
+| Manual deploy to production | production is manual: a promotion pull request (`dev` → `main`) is merged only on the owner's go for that release; nothing merges into `main` automatically | [promotion PR #69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69) and [its run on `main`](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878); [rulesets](https://github.com/alexisdacquay/immune-citadel-v4/rules), [STATUS, Promotions](STATUS.md#promotions) |
 | Rollback | redeploy the last good commit in Render, or revert the pull request | [OPERATIONS, Rollback](OPERATIONS.md#rollback) |
 
-- **The merge is the manual step:** Render deploys `main` on merge, and nothing automatic (workflow, auto-merge, schedule) targets `main`.
-- **GitHub enforces:** a pull request only; green CI; `dev` green on the same commit. The owner's go is a team rule, which GitHub does not enforce.
-- **Every promotion followed the owner's written go:** its own go ("Yes, promote"), the go of a promotion covering its docs-only follow-up, or the owner's standing go of 2026-11-08, "In the future, please proxy for me" (merged by the orchestrator). These promotions were merged in the original repository, whose pull requests are not public; [STATUS, Promotions](STATUS.md#promotions) lists each one by its merge commit on `main` here. The screenshot below shows one.
+- **The merge is the manual step:** Render deploys `main` on merge, and nothing automatic targets `main`. [tools/automerge.sh](../tools/automerge.sh) refuses any base but `dev`. No workflow, schedule or auto-merge merges into `main`: [ci.yml](../.github/workflows/ci.yml) and [promotion.yml](../.github/workflows/promotion.yml) only run checks, and [oncall.yml](../.github/workflows/oncall.yml) opens pull requests into `dev`.
+- **GitHub enforces** on `main` (ruleset 27124774, [main.json](../.github/rulesets/main.json)): a pull request only, up to date, with `test`, `game` and `dev-green` green. The owner's go is a team rule, which GitHub does not enforce.
+- **The latest promotion, in this repository:** [PR #69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69), `dev` → `main`, merged by hand on 2026-11-12 at 17:30 UTC as [`a8e90f0`](https://github.com/alexisdacquay/immune-citadel-v4/commit/a8e90f0), with no auto-merge armed on it. Before it, `dev`'s own run on the promoted commit `e322752` was green ([run 43268129015](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43268129015)). After it, the push run on `main` ran `test`, `game` and `deployed` green ([run 43270181878](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878)); Render deployed `a8e90f0` by itself.
+- **Earlier promotions** were merged in the original repository, whose pull requests are not public; [STATUS, Promotions](STATUS.md#promotions) lists each one by its merge commit on `main` here. The screenshot below shows one.
 
-| The rules on `dev` and `main` | A promotion, with the owner's written go |
+| The rules on `dev` and `main` | A promotion in the original repository |
 |---|---|
-| ![Rulesets: dev needs a pull request with green CI and QA; main needs a pull request, green CI and dev green on the same commit](screenshots/proof/cicd-rulesets.jpg) | ![PR #129 merged into main, quoting the owner's written approval](screenshots/proof/cicd-promotion-pr.jpg) |
+| ![Rulesets: dev needs a pull request with green CI and QA; main needs a pull request, green CI and dev green on the same commit](screenshots/proof/cicd-rulesets.jpg) | ![PR #129, a promotion merged into main in the original repository](screenshots/proof/cicd-promotion-pr.jpg) |
 
 After a promotion (`ee4783d`), the push run on `main` ran the tests, then checked production itself. `qa` and `qa-review` run on pull requests into `dev` only, so they show as skipped on this push run.
 
