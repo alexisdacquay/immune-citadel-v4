@@ -26,7 +26,8 @@ The process and roles are defined in `docs/TEAM.md`. This is the orchestrator's 
 ## 4. Integrate
 - Read the diff yourself before opening the pull request into `dev`; arm auto-merge right away with `sh tools/automerge.sh <n>`. GitHub merges once `test`, `game` and `qa` are green.
 - On a stage 1 FAIL: a real defect, fix it; a wrong answer, rewrite the question and add the lesson to AGENTS.md. Fix or answer every `qa-review` finding before the next promotion.
-- Once CI's `deployed` job is green on `dev`, label the issue `status:on-dev` and post a one-line **Integrated** comment with the commit.
+- Once the pull request merges into `dev`, close the issue with "Fixed by #<pr> on dev; it reaches production with the next promotion."
+- At a promotion, the pull request lists what it brings; once it merges, each issue it ships gets "Shipped to production in #<promotion> (<commit>)".
 
 ## 5. Report
 Tell the owner in a few lines: what shipped (issue links), what is not verified, what needs them. Then, if the owner asked for more than one cycle, go back to step 1.
