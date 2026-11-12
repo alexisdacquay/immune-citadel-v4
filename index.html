@@ -1536,7 +1536,7 @@ function persist() { save.at = Math.max(Date.now(), (save.at || 0) + 1); persist
 // Hosts without an API (file://) play exactly as before.
 const CLOUD_API = { 'immune-citadel-v4.onrender.com': 'https://immune-citadel-v4-api.onrender.com', 'immune-citadel-v4-dev.onrender.com': 'https://immune-citadel-v4-api-dev.onrender.com', localhost: 'http://localhost:8787', '127.0.0.1': 'http://localhost:8787' }[location.hostname] || null;
 const CODE_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', CODE_RE = /^[A-HJ-NP-Z2-9]{16}$/; // no I, O, 0, 1: codes get read aloud and retyped
-const cloud = { code: null, st: 'idle', at: 0, busy: false, again: false, timer: 0 };
+const cloud = { code: null, st: 'idle', at: 0, busy: false, again: false, timer: 0, fresh: false };
 try { const c = localStorage.getItem('immune-citadel-v4-code'); if (CODE_RE.test(c)) cloud.code = c; } catch (e) {}
 // two saves of one player: progress only grows (best stars, every challenge won, everything seen); choices (memory, settings) follow the newer save
 function mergeSave(a, b) {
@@ -3171,15 +3171,17 @@ async function cloudSync() {
     if (!cloud.code) { // first save on this device: mint a code
       cloud.code = Array.from(crypto.getRandomValues(new Uint8Array(16)), v => CODE_ABC[v & 31]).join('');
       try { localStorage.setItem('immune-citadel-v4-code', cloud.code); } catch (e) {}
+      cloud.fresh = true; // nothing can be stored under a code minted here until its first push: no pull, whose 404 the browser logs as an error
     }
-    const url = `${CLOUD_API}/api/save/${cloud.code}`, r = await fetch(url, { cache: 'no-store' });
-    if (!r.ok && r.status !== 404) throw new Error('pull ' + r.status);
-    const local = snapshot(), remote = r.ok ? ((await r.json()).save || {}) : null, merged = remote ? mergeSave(local, remote) : local;
+    const url = `${CLOUD_API}/api/save/${cloud.code}`, r = cloud.fresh ? null : await fetch(url, { cache: 'no-store' });
+    if (r && !r.ok && r.status !== 404) throw new Error('pull ' + r.status);
+    const local = snapshot(), remote = r?.ok ? ((await r.json()).save || {}) : null, merged = remote ? mergeSave(local, remote) : local;
     if (JSON.stringify(merged) !== JSON.stringify(local)) cloudApply(merged);
     if (!remote || JSON.stringify(merged) !== JSON.stringify(remote)) {
       const w = await fetch(url, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ save: merged }) });
       if (!w.ok) throw new Error('push ' + w.status);
     }
+    cloud.fresh = false;
     cloud.st = 'ok'; cloud.at = Date.now();
   } catch (e) { cloud.st = 'err'; } // the save is safe in this browser; the next save or visit retries
   cloud.busy = false; cloudShow();
@@ -3208,7 +3210,7 @@ async function cloudLoad() { // continue a save made on another device; this dev
     if (r.status === 404) return cloudShow('No save under that code. Check it on the other device.');
     if (!r.ok) throw new Error(r.status);
   } catch (e) { return cloudShow('Cloud unreachable. Try again in a minute.'); }
-  cloud.code = code; try { localStorage.setItem('immune-citadel-v4-code', code); } catch (e) {}
+  cloud.code = code; cloud.fresh = false; try { localStorage.setItem('immune-citadel-v4-code', code); } catch (e) {}
   save.at = 0; // the save being continued keeps its memory and settings; this device adds only its progress
   $('#cloudIn').value = ''; sfx('up'); await cloudSync();
 }
