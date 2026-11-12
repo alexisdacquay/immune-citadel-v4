@@ -1,6 +1,6 @@
 // Fast checks for tools/qa.js: which issues a pull request names, that anything but a clear PASS fails, and how stage 1 reads and judges checks.
 const test = require('node:test'), assert = require('node:assert');
-const { issueNumbers, readVerdict, parseChecks, unreadable, judge, majority } = require('../tools/qa.js');
+const { issueNumbers, readVerdict, parseChecks, unreadable, judge, majority, ask, vote, report, reviewPrompt } = require('../tools/qa.js');
 
 test('issues come from the branch, title, body and commits, without the pull request itself', () => {
   assert.deepEqual(issueNumbers({ branch: 'issue/22-hud', title: 'Fix (#23)', body: 'See #22 and #7', commits: ['x (#61)', 'y #40'], self: 61 }), [7, 22, 23, 40]);
@@ -54,4 +54,38 @@ test('every check line in test/past-failures.md can be read, so no past failure 
   const lines = text.split('\n').filter(l => /^\s*[-*+]\s*\[/.test(l));
   assert.equal(parseChecks(text).length, lines.length);
   assert.ok(lines.length >= 17);
+});
+
+// The backup model: DeepSeek is stubbed to fail, the gateway to answer; no network, no key.
+const env = { DEEPSEEK_API_KEY: 'k', KILO_API_KEY: 'b', KILO_BASE_URL: 'https://gateway.test/api/v1/' }, check = { files: ['package.json'], question: 'q?' };
+const answer = content => new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content } }] }));
+
+test('a DeepSeek timeout, after its 3 tries, goes once to the backup model, and the answer says which model gave it', async t => {
+  const calls = [];
+  t.mock.method(globalThis, 'fetch', async url => { calls.push(url); if (url.includes('deepseek')) throw new DOMException('The operation was aborted due to timeout', 'TimeoutError'); return answer('{"answer":"YES","quote":"x","why":"y"}'); });
+  const a = await ask(check, 'HEAD', { env, wait: 0 });
+  assert.deepEqual([a.answer, a.model], ['YES', 'google/gemini-3.5-flash']);
+  assert.deepEqual(calls, [...Array(3).fill('https://api.deepseek.com/chat/completions'), 'https://gateway.test/api/v1/chat/completions']);
+  assert.deepEqual((await vote(check, 'HEAD', { env, wait: 0 })).models, Array(3).fill('google/gemini-3.5-flash'));
+});
+
+test('both models failing fails closed, with both errors in the answer; without the backup secrets DeepSeek alone decides', async t => {
+  const calls = [];
+  t.mock.method(globalThis, 'fetch', async url => { calls.push(url); return new Response('', { status: url.includes('deepseek') ? 503 : 401 }); });
+  const v = await vote(check, 'HEAD', { env, wait: 0 });
+  assert.equal(v.answer, 'UNSURE');
+  assert.match(v.why, /DeepSeek: HTTP 503; backup google\/gemini-3\.5-flash: HTTP 401/);
+  assert.equal(judge({ label: 'stays' }, v, null).pass, false);
+  calls.length = 0;
+  await assert.rejects(ask(check, 'HEAD', { env: { DEEPSEEK_API_KEY: 'k' }, wait: 0 }), /^Error: DeepSeek: HTTP 503$/);
+  assert.equal(calls.filter(u => !u.includes('deepseek')).length, 0);
+});
+
+test('stage 2 names the changed files left out of its diff, in the prompt and in the report', () => {
+  const left = ['docs/diagrams/observability.svg', 'package-lock.json'];
+  assert.match(reviewPrompt(9, { title: 't', body: '' }, [], 'diff', left), /## Diff\ndiff\n\n## Changed files left out of the diff\n.*\n- docs\/diagrams\/observability\.svg\n- package-lock\.json$/);
+  assert.doesNotMatch(reviewPrompt(9, { title: 't', body: '' }, [], 'diff', []), /left out/);
+  const md = report(readVerdict('{"verdict":"PASS"}'), [], 'QA review', { model: 'google/gemini-3.5-flash', left });
+  assert.match(md, /left out of the diff \(generated, not reviewed\): docs\/diagrams\/observability\.svg, package-lock\.json/);
+  assert.match(md, /model google\/gemini-3\.5-flash_$/);
 });

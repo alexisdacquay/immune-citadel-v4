@@ -43,7 +43,7 @@ jobs:
     # No "needs": it reads code, not test results, so it runs beside test and game and adds no wait.
     if: github.event_name == 'pull_request' && github.base_ref == 'dev'
     runs-on: ubuntu-latest
-    timeout-minutes: 15 # each question takes seconds; a model call gives up after 4 min and is tried at most 3 times
+    timeout-minutes: 20 # each question takes seconds; a DeepSeek call gives up after 4 min and is tried at most 3 times, then the backup once
     permissions: { contents: read, issues: write, pull-requests: write }
     steps:
       - uses: actions/checkout@v5
@@ -57,6 +57,8 @@ jobs:
       - run: node "$RUNNER_TEMP/qa.js"
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          KILO_API_KEY: ${{ secrets.KILO_API_KEY }} # the backup model's gateway, asked once when DeepSeek fails
+          KILO_BASE_URL: ${{ secrets.KILO_BASE_URL }}
           PR: ${{ github.event.pull_request.number }}
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.sha }} # the merge this pull request would make, so a branch behind dev is judged on what lands
@@ -70,7 +72,7 @@ jobs:
     if: github.event_name == 'pull_request' && github.base_ref == 'dev'
     needs: [test, game]
     runs-on: ubuntu-latest
-    timeout-minutes: 15 # usually 1-4 min; the model call gives up after 12
+    timeout-minutes: 26 # usually 1-4 min; the DeepSeek call gives up after 12, then the backup's after 12
     permissions: { contents: read, issues: write, pull-requests: write }
     steps:
       - uses: actions/checkout@v5
@@ -84,6 +86,8 @@ jobs:
       - run: node "$RUNNER_TEMP/qa.js"
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          KILO_API_KEY: ${{ secrets.KILO_API_KEY }} # the backup model's gateway, asked once when DeepSeek fails
+          KILO_BASE_URL: ${{ secrets.KILO_BASE_URL }}
           PR: ${{ github.event.pull_request.number }}
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}

@@ -24,8 +24,9 @@ Immune Citadel v4 is built by AI agents and one human owner, Alexis Dacquay. Thi
 |---|---|---|
 | **Question** | closed: YES, NO or UNSURE | open: judge the change against its acceptance criteria and list real defects |
 | **Questions come from** | the pull request's `## QA checks`, written by the builder, and the past failures in [test/past-failures.md](../test/past-failures.md) that name a file the change touches | the acceptance criteria of the issues the pull request names |
-| **The agent sees** | the full text of the files each question names, in the merge that would land (and, for a `[changes]` check, in the code before the change) | the diff (without lockfiles and diagram SVGs), the pull request description, the issues |
+| **The agent sees** | the full text of the files each question names, in the merge that would land (and, for a `[changes]` check, in the code before the change) | the diff (without lockfiles and diagram SVGs, which are named as left out), the pull request description, the issues |
 | **How the model is asked** | low reasoning effort, up to 64,000 tokens, each question 3 times: the answer given at least twice counts, otherwise UNSURE; a failed call is retried | once, up to 12 minutes |
+| **When DeepSeek fails** | after its retries, the same request once on a backup model from another provider (`google/gemini-3.5-flash` through the Kilo gateway); the comment names the models that answered. Both failing: the question is UNSURE with both errors, so the check fails | the same request once on the backup; the comment names the model |
 | **When** | beside `test` and `game`, so it adds no wait | after `test` and `game` pass |
 | **Result** | a **QA checks: PASS/FAIL** comment: one row per question, with the old and new answers and the line of code that decided | a **QA review (advisory, does not block)** comment: criteria, evidence, defects |
 | **Blocks the merge?** | yes: it is a required check on `dev` | no; before a promotion, every finding is fixed or answered |
@@ -136,6 +137,5 @@ The agents post through the owner's `gh` login, so on GitHub their comments show
 
 ## Known gaps
 
-- **No backup model for QA.** When DeepSeek fails, stage 1 fails closed and blocks the merge until a re-run. A backup model is on the roadmap as P1 ([#83](https://github.com/alexisdacquay/immune-citadel-v4/issues/83)).
 - **A pull request that edits `ci.yml` can change its own `qa` job,** because GitHub reads the workflow file from the pull request. Not fixed yet.
 - **The paused issue-cycle workflow** ([.claude/workflows/issue-cycle.js](../.claude/workflows/issue-cycle.js)) still sends bugs to `ic-bug-fixer` and verification to `ic-qa`, both paused. It is kept for reference and not run; the loop above, in the [`team-loop` skill](../.claude/skills/team-loop/SKILL.md), is what the team does today.
