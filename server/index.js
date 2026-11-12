@@ -13,6 +13,7 @@ const MAX_DEPTH = 20; // a real save is a few levels deep; thousands of levels o
 const tooDeep = (v, d = 0) => d > MAX_DEPTH || (v !== null && typeof v === 'object' && Object.values(v).some(x => tooDeep(x, d + 1))); // stops at the limit, so it cannot overflow itself
 const WRITES_PER_MIN = 120; // per client IP; a player saves a few times per level, a classroom shares one IP
 const NEW_SAVES_PER_DAY = 2000; // new save codes a day per server; existing codes always save. 2,000 x 395 days x 8 KB at most ~ 6 GB on a 15 GB disk (#53)
+const NEW_SAVES_PER_IP = 100; // new save codes a day per client IP: a few classes starting together behind one school address; one address takes at most 5% of the server's day (#73)
 const PLAY_PER_MIN = 60; // gameplay event batches per client IP: one per level end or hidden tab; never counted against saves
 const SCHEMA = process.env.DB_SCHEMA || 'public'; // one schema per environment; each environment has its own Postgres (render.yaml)
 if (process.env.DATABASE_URL && !process.env.DB_SCHEMA) throw new Error('DB_SCHEMA must be set with DATABASE_URL, or dev would write into prod');
@@ -104,19 +105,21 @@ function pgStore(url) {
 }
 
 // shortcut: per-process fixed-window limit, resets on restart; move to the database if the API ever runs on several instances
-function limiter(max) {
-  const hits = new Map(); // IPs live here only, never on disk or in logs, and are forgotten within two minutes
-  setInterval(() => { const now = Date.now(); for (const [k, v] of hits) if (now - v.t > 60000) hits.delete(k); }, 60000).unref();
+function limiter(max, ms = 60000) {
+  const hits = new Map(); // IPs live here only, never on disk or in logs, and are forgotten within a minute after their window ends
+  setInterval(() => { const now = Date.now(); for (const [k, v] of hits) if (now - v.t > ms) hits.delete(k); }, 60000).unref();
   return ip => {
     const now = Date.now(), h = hits.get(ip);
-    if (!h || now - h.t > 60000) {
-      if (hits.size > 10000) for (const [k, v] of hits) if (now - v.t > 60000) hits.delete(k); // drop expired windows, never live ones
+    if (!h || now - h.t > ms) {
+      if (hits.size > 10000) for (const [k, v] of hits) if (now - v.t > ms) hits.delete(k); // drop expired windows, never live ones
       hits.set(ip, { t: now, n: 1 }); return false;
     }
     return ++h.n > max;
   };
 }
 const limited = limiter(WRITES_PER_MIN), playLimited = limiter(PLAY_PER_MIN);
+const newLimited = limiter(NEW_SAVES_PER_IP, 864e5); // shortcut: a day from the address's first new code, per process, so a restart gives every address a fresh budget; addresses that made a new code stay in memory up to a day
+let capReported = null; // the UTC day the server's cap was last reported to Sentry
 const clientIp = req => req.headers['cf-connecting-ip'] || req.socket.remoteAddress; // Render sits behind Cloudflare, which overwrites this header with the real client; X-Forwarded-For starts with whatever the client sent
 async function readBody(req) { // the body as text, or null past MAX_BODY
   let size = 0; const chunks = [];
@@ -175,8 +178,14 @@ function createServer(store) {
         if (tooDeep(save)) return send(400, { error: 'save nested too deep' });
         if (save.owe !== undefined && !Array.isArray(save.owe)) return send(400, { error: 'owe must be a list' }); // a stored non-list owe broke every sync for its code (#51)
         log.debug({ owed: Array.isArray(save.owe) ? save.owe.filter(Boolean).length : 0 }, 'cards owed'); // how many cards the save still owes the player, at debug level
+        if (!(await store.get(code)) && newLimited(clientIp(req))) return send(429, { error: 'too many new saves from this address today, try again tomorrow' }); // only new codes count: an existing save always updates
         const updatedAt = await store.put(code, save);
-        if (!updatedAt) { log.warn('new saves daily cap reached'); return send(429, { error: 'too many new saves today, try again tomorrow' }); } // the player's progress stays on the device and syncs later
+        if (!updatedAt) { // the player's progress stays on the device and syncs later
+          log.warn('new saves daily cap reached');
+          const day = new Date().toISOString().slice(0, 10);
+          if (capReported !== day) { capReported = day; Sentry.captureMessage('new saves daily cap reached', 'warning'); } // once a day, emails the owner (Sentry alert); no code, IP or save in it
+          return send(429, { error: 'too many new saves today, try again tomorrow' });
+        }
         return send(200, { updatedAt });
       }
       send(405, { error: 'method not allowed' });
