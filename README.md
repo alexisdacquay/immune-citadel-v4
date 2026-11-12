@@ -135,7 +135,7 @@ Every Render setting lives in [render.yaml](render.yaml). Environments, releases
 
 ## How it is built
 
-A small AI agent team builds the game, with one human owner who sets priorities, playtests and gives the written go for production releases (per release, or since 2026-11-08 as a standing go). Four agents: the orchestrator (the main Claude Code session) builds; a DeepSeek QA agent checks every change in CI; a DeepSeek on-call agent answers alerts with a fix; short-lived Claude panels audit and propose designs. Roles and the loop: [docs/TEAM.md](docs/TEAM.md).
+A small AI agent team builds the game, with one human owner who sets priorities, playtests and gives the go for each production release. Four agents: the orchestrator (the main Claude Code session) builds; a DeepSeek QA agent checks every change in CI; a DeepSeek on-call agent answers alerts with a fix; short-lived Claude panels audit and propose designs. Roles and the loop: [docs/TEAM.md](docs/TEAM.md).
 
 **From issue to production:**
 
@@ -146,7 +146,7 @@ A small AI agent team builds the game, with one human owner who sets priorities,
 3. CI runs `test`, `game` and `qa` (the QA agent, required) on it, plus `qa-review` (advisory). Details: [docs/TEAM.md](docs/TEAM.md).
 4. GitHub merges the pull request into `dev` as soon as `test`, `game` and `qa` are green. Auto-merge is armed through the owner's login, so GitHub shows the owner as the merger.
 5. Render deploys every commit on `dev`, and CI's `deployed` job proves that commit is live, then runs a read-only smoke and privacy check on it ([tools/smoke.js](tools/smoke.js)).
-6. Production moves only through a promotion: a pull request from `dev` into `main`, merged only on the owner's written go, never automatically.
+6. Production is manual: a promotion pull request (`dev` → `main`) is merged only on the owner's go for that release; nothing merges into `main` automatically.
 
 Where to read more:
 

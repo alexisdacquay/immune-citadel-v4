@@ -32,4 +32,4 @@ The process and roles are defined in `docs/TEAM.md`. This is the orchestrator's 
 Tell the owner in a few lines: what shipped (issue links), what is not verified, what needs them. Then, if the owner asked for more than one cycle, go back to step 1.
 
 ## Gates
-- Never touch `main` without the owner's explicit approval in the current conversation.
+- Production is manual: a promotion pull request (`dev` → `main`) is merged only on the owner's go for that release; nothing merges into `main` automatically. Never merge into `main`, or arm auto-merge on it, without that go in the current conversation.
