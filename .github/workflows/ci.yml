@@ -40,9 +40,9 @@ jobs:
           if [ "${{ github.event_name }}" = pull_request ] && files=$(git diff --name-only --no-renames "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}") && [ -n "$files" ] && ! printf '%s\n' "$files" | grep -qvE '^docs/|\.md$'; then code=false; fi
           echo "code=$code" >> "$GITHUB_OUTPUT"; echo "game needed: $code"
 
-  game: # skipped (which a required check counts as passed) on a docs-only pull request; always on pushes to dev and main
+  game: # skipped (which a required check counts as passed) only when changes succeeded and found a docs-only pull request; always on pushes to dev and main
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.code == 'true') }} # fails closed: a failed or timed-out changes job runs game
     runs-on: ubuntu-latest
     timeout-minutes: 25 # usually 6-7 min, up to ~16 on a slow runner; a hang must not block deploys for GitHub's default 6 h
     steps:
