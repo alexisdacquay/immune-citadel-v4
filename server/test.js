@@ -92,6 +92,20 @@ test('gameplay events: only known shapes are stored, nothing else gets in', asyn
   assert.equal((await fetch(`${base}/api/save/ABCDEFGHJKMNPQRS`, { method: 'PUT', headers: { 'cf-connecting-ip': '5.6.7.8' }, body: JSON.stringify({ save: { a: 1 } }) })).status, 200, 'and never use up the save budget');
 });
 
+test('past the daily cap of new save codes, a new code gets 429 and is not stored, an existing save still updates (#53)', async t => {
+  const store = memoryStore(), srv = createServer(store); await new Promise(r => srv.listen(0, r));
+  t.after(() => srv.close());
+  const base = `http://localhost:${srv.address().port}`, day = d => new Date(Date.now() - d * 864e5).toISOString().slice(0, 10);
+  const put = c => fetch(`${base}/api/save/${c}`, { method: 'PUT', body: JSON.stringify({ save: { st: [1] } }) });
+  assert.equal((await put('ABCDEFGHJKMNPQRS')).status, 200);
+  for (let i = 1; i < 2000; i++) store.saves.set('FILL' + i, { data: {}, updatedAt: '', created: day(0) }); // 2,000 codes new today
+  assert.equal((await put('ABCDEFGHJKMNPQRT')).status, 429, 'a new code past the cap is refused');
+  assert.equal(await store.get('ABCDEFGHJKMNPQRT'), null, 'and nothing is stored');
+  assert.equal((await put('ABCDEFGHJKMNPQRS')).status, 200, 'an existing save still updates');
+  for (const r of store.saves.values()) r.created = day(1);
+  assert.equal((await put('ABCDEFGHJKMNPQRT')).status, 200, 'codes created on earlier days do not count');
+});
+
 test('cloud saves untouched for 13 months are pruned, newer ones stay', async () => {
   const store = memoryStore(), day = 864e5, at = d => new Date(Date.now() - d * day).toISOString();
   store.saves.set('ABCDEFGHJKMNPQRS', { data: { a: 1 }, updatedAt: at(396) });

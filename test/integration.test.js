@@ -25,6 +25,19 @@ test('the server prunes cloud saves untouched for 13 months, at start, and keeps
   assert.equal(sql(`SELECT count(*) FROM saves WHERE code = '${recent}'`), '1', 'newer save kept');
 });
 
+test('past the daily cap of new save codes, Postgres refuses a new code and still updates an existing save', async () => {
+  const known = newCode(), fresh = newCode();
+  const put = c => fetch(`${API}/api/save/${c}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ save: { st: [1] } }) });
+  assert.equal((await put(known)).status, 200);
+  sql(`INSERT INTO saves (code, data) SELECT 'FILL' || g, '{}' FROM generate_series(1, 2000) g`); // the cap's worth of codes new today
+  try {
+    assert.equal((await put(fresh)).status, 429, 'new code refused');
+    assert.equal(sql(`SELECT count(*) FROM saves WHERE code = '${fresh}'`), '0', 'no row for it');
+    assert.equal((await put(known)).status, 200, 'existing save updated');
+  } finally { sql(`DELETE FROM saves WHERE code LIKE 'FILL%'`); }
+  assert.equal((await put(fresh)).status, 200, 'below the cap again, new codes save');
+});
+
 test('gameplay events reach the events table and its views', async () => {
   const page = Array.from({ length: 16 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
   const r = await fetch(`${API}/api/play`, { method: 'POST', body: JSON.stringify({ page, release: '', events: [{ name: 'level_start', t: 1, level: 18, mode: 'iron', difficulty: 'hard' }, { name: 'hide', t: 2 }] }) });
