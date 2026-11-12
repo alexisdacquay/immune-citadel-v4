@@ -12,6 +12,7 @@ const MAX_BODY = 8 * 1024; // a full save is about 1 KB
 const MAX_DEPTH = 20; // a real save is a few levels deep; thousands of levels overflow the stack in pg on Node 22 (#57)
 const tooDeep = (v, d = 0) => d > MAX_DEPTH || (v !== null && typeof v === 'object' && Object.values(v).some(x => tooDeep(x, d + 1))); // stops at the limit, so it cannot overflow itself
 const WRITES_PER_MIN = 120; // per client IP; a player saves a few times per level, a classroom shares one IP
+const NEW_SAVES_PER_DAY = 2000; // new save codes a day per server; existing codes always save. 2,000 x 395 days x 8 KB at most ~ 6 GB on a 15 GB disk (#53)
 const PLAY_PER_MIN = 60; // gameplay event batches per client IP: one per level end or hidden tab; never counted against saves
 const SCHEMA = process.env.DB_SCHEMA || 'public'; // one schema per environment; each environment has its own Postgres (render.yaml)
 if (process.env.DATABASE_URL && !process.env.DB_SCHEMA) throw new Error('DB_SCHEMA must be set with DATABASE_URL, or dev would write into prod');
@@ -24,7 +25,11 @@ function memoryStore() {
     saves: m,
     init: async () => {},
     get: async code => m.get(code) || null,
-    put: async (code, data) => { const row = { data, updatedAt: new Date().toISOString() }; m.set(code, row); return row.updatedAt; },
+    put: async (code, data) => { // null: a new code past the daily cap, nothing stored
+      const old = m.get(code), today = new Date().toISOString().slice(0, 10);
+      if (!old && [...m.values()].filter(r => r.created === today).length >= NEW_SAVES_PER_DAY) return null;
+      const row = { data, updatedAt: new Date().toISOString(), created: old ? old.created : today }; m.set(code, row); return row.updatedAt;
+    },
     events: [],
     play: async function (page, release, rows) { if (this.events.length + rows.length > play.DAILY_CAP) return 0; this.events.push(...rows.map(r => ({ page, release, ...r }))); return rows.length; },
     prune: async () => { // same rule as Postgres for saves; events in memory carry no day, so they stay
@@ -46,6 +51,9 @@ function pgStore(url) {
     init: async () => {
       await pool.query(`CREATE SCHEMA IF NOT EXISTS "${SCHEMA}"`);
       await pool.query(`CREATE TABLE IF NOT EXISTS ${T} (code text PRIMARY KEY, data json NOT NULL, updated_at timestamptz NOT NULL DEFAULT now())`);
+      await pool.query(`ALTER TABLE ${T} ADD COLUMN IF NOT EXISTS created date`); // saves from before the cap keep NULL: they never count as new today
+      await pool.query(`ALTER TABLE ${T} ALTER COLUMN created SET DEFAULT current_date`);
+      await pool.query(`CREATE INDEX IF NOT EXISTS saves_created ON ${T} (created)`);
       // gameplay events (docs/EVENTS.md): the date only, no time of day, no arrival order, no IP; rows go after KEEP_DAYS
       await pool.query(`CREATE TABLE IF NOT EXISTS ${E} (day date NOT NULL DEFAULT current_date, page text NOT NULL, release text, name text NOT NULL, t integer NOT NULL,
         level smallint, mode text, difficulty text, outcome text, first boolean, stars smallint, wave smallint, card text, secs integer, is_new boolean)`);
@@ -86,9 +94,11 @@ function pgStore(url) {
       const r = await pool.query(`SELECT data, updated_at FROM ${T} WHERE code = $1`, [code]);
       return r.rows[0] ? { data: r.rows[0].data, updatedAt: r.rows[0].updated_at.toISOString() } : null;
     },
-    put: async (code, data) => {
-      const r = await pool.query(`INSERT INTO ${T} (code, data) VALUES ($1, $2) ON CONFLICT (code) DO UPDATE SET data = EXCLUDED.data, updated_at = now() RETURNING updated_at`, [code, data]);
-      return r.rows[0].updated_at.toISOString();
+    put: async (code, data) => { // null: a new code past the daily cap, nothing stored; an existing code always updates, counted in the table so a restart does not reset it
+      const r = await pool.query(`INSERT INTO ${T} (code, data) SELECT $1::text, $2::json
+        WHERE EXISTS (SELECT 1 FROM ${T} WHERE code = $1) OR (SELECT count(*) FROM ${T} WHERE created = current_date) < ${NEW_SAVES_PER_DAY}
+        ON CONFLICT (code) DO UPDATE SET data = EXCLUDED.data, updated_at = now() RETURNING updated_at`, [code, data]);
+      return r.rows[0] ? r.rows[0].updated_at.toISOString() : null;
     },
   };
 }
@@ -165,6 +175,7 @@ function createServer(store) {
         if (tooDeep(save)) return send(400, { error: 'save nested too deep' });
         log.debug({ owed: Array.isArray(save.owe) ? save.owe.filter(Boolean).length : 0 }, 'cards owed'); // how many cards the save still owes the player, at debug level
         const updatedAt = await store.put(code, save);
+        if (!updatedAt) { log.warn('new saves daily cap reached'); return send(429, { error: 'too many new saves today, try again tomorrow' }); } // the player's progress stays on the device and syncs later
         return send(200, { updatedAt });
       }
       send(405, { error: 'method not allowed' });
