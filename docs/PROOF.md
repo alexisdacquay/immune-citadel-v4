@@ -36,13 +36,13 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 > **2 points:** "A specification exists and there's a publicly accessible task tracker. The tasks define acceptance criteria and there's evidence that the agents used the tracker."
 
 - **Specification:** [SPEC.md](SPEC.md), player journeys, each with acceptance criteria.
-- **Public tracker:** [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues?q=is%3Aissue) and [merged pull requests](https://github.com/alexisdacquay/immune-citadel-v4/pulls?q=is%3Apr%20is%3Amerged). Many issues carry an "Acceptance criteria" section ([search](https://github.com/alexisdacquay/immune-citadel-v4/issues?q=is%3Aissue%20%22acceptance%20criteria%22)); most of the rest are bug reports, roadmap ideas, or early features from before that rule.
+- **Public tracker:** [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues?q=is%3Aissue+sort%3Acreated-asc), oldest first, and [merged pull requests](https://github.com/alexisdacquay/immune-citadel-v4/pulls?q=is%3Apr%20is%3Amerged). Many issues carry an "Acceptance criteria" section ([search](https://github.com/alexisdacquay/immune-citadel-v4/issues?q=is%3Aissue%20%22acceptance%20criteria%22)); most of the rest are bug reports, roadmap ideas, or early features from before that rule. Acceptance criteria were verified through each pull request's QA checks, so their boxes were left unticked, on the copied issues too; [#24](https://github.com/alexisdacquay/immune-citadel-v4/issues/24) is the exception (below).
 - **Agents used the tracker** (the QA and on-call agents post as bot accounts; the orchestrator posts through the owner's login, as the next bullet explains):
-  - in this repository: issue [#93](https://github.com/alexisdacquay/immune-citadel-v4/issues/93), a bug with acceptance criteria → pull request [#94](https://github.com/alexisdacquay/immune-citadel-v4/pull/94), "Fixes #93", with the builder's `## QA checks` and the QA agent's verdicts as `github-actions` → "Fixed by #94" on #93 once it merged into `dev`. Every pull request into `dev` since [#59](https://github.com/alexisdacquay/immune-citadel-v4/pull/59) carries the builder's `## QA checks` and the bot's verdict;
+  - in this repository: issue [#93](https://github.com/alexisdacquay/immune-citadel-v4/issues/93), a bug with acceptance criteria → pull request [#94](https://github.com/alexisdacquay/immune-citadel-v4/pull/94), "Fixes #93", with the builder's `## QA checks` and the QA agent's verdicts as `github-actions` → "Fixed by #94" on #93 once it merged into `dev`. Every pull request into `dev` since [#59](https://github.com/alexisdacquay/immune-citadel-v4/pull/59) carries the builder's `## QA checks` and the bot's verdict ([pull requests with a `github-actions` comment](https://github.com/alexisdacquay/immune-citadel-v4/pulls?q=is%3Apr+commenter%3Aapp%2Fgithub-actions));
   - in the original repository (screenshots): the on-call drill's issue, opened by `sentry[bot]` and worked by the on-call agent as `github-actions` ([screenshot](screenshots/proof/oncall-2-agent-comments.jpg), criterion 12), and the QA agent's verdict on the on-call agent's fix ([screenshot](screenshots/proof/team-qa-on-oncall-pr.jpg), criterion 3).
 - **The orchestrator on issues:** it runs on the owner's machine, so GitHub shows the owner's login; the heading names the role ("Build notes", "QA verdict"), for example issue #24 in the original repository (its copy here, [#24](https://github.com/alexisdacquay/immune-citadel-v4/issues/24), has the ticked criteria but not the comments):
 
-| Acceptance criteria, ticked when verified | The QA verdict on the same issue (posted through the owner's login) |
+| Acceptance criteria on #24, ticked when verified | The QA verdict on the same issue (posted through the owner's login) |
 |---|---|
 | ![Issue #24: Why, What, and four ticked acceptance criteria](screenshots/proof/spec-issue-acceptance.jpg) | ![Issue #24: "QA verdict (round 2): PASS", one row per criterion with evidence](screenshots/proof/spec-qa-verdict.jpg) |
 
@@ -218,7 +218,7 @@ As of promotion [#127](https://github.com/alexisdacquay/immune-citadel-v4/pull/1
 
 > **2 points:** "A key user journey is instrumented with metrics, traces, and structured logs that share a trace ID; no customer data or credentials are sent to telemetry; and the signals are collected, stored, and viewable in a UI."
 
-**The journey:** a cloud save, as the save API handles it (the browser's request is not joined to the trace). One real save on dev, trace `e273c17a1ecc4b94b4627985857338e4`:
+**The journey:** a cloud save, server side; the browser's request is not joined to the trace. One real save on dev, trace `e273c17a1ecc4b94b4627985857338e4`:
 
 | Signal | Where | Proof |
 |---|---|---|
@@ -246,6 +246,13 @@ As of promotion [#127](https://github.com/alexisdacquay/immune-citadel-v4/pull/1
 
 Checked by [server/observability.test.js](../server/observability.test.js) on every pull request and by CI's smoke test after every deploy (the `SMOKE PASS` line in [criterion 9](#9-cicd)).
 
+**On production, after every push to `main`** (and to `dev`): CI's `deployed` job runs [tools/verify-sentry.js](../tools/verify-sentry.js), which makes one save under a trace ID it chooses, then finds that save's trace, log line and metric in Sentry under that one ID; the run goes red if any is missing. On `56f05ec`, the `deployed` job of [run 43293619081](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43293619081) ([log](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43293619081/job/131445983854)) printed:
+
+```
+save CHEC… on https://immune-citadel-v4-api.onrender.com: 200, trace 6f7bcc210faa96d46db356b62d2b7f8f
+in Sentry: the trace, its log line and its metric
+```
+
 ## 11. Alerting on User Impact
 
 > **1 point:** "At least one alert exists." The course asks to alert "on real user impact instead of CPU graphs".
@@ -253,6 +260,7 @@ Checked by [server/observability.test.js](../server/observability.test.js) on ev
 - **The user impact:** a player's save or load fails.
 - **The alert:** any save API error emails the owner and opens a GitHub issue, which wakes the on-call agent ([observability/sentry-alert.json](../observability/sentry-alert.json)).
 - **Fired twice:** 2026-11-06 (database stopped on purpose, local stack) and 2026-11-08 (the drill, criterion 12).
+- **The screenshots** show the alert before [#85](https://github.com/alexisdacquay/immune-citadel-v4/pull/85) split it by level: an error still emails the owner and opens the issue; a warning (the daily cap on new save codes) only emails. "Al" in the Sentry screenshots is the owner's account name.
 - **Also:** a game crash emails the owner, in dev and production ([observability/sentry-game-alert.json](../observability/sentry-game-alert.json)), and Better Stack emails when a site or an API is down.
 
 | Its two firings | Its two actions: email the owner ("Notify Al", the owner's Sentry name) and open a GitHub issue |
