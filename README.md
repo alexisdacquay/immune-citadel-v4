@@ -162,6 +162,8 @@ Where to read more:
 
 ## For reviewers
 
+**About this repository.** It was created on 2026-11-12 under the same name as the project's original repository, which was renamed and made private the same day, to publish the course submission without later product work. It keeps the full commit history; issues #1 to #58 were copied without their comments, each starting with a "_Copy of_" note. The original's pull requests, Actions runs and issue comments are not public, so the screenshots of issue #131, pull request #132 and run 42502143601 in [docs/PROOF.md](docs/PROOF.md) show the original repository under this same name; those numbers do not point to them here. Likewise, #numbers in commit messages before 2026-11-12 refer to the original repository, and GitHub links them to unrelated items here. The licence commit [`3d488f8`](https://github.com/alexisdacquay/immune-citadel-v4/commit/3d488f8) went to `main` directly during the re-creation, before the branch rules applied; every change since went through a pull request.
+
 Immune Citadel is a project for the [DataTalksClub AI Dev Tools Zoomcamp](https://github.com/DataTalksClub/ai-dev-tools-zoomcamp/tree/main/project). Each row links to its proof in [docs/PROOF.md](docs/PROOF.md): the rubric's words, screenshots, raw output, links that open without a login.
 
 | # | Criterion | Points | Proof (screenshots and raw output) |
