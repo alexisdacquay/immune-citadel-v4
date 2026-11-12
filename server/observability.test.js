@@ -70,6 +70,17 @@ test('one save: trace, log line and metric share one trace ID with the Render lo
   } finally { a.api.kill('SIGKILL'); sentry.close(); }
 });
 
+test('a save code written another way, in lower case or percent-encoded, never reaches Sentry either', async () => {
+  const sentry = await fakeSentry(), a = await startApi(`http://key@127.0.0.1:${sentry.port}/1`);
+  const ENCODED = CODE.slice(0, 8) + '%' + CODE.charCodeAt(8).toString(16).toUpperCase() + CODE.slice(9); // one letter percent-encoded
+  try {
+    for (const p of [`/api/save/${CODE.toLowerCase()}`, `/api/save/${ENCODED}`, `/x/${CODE.toLowerCase()}`]) assert.ok((await fetch(a.base + p)).status >= 400, p);
+    a.api.kill('SIGTERM'); assert.equal(await a.exited, 0);
+    assert.equal(sentry.items.filter(i => i.type === 'span').length, 3, 'each request was traced');
+    assert.doesNotMatch(sentry.items.map(i => i.raw).join('\n'), new RegExp(`${CODE}|${ENCODED}`, 'i'), 'no save code, in any case or encoding');
+  } finally { a.api.kill('SIGKILL'); sentry.close(); }
+});
+
 test('a deploy finishes a save in flight', async () => {
   const a = await startApi('');
   try {
