@@ -41,7 +41,7 @@ Status: **signed by the owner on 2026-11-07**, **re-signed the same day** for th
 
 | Option | Result | Decision |
 |---|---|---|
-| on, with notice and switch | data from most players; meets the UK and FR exemptions | **chosen by the owner, 2026-11-06** |
+| on, with notice and switch | data from most players; meets the UK and FR exemptions | **chosen** |
 | *(2026-11-08, second re-signing)* off until the player opts in | a child consents alone to online services only from 13 in the UK (UK GDPR Art 8, DPA 2018 s.9), 15 in France and 16 in Germany: many players could not, and opt-in gives too few answers to be useful. The basis stays legitimate interests, not consent; the switch and Global Privacy Control are the safeguard | rejected |
 
 ## Risks and measures
