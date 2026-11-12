@@ -110,8 +110,8 @@ const limited = limiter(WRITES_PER_MIN), playLimited = limiter(PLAY_PER_MIN);
 const clientIp = req => req.headers['cf-connecting-ip'] || req.socket.remoteAddress; // Render sits behind Cloudflare, which overwrites this header with the real client; X-Forwarded-For starts with whatever the client sent
 async function readBody(req) { // the body as text, or null past MAX_BODY
   let size = 0; const chunks = [];
-  for await (const c of req) { size += c.length; if (size > MAX_BODY) return null; chunks.push(c); }
-  return Buffer.concat(chunks).toString('utf8');
+  for await (const c of req) { size += c.length; if (size <= MAX_BODY) chunks.push(c); } // past the limit, read on and drop: leaving the loop early destroys the socket the proxy reuses (#50)
+  return size > MAX_BODY ? null : Buffer.concat(chunks).toString('utf8');
 }
 
 // POST /api/play: gameplay events, plain-text JSON so a browser sends it without a CORS preflight. The game never reads the answer.
