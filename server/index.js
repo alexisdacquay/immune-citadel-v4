@@ -173,6 +173,7 @@ function createServer(store) {
         const save = body && body.save;
         if (!save || typeof save !== 'object' || Array.isArray(save)) return send(400, { error: 'body must be {"save": {...}}' });
         if (tooDeep(save)) return send(400, { error: 'save nested too deep' });
+        if (save.owe !== undefined && !Array.isArray(save.owe)) return send(400, { error: 'owe must be a list' }); // a stored non-list owe broke every sync for its code (#51)
         log.debug({ owed: Array.isArray(save.owe) ? save.owe.filter(Boolean).length : 0 }, 'cards owed'); // how many cards the save still owes the player, at debug level
         const updatedAt = await store.put(code, save);
         if (!updatedAt) { log.warn('new saves daily cap reached'); return send(429, { error: 'too many new saves today, try again tomorrow' }); } // the player's progress stays on the device and syncs later
