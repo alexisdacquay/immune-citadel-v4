@@ -102,6 +102,9 @@ const { chromium } = require('playwright'); const path = require('path'), fs = r
   // an owed card shown on one device must not come back from the other device's copy (it did: "Fever spike" shown as new at every level)
   const owed = await p.evaluate(() => { const shown = { owe: [], seen: ['owed:fever'], at: 2 }, cloud = { owe: ['fever'], seen: [], at: 1 }; return [IC.mergeSave(shown, cloud), IC.mergeSave(cloud, shown)].map(m => (m.owe || []).join()).join('|'); });
   if (owed !== '|') errs.push('an owed card shown on one device came back from the other: ' + owed);
+  // a save whose owe is not a list counts as owing nothing: merging must not throw, or every cloud sync for that code fails (#51)
+  const badOwe = await p.evaluate(() => ['x', 5, { a: 1 }, null].map(owe => { try { return [IC.mergeSave({ owe, at: 2 }, { owe: ['fever'], at: 1 }), IC.mergeSave({ owe: ['fever'], at: 2 }, { owe, at: 1 })].map(m => (m.owe || []).join()).join('|'); } catch (e) { return e.message; } }));
+  if (badOwe.some(r => r !== 'fever|fever')) errs.push('merging a save whose owe is not a list: ' + badOwe.join(', '));
   console.log('route problems:', route.length ? route : 'none'); errs.push(...route);
   const results = []; let used = {}; // specialists bought by the bot, across all runs
   const nLv = await p.evaluate(() => IC.LEVELS.length), lmark = await p.evaluate(() => IC.LMARK);

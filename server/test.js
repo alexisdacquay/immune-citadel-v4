@@ -22,7 +22,8 @@ test('save API', async t => {
   assert.equal((await put(code, { save: { a: 1 } }, { origin: 'https://evil.example' })).headers.get('access-control-allow-origin'), null, 'foreign origin gets no CORS grant');
   assert.equal((await put(code, 'not json')).status, 400);
   assert.equal((await put(code, { save: [1, 2] })).status, 400, 'save must be an object');
-  assert.equal((await put(code, { save: { owe: 'not an array' } })).status, 200, 'non-array owe is not a server error');
+  for (const owe of ['not an array', 5, { a: 1 }, null]) assert.equal((await put(code, { save: { owe } })).status, 400, `non-list owe ${JSON.stringify(owe)} is refused`);
+  assert.equal((await put(code, { save: { owe: ['fever'] } })).status, 200, 'a list of owed cards is kept');
   assert.equal((await put(code, { nope: 1 })).status, 400);
   assert.equal((await put(code, { save: { x: 'y'.repeat(9000) } })).status, 413);
   assert.equal((await fetch(`${base}/api/save/${code}`, { method: 'OPTIONS', headers: { origin: 'https://game.example' } })).status, 204);
