@@ -1546,7 +1546,7 @@ function mergeSave(a, b) {
   for (const k of ['st', 'hc', 'ic']) out[k] = fa[k].map((v, i) => Math.max(v, fb[k][i]));
   out.rch = Math.max(fa.rch, fb.rch);
   const met = new Set([...arr(a, 'seen'), ...arr(b, 'seen')]); // an owed card shown on either device stays shown: 'owed:<id>' in seen
-  const owe = [...new Set([...(fa.owe || a.owe || []), ...(fb.owe || b.owe || [])])].filter(id => !met.has('owed:' + id)); if (owe.length) out.owe = owe; else delete out.owe;
+  const owe = [...new Set([...(fa.owe || arr(a, 'owe')), ...(fb.owe || arr(b, 'owe'))])].filter(id => !met.has('owed:' + id)); if (owe.length) out.owe = owe; else delete out.owe;
   for (const k of ['seen', 'viewed', 'hints']) out[k] = [...new Set([...arr(a, k), ...arr(b, k)])].filter(v => typeof v === 'string');
   if (!out.mem || typeof out.mem !== 'object' || Array.isArray(out.mem)) out.mem = {};
   if (!DIFF[out.diff]) out.diff = 'normal';
