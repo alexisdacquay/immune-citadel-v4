@@ -1,7 +1,7 @@
 // Save API unit tests on the in-memory store; Postgres is covered by test/integration.test.js.
 process.env.ALLOWED_ORIGINS = 'https://game.example'; process.env.LOG_LEVEL = 'silent';
 const test = require('node:test'), assert = require('node:assert'), http = require('node:http');
-const { createServer, memoryStore } = require('./index.js');
+const { createServer, memoryStore, limiter } = require('./index.js');
 const { Sentry } = require('./sentry');
 
 test('save API', async t => {
@@ -110,7 +110,7 @@ test('past the daily cap of new save codes, a new code gets 429 and is not store
   assert.equal((await put('ABCDEFGHJKMNPQRT')).status, 200, 'codes created on earlier days do not count');
 });
 
-test('one address gets 100 new save codes a day; its existing saves still update and other addresses still start new ones (#73)', async t => {
+test('one address gets 10 new save codes per 2 minutes; its existing saves still update and other addresses still start new ones (#73, #86)', async t => {
   const store = memoryStore(), srv = createServer(store); await new Promise(r => srv.listen(0, r));
   t.after(() => srv.close());
   const base = `http://localhost:${srv.address().port}`, A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', code = i => 'ABCDEFGHJKMNPQ' + A[i >> 5] + A[i & 31];
@@ -118,11 +118,42 @@ test('one address gets 100 new save codes a day; its existing saves still update
   t.mock.method(store, 'put', async () => null); // the server's cap is full
   for (let i = 0; i < 5; i++) assert.equal((await put(code(0), '7.7.7.7')).status, 429, 'a first save refused by the server cap');
   t.mock.restoreAll();
-  for (let i = 0; i < 100; i++) assert.equal((await put(code(i), '7.7.7.7')).status, 200, 'its retries did not use up the budget');
-  assert.equal((await put(code(100), '7.7.7.7')).status, 429, 'the 101st new code from one address is refused');
+  for (let i = 0; i < 10; i++) assert.equal((await put(code(i), '7.7.7.7')).status, 200, 'its retries did not use up the budget');
+  assert.equal((await put(code(100), '7.7.7.7')).status, 429, 'the 11th new code from one address is refused');
   assert.equal(await store.get(code(100)), null, 'and nothing is stored');
   assert.equal((await put(code(0), '7.7.7.7')).status, 200, 'a save that exists still updates from that address');
   assert.equal((await put(code(100), '8.8.8.8')).status, 200, 'another address still starts a new code');
+});
+
+test('parallel new codes from one address cannot pass its budget together (#86)', async t => {
+  const store = memoryStore(), srv = createServer(store), put0 = store.put; await new Promise(r => srv.listen(0, r));
+  t.after(() => srv.close());
+  t.mock.method(store, 'put', async (...a) => { await new Promise(r => setTimeout(r, 100)); return put0(...a); }); // every request is checked before any is stored
+  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', put = i => fetch(`http://localhost:${srv.address().port}/api/save/ABCDEFGHJKMNPQ${A[i]}2`, { method: 'PUT', headers: { 'cf-connecting-ip': '6.6.6.6' }, body: JSON.stringify({ save: { st: [1] } }) });
+  const statuses = await Promise.all(Array.from({ length: 15 }, (_, i) => put(i).then(r => r.status)));
+  assert.deepEqual([statuses.filter(s => s === 200).length, statuses.filter(s => s === 429).length], [10, 5], '10 stored, 5 refused');
+});
+
+test('IPv6: the new-code budget is per /64, so one host cannot rotate addresses inside it (#86)', async t => {
+  const store = memoryStore(), srv = createServer(store); await new Promise(r => srv.listen(0, r));
+  t.after(() => srv.close());
+  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', put = (i, ip) => fetch(`http://localhost:${srv.address().port}/api/save/ABCDEFGHJKMNPQ${A[i]}3`, { method: 'PUT', headers: { 'cf-connecting-ip': ip }, body: JSON.stringify({ save: { st: [1] } }) });
+  for (let i = 0; i < 10; i++) assert.equal((await put(i, `2001:db8:1:2::${i + 1}`)).status, 200, 'ten addresses in one /64');
+  assert.equal((await put(10, '2001:0DB8:0001:0002:ffff:0:0:b')).status, 429, 'any other address in that /64, however written, is refused');
+  assert.equal((await put(11, '2001:db8:1:3::1')).status, 200, 'the next /64 is another network');
+});
+
+test('every address is deleted from memory the moment its window ends: 2 minutes for new codes, 1 for writes (#86)', t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const fresh = limiter(10, 2 * 60000), writes = limiter(120);
+  for (let i = 0; i < 10; i++) assert.equal(fresh('7.7.7.7'), false);
+  assert.equal(fresh('7.7.7.7'), true, 'the 11th is past the budget');
+  fresh('8.8.8.8', true); assert.equal(fresh.hits.has('8.8.8.8'), false, 'giving back never stores an address');
+  writes('7.7.7.7');
+  t.mock.timers.tick(60000); assert.equal(writes.hits.size, 0, 'the write limit forgets it after 1 minute');
+  t.mock.timers.tick(59999); assert.equal(fresh.hits.size, 1, 'kept during its window');
+  t.mock.timers.tick(1); assert.equal(fresh.hits.size, 0, 'deleted when the 2 minutes end');
+  assert.equal(fresh('7.7.7.7'), false, 'and the next new code starts a fresh budget');
 });
 
 test('cloud saves untouched for 13 months are pruned, newer ones stay', async () => {

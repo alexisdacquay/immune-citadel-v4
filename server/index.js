@@ -1,6 +1,7 @@
 // Cloud saves for Immune Citadel. A save is an opaque JSON object keyed by a 16-character save code the game generates.
 // Knowing the code is the only credential, so codes carry 80 random bits. Without DATABASE_URL it keeps saves in memory (local dev, tests).
 const http = require('node:http');
+const { isIPv6 } = require('node:net');
 const { initSentry, Sentry } = require('./sentry');
 const span = () => Sentry.getActiveSpan()?.spanContext(); // the request's trace, while Sentry is on
 const log = require('pino')({ level: process.env.LOG_LEVEL || 'info', mixin: () => (span() ? { trace_id: span().traceId, span_id: span().spanId } : {}) }); // JSON lines in Render's logs, findable by trace ID
@@ -13,7 +14,7 @@ const MAX_DEPTH = 20; // a real save is a few levels deep; thousands of levels o
 const tooDeep = (v, d = 0) => d > MAX_DEPTH || (v !== null && typeof v === 'object' && Object.values(v).some(x => tooDeep(x, d + 1))); // stops at the limit, so it cannot overflow itself
 const WRITES_PER_MIN = 120; // per client IP; a player saves a few times per level, a classroom shares one IP
 const NEW_SAVES_PER_DAY = 2000; // new save codes a day per server; existing codes always save. 2,000 x 395 days x 8 KB at most ~ 6 GB on a 15 GB disk (#53)
-const NEW_SAVES_PER_IP = 100; // new save codes a day per client IP: a few classes starting together behind one school address; one address takes at most 5% of the server's day (#73)
+const NEW_SAVES_PER_IP = 10; // new save codes per client address (IPv6: per /64) in 2 minutes, the longest the server may keep an address; one address needs about 6.7 hours to use the server's day (#73, #86)
 const PLAY_PER_MIN = 60; // gameplay event batches per client IP: one per level end or hidden tab; never counted against saves
 const SCHEMA = process.env.DB_SCHEMA || 'public'; // one schema per environment; each environment has its own Postgres (render.yaml)
 if (process.env.DATABASE_URL && !process.env.DB_SCHEMA) throw new Error('DB_SCHEMA must be set with DATABASE_URL, or dev would write into prod');
@@ -106,20 +107,23 @@ function pgStore(url) {
 
 // shortcut: per-process fixed-window limit, resets on restart; move to the database if the API ever runs on several instances
 function limiter(max, ms = 60000) {
-  const hits = new Map(); // IPs live here only, never on disk or in logs, and are forgotten within a minute after their window ends
-  setInterval(() => { const now = Date.now(); for (const [k, v] of hits) if (now - v.t > ms) hits.delete(k); }, 60000).unref();
-  return (ip, peek = false) => { // peek: is this IP already at max, without counting
-    const now = Date.now(), h = hits.get(ip);
-    if (!h || now - h.t > ms) {
-      if (peek) return false;
-      if (hits.size > 10000) for (const [k, v] of hits) if (now - v.t > ms) hits.delete(k); // drop expired windows, never live ones
-      hits.set(ip, { t: now, n: 1 }); return false;
-    }
-    return peek ? h.n >= max : ++h.n > max;
+  const hits = new Map(); // IPs live here only, never on disk or in logs, and each is deleted the moment its window ends
+  const hit = (ip, giveBack = false) => { // true: past max, counted; giveBack returns a count whose action did not happen
+    const h = hits.get(ip);
+    if (giveBack) { if (h) h.n--; return false; }
+    if (h) return ++h.n > max;
+    hits.set(ip, { n: 1 }); setTimeout(() => hits.delete(ip), ms).unref(); return false; // one timer per entry: the entry exists until it fires
   };
+  return Object.assign(hit, { hits });
 }
 const limited = limiter(WRITES_PER_MIN), playLimited = limiter(PLAY_PER_MIN);
-const newLimited = limiter(NEW_SAVES_PER_IP, 864e5); // shortcut: a day from the address's first new code, per process, so a restart gives every address a fresh budget; addresses that made a new code stay in memory up to a day
+const newLimited = limiter(NEW_SAVES_PER_IP, 2 * 60000); // never longer than 2 minutes: the in-game notice promises the address is forgotten by then
+const net64 = ip => { // IPv6: its /64, which one host can fill with addresses; IPv4 and IPv4-mapped as is
+  if (!isIPv6(ip) || ip.includes('.')) return ip;
+  const [a, b] = ip.split('::'), head = a ? a.split(':') : [], tail = b ? b.split(':') : [];
+  const groups = b === undefined ? head : [...head, ...Array(8 - head.length - tail.length).fill('0'), ...tail];
+  return groups.slice(0, 4).map(g => parseInt(g, 16).toString(16)).join(':') + '::/64';
+};
 let capReported = null; // the UTC day the server's cap was last reported to Sentry
 const clientIp = req => req.headers['cf-connecting-ip'] || req.socket.remoteAddress; // Render sits behind Cloudflare, which overwrites this header with the real client; X-Forwarded-For starts with whatever the client sent
 async function readBody(req) { // the body as text, or null past MAX_BODY
@@ -179,16 +183,16 @@ function createServer(store) {
         if (tooDeep(save)) return send(400, { error: 'save nested too deep' });
         if (save.owe !== undefined && !Array.isArray(save.owe)) return send(400, { error: 'owe must be a list' }); // a stored non-list owe broke every sync for its code (#51)
         log.debug({ owed: Array.isArray(save.owe) ? save.owe.filter(Boolean).length : 0 }, 'cards owed'); // how many cards the save still owes the player, at debug level
-        const fresh = !(await store.get(code)); // only new codes count: an existing save always updates
-        if (fresh && newLimited(clientIp(req), true)) return send(429, { error: 'too many new saves from this address today, try again tomorrow' });
+        const fresh = !(await store.get(code)), net = net64(clientIp(req)); // only new codes count: an existing save always updates
+        if (fresh && newLimited(net)) return send(429, { error: 'too many new saves from this address, try again in a few minutes' }); // counted now, so parallel new codes cannot all pass
         const updatedAt = await store.put(code, save);
         if (!updatedAt) { // the player's progress stays on the device and syncs later
+          if (fresh) newLimited(net, true); // given back, so a player retrying a refused first save does not use up the address's budget
           log.warn('new saves daily cap reached');
           const day = new Date().toISOString().slice(0, 10);
           if (capReported !== day) { capReported = day; Sentry.captureMessage('new saves daily cap reached', 'warning'); } // once a day, so the Sentry alert emails once; no code, IP or save in it
           return send(429, { error: 'too many new saves today, try again tomorrow' });
         }
-        if (fresh) newLimited(clientIp(req)); // counted once stored, so a player retrying a refused first save does not use up the address's budget
         return send(200, { updatedAt });
       }
       send(405, { error: 'method not allowed' });
@@ -200,7 +204,7 @@ function createServer(store) {
   });
 }
 
-module.exports = { createServer, memoryStore };
+module.exports = { createServer, memoryStore, limiter, net64 };
 
 if (require.main === module) {
   initSentry();
