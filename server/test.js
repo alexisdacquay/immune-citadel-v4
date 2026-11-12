@@ -24,6 +24,8 @@ test('save API', async t => {
   assert.equal((await put(code, 'not json')).status, 400);
   assert.equal((await put(code, { save: [1, 2] })).status, 400, 'save must be an object');
   for (const owe of ['not an array', 5, { a: 1 }, null]) assert.equal((await put(code, { save: { owe } })).status, 400, `non-list owe ${JSON.stringify(owe)} is refused`);
+  assert.equal((await put(code, { save: { rch: 2 } })).status, 200, 'a save with a reached specimen and no stars list is stored, not a 500 (#142)');
+  assert.deepEqual((await (await fetch(`${base}/api/save/${code}`)).json()).save, { rch: 2 });
   assert.equal((await put(code, { save: { owe: ['fever'] } })).status, 200, 'a list of owed cards is kept');
   assert.equal((await put(code, { nope: 1 })).status, 400);
   assert.equal((await put(code, { save: { x: 'y'.repeat(9000) } })).status, 413);
