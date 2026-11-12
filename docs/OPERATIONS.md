@@ -2,7 +2,7 @@
 
 How Immune Citadel runs: where it is deployed, how a change reaches players, what watches it, and what to do when an alert fires. The plans behind this page, with their proof, are [PIPELINE-PLAN.md](PIPELINE-PLAN.md) and [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md).
 
-**On this page:** [Environments](#environments) · [Infrastructure as code](#infrastructure-as-code) · [Releases](#releases) · [QA in two stages](#qa-in-two-stages) · [Branch rules](#branch-rules) · [Rollback](#rollback) · [Restore the database](#restore-the-database) · [Telemetry](#telemetry) · [Follow one save](#follow-one-save) · [Reading gameplay events](#reading-gameplay-events) · [On-call agent](#on-call-agent) · [Alert: save API error](#alert-save-api-error) · [Alert: API down](#alert-api-down)
+**On this page:** [Environments](#environments) · [Infrastructure as code](#infrastructure-as-code) · [Releases](#releases) · [QA in two stages](#qa-in-two-stages) · [Branch rules](#branch-rules) · [Rollback](#rollback) · [Restore the database](#restore-the-database) · [Telemetry](#telemetry) · [Follow one save](#follow-one-save) · [Reading gameplay events](#reading-gameplay-events) · [On-call agent](#on-call-agent) · [On-call setup checklist](#on-call-setup-checklist) · [Alert: save API error](#alert-save-api-error) · [Alert: API down](#alert-api-down)
 
 ## Environments
 
@@ -123,6 +123,7 @@ GitHub rulesets on both branches; nobody bypasses them, and neither branch accep
 | the game crashes on a player's device (dev and production sites) | Sentry, project `immune-citadel-game` | email when an issue is new or returns ([observability/sentry-game-alert.json](../observability/sentry-game-alert.json)), and again when it first reaches production ([observability/sentry-game-alert-production.json](../observability/sentry-game-alert-production.json)) |
 | a save or load fails with a server error | Sentry alert: on dev and production (the rule has no environment filter) | email; [runbook](#alert-save-api-error) |
 | monitoring stops (a missing `SENTRY_DSN`, a broken SDK) while Sentry shows nothing | CI's `deployed` job: one save under a known trace ID must reach Sentry as a trace, a log line and a metric within 5 minutes ([tools/verify-sentry.js](../tools/verify-sentry.js)) | red run; GitHub emails the owner |
+| the on-call wiring breaks (a secret, the deploy key, the Sentry alert's target, the `incident` label), for example after the repository is re-created | CI's `deployed` job: [tools/oncall-preflight.js](../tools/oncall-preflight.js); the rest of the [on-call setup checklist](#on-call-setup-checklist) is manual | red run naming the item and its fix; GitHub emails the owner |
 | CI never runs after a merge, or a dashboard rollback leaves an old commit live | not covered | accepted: [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md#open) |
 
 ### Rollback
@@ -234,12 +235,6 @@ When a Sentry alert fires, an agent wakes and proposes the fix, with no human in
 
 **Guard rails.** It edits only `index.html` and `server/<name>.js` (an allow-list), at most 150 lines and 20,000 characters. The agent's own code runs from `main`, never from `dev`. The error text is untrusted data in its prompt. One agent runs at a time, and a retry replaces its own unmerged branch. The design was reviewed independently on 2026-11-08.
 
-**Setup (done 2026-11-08), once, by the owner:** install Sentry's GitHub integration on this repository (Sentry → Settings → Integrations → GitHub), so that the orchestrator can add "Create a GitHub issue" to the alert rules. Then run, once, the command below. It creates a write deploy key for this repository only, stores its private half as the `ONCALL_DEPLOY_KEY` secret without showing it, and lets GitHub Actions open pull requests. The agent pushes with that key because GitHub starts no CI for what its own `GITHUB_TOKEN` pushes. No personal token is needed. An issue-triggered workflow runs from the default branch, so the agent wakes only once it is on `main`. The `incident` label is for a manual wake-up by the owner.
-
-```bash
-D=$(mktemp -d) && ssh-keygen -q -t ed25519 -N "" -C "immune-citadel-v4 on-call agent" -f "$D/k" && gh repo deploy-key add "$D/k.pub" -R alexisdacquay/immune-citadel-v4 --allow-write --title "on-call agent" && gh secret set ONCALL_DEPLOY_KEY -R alexisdacquay/immune-citadel-v4 < "$D/k" && gh api -X PUT repos/alexisdacquay/immune-citadel-v4/actions/permissions/workflow -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true && rm -rf "$D" && echo "on-call key set"
-```
-
 **First drill, 2026-11-08: from an alert to a fix live on `dev` in 11 minutes, with no human in the loop.** The save API had no 500 that real traffic could trigger: the nested-save 500 (#57) does not reproduce on Render. So the drill planted a real defect on `dev`, as #27's spec asks: a debug line that counts the cards a save owes with `save.owe.filter(...)`, which throws when `owe` is not a list (a pull request labelled a drill, in the original repository). The unit tests sent no `owe`, so CI passed it.
 
 | Time (UTC) | What happened | Proof |
@@ -254,6 +249,27 @@ D=$(mktemp -d) && ssh-keygen -q -t ed25519 -N "" -C "immune-citadel-v4 on-call a
 | 17:04:06 | `dev` serves the fix (`411f62b`); the same crafted save answers 200 | `/health` on the dev API |
 
 The merge was made with GitHub's own token, so `dev`'s push run (and its `deployed` proof) did not start for `411f62b`; Render deployed it, and the next merge into `dev` runs CI again. The planted line stays, now guarded, and reached production with the next promotion as harmless debug logging.
+
+### On-call setup checklist
+
+Redo every item after any move or re-creation of this repository. A new repository starts without the secrets, the deploy key, the labels, the rulesets and the Actions settings, and the GitHub apps and the Sentry alert still point at the old one. After the last re-creation, GitHub Actions was not allowed to open pull requests and nothing noticed: the agent would have found the fix and failed to propose it.
+
+**CI** items are checked by [tools/oncall-preflight.js](../tools/oncall-preflight.js) in CI's `deployed` job, on every push to `dev` and `main`: a broken one turns the run red, with the item and its fix. **Manual** items are beyond what CI's tokens can read: check them by hand. An issue-triggered workflow runs from the default branch, so the agent wakes only once `oncall.yml` is on `main`.
+
+- [ ] **GitHub Actions may open pull requests** (manual: reading the setting needs administration access, which `GITHUB_TOKEN` lacks). Without it the agent's fix pull request is refused. The second call must show `"can_approve_pull_request_reviews":true`:
+  ```bash
+  gh api -X PUT repos/alexisdacquay/immune-citadel-v4/actions/permissions/workflow -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true && gh api repos/alexisdacquay/immune-citadel-v4/actions/permissions/workflow
+  ```
+- [ ] **Sentry's GitHub app can reach this repository** (manual): GitHub → Settings → Applications → Sentry → Configure → Repository access (installed from Sentry → Settings → Integrations → GitHub). Without it the alert cannot open the incident issue.
+- [ ] **Render's GitHub app can reach this repository** (manual; `deployed` goes red within 15 minutes when Render stops deploying): GitHub → Settings → Applications → Render → Configure → Repository access, then Render syncs the Blueprint `exs-dbndeu7f3r2c738bllag` again.
+- [ ] **The secrets** (CI: `SENTRY_AUTH_TOKEN` must read the Sentry project; `DEEPSEEK_API_KEY` must be set, not tested with a model call). Set each from the clipboard: `pbpaste | gh secret set DEEPSEEK_API_KEY -R alexisdacquay/immune-citadel-v4`. `SENTRY_AUTH_TOKEN` needs the scopes `org:read`, `project:read`, `event:read`. CI's `qa` jobs also need `KILO_API_KEY` and `KILO_BASE_URL` (manual).
+- [ ] **The deploy key** (CI: a `git push --dry-run` over ssh with `ONCALL_DEPLOY_KEY` must pass, which needs write access to this repository; nothing is pushed). The agent pushes with it because GitHub starts no CI for what its own `GITHUB_TOKEN` pushes; no personal token is needed. This creates a write deploy key for this repository only and stores its private half as the secret without showing it:
+  ```bash
+  D=$(mktemp -d) && ssh-keygen -q -t ed25519 -N "" -C "immune-citadel-v4 on-call agent" -f "$D/k" && gh repo deploy-key add "$D/k.pub" -R alexisdacquay/immune-citadel-v4 --allow-write --title "on-call agent" && gh secret set ONCALL_DEPLOY_KEY -R alexisdacquay/immune-citadel-v4 < "$D/k" && rm -rf "$D" && echo "on-call key set"
+  ```
+- [ ] **The `incident` label** (CI): Sentry puts it on the issues it opens, and the owner adds it to wake the agent by hand. `gh label create incident -R alexisdacquay/immune-citadel-v4 --color B60205 --description "An incident: the owner's label wakes the on-call agent"`
+- [ ] **The Sentry alert targets this repository** (CI: alert 1464000 is enabled, fires for `immune-citadel-api`, and has an active GitHub action that opens an issue labelled `incident` here). After a move, change `repo` in [observability/sentry-alert.json](../observability/sentry-alert.json) and apply it through the Sentry MCP (`update_alert_rule`).
+- [ ] **The rulesets** (manual): a new repository has none. `gh api -X POST repos/alexisdacquay/immune-citadel-v4/rulesets --input .github/rulesets/dev.json`, the same with `main.json`, then put the new ids in [Branch rules](#branch-rules).
 
 ## Alert: save API error
 
