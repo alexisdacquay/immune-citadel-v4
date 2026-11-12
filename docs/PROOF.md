@@ -2,7 +2,7 @@
 
 For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoomcamp/tree/main/project)). Each section: the rubric's words, what was built, then screenshots or raw output with links. Every link opens without a login, except GitHub Actions job logs (GitHub requires one); their key lines are quoted here.
 
-**Claimed: 24 of 24.** Evidence captured on 2026-11-08, in the project's original repository. Its issues were copied here on 2026-11-12; its pull requests and Actions runs are not public here, so that evidence is the screenshots in [screenshots/proof/](screenshots/proof/), which show the original numbers, and the commits, which this repository keeps.
+**Claimed: 24 of 24.** Evidence captured on 2026-11-08, in the project's original repository. Its issues were copied here on 2026-11-12; its pull requests and Actions runs are not public here, so that evidence is the screenshots in [screenshots/proof/](screenshots/proof/), which show the original numbers, and the commits, which this repository keeps. Work since the copy is live here: pull requests from [#59](https://github.com/alexisdacquay/immune-citadel-v4/pull/59) on, with their QA verdicts and CI runs, and the promotion [#69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69).
 
 | # | Criterion | Points | The proof in one line |
 |---|---|---|---|
@@ -36,8 +36,8 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 - **Specification:** [SPEC.md](SPEC.md), player journeys, each with acceptance criteria.
 - **Public tracker:** [GitHub Issues](https://github.com/alexisdacquay/immune-citadel-v4/issues?q=is%3Aissue) and [merged pull requests](https://github.com/alexisdacquay/immune-citadel-v4/pulls?q=is%3Apr%20is%3Amerged). Many issues carry an "Acceptance criteria" section ([search](https://github.com/alexisdacquay/immune-citadel-v4/issues?q=is%3Aissue%20%22acceptance%20criteria%22)); most of the rest are bug reports, roadmap ideas, or early features from before that rule.
 - **Agents used the tracker** (bot accounts, so no doubt who wrote it):
-  - the on-call drill's issue, in the original repository: opened by `sentry[bot]`, worked by the on-call agent as `github-actions` ([screenshot](screenshots/proof/oncall-2-agent-comments.jpg), criterion 12); [#58](https://github.com/alexisdacquay/immune-citadel-v4/issues/58) is its copy here;
-  - every pull request into `dev`: the QA agent posts its verdict as `github-actions`, for example on the on-call agent's fix ([screenshot](screenshots/proof/team-qa-on-oncall-pr.jpg), criterion 3).
+  - in this repository: issue [#93](https://github.com/alexisdacquay/immune-citadel-v4/issues/93), a bug with acceptance criteria → pull request [#94](https://github.com/alexisdacquay/immune-citadel-v4/pull/94), "Fixes #93", with the builder's `## QA checks` and the QA agent's verdicts as `github-actions` → "Fixed by #94" on #93 once it merged into `dev`. Every pull request into `dev` since [#59](https://github.com/alexisdacquay/immune-citadel-v4/pull/59) carries the builder's `## QA checks` and the bot's verdict;
+  - in the original repository (screenshots): the on-call drill's issue, opened by `sentry[bot]` and worked by the on-call agent as `github-actions` ([screenshot](screenshots/proof/oncall-2-agent-comments.jpg), criterion 12), and the QA agent's verdict on the on-call agent's fix ([screenshot](screenshots/proof/team-qa-on-oncall-pr.jpg), criterion 3).
 - **The orchestrator on issues:** it runs on the owner's machine, so GitHub shows the owner's login; the heading names the role ("Build notes", "QA verdict"), for example issue #24 in the original repository (its copy here, [#24](https://github.com/alexisdacquay/immune-citadel-v4/issues/24), has the ticked criteria but not the comments):
 
 | Acceptance criteria, ticked when verified | The QA verdict on the same issue (posted through the owner's login) |
@@ -59,7 +59,9 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 
 ![Release pipeline: branch, pull request with test, game and qa, auto-merge into dev, Render deploys dev, owner-approved promotion into main, Render deploys production](diagrams/release-pipeline.svg)
 
-Two agents on one pull request: the on-call agent's fix, judged by the QA agent, then merged automatically.
+Two agents on one pull request, in this repository: on [PR #87](https://github.com/alexisdacquay/immune-citadel-v4/pull/87), the QA agent's stage 1 failed the change twice: first on past failure #73, whose question named the per-address budget the change replaces (the builder rewrote it in [#88](https://github.com/alexisdacquay/immune-citadel-v4/pull/88)), then on another pull request's QA checks, which had replaced its own in the description. With both fixed, stage 1 passed, and the builder answered the advisory review in a comment on the pull request.
+
+In the original repository: the on-call agent's fix, judged by the QA agent, then merged automatically.
 
 ![PR #132: commits and auto-merge by the on-call agent, then the QA agent's "QA checks: PASS"](screenshots/proof/team-qa-on-oncall-pr.jpg)
 
@@ -189,11 +191,11 @@ $ curl -s https://immune-citadel-v4-api.onrender.com/health
 - **The merge is the manual step:** Render deploys `main` on merge, and nothing automatic targets `main`. [tools/automerge.sh](../tools/automerge.sh) refuses any base but `dev`. No workflow, schedule or auto-merge merges into `main`: [ci.yml](../.github/workflows/ci.yml) and [promotion.yml](../.github/workflows/promotion.yml) only run checks, and [oncall.yml](../.github/workflows/oncall.yml) opens pull requests into `dev`.
 - **GitHub enforces** on `main` (ruleset 27124774, [main.json](../.github/rulesets/main.json)): a pull request only, up to date, with `test`, `game` and `dev-green` green. The owner's go is a team rule, which GitHub does not enforce.
 - **The latest promotion, in this repository:** [PR #69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69), `dev` → `main`, merged by hand on 2026-11-12 at 17:30 UTC as [`a8e90f0`](https://github.com/alexisdacquay/immune-citadel-v4/commit/a8e90f0), with no auto-merge armed on it. Before it, `dev`'s own run on the promoted commit `e322752` was green ([run 43268129015](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43268129015)). After it, the push run on `main` ran `test`, `game` and `deployed` green ([run 43270181878](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878)); Render deployed `a8e90f0` by itself.
-- **Earlier promotions** were merged in the original repository, whose pull requests are not public; [STATUS, Promotions](STATUS.md#promotions) lists each one by its merge commit on `main` here. The screenshot below shows one.
+- **Earlier promotions** were merged in the original repository, whose pull requests are not public; [STATUS, Promotions](STATUS.md#promotions) lists each one by its merge commit on `main` here.
 
-| The rules on `dev` and `main` | A promotion in the original repository |
-|---|---|
-| ![Rulesets: dev needs a pull request with green CI and QA; main needs a pull request, green CI and dev green on the same commit](screenshots/proof/cicd-rulesets.jpg) | ![PR #129, a promotion merged into main in the original repository](screenshots/proof/cicd-promotion-pr.jpg) |
+The rules on `dev` and `main`:
+
+![Rulesets: dev needs a pull request with green CI and QA; main needs a pull request, green CI and dev green on the same commit](screenshots/proof/cicd-rulesets.jpg)
 
 After a promotion (`ee4783d`), the push run on `main` ran the tests, then checked production itself. `qa` and `qa-review` run on pull requests into `dev` only, so they show as skipped on this push run.
 
@@ -256,7 +258,7 @@ Checked by [server/observability.test.js](../server/observability.test.js) on ev
 
 > **2 points:** "An agent wakes up on an alert and fixes the issue."
 
-**First drill, 2026-11-08, on dev, in the project's original repository.** Its issue, pull requests and runs are not public here; the evidence is the screenshots in [screenshots/proof/](screenshots/proof/) ([1](screenshots/proof/oncall-1-issue-by-sentry.jpg), [2](screenshots/proof/oncall-2-agent-comments.jpg), [3](screenshots/proof/oncall-3-fix-pr-merged.jpg), below) and the commits. [#58](https://github.com/alexisdacquay/immune-citadel-v4/issues/58) is a copy of the drill's issue, made when the tracker was copied here on 2026-11-12: opened by `alexisdacquay` and closed at once. Its two `github-actions` comments are the on-call agent stopping on a Sentry 401 when the copy was labelled, before Sentry access was set up.
+**First drill, 2026-11-08, on dev, in the project's original repository.** Its issue, pull requests and runs are not public here; the evidence is the screenshots in [screenshots/proof/](screenshots/proof/) ([1](screenshots/proof/oncall-1-issue-by-sentry.jpg), [2](screenshots/proof/oncall-2-agent-comments.jpg), [3](screenshots/proof/oncall-3-fix-pr-merged.jpg), below) and the commits. [#58](https://github.com/alexisdacquay/immune-citadel-v4/issues/58) is the drill's issue as copied here on 2026-11-12; its two comments of that day are an on-call run from before Sentry access was connected to this repository, not part of the drill.
 
 The only known 500, a deeply nested save ([#57](https://github.com/alexisdacquay/immune-citadel-v4/issues/57)), did not reproduce on Render, so a fault was planted on purpose ([d70e778](https://github.com/alexisdacquay/immune-citadel-v4/commit/d70e778)). The agent was never told about it: its prompt is built only from the Sentry event and the files its stack trace names ([tools/oncall.js](../tools/oncall.js), `incident()` and `sourceContext()`); its first comment on the issue lists them ([screenshot 2](screenshots/proof/oncall-2-agent-comments.jpg)): `server/index.js`, `server/test.js`. Before its fix, `PUT {"save":{"owe":"x"}}` answered 500 on dev; after it, 200.
 
