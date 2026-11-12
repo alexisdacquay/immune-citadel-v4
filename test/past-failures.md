@@ -31,3 +31,4 @@ A bug fix adds its line here in the same pull request, in the same form: `- [<is
 - [PR #120] index.html: On a screen 560 px tall or less, does the Field Guide keep its Back button stuck to the bottom of the visible area while the guide's content scrolls?
 - [PR #120] index.html: On a 1366x768 laptop, where the title screen's top bar is about 1208 px wide inside, does the game show its name IMMUNE CITADEL, hiding it only when the bar is narrower than 1180 px?
 - [#102] server/route.js: Does the route the API logs hide the save code even when the path is written another way, such as //api/save/CODE, an upper-case /API/SAVE/, or URL-encoded slashes, by decoding the path before redacting it?
+- [#57] server/index.js: Does the save API answer 400, without passing the save to the store, when the save is nested far deeper than any real save, such as 4,000 nested arrays in under 8 KB?

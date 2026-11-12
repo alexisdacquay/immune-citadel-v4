@@ -9,6 +9,8 @@ const play = require('./play');
 
 const CODE = /^[A-HJ-NP-Z2-9]{16}$/; // the game's alphabet: no I, O, 0, 1
 const MAX_BODY = 8 * 1024; // a full save is about 1 KB
+const MAX_DEPTH = 20; // a real save is a few levels deep; thousands of levels overflow the stack in pg on Node 22 (#57)
+const tooDeep = (v, d = 0) => d > MAX_DEPTH || (v !== null && typeof v === 'object' && Object.values(v).some(x => tooDeep(x, d + 1))); // stops at the limit, so it cannot overflow itself
 const WRITES_PER_MIN = 120; // per client IP; a player saves a few times per level, a classroom shares one IP
 const PLAY_PER_MIN = 60; // gameplay event batches per client IP: one per level end or hidden tab; never counted against saves
 const SCHEMA = process.env.DB_SCHEMA || 'public'; // one schema per environment; each environment has its own Postgres (render.yaml)
@@ -160,6 +162,7 @@ function createServer(store) {
         let body; try { body = JSON.parse(text); } catch { return send(400, { error: 'body must be JSON' }); }
         const save = body && body.save;
         if (!save || typeof save !== 'object' || Array.isArray(save)) return send(400, { error: 'body must be {"save": {...}}' });
+        if (tooDeep(save)) return send(400, { error: 'save nested too deep' });
         log.debug({ owed: Array.isArray(save.owe) ? save.owe.filter(Boolean).length : 0 }, 'cards owed'); // how many cards the save still owes the player, at debug level
         const updatedAt = await store.put(code, save);
         return send(200, { updatedAt });
