@@ -31,6 +31,9 @@ test('stage 1: YES on the new code passes; a [changes] check must also be NO on 
   assert.equal(judge({ label: 'changes' }, yes, no).pass, true);
   assert.equal(judge({ label: 'changes' }, yes, unsure).pass, true); // the old code cannot show it: still not a YES
   assert.match(judge({ label: 'changes' }, yes, yes).why, /does not test the change/);
+  const failed = { answer: 'UNSURE', why: 'no answer: DeepSeek: HTTP 503; backup google/gemini-3.5-flash: HTTP 401' };
+  assert.equal(judge({ label: 'changes' }, yes, failed).pass, false); // both models failed on the old code: never judged
+  assert.match(judge({ label: 'changes' }, yes, failed).why, /old code was never judged \(no answer: DeepSeek: HTTP 503/);
   assert.equal(judge({ label: 'stays' }, yes, null).pass, true);
   assert.equal(judge({ label: '#9' }, no, null).pass, false);
   assert.equal(judge({ label: 'stays' }, unsure, null).pass, false);
