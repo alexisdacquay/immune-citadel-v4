@@ -261,7 +261,7 @@ The merge was made with GitHub's own token, so `dev`'s push run (and its `deploy
 |---|---|
 | ![The save API alert: 2 triggers, Nov 6 and Nov 8](screenshots/proof/alert-1-history.jpg) | ![The alert's actions: notify by email, create a GitHub issue](screenshots/proof/alert-2-actions.jpg) |
 
-**"Save API error (a save or load failed): email owner, wake the on-call agent"**: every error in Sentry project `immune-citadel-api` emails the owner, at most once per 30 min per issue, and opens a GitHub issue that wakes the [on-call agent](#on-call-agent). Defined in [observability/sentry-alert.json](../observability/sentry-alert.json) (Sentry alert 1464000) and applied through the Sentry MCP.
+**"Save API error (a save or load failed): email owner, wake the on-call agent"**: every error in Sentry project `immune-citadel-api` emails the owner, at most once per 30 min per issue, and opens a GitHub issue that wakes the [on-call agent](#on-call-agent). A warning (only "new saves daily cap reached", sent once a day when the API starts refusing new save codes) emails the owner and opens no issue: it has no stack trace for the agent to fix. Defined in [observability/sentry-alert.json](../observability/sentry-alert.json) (Sentry alert 1464000) and applied through the Sentry MCP.
 
 | | |
 |---|---|
