@@ -183,7 +183,7 @@ function createServer(store) {
         if (!updatedAt) { // the player's progress stays on the device and syncs later
           log.warn('new saves daily cap reached');
           const day = new Date().toISOString().slice(0, 10);
-          if (capReported !== day) { capReported = day; Sentry.captureMessage('new saves daily cap reached', 'warning'); } // once a day, emails the owner (Sentry alert); no code, IP or save in it
+          if (capReported !== day) { capReported = day; Sentry.captureMessage('new saves daily cap reached', 'warning'); } // once a day, so the Sentry alert emails once; no code, IP or save in it
           return send(429, { error: 'too many new saves today, try again tomorrow' });
         }
         return send(200, { updatedAt });
