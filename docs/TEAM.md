@@ -120,7 +120,7 @@ The agents post through the owner's `gh` login, so on GitHub their comments show
 | a builder's test plan and both QA verdicts | the description and comments of any pull request into `dev`, for example the [QA checks comment on the on-call fix](screenshots/proof/team-qa-on-oncall-pr.jpg) |
 | the past failures stage 1 keeps asking | [test/past-failures.md](../test/past-failures.md) |
 | the older QA subagent's verdict on an issue | [#24](https://github.com/alexisdacquay/immune-citadel-v4/issues/24): [its spec](screenshots/proof/spec-issue-acceptance.jpg) and [the QA subagent's round-2 verdict](screenshots/proof/spec-qa-verdict.jpg) |
-| which issue a commit belongs to | from 2026-11-12 on: the `(#n)` at the end of a commit message on `dev`, or the `issue/<n>-…` branch named in its merge commit. Earlier commits carry the original repository's numbers, which here are missing or name other items |
+| which issue a commit belongs to | from 2026-11-12 on: the `(#n)` at the end of a commit message on `dev`, or the `issue/<n>-…` branch named in its merge commit. Earlier commits carry the original repository's numbers; some match an issue here, others are missing or name another item |
 
 ## Tools the team uses
 
