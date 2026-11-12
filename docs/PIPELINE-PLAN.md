@@ -40,7 +40,7 @@ Required proof: `/version.txt` shows the commit; `/server/index.js`, `/node_modu
 GitHub Pro bought by the owner (the repository was private then; it is public now). Changes only through a pull request, nobody bypasses. Today's rules are in [OPERATIONS.md, Branch rules](OPERATIONS.md#branch-rules).
 
 - **Done 2026-11-06:** one ruleset for both branches (26693579, from `dev-main.json`). A direct push to `dev` was rejected (`GH013: Repository rule violations`; `dev` stayed at `e6248b1`); `gh pr merge 45` with CI still running was refused ("the base branch policy prohibits the merge", BLOCKED). Not tested: `--admin`. There are no bypass actors, so it should be refused.
-- **2026-11-07, three changes:** `qa` became a required check on `dev` (PR #62, #61); `dev` no longer requires an up-to-date branch and `main` requires `dev-green` (PR #64, #63); `dev-green` moved into its own workflow that runs only on promotions (PR #76, #75). Two rulesets now: `dev` (26753396) and `main` (26693579), from [.github/rulesets/](../.github/rulesets/).
+- **2026-11-07, three changes:** `qa` became a required check on `dev` (PR #62, #61); `dev` no longer requires an up-to-date branch and `main` requires `dev-green` (PR #64, #63); `dev-green` moved into its own workflow that runs only on promotions (PR #76, #75). Two rulesets since: `dev` and `main`, from [.github/rulesets/](../.github/rulesets/), then 26753396 and 26693579; created again from the same files on 2026-11-12 as 27124769 (`dev`) and 27124774 (`main`).
 
 ### 3. Deploy on commit, verified in CI: done
 

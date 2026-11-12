@@ -207,7 +207,7 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 #mstage{position:absolute;left:0;top:0;width:1440px;height:900px;transform-origin:0 0}
 #mapCv,#bodymap{position:absolute;inset:0;width:1440px;height:900px}
 .mhud{position:absolute;left:22px;top:74px;font:500 10px var(--mono);letter-spacing:.16em;color:rgba(127,149,170,.75);white-space:pre;pointer-events:none}.mhud.r{left:auto;right:22px;text-align:right}
-/* level nodes: a stained cell in its place's colour; the next level pulses; locked ones are dark with a padlock */
+/* level nodes: a cleared level is a stained cell in its place's colour; the next level pulses; an unlocked one not yet cleared is dark with a ring in that colour; locked ones are dark with a padlock */
 .lnode,.lch{position:absolute;width:54px;height:54px;margin:-27px 0 0 -27px;padding:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;outline:none;color:#fff;
   background:radial-gradient(circle at 50% 50%,rgba(91,140,255,.95) 0 9px,rgba(91,140,255,0) 15px),radial-gradient(circle at 38% 32%,color-mix(in srgb,var(--c) 70%,#fff) 0,var(--c) 30%,color-mix(in srgb,var(--c) 35%,#000) 78%);
   border:2px solid color-mix(in srgb,var(--c) 60%,#fff);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 22%,transparent),0 0 22px 2px color-mix(in srgb,var(--c) 70%,transparent),inset 0 -6px 12px rgba(0,0,0,.45),inset 0 3px 6px rgba(255,255,255,.35)}
@@ -219,6 +219,8 @@ html:not(.touch) .ab.armed .tip{opacity:0!important} /* selected: the info card 
 .lnode.next::before{content:"";position:absolute;inset:-12px;border-radius:50%;border:2px solid var(--c);opacity:.8;animation:nring 1.6s ease-out infinite;pointer-events:none}
 @keyframes npulse{50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--c) 30%,transparent),0 0 44px 10px color-mix(in srgb,var(--c) 80%,transparent),inset 0 -6px 12px rgba(0,0,0,.45),inset 0 3px 6px rgba(255,255,255,.35)}}
 @keyframes nring{from{transform:scale(.8);opacity:.9}to{transform:scale(1.45);opacity:0}}
+.lnode.open{background:radial-gradient(circle at 40% 35%,#1d2a38,#0a1119 80%);border:2px solid var(--c);box-shadow:0 0 0 3px rgba(2,4,7,.7),0 0 12px color-mix(in srgb,var(--c) 45%,transparent),inset 0 -4px 10px rgba(0,0,0,.5)}
+.lnode.open i{color:color-mix(in srgb,var(--c) 70%,#fff)}
 .lnode.sel,.lnode:focus-visible,.lch:focus-visible{outline:3px solid #ffd27a;outline-offset:5px}
 .lnode.locked,.lch.locked{cursor:default;background:radial-gradient(circle at 40% 35%,#1d2a38,#0a1119 80%);border:2px solid rgba(140,205,255,.28);box-shadow:0 0 0 3px rgba(2,4,7,.7),inset 0 -4px 10px rgba(0,0,0,.5)}
 .lnode.locked i{color:#6c8196;font-size:14px}

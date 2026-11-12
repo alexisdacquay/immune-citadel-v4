@@ -1,6 +1,6 @@
 // Save API unit tests on the in-memory store; Postgres is covered by test/integration.test.js.
 process.env.ALLOWED_ORIGINS = 'https://game.example'; process.env.LOG_LEVEL = 'silent';
-const test = require('node:test'), assert = require('node:assert');
+const test = require('node:test'), assert = require('node:assert'), http = require('node:http');
 const { createServer, memoryStore } = require('./index.js');
 
 test('save API', async t => {
@@ -26,11 +26,25 @@ test('save API', async t => {
   assert.equal((await put(code, { save: { owe: ['fever'] } })).status, 200, 'a list of owed cards is kept');
   assert.equal((await put(code, { nope: 1 })).status, 400);
   assert.equal((await put(code, { save: { x: 'y'.repeat(9000) } })).status, 413);
+  const deep = '{"save":{"a":' + '['.repeat(4000) + ']'.repeat(4000) + '}}'; // fits in 8 KB; overflowed the stack writing to Postgres on Node 22 (#57)
+  assert.equal((await put(code, deep)).status, 400, 'a save nested thousands of levels deep is refused');
+  assert.deepEqual((await (await fetch(`${base}/api/save/${code}`)).json()).save, { owe: ['fever'] }, 'and never reaches the store');
   assert.equal((await fetch(`${base}/api/save/${code}`, { method: 'OPTIONS', headers: { origin: 'https://game.example' } })).status, 204);
   assert.equal((await fetch(`${base}/api/save/${code}`, { method: 'DELETE' })).status, 405);
 
   let last; for (let i = 0; i < 130; i++) last = (await put(code, { save: { i } }, { 'x-forwarded-for': `9.9.9.${i}`, 'cf-connecting-ip': '1.2.3.4' })).status;
   assert.equal(last, 429, 'write rate limit keys on the Cloudflare client address, not X-Forwarded-For');
+});
+
+test('an upload over 8 KB gets 413 and leaves the connection usable for the next request (#50)', async t => {
+  const srv = createServer(memoryStore()), agent = new http.Agent({ keepAlive: true, maxSockets: 1 }); // one kept-alive connection, as a proxy reuses it
+  await new Promise(r => srv.listen(0, r)); t.after(() => { agent.destroy(); srv.close(); });
+  const send = (method, body) => new Promise((resolve, reject) => {
+    const r = http.request({ port: srv.address().port, method, path: '/api/save/ABCDEFGHJKMNPQRS', agent }, res => { res.resume(); res.on('end', () => resolve({ status: res.statusCode, reused: r.reusedSocket })); });
+    r.on('error', reject); r.end(body);
+  });
+  assert.equal((await send('PUT', JSON.stringify({ save: { x: 'y'.repeat(200000) } }))).status, 413);
+  assert.deepEqual(await send('GET'), { status: 404, reused: true }, 'answered on the same connection, not reset');
 });
 
 test('gameplay events: only known shapes are stored, nothing else gets in', async t => {
