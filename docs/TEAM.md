@@ -95,10 +95,10 @@ When the owner says **continue**, the orchestrator runs one turn of this loop. T
 3. **Build.** The orchestrator builds it on a branch `issue/<n>-<slug>`, runs the checks (`npm test`; `npm run test:game` for game changes; the balance bot for gameplay) and tries the change live.
 4. **Open the pull request** into `dev`, with its `## QA checks`. A bug fix also adds its past failure. The orchestrator arms auto-merge at once: `sh tools/automerge.sh <n>`.
 5. **Verify.** CI runs `test`, `game`, `qa` and `qa-review`. A red `test`, `game` or `qa` blocks the merge and the work goes back to the builder. The orchestrator reads `qa-review` and fixes or answers each finding.
-6. **Integrate.** GitHub merges the pull request once `test`, `game` and `qa` are green, with no human. Render deploys the new `dev` commit, and CI's `deployed` job proves it is live.
+6. **Integrate.** GitHub merges the pull request once `test`, `game` and `qa` are green, with no human. Render deploys the new `dev` commit, and CI's `deployed` job proves it is live. The issue closes with "Fixed by #<n> on dev; it reaches production with the next promotion."
 7. **Report.** One short message to the owner: what shipped, what is not verified, what needs them.
 
-**Promotion** is separate. Production is manual: a promotion pull request (`dev` → `main`) is merged only on the owner's go for that release; nothing merges into `main` automatically ([PROOF, CI/CD](PROOF.md#9-cicd)). Issues close then, each with a "Shipped to production" comment. Until then a finished issue stays open, with the label `status:on-dev`.
+**Promotion** is separate. Production is manual: a promotion pull request (`dev` → `main`) is merged only on the owner's go for that release; nothing merges into `main` automatically ([PROOF, CI/CD](PROOF.md#9-cicd)). The promotion pull request lists what it brings; once it merges, each issue it ships gets "Shipped to production in #<promotion> (<commit>)". For example, [#93](https://github.com/alexisdacquay/immune-citadel-v4/issues/93): "Fixed by #94 on dev", then "Shipped to production in #69 (a8e90f0)".
 
 ## Gates
 
