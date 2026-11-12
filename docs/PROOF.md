@@ -11,7 +11,7 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 | [3](#3-agent-team) | Agent team | 2 / 2 | 4 agents with roles and limits, one loop; their work is visible on every pull request |
 | [4](#4-context-management) | Context management | 2 / 2 | AGENTS.md points to STATUS, SPEC, TEAM, OPERATIONS |
 | [5](#5-application) | Application | 2 / 2 | one command; a click in the browser lands as a row in Postgres |
-| [6](#6-testing) | Testing | 2 / 2 | `npm test`: 46 unit and 4 integration tests pass on a fresh clone |
+| [6](#6-testing) | Testing | 2 / 2 | `npm test`: 61 unit and 5 integration tests pass, in CI on `a8e90f0` |
 | [7](#7-containerization) | Containerization | 2 / 2 | `docker compose up --build`: game, API and Postgres, all healthy |
 | [8](#8-deployment) | Deployment | 2 / 2 | public URL; `/health` and `/version.txt` name the live commit |
 | [9](#9-cicd) | CI/CD | 3 / 3 | CI on every pull request; CD to dev on every merge; production is manual: a promotion is merged only on the owner's go for that release |
@@ -121,27 +121,28 @@ Browser → save API → Postgres: the click on HARD is the `hard` in that row.
 
 > **2 points:** "Both unit and integration tests exist, run with a single command, and pass."
 
-**One command:** `npm test` (prerequisites: Node 22 and Docker; install once with `npm ci`). It runs the unit tests, then the integration tests on the Docker stack. Output on a fresh clone of `d3f7a43`, trimmed:
+**One command:** `npm test` (prerequisites: Node 22 and Docker; install once with `npm ci`). It runs the unit tests, then the integration tests on the Docker stack. Output of job `test` on `a8e90f0`, the push run on `main` after promotion #69 ([run 43270181878](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878)), trimmed:
 
 ```
-$ npm test
-# unit tests (npm run test:unit)
-ℹ tests 46
-ℹ pass 46
-ℹ fail 0
-# integration tests on the Docker stack (npm run test:integration)
-✔ a save sent to the API is stored in Postgres and read back
-✔ the server prunes cloud saves untouched for 13 months, at start, and keeps newer ones
-✔ gameplay events reach the events table and its views
-✔ progress saved on one device continues on another through its save code
-ℹ tests 4
-ℹ pass 4
-ℹ fail 0
+> npm run test:unit && npm run test:integration
+> test:unit
+# tests 61
+# pass 61
+# fail 0
+> test:integration
+ok 1 - a save sent to the API is stored in Postgres and read back
+ok 2 - the server prunes cloud saves untouched for 13 months, at start, and keeps newer ones
+ok 3 - past the daily cap of new save codes, Postgres refuses a new code and still updates an existing save
+ok 4 - gameplay events reach the events table and its views
+ok 5 - progress saved on one device continues on another through its save code
+# tests 5
+# pass 5
+# fail 0
 ```
 
 - **Unit:** [server/test.js](../server/test.js), [server/observability.test.js](../server/observability.test.js) and the other files in `package.json` (`test:unit`).
 - **Integration:** [test/integration.test.js](../test/integration.test.js), against the real Postgres.
-- **In CI:** the same suite is green on the release commit `ee4783d`, job `test` ([screenshot](screenshots/proof/ci-main-run.jpg)). CI also runs `npm run test:game`, a browser bot that plays all 18 levels.
+- **In CI:** job `test` runs this suite on every pull request and every push to `dev` and `main`; the output above is from [run 43270181878](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878). CI also runs `npm run test:game`, a browser bot that plays all 18 levels.
 
 ## 7. Containerization
 
@@ -162,19 +163,19 @@ web       nginx:alpine         Up 16 seconds (healthy)   0.0.0.0:8080->80/tcp
 > **2 points:** "The application is deployed and reachable at a public URL, or there's a clear demo with the deployment."
 
 - **Play it:** https://immune-citadel-v4.onrender.com
-- **Live commit:** [/version.txt](https://immune-citadel-v4.onrender.com/version.txt) (the game) and [/health](https://immune-citadel-v4-api.onrender.com/health) (the save API). On 2026-11-08 both said `d3f7a43`. Later, both name the head of [`main`](https://github.com/alexisdacquay/immune-citadel-v4/commits/main).
+- **Live commit:** [/version.txt](https://immune-citadel-v4.onrender.com/version.txt) (the game) and [/health](https://immune-citadel-v4-api.onrender.com/health) (the save API). On 2026-11-08 both said `d3f7a43`; on 2026-11-12, after promotion [#69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69), both name `a8e90f0`. Later, both name the head of [`main`](https://github.com/alexisdacquay/immune-citadel-v4/commits/main).
 - **Dev:** https://immune-citadel-v4-dev.onrender.com ([/version.txt](https://immune-citadel-v4-dev.onrender.com/version.txt)) and the save API's [/health](https://immune-citadel-v4-api-dev.onrender.com/health): both name the head of [`dev`](https://github.com/alexisdacquay/immune-citadel-v4/commits/dev).
 - **Infrastructure as code:** [render.yaml](../render.yaml): the game site, the save API and Postgres, for dev and for production.
 
-Production, 2026-11-08:
+Production, 2026-11-12, after promotion #69:
 
 ```
 $ curl -s -o /dev/null -w '%{http_code}\n' https://immune-citadel-v4.onrender.com/
 200
 $ curl -s https://immune-citadel-v4.onrender.com/version.txt
-d3f7a43d47fbddd870a453b291ac7a7a6aae11b1
+a8e90f0c8d2fe992d225764820f46d0320f84b61
 $ curl -s https://immune-citadel-v4-api.onrender.com/health
-{"ok":true,"commit":"d3f7a43d47fbddd870a453b291ac7a7a6aae11b1"}
+{"ok":true,"commit":"a8e90f0c8d2fe992d225764820f46d0320f84b61"}
 ```
 
 ## 9. CI/CD
