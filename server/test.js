@@ -145,6 +145,15 @@ test('a new code whose store fails does not use up the budget of its address (#8
   assert.equal((await put(12)).status, 200, 'once it is back, the same address still starts a new code');
 });
 
+test('two different errors in the save API are two Sentry issues: the fingerprint adds the type and message to the default grouping', async t => {
+  const errors = [new Error('database down'), new TypeError('save.owe.filter is not a function')];
+  const srv = createServer({ get: async () => null, put: async () => { throw errors.shift(); } }), sent = t.mock.method(Sentry, 'captureException', () => {});
+  await new Promise(r => srv.listen(0, r)); t.after(() => srv.close());
+  const put = () => fetch(`http://localhost:${srv.address().port}/api/save/ABCDEFGHJKMNPQR5`, { method: 'PUT', body: JSON.stringify({ save: { st: [1] } }) });
+  assert.equal((await put()).status, 500); assert.equal((await put()).status, 500);
+  assert.deepEqual(sent.mock.calls.map(c => c.arguments[1].fingerprint), [['{{ default }}', 'Error', 'database down'], ['{{ default }}', 'TypeError', 'save.owe.filter is not a function']]);
+});
+
 test('IPv6: the new-code budget is per /64, so one host cannot rotate addresses inside it (#86)', async t => {
   const store = memoryStore(), srv = createServer(store); await new Promise(r => srv.listen(0, r));
   t.after(() => srv.close());
