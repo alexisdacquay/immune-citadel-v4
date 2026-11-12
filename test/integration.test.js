@@ -38,9 +38,11 @@ test('progress saved on one device continues on another through its save code', 
   try {
     // device A: earn 3 stars on the first specimen; the game syncs to the cloud on its own
     const a = await (await browser.newContext()).newPage();
+    const errs = []; a.on('console', m => m.type() === 'error' && errs.push(m.text()));
     await a.goto(GAME);
     await a.evaluate(() => { IC.save.st[0] = 3; persist(); });
     await a.waitForFunction(() => cloud.st === 'ok', null, { timeout: 15000 });
+    assert.deepEqual(errs, [], 'a new player\'s first cloud save logs no error in the console (#55)');
     const code = await a.evaluate(() => cloud.code);
     assert.equal(JSON.parse(sql(`SELECT data FROM saves WHERE code = '${code}'`)).st[0], 3, 'device A progress in Postgres');
 
