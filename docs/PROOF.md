@@ -184,7 +184,7 @@ $ curl -s https://immune-citadel-v4-api.onrender.com/health
 
 | Step | What happens | Proof |
 |---|---|---|
-| CI | every pull request runs `test` (unit and integration) and `game` (the bot plays every level); every pull request into `dev` also runs `qa` (the QA agent) | [ci.yml](../.github/workflows/ci.yml); the green checks on the on-call agent's fix ([screenshot](screenshots/proof/team-qa-on-oncall-pr.jpg)) |
+| CI | every pull request runs `test` (unit and integration) and `game` (the bot plays every level; skipped when a pull request changes only `docs/` or `*.md` files); every pull request into `dev` also runs `qa` (the QA agent) | [ci.yml](../.github/workflows/ci.yml); the green checks on the on-call agent's fix ([screenshot](screenshots/proof/team-qa-on-oncall-pr.jpg)) |
 | CD to dev | a green pull request merges into `dev`; Render deploys every commit on `dev`; CI's `deployed` job waits until the live site serves it, then tests it | [render.yaml](../render.yaml) (`branch: dev`, `autoDeployTrigger: commit`); [a dev run, `deployed` green](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43239236141) |
 | Manual deploy to production | production is manual: a promotion pull request (`dev` → `main`) is merged only on the owner's go for that release; nothing merges into `main` automatically | [promotion PR #69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69) and [its run on `main`](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878); [rulesets](https://github.com/alexisdacquay/immune-citadel-v4/rules), [STATUS, Promotions](STATUS.md#promotions) |
 | Rollback | redeploy the last good commit in Render, or revert the pull request | [OPERATIONS, Rollback](OPERATIONS.md#rollback) |
