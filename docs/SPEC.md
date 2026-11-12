@@ -1,6 +1,6 @@
 # Product specification
 
-What the game must do for its players, written as player journeys with acceptance criteria. Each criterion below describes the game as it is: checked against `index.html` at `f07f748` (2026-11-08), in production since the promotion `ee4783d`.
+What the game must do for its players, written as player journeys with acceptance criteria. Each criterion below describes the game as it is: checked against `index.html` at `f07f748` (2026-11-08); that `index.html` reached production with the promotion `ee4783d`.
 
 ![A level in play: immune cells grown beside the infection route, the vitality, ATP and wave counters at the top left, the game controls at the top right, the hero and ability buttons at the bottom left](screenshots/play.jpg)
 
