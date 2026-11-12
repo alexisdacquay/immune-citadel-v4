@@ -134,6 +134,17 @@ test('parallel new codes from one address cannot pass its budget together (#86)'
   assert.deepEqual([statuses.filter(s => s === 200).length, statuses.filter(s => s === 429).length], [10, 5], '10 stored, 5 refused');
 });
 
+test('a new code whose store fails does not use up the budget of its address (#86)', async t => {
+  const store = memoryStore(), srv = createServer(store); await new Promise(r => srv.listen(0, r));
+  t.after(() => srv.close());
+  t.mock.method(Sentry, 'captureException', () => {});
+  const down = t.mock.method(store, 'put', async () => { throw new Error('database down'); });
+  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', put = i => fetch(`http://localhost:${srv.address().port}/api/save/ABCDEFGHJKMNPQ${A[i]}4`, { method: 'PUT', headers: { 'cf-connecting-ip': '8.8.4.4' }, body: JSON.stringify({ save: { st: [1] } }) });
+  for (let i = 0; i < 12; i++) assert.equal((await put(i)).status, 500, 'the database is down');
+  down.mock.restore();
+  assert.equal((await put(12)).status, 200, 'once it is back, the same address still starts a new code');
+});
+
 test('IPv6: the new-code budget is per /64, so one host cannot rotate addresses inside it (#86)', async t => {
   const store = memoryStore(), srv = createServer(store); await new Promise(r => srv.listen(0, r));
   t.after(() => srv.close());

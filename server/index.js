@@ -185,7 +185,7 @@ function createServer(store) {
         log.debug({ owed: Array.isArray(save.owe) ? save.owe.filter(Boolean).length : 0 }, 'cards owed'); // how many cards the save still owes the player, at debug level
         const fresh = !(await store.get(code)), net = net64(clientIp(req)); // only new codes count: an existing save always updates
         if (fresh && newLimited(net)) return send(429, { error: 'too many new saves from this address, try again in a few minutes' }); // counted now, so parallel new codes cannot all pass
-        const updatedAt = await store.put(code, save);
+        let updatedAt; try { updatedAt = await store.put(code, save); } catch (e) { if (fresh) newLimited(net, true); throw e; } // a failed store gives the count back too, so retries during a database outage do not use up the address's budget
         if (!updatedAt) { // the player's progress stays on the device and syncs later
           if (fresh) newLimited(net, true); // given back, so a player retrying a refused first save does not use up the address's budget
           log.warn('new saves daily cap reached');
