@@ -9,7 +9,7 @@ test('routes hide the save code', () => {
   assert.equal(route(`/api/save/${CODE}?x=1`), '/api/save/:code');
   assert.equal(route('/api/save/not-a-code/extra'), '/api/save/:code');
   assert.equal(route('/health'), '/health');
-  // #102: a hand-written path must not slip a code past the redaction
+  // #52: a hand-written path must not slip a code past the redaction
   for (const u of [`//api/save/${CODE}`, `/x/../api/save/${CODE}`, `/API/SAVE/${CODE}`, `/api%2Fsave%2F${CODE}`, `/api/save%2F${CODE.toLowerCase()}`, `/%61pi/save/${CODE}`])
     assert.equal(route(u), '/api/save/:code', u);
   assert.equal(route(`/anything/${CODE.toLowerCase()}`), '/anything/:code', 'a code anywhere else in the path');

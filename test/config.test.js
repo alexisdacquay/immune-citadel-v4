@@ -43,7 +43,7 @@ test('the game loads Sentry only on the dev and production sites, pinned and che
   assert.match(block, /dataCollection: \{ userInfo: false,/, 'userInfo false makes the SDK tell Sentry infer_ip "never", so Sentry keeps no IP');
 });
 
-test('the game takes its fonts from its own site, never from Google, and both sites publish them (#99)', () => {
+test('the game takes its fonts from its own site, never from Google, and both sites publish them (#49)', () => {
   const html = read('index.html'), files = [...html.matchAll(/url\(['"]?(fonts\/[^)'"]+)/g)].map(m => m[1]);
   assert.doesNotMatch(html, /fonts\.(googleapis|gstatic)\.com/, 'Google would get the player\'s IP and browser identifier');
   assert.ok(files.length >= 2, 'self-hosted font faces');
