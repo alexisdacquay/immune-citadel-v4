@@ -13,7 +13,7 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 | [3](#3-agent-team-specification) | Agent Team Specification | 2 / 2 | 4 agents with roles and limits, one loop; their work is visible on every pull request |
 | [4](#4-context-management) | Context Management | 2 / 2 | AGENTS.md points to STATUS, SPEC, TEAM, OPERATIONS |
 | [5](#5-application) | Application | 2 / 2 | one command; a click in the browser lands as a row in Postgres |
-| [6](#6-testing) | Testing | 2 / 2 | `npm test`: 61 unit and 5 integration tests pass, in CI on `a8e90f0` |
+| [6](#6-testing) | Testing | 2 / 2 | `npm test`: 61 unit and 5 integration tests pass, in CI on `a8e90f0` and `56f05ec` |
 | [7](#7-containerization) | Containerization | 2 / 2 | `docker compose up --build`: game, API and Postgres, all healthy |
 | [8](#8-deployment) | Deployment | 2 / 2 | public URL; `/health` and `/version.txt` name the live commit |
 | [9](#9-cicd) | CI/CD | 3 / 3 | CI on every pull request; CD to dev on every merge; production is manual: a promotion is merged only on the owner's go for that release |
@@ -123,7 +123,7 @@ Browser → save API → Postgres: the click on HARD is the `hard` in that row.
 
 > **2 points:** "Both unit and integration tests exist, run with a single command, and pass."
 
-**One command:** `npm test` (prerequisites: Node 22 and Docker; install once with `npm ci`). It runs the unit tests, then the integration tests on the Docker stack. Output of job `test` on `a8e90f0`, the push run on `main` after promotion #69 ([run 43270181878](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878)), trimmed:
+**One command:** `npm test` (prerequisites: Node 22 and Docker; install once with `npm ci`). It runs the unit tests, then the integration tests on the Docker stack. Output of job `test` on `a8e90f0`, [run 43270181878](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878) (the push run on `main` after promotion #69), trimmed:
 
 ```
 > npm run test:unit && npm run test:integration
@@ -141,6 +141,8 @@ ok 5 - progress saved on one device continues on another through its save code
 # pass 5
 # fail 0
 ```
+
+As of promotion [#127](https://github.com/alexisdacquay/immune-citadel-v4/pull/127), production runs `56f05ec`; its push run on `main`, [run 43293619081](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43293619081), passed the same 61 unit and 5 integration tests.
 
 - **Unit:** [server/test.js](../server/test.js), [server/observability.test.js](../server/observability.test.js) and the other files in `package.json` (`test:unit`).
 - **Integration:** [test/integration.test.js](../test/integration.test.js), against the real Postgres.
@@ -165,11 +167,11 @@ web       nginx:alpine         Up 16 seconds (healthy)   0.0.0.0:8080->80/tcp
 > **2 points:** "The application is deployed and reachable at a public URL, or there's a clear demo with the deployment."
 
 - **Play it:** https://immune-citadel-v4.onrender.com
-- **Live commit:** [/version.txt](https://immune-citadel-v4.onrender.com/version.txt) (the game) and [/health](https://immune-citadel-v4-api.onrender.com/health) (the save API). On 2026-11-08 both said `d3f7a43`; on 2026-11-12, after promotion [#69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69), both name `a8e90f0`. Later, both name the head of [`main`](https://github.com/alexisdacquay/immune-citadel-v4/commits/main).
+- **Live commit:** [/version.txt](https://immune-citadel-v4.onrender.com/version.txt) (the game) and [/health](https://immune-citadel-v4-api.onrender.com/health) (the save API) both name the head of [`main`](https://github.com/alexisdacquay/immune-citadel-v4/commits/main): `a8e90f0` after promotion [#69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69), `56f05ec` after promotion [#127](https://github.com/alexisdacquay/immune-citadel-v4/pull/127) (both 2026-11-12).
 - **Dev:** https://immune-citadel-v4-dev.onrender.com ([/version.txt](https://immune-citadel-v4-dev.onrender.com/version.txt)) and the save API's [/health](https://immune-citadel-v4-api-dev.onrender.com/health): both name the head of [`dev`](https://github.com/alexisdacquay/immune-citadel-v4/commits/dev).
 - **Infrastructure as code:** [render.yaml](../render.yaml): the game site, the save API and Postgres, for dev and for production.
 
-Production, 2026-11-12, after promotion #69:
+Production on `a8e90f0`, after promotion #69 (2026-11-12; deployed and checked by [run 43270181878](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878)):
 
 ```
 $ curl -s -o /dev/null -w '%{http_code}\n' https://immune-citadel-v4.onrender.com/
@@ -180,6 +182,8 @@ $ curl -s https://immune-citadel-v4-api.onrender.com/health
 {"ok":true,"commit":"a8e90f0c8d2fe992d225764820f46d0320f84b61"}
 ```
 
+As of promotion [#127](https://github.com/alexisdacquay/immune-citadel-v4/pull/127), production runs `56f05ec`: the same commands answer `200` and `56f05ec4ac663de99c0ea7f3cd2c8aeeb003149b`, and [run 43293619081](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43293619081) checked that deploy the same way.
+
 ## 9. CI/CD
 
 > **3 points:** "CI runs tests, CD deploys to dev, and there's a manual deploy to production."
@@ -188,12 +192,12 @@ $ curl -s https://immune-citadel-v4-api.onrender.com/health
 |---|---|---|
 | CI | every pull request runs `test` (unit and integration) and `game` (the bot plays every level; skipped when a pull request changes only `docs/` or `*.md` files); every pull request into `dev` also runs `qa` (the QA agent) | [ci.yml](../.github/workflows/ci.yml); the green checks on the on-call agent's fix ([screenshot](screenshots/proof/team-qa-on-oncall-pr.jpg)) |
 | CD to dev | a green pull request merges into `dev`; Render deploys every commit on `dev`; CI's `deployed` job waits until the live site serves it, then tests it | [render.yaml](../render.yaml) (`branch: dev`, `autoDeployTrigger: commit`); [a dev run, `deployed` green](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43239236141) |
-| Manual deploy to production | production is manual: a promotion pull request (`dev` → `main`) is merged only on the owner's go for that release; nothing merges into `main` automatically | [promotion PR #69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69) and [its run on `main`](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878); [rulesets](https://github.com/alexisdacquay/immune-citadel-v4/rules), [STATUS, Promotions](STATUS.md#promotions) |
+| Manual deploy to production | production is manual: a promotion pull request (`dev` → `main`) is merged only on the owner's go for that release; nothing merges into `main` automatically | promotions [#69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69) and [#127](https://github.com/alexisdacquay/immune-citadel-v4/pull/127), and their runs on `main`, [43270181878](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878) and [43293619081](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43293619081); [rulesets](https://github.com/alexisdacquay/immune-citadel-v4/rules), [STATUS, Promotions](STATUS.md#promotions) |
 | Rollback | redeploy the last good commit in Render, or revert the pull request | [OPERATIONS, Rollback](OPERATIONS.md#rollback) |
 
 - **The merge is the manual step:** Render deploys `main` on merge, and nothing automatic targets `main`. [tools/automerge.sh](../tools/automerge.sh) refuses any base but `dev`. No workflow, schedule or auto-merge merges into `main`: [ci.yml](../.github/workflows/ci.yml) and [promotion.yml](../.github/workflows/promotion.yml) only run checks, and [oncall.yml](../.github/workflows/oncall.yml) opens pull requests into `dev`.
 - **GitHub enforces** on `main` (ruleset 27124774, [main.json](../.github/rulesets/main.json)): a pull request only, up to date, with `test`, `game` and `dev-green` green. The owner's go is a team rule, which GitHub does not enforce.
-- **A promotion made in this repository:** [PR #69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69), `dev` → `main`, merged by hand on 2026-11-12 at 17:30 UTC as [`a8e90f0`](https://github.com/alexisdacquay/immune-citadel-v4/commit/a8e90f0), with no auto-merge armed on it. Before it, `dev`'s own run on the promoted commit `e322752` was green ([run 43268129015](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43268129015)). After it, the push run on `main` ran `test`, `game` and `deployed` green ([run 43270181878](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878)); Render deployed `a8e90f0` by itself.
+- **A promotion made in this repository:** [PR #69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69), `dev` → `main`, merged by hand on 2026-11-12 at 17:30 UTC as [`a8e90f0`](https://github.com/alexisdacquay/immune-citadel-v4/commit/a8e90f0), with no auto-merge armed on it. Before it, `dev`'s own run on the promoted commit `e322752` was green ([run 43268129015](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43268129015)). After it, the push run on `main` ran `test`, `game` and `deployed` green ([run 43270181878](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878)); Render deployed `a8e90f0` by itself. The next promotion, [#127](https://github.com/alexisdacquay/immune-citadel-v4/pull/127), merged on 2026-11-12 at 19:46 UTC as [`56f05ec`](https://github.com/alexisdacquay/immune-citadel-v4/commit/56f05ec); its push run on `main` ([run 43293619081](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43293619081)) was green.
 - **Earlier promotions** were merged in the original repository, whose pull requests are not public; [STATUS, Promotions](STATUS.md#promotions) lists each one by its merge commit on `main` here.
 
 The rules on `dev` and `main`:
@@ -207,6 +211,8 @@ SMOKE PASS https://immune-citadel-v4.onrender.com at a8e90f0c8d2fe992d225764820f
 ```
 
 It means: the smoke test catches the page's Sentry requests ("held back") and inspects them; with play stats off, or Global Privacy Control (a browser's opt-out signal) on, only crash reports are sent.
+
+As of promotion [#127](https://github.com/alexisdacquay/immune-citadel-v4/pull/127), production runs `56f05ec`; the `deployed` job of [run 43293619081](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43293619081) ([log](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43293619081/job/131445983854)) printed the same `SMOKE PASS` line for `56f05ec4ac663de99c0ea7f3cd2c8aeeb003149b`.
 
 ## 10. Observability
 

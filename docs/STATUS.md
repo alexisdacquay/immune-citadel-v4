@@ -9,7 +9,7 @@ Last update: 2026-11-12: production runs the head of [`main`](https://github.com
 - **Production** runs the head of `main`, the commit its save API's `/health` names, with every promotion listed under [Promotions](#promotions): the whole 18-level campaign on the body map, cloud saves (deleted after 13 months unchanged), the save API's one-trace-ID observability, crash reports and load reports that respect Play stats and Global Privacy Control, the game's own fonts, phone and laptop layout fixes, the on-call agent, and, after every push to `dev` or `main`, a read-only smoke and privacy check and a check that one save reaches Sentry.
 - **Dev** runs production's code plus every pull request merged into `dev` since the last promotion.
 - **In flight:** the [open pull requests](https://github.com/alexisdacquay/immune-citadel-v4/pulls).
-- **Next:** the rubric work (P0).
+- **Next:** for the game, the open P1s: body map zones in reading order ([#40](https://github.com/alexisdacquay/immune-citadel-v4/issues/40)) and the trading-card design ([#41](https://github.com/alexisdacquay/immune-citadel-v4/issues/41)); see [What is next](#what-is-next).
 
 ## Where things run
 
@@ -34,6 +34,7 @@ Every promotion of `dev` into `main`, the production branch, each after the owne
 | [`5ec8a26`](https://github.com/alexisdacquay/immune-citadel-v4/commit/5ec8a26) | 2026-11-08 19:07 | docs only: the proof page for course reviewers ([PROOF.md](PROOF.md)), every rubric criterion with screenshots and raw output, linked from the README |
 | [`cbe012e`](https://github.com/alexisdacquay/immune-citadel-v4/commit/cbe012e) | 2026-11-08 19:49 | a check in CI's `deployed` job: after every deploy, one save under a known trace ID must reach Sentry as a trace, a log line and a metric, on dev and production; no change to the game or the save API |
 | [`a8e90f0`](https://github.com/alexisdacquay/immune-citadel-v4/commit/a8e90f0) | 2026-11-12 17:30 | [#69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69): the fixes from the tracker, pull requests [#59](https://github.com/alexisdacquay/immune-citadel-v4/pull/59) to [#94](https://github.com/alexisdacquay/immune-citadel-v4/pull/94) (save API limits and errors, two game fixes, the QA agent's rules, docs true for this repository); `main` run [43270181878](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878) green |
+| [`56f05ec`](https://github.com/alexisdacquay/immune-citadel-v4/commit/56f05ec) | 2026-11-12 19:46 | [#127](https://github.com/alexisdacquay/immune-citadel-v4/pull/127): reviewer docs true to this repository, CI that skips the game suite on pull requests that change only docs, code comments without the original repository's numbers; no change to how the game or the save API behaves; `main` run [43293619081](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43293619081) green |
 
 Infrastructure and telemetry events around them:
 
@@ -65,10 +66,9 @@ In the order the team loop uses: `P0` first, then the owner's latest priority, t
 
 | # | Work | Why now |
 |---|---|---|
-| 1 | Rubric: full marks with margin, obvious to any reviewer (P0): README's "For reviewers" table, in the rubric's words with the points claimed (2026-11-08), then at least three independent cold reviews | the only P0; no review report is linked yet |
-| 2 | QA: count real catches and false alarms of both stages on each pull request until 2026-11-21, then decide what changes | set on 2026-11-07; stage 1 in its new form has run in CI on every pull request into `dev` since 2026-11-08, first in the original repository |
-| 3 | P1 backlog: body map zones in reading order ([#40](https://github.com/alexisdacquay/immune-citadel-v4/issues/40)), trading-card design ([#41](https://github.com/alexisdacquay/immune-citadel-v4/issues/41), mock-ups first, the owner picks) | the owner's P1s that can start without the owner |
-| 4 | P2 backlog: more enemy variety ([#42](https://github.com/alexisdacquay/immune-citadel-v4/issues/42)), game content out of `index.html` ([#17](https://github.com/alexisdacquay/immune-citadel-v4/issues/17)), Chapter 2 ([#11](https://github.com/alexisdacquay/immune-citadel-v4/issues/11)) | planned |
+| 1 | QA: count real catches and false alarms of both stages on each pull request until 2026-11-21, then decide what changes | set on 2026-11-07; stage 1 in its new form has run in CI on every pull request into `dev` since 2026-11-08, first in the original repository |
+| 2 | P1 backlog: body map zones in reading order ([#40](https://github.com/alexisdacquay/immune-citadel-v4/issues/40)), trading-card design ([#41](https://github.com/alexisdacquay/immune-citadel-v4/issues/41), mock-ups first, the owner picks) | the owner's P1s that can start without the owner |
+| 3 | P2 backlog: more enemy variety ([#42](https://github.com/alexisdacquay/immune-citadel-v4/issues/42)), game content out of `index.html` ([#17](https://github.com/alexisdacquay/immune-citadel-v4/issues/17)), Chapter 2 ([#11](https://github.com/alexisdacquay/immune-citadel-v4/issues/11)) | planned |
 
 ## Waiting on the owner
 
