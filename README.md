@@ -180,3 +180,7 @@ Immune Citadel is a project for the [DataTalksClub AI Dev Tools Zoomcamp](https:
 | 12 | On-call agent | 2 / 2 | [Proof](docs/PROOF.md#12-on-call-agent) |
 
 **Claimed: 24 of 24 points.**
+
+## License
+
+Immune Citadel is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE.md): free to use, share and modify for non-commercial purposes; commercial use requires a separate licence from the author. © 2026 Alexis Dacquay.
