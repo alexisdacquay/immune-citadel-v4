@@ -1,6 +1,6 @@
 # Immune Citadel
 
-[![CI on dev](https://github.com/alexisdacquay/immune-citadel-v4/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/alexisdacquay/immune-citadel-v4/actions/workflows/ci.yml?query=branch%3Adev)
+[![CI on main](https://github.com/alexisdacquay/immune-citadel-v4/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/alexisdacquay/immune-citadel-v4/actions/workflows/ci.yml?query=branch%3Amain+event%3Apush)
 
 **A tower-defence game inside the human body, for teens aged 12 to 15.** Bacteria, viruses, fungi and parasites pour into the body, and you grow immune cells beside their route to stop them. Each cell fights the way it really does in the body, so to win you have to learn what each one is good at.
 
