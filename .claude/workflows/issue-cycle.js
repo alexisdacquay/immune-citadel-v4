@@ -1,6 +1,6 @@
 export const meta = {
   name: 'issue-cycle',
-  description: 'PAUSED by the owner (2026-11-07), do not run: the orchestrator builds every issue and QA is the CI agent tools/qa.js. Immune Citadel: ic-bug-fixer fixes one bug (or the orchestrator has built the issue, qaOnly), ic-qa verifies it; up to two fix rounds for bugs',
+  description: 'PAUSED, do not run: the orchestrator builds every issue and QA is the CI agent tools/qa.js. Immune Citadel: ic-bug-fixer fixes one bug (or the orchestrator has built the issue, qaOnly), ic-qa verifies it; up to two fix rounds for bugs',
   whenToUse: 'From the continue skill, once the orchestrator has written the Spec comment on an issue. args: { issue: <number>, slug: "<short-slug>", repo: "<absolute repo path>", qaOnly: true when the orchestrator built it, roleFiles: true when the session is not in the repo }',
   phases: [{ title: 'Build', model: 'opus' }, { title: 'Verify', model: 'opus' }, { title: 'Fix', model: 'opus' }],
 }

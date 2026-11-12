@@ -6,8 +6,8 @@ Immune Citadel v4 is built by AI agents and one human owner, Alexis Dacquay. Thi
 
 | Role | Who | Owns | Never does |
 |---|---|---|---|
-| **Owner** | Alexis Dacquay, the only human | priorities, design approvals, playtests, the written go for every promotion into production (`main`) | |
-| **Orchestrator** | the main Claude Code session | the backlog, each issue's spec and acceptance criteria, design decisions, **building every issue** (bugs included while the bug-fixer is paused), **the test plan** (see below), live testing, opening pull requests and arming auto-merge into `dev`, short reports to the owner | merge into `main` without the owner's written go (a promotion's own, or the owner's standing go of 2026-11-08, quoted in the pull request), or arm auto-merge on it |
+| **Owner** | Alexis Dacquay, the only human | priorities, design approvals, playtests, the go for each promotion into production (`main`) | |
+| **Orchestrator** | the main Claude Code session | the backlog, each issue's spec and acceptance criteria, design decisions, **building every issue** (bugs included while the bug-fixer is paused), **the test plan** (see below), live testing, opening pull requests and arming auto-merge into `dev`, short reports to the owner | merge a promotion into `main` without the owner's go for that release, or arm auto-merge on it |
 | **QA** | an independent DeepSeek agent ([tools/qa.js](../tools/qa.js), model `deepseek-flash`) in two CI jobs on every pull request into `dev` | stage 1, `qa` (required): closed YES/NO questions. Stage 2, `qa-review` (advisory): an open review. Both post their verdict as a comment on the pull request | edit code; stage 1 sees only the files a question names and the question itself, never the builder's notes or chat |
 | **On-call agent** | an independent DeepSeek agent ([tools/oncall.js](../tools/oncall.js), model `deepseek-v4-pro`), woken by a Sentry alert through the issue it opens ([OPERATIONS, On-call agent](OPERATIONS.md#on-call-agent)) | an incident: reads the error from Sentry, finds the cause, opens a pull request into `dev` with the fix, a regression test and QA checks, and reports on the incident issue | merge into `main`; edit anything but `index.html` and `server/*.js`; run the fix's tests with access to a secret or the network |
 | **Panels** | groups of short-lived Claude subagents run as one workflow | wide questions one agent should not answer alone: design options (designers, then judges) and audits (finders, then independent verifiers) | decide: a panel returns options and evidence, and the orchestrator decides |
@@ -18,7 +18,7 @@ Immune Citadel v4 is built by AI agents and one human owner, Alexis Dacquay. Thi
 
 ## How QA works: two stages
 
-![QA in two stages on a pull request into dev. The builder's QA checks and the past failures in the changed files feed stage 1, the required job qa: closed YES or NO questions at low effort, 3 votes each. GitHub auto-merges into dev once test, game and qa are green; Render deploys dev and the deployed job proves the new commit is live; dev reaches main only on the owner's written go. Stage 2, the advisory job qa-review, runs after test and game pass and only comments; its findings are fixed or answered before a promotion](diagrams/qa-stages.svg)
+![QA in two stages on a pull request into dev. The builder's QA checks and the past failures in the changed files feed stage 1, the required job qa: closed YES or NO questions at low effort, 3 votes each. GitHub auto-merges into dev once test, game and qa are green; Render deploys dev and the deployed job proves the new commit is live; dev reaches main only on the owner's go for that release. Stage 2, the advisory job qa-review, runs after test and game pass and only comments; its findings are fixed or answered before a promotion](diagrams/qa-stages.svg)
 
 | | Stage 1: `qa` | Stage 2: `qa-review` |
 |---|---|---|
@@ -39,11 +39,11 @@ A stage 1 check passes only when:
 
 The agent must quote the code that decides its answer. Code comments do not count as evidence, because a comment can claim what the code does not do.
 
-Both jobs run only on pull requests into `dev`. A promotion into `main` is not judged again (owner, 2026-11-07, [#38](https://github.com/alexisdacquay/immune-citadel-v4/issues/38)): each change already passed QA on its way into `dev`, and judging the whole release diff at once produced false alarms. The judge itself, `tools/qa.js`, and the past failures are read from the base branch, so a pull request cannot rewrite the script or drop the questions that judge it; a change to either applies from the next pull request.
+Both jobs run only on pull requests into `dev`. A promotion into `main` is not judged again ([#38](https://github.com/alexisdacquay/immune-citadel-v4/issues/38)): each change already passed QA on its way into `dev`, and judging the whole release diff at once produced false alarms. The judge itself, `tools/qa.js`, and the past failures are read from the base branch, so a pull request cannot rewrite the script or drop the questions that judge it; a change to either applies from the next pull request.
 
 ### Why closed questions
 
-Until 2026-11-07, QA was a single open review. Its record on every blocking verdict: 8 real defects caught, 7 false alarms, and 3 runs that blocked with no verdict because the model ran out of time or tokens ([#47](https://github.com/alexisdacquay/immune-citadel-v4/issues/47)). A first two-stage design, a short prompt judging the acceptance criteria, passed real defects on a benchmark: it was merged, then replaced after the owner rejected it. The owner's design, approved on 2026-11-08: give the agent simple, closed tasks at low effort, many of them, for quick signals, and let the builder, who knows what the change could break, write the questions.
+Until 2026-11-07, QA was a single open review. Its record on every blocking verdict: 8 real defects caught, 7 false alarms, and 3 runs that blocked with no verdict because the model ran out of time or tokens ([#47](https://github.com/alexisdacquay/immune-citadel-v4/issues/47)). A first two-stage design, a short prompt judging the acceptance criteria, passed real defects on a benchmark: it was merged, then replaced. The design in use: give the agent simple, closed tasks at low effort, many of them, for quick signals, and let the builder, who knows what the change could break, write the questions.
 
 Stage 1 in this form arrived with a pull request on 2026-11-08, in the original repository. That pull request's own `qa` job still ran the previous judge, so the first pull request judged by the new stage 1 in CI was the next one; every pull request into `dev` since then has been judged by it. Before merging, the builder ran it locally with the real model:
 
@@ -95,10 +95,10 @@ When the owner says **continue**, the orchestrator runs one turn of this loop. T
 3. **Build.** The orchestrator builds it on a branch `issue/<n>-<slug>`, runs the checks (`npm test`; `npm run test:game` for game changes; the balance bot for gameplay) and tries the change live.
 4. **Open the pull request** into `dev`, with its `## QA checks`. A bug fix also adds its past failure. The orchestrator arms auto-merge at once: `sh tools/automerge.sh <n>`.
 5. **Verify.** CI runs `test`, `game`, `qa` and `qa-review`. A red `test`, `game` or `qa` blocks the merge and the work goes back to the builder. The orchestrator reads `qa-review` and fixes or answers each finding.
-6. **Integrate.** GitHub merges the pull request once `test`, `game` and `qa` are green, with no human. Render deploys the new `dev` commit, and CI's `deployed` job proves it is live.
+6. **Integrate.** GitHub merges the pull request once `test`, `game` and `qa` are green, with no human. Render deploys the new `dev` commit, and CI's `deployed` job proves it is live. The issue closes with "Fixed by #<n> on dev; it reaches production with the next promotion."
 7. **Report.** One short message to the owner: what shipped, what is not verified, what needs them.
 
-**Promotion** is separate and needs the owner: every promotion of `dev` into `main` (production) needs the owner's written go; then the owner or, on that go, the orchestrator clicks merge. How each go was given: [PROOF, CI/CD](PROOF.md#9-cicd). Issues close then, each with a "Shipped to production" comment. Until then a finished issue stays open, with the label `status:on-dev`.
+**Promotion** is separate. Production is manual: a promotion pull request (`dev` → `main`) is merged only on the owner's go for that release; nothing merges into `main` automatically ([PROOF, CI/CD](PROOF.md#9-cicd)). The promotion pull request lists what it brings; once it merges, each issue it ships gets "Shipped to production in #<promotion> (<commit>)". For example, [#93](https://github.com/alexisdacquay/immune-citadel-v4/issues/93): "Fixed by #94 on dev", then "Shipped to production in #69 (a8e90f0)".
 
 ## Gates
 
@@ -106,7 +106,7 @@ When the owner says **continue**, the orchestrator runs one turn of this loop. T
 |---|---|
 | `dev` changes only through a pull request whose `test`, `game` and `qa` passed | GitHub ruleset on `dev`; nobody can bypass it |
 | `main` changes only through a pull request that is up to date, with `test` and `game` green and `dev`'s own CI run on the same commit green (`dev-green`) | GitHub ruleset on `main` and [promotion.yml](../.github/workflows/promotion.yml) |
-| Every merge into `main` follows the owner's written go | the rule in [AGENTS.md](../AGENTS.md) and `tools/automerge.sh`, which refuses any base but `dev`. GitHub itself does not enforce who merges |
+| Production is manual: a promotion into `main` is merged only on the owner's go for that release | the rule in [AGENTS.md](../AGENTS.md); `tools/automerge.sh` refuses any base but `dev`, and no workflow or schedule merges into `main`. GitHub itself does not enforce who merges |
 | Biology text is fun first, honest always: every bend of real biology carries an "In reality" note | the spec and the review of each change |
 
 ## Where to see it

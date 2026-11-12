@@ -1,6 +1,6 @@
 # Product specification
 
-What the game must do for its players, written as player journeys with acceptance criteria. Each criterion below describes the game as it is: checked against `index.html` on `dev` at `f07f748` on 2026-11-08; production gets this file at the next promotion.
+What the game must do for its players, written as player journeys with acceptance criteria. Each criterion below describes the game as it is: checked against `index.html` at `f07f748` (2026-11-08). Every later change to `index.html` ([its history](https://github.com/alexisdacquay/immune-citadel-v4/commits/main/index.html)) went through its pull request's QA checks and the game suite, not a new pass over the criteria below.
 
 ![A level in play: immune cells grown beside the infection route, the vitality, ATP and wave counters at the top left, the game controls at the top right, the hero and ability buttons at the bottom left](screenshots/play.jpg)
 
@@ -152,7 +152,7 @@ A player, a parent or a teacher can see what leaves the browser and turn the pla
 
 ## Checked by
 
-Continuous integration runs `test` and `game` on every pull request and every push to `dev` or `main`; a pull request into `dev` merges automatically once `test`, `game` and `qa` are green, the three checks GitHub's rule on `dev` requires (jobs in [ci.yml](../.github/workflows/ci.yml)).
+Continuous integration runs `test` and `game` on every pull request and every push to `dev` or `main` (`game` is skipped on a pull request that changes only `docs/` or `*.md` files); a pull request into `dev` merges automatically once `test`, `game` and `qa` are green, the three checks GitHub's rule on `dev` requires (jobs in [ci.yml](../.github/workflows/ci.yml)).
 
 | Journey | Checked by | What it proves |
 |---|---|---|

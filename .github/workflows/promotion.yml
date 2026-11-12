@@ -1,4 +1,4 @@
-# Promotion gate (#75): a pull request into main waits for dev's own CI run on the same commit, deploy proof included,
+# Promotion gate (#38): a pull request into main waits for dev's own CI run on the same commit, deploy proof included,
 # and fails unless it is green. Its own workflow, run on pull requests into main only, so no push run ever reports a
 # skipped "dev-green" that GitHub would count as passing.
 name: Promotion

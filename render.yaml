@@ -1,7 +1,7 @@
 # Infrastructure for Immune Citadel v4 on Render (Frankfurt). Source of truth for
 # plans and settings: Render applies this file through a Blueprint; never change a
 # plan or a service setting in the dashboard.
-# Owner, 2026-11-06: everything is live production grade; dev mirrors production.
+# Everything is live production grade; dev mirrors production.
 # The two environments are identical except data, secrets, branch and origins.
 # Database IP allowlists are set in Render only, never here: they hold the owner's personal IP. Omitted, a sync keeps
 # the current list (Render Blueprint spec); a database created from scratch would accept any IP with valid credentials.

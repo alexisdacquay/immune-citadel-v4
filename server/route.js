@@ -1,5 +1,5 @@
 // The save code in /api/save/<code> is the player's only credential: logs and traces use this route instead of the URL.
-// The path is decoded first, so no way of writing it gets a code through (#102): any path that names the save route (//api/save,
+// The path is decoded first, so no way of writing it gets a code through (#52): any path that names the save route (//api/save,
 // upper case, URL-encoded slashes) becomes the route, and any 16-character run of the code's alphabet left anywhere else is hidden.
 module.exports = url => {
   let p = (url || '').split('?')[0];

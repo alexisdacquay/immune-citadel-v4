@@ -9,7 +9,7 @@ Last update: 2026-11-12: production runs the head of [`main`](https://github.com
 - **Production** runs the head of `main`, the commit its save API's `/health` names, with every promotion listed under [Promotions](#promotions): the whole 18-level campaign on the body map, cloud saves (deleted after 13 months unchanged), the save API's one-trace-ID observability, crash reports and load reports that respect Play stats and Global Privacy Control, the game's own fonts, phone and laptop layout fixes, the on-call agent, and, after every push to `dev` or `main`, a read-only smoke and privacy check and a check that one save reaches Sentry.
 - **Dev** runs production's code plus every pull request merged into `dev` since the last promotion.
 - **In flight:** the [open pull requests](https://github.com/alexisdacquay/immune-citadel-v4/pulls).
-- **Next:** the rubric work ([#39](https://github.com/alexisdacquay/immune-citadel-v4/issues/39), P0).
+- **Next:** the rubric work (P0).
 
 ## Where things run
 
@@ -20,7 +20,7 @@ Last update: 2026-11-12: production runs the head of [`main`](https://github.com
 
 ## Promotions
 
-Every promotion of `dev` into `main`, the production branch, each after the owner's written go ([PROOF, CI/CD](PROOF.md#9-cicd)). They were made in the project's original repository, whose pull requests and CI runs are not public; each merge commit below is the same commit on `main` here. Each one's CI run on `main` there was green: `test`, `game` and `deployed` (the commit is live).
+Every promotion of `dev` into `main`, the production branch, each after the owner's written go ([PROOF, CI/CD](PROOF.md#9-cicd)). Until 2026-11-08 they were made in the project's original repository, whose pull requests and CI runs are not public (screenshots in [PROOF, CI/CD](PROOF.md#9-cicd)); each of those merge commits is the same commit on `main` here. From [#69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69) on, the promotion pull requests are here. Each one's CI run on `main` was green: `test`, `game` and `deployed` (the commit is live).
 
 | Merge commit | Merged (UTC) | What it brought |
 |---|---|---|
@@ -33,6 +33,7 @@ Every promotion of `dev` into `main`, the production branch, each after the owne
 | [`d3f7a43`](https://github.com/alexisdacquay/immune-citadel-v4/commit/d3f7a43) | 2026-11-08 17:29 | the on-call agent's first drill, recorded, and its fix of the drill's planted fault |
 | [`5ec8a26`](https://github.com/alexisdacquay/immune-citadel-v4/commit/5ec8a26) | 2026-11-08 19:07 | docs only: the proof page for course reviewers ([PROOF.md](PROOF.md)), every rubric criterion with screenshots and raw output, linked from the README |
 | [`cbe012e`](https://github.com/alexisdacquay/immune-citadel-v4/commit/cbe012e) | 2026-11-08 19:49 | a check in CI's `deployed` job: after every deploy, one save under a known trace ID must reach Sentry as a trace, a log line and a metric, on dev and production; no change to the game or the save API |
+| [`a8e90f0`](https://github.com/alexisdacquay/immune-citadel-v4/commit/a8e90f0) | 2026-11-12 17:30 | [#69](https://github.com/alexisdacquay/immune-citadel-v4/pull/69): the fixes from the tracker, pull requests [#59](https://github.com/alexisdacquay/immune-citadel-v4/pull/59) to [#94](https://github.com/alexisdacquay/immune-citadel-v4/pull/94) (save API limits and errors, two game fixes, the QA agent's rules, docs true for this repository); `main` run [43270181878](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43270181878) green |
 
 Infrastructure and telemetry events around them:
 
@@ -56,7 +57,7 @@ How the parts connect: [README, How it fits together](../README.md#how-it-fits-t
 | Plan | Done | Left |
 |---|---|---|
 | [PIPELINE-PLAN.md](PIPELINE-PLAN.md): trustworthy deploys | steps 1-4: the site publishes only the game; rules on `dev` and `main`; deploy on every commit with the `deployed` proof; auto-merge | nothing: closed (its step 5 moved to the observability plan) |
-| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | steps 1-5, proven on `dev`; step 6 in part: promoted, uptime checks on both APIs, and the production save API in Sentry (2026-11-08); step 7 on `dev` and production | step 7 is done: the screenshots of one real dev save (2026-11-08), and CI's `deployed` job checks after every deploy that a save still reaches Sentry. Step 6: the production checks are left |
+| [OBSERVABILITY-PLAN.md](OBSERVABILITY-PLAN.md): Sentry, own gameplay events, Better Stack | steps 1-5, proven on `dev`; step 6 in part: promoted, uptime checks on both APIs, and the production save API in Sentry (2026-11-08); step 7 on `dev` and production, with the screenshots of one real dev save (2026-11-08), and CI's `deployed` job checking after every deploy that a save still reaches Sentry | step 6: the production checks (a test error from the production game and save API, a played level on production in the funnel query) |
 
 ## What is next
 
@@ -64,7 +65,7 @@ In the order the team loop uses: `P0` first, then the owner's latest priority, t
 
 | # | Work | Why now |
 |---|---|---|
-| 1 | Rubric: full marks with margin, obvious to any reviewer ([#39](https://github.com/alexisdacquay/immune-citadel-v4/issues/39), P0): README's "For reviewers" table, in the rubric's words with the points claimed (2026-11-08), then at least three independent cold reviews | the only P0; no review report is linked yet |
+| 1 | Rubric: full marks with margin, obvious to any reviewer (P0): README's "For reviewers" table, in the rubric's words with the points claimed (2026-11-08), then at least three independent cold reviews | the only P0; no review report is linked yet |
 | 2 | QA: count real catches and false alarms of both stages on each pull request until 2026-11-21, then decide what changes | set on 2026-11-07; stage 1 in its new form has run in CI on every pull request into `dev` since 2026-11-08, first in the original repository |
 | 3 | P1 backlog: body map zones in reading order ([#40](https://github.com/alexisdacquay/immune-citadel-v4/issues/40)), trading-card design ([#41](https://github.com/alexisdacquay/immune-citadel-v4/issues/41), mock-ups first, the owner picks) | the owner's P1s that can start without the owner |
 | 4 | P2 backlog: more enemy variety ([#42](https://github.com/alexisdacquay/immune-citadel-v4/issues/42)), game content out of `index.html` ([#17](https://github.com/alexisdacquay/immune-citadel-v4/issues/17)), Chapter 2 ([#11](https://github.com/alexisdacquay/immune-citadel-v4/issues/11)) | planned |
@@ -81,16 +82,21 @@ In the order the team loop uses: `P0` first, then the owner's latest priority, t
 | Item | Note |
 |---|---|
 | Chronic challenge balance ([#20](https://github.com/alexisdacquay/immune-citadel-v4/issues/20)) | roadmap, P2; target when picked up: the bot wins about 5 of 6 |
-| A personal value in one old bot comment and one Actions log | left as they are: the owner's decision of 2026-11-08 ("it will take time to fix") |
 | the `ic-bug-fixer` and `ic-qa` subagents | the orchestrator builds bugs too, and QA runs in CI ([#34](https://github.com/alexisdacquay/immune-citadel-v4/issues/34)); see [TEAM.md](TEAM.md) |
 
 ## Decisions
+
+### 2026-11-12
+
+| Decision | Instead of |
+|---|---|
+| repository re-created from the original with full history; issues copied without comments; earlier pull requests and runs kept as screenshots ([PROOF](PROOF.md)) | — |
 
 ### 2026-11-08
 
 | Decision | Instead of |
 |---|---|
-| QA stage 1 asks closed YES/NO questions, each 3 times at low effort: the builder's QA checks and the past failures in the files a change touches. The builder owns the test plan (owner's design, #47) | a short prompt judging the issues' acceptance criteria, which passed real defects on the benchmark |
+| QA stage 1 asks closed YES/NO questions, each 3 times at low effort: the builder's QA checks and the past failures in the files a change touches. The builder owns the test plan (#47) | a short prompt judging the issues' acceptance criteria, which passed real defects on the benchmark |
 
 ### 2026-11-07
 
@@ -103,7 +109,7 @@ In the order the team loop uses: `P0` first, then the owner's latest priority, t
 | QA agent as a required CI check; merges into `dev` automatic on green, production by the owner only (#34) | a human or an agent arming each merge |
 | `dev` merges without the up-to-date rule; `main` keeps it and needs `dev` green (#35) | GitHub's merge queue (needs Enterprise Cloud on a private repo) |
 | diagrams with `diagram-design`, light, never Mermaid | Mermaid |
-| repository public; the owner's IP removed from every file and from history (#36); GitHub Support asked to purge old pull-request copies | a fresh repository (would lose the issue and pull-request evidence) |
+| repository public; the owner's IP removed from every file and from history (#36); GitHub Support asked to purge old pull-request copies | a fresh repository, which at the time would have lost the issue and pull-request evidence (re-created on 2026-11-12, above) |
 | every environment production grade, `dev` mirrors production; `render.yaml` the only place infrastructure changes (#33) | Free instances, one shared database |
 
 ### 2026-11-06
