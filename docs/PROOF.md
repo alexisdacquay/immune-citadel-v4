@@ -19,7 +19,7 @@ For course reviewers ([rubric](https://github.com/DataTalksClub/ai-dev-tools-zoo
 | [9](#9-cicd) | CI/CD | 3 / 3 | CI on every pull request; CD to dev on every merge; production is manual: a promotion is merged only on the owner's go for that release |
 | [10](#10-observability) | Observability | 2 / 2 | one save: trace, log line and metric under one trace ID, in Sentry's UI |
 | [11](#11-alerting-on-user-impact) | Alerting on User Impact | 1 / 1 | a failed save emails the owner and opens a GitHub issue |
-| [12](#12-on-call-agent) | On-Call Agent | 2 / 2 | a real alert on a deliberately planted fault: the agent fixed it, live on dev 11 minutes later, no human |
+| [12](#12-on-call-agent) | On-Call Agent | 2 / 2 | a real alert on a deliberately planted fault: Sentry opened #157, the agent's fix #158 was live on dev 10 minutes after the first 500, no human |
 
 ## 1. Problem Description
 
@@ -259,7 +259,7 @@ in Sentry: the trace, its log line and its metric
 
 - **The user impact:** a player's save or load fails.
 - **The alert:** any save API error emails the owner and opens a GitHub issue, which wakes the on-call agent ([observability/sentry-alert.json](../observability/sentry-alert.json)).
-- **Fired twice:** 2026-11-06 (database stopped on purpose, local stack) and 2026-11-08 (the drill, criterion 12).
+- **Fired** on 2026-11-06 (database stopped on purpose, local stack), 2026-11-08 (the first on-call drill) and 2026-11-12 (the on-call drill of criterion 12, which opened [#157](https://github.com/alexisdacquay/immune-citadel-v4/issues/157)).
 - **The screenshots** show the alert before [#85](https://github.com/alexisdacquay/immune-citadel-v4/pull/85) split it by level: an error still emails the owner and opens the issue; a warning (the daily cap on new save codes) only emails. "Al" in the Sentry screenshots is the owner's account name.
 - **Also:** a game crash emails the owner, in dev and production ([observability/sentry-game-alert.json](../observability/sentry-game-alert.json)), and Better Stack emails when a site or an API is down.
 
@@ -271,38 +271,50 @@ in Sentry: the trace, its log line and its metric
 
 > **2 points:** "An agent wakes up on an alert and fixes the issue."
 
-**First drill, 2026-11-08, on dev, in the project's original repository.** Its issue, pull requests and runs are not public here; the evidence is the screenshots in [screenshots/proof/](screenshots/proof/) ([1](screenshots/proof/oncall-1-issue-by-sentry.jpg), [2](screenshots/proof/oncall-2-agent-comments.jpg), [3](screenshots/proof/oncall-3-fix-pr-merged.jpg), below) and its public trace here: the fix's two commits, authored by `immune-citadel on-call agent` ([80a9a1c](https://github.com/alexisdacquay/immune-citadel-v4/commit/80a9a1c), [1b2dc9b](https://github.com/alexisdacquay/immune-citadel-v4/commit/1b2dc9b)), and their merge into `dev` by `github-actions[bot]` ([411f62b](https://github.com/alexisdacquay/immune-citadel-v4/commit/411f62b)). [#58](https://github.com/alexisdacquay/immune-citadel-v4/issues/58) is the drill's issue as copied here; its two comments are an on-call run on 2026-11-12, before Sentry access was connected to this repository, not part of the drill.
-
-The only known 500, a deeply nested save ([#57](https://github.com/alexisdacquay/immune-citadel-v4/issues/57)), did not reproduce on Render, so a fault was planted on purpose ([d70e778](https://github.com/alexisdacquay/immune-citadel-v4/commit/d70e778)). The agent was never told about it: its prompt is built only from the Sentry event and the files its stack trace names ([tools/oncall.js](../tools/oncall.js), `incident()` and `sourceContext()`); its first comment on the issue lists them ([screenshot 2](screenshots/proof/oncall-2-agent-comments.jpg)): `server/index.js`, `server/test.js`. Before its fix, `PUT {"save":{"owe":"x"}}` answered 500 on dev; after it, 200.
+**Drill, 2026-11-12, on dev, in this repository.** A fault was planted on `dev` on purpose ([#156](https://github.com/alexisdacquay/immune-citadel-v4/pull/156), commit [8c346c8](https://github.com/alexisdacquay/immune-citadel-v4/commit/8c346c8)): a debug line in the save API's PUT path counts a save's immune skills with `Object.keys(save.mem)` whenever the save has `diff`, without checking `mem`. The game always sends `mem` and no test sends `diff`, so CI passed it and ordinary saves kept working. The agent was never told about it: its prompt is built only from the Sentry event and the files its stack trace names ([tools/oncall.js](../tools/oncall.js), `incident()` and `sourceContext()`); its first comment on the incident lists them: `server/index.js`, `server/test.js`. Before its fix, `PUT {"save":{"diff":"hard"}}` on a new save code answered 500 on dev; after it, 200. The fault lived only on `dev`: production ran [`1251eec`](https://github.com/alexisdacquay/immune-citadel-v4/commit/1251eec) (promotion [#154](https://github.com/alexisdacquay/immune-citadel-v4/pull/154)) throughout.
 
 | Time (UTC) | Step |
 |---|---|
-| 16:52:52 | a crafted save hits the fault: the API answers 500 |
-| 16:53:05 | the alert fires |
-| 16:53:06 | Sentry opens the issue ([screenshot 1](screenshots/proof/oncall-1-issue-by-sentry.jpg)) |
-| 16:53:13 | GitHub starts [the On-call run](screenshots/proof/oncall-2-agent-comments.jpg) on that issue's `opened` event: no polling, no schedule ([oncall.yml](../.github/workflows/oncall.yml), `on: issues`) |
-| 16:53:22 | the agent reports on the issue |
-| 16:54:40 | it opens the fix ([screenshot 3](screenshots/proof/oncall-3-fix-pr-merged.jpg)), with a regression test |
-| 17:02:00 | CI and the QA agent pass; the fix merges itself into `dev` |
-| 17:04:06 | live: dev's `/health` names the fix's merge `411f62b`, and the crafted save answers 200 (checked afterwards with curl; nothing was done to the system). The next dev run's `deployed` job covers it. |
-| 17:29:17 | promoted to production: merge [`d3f7a43`](https://github.com/alexisdacquay/immune-citadel-v4/commit/d3f7a43) |
+| 23:45:03 | the fault merges into `dev` ([`63dce97`](https://github.com/alexisdacquay/immune-citadel-v4/commit/63dce97)); dev's `/health` names it from 23:46:19 |
+| 23:46:28 | a crafted save hits the fault: the API answers 500 |
+| 23:46:29 | Sentry opens IMMUNE-CITADEL-API-4: `TypeError: Cannot convert undefined or null to object` at `server/index.js` line 186, environment dev, release 63dce97 |
+| 23:46:37 | the alert fires: it emails the owner and asks Sentry's GitHub integration for an issue |
+| 23:46:39 | `sentry[bot]` opens [#157](https://github.com/alexisdacquay/immune-citadel-v4/issues/157), labelled `incident` |
+| 23:46:42 | GitHub starts [the On-call run](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43331687728) from `main` on that issue's `opened` event: no polling, no schedule ([oncall.yml](../.github/workflows/oncall.yml), `on: issues`) |
+| 23:46:59 | the agent reports on the issue: [awake, reading `server/index.js` and `server/test.js`](https://github.com/alexisdacquay/immune-citadel-v4/issues/157#issuecomment-6839328422) |
+| 23:47:42 | it opens the fix, [#158](https://github.com/alexisdacquay/immune-citadel-v4/pull/158), with a regression test and three QA checks of its own; unit tests green, sealed, on attempt 1 of 3. At 23:47:47 it [gives the cause on the issue](https://github.com/alexisdacquay/immune-citadel-v4/issues/157#issuecomment-6839342565) |
+| 23:48:05 | the QA agent answers the fix's QA checks: [PASS](https://github.com/alexisdacquay/immune-citadel-v4/pull/158#issuecomment-6839347584), 10 checks (its 3, and 7 past failures in the files it changes), 0 failed |
+| 23:55:36 | CI on the fix ends green: `test`, `game`, `qa` and `qa-review` ([run 43331836351](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43331836351)) |
+| 23:55:44 | auto-merge merges the fix into `dev` as [`35bafd4`](https://github.com/alexisdacquay/immune-citadel-v4/commit/35bafd4), merged by `github-actions[bot]` |
+| 23:56:33 | live: dev's `/health` names `35bafd4`; at 23:56:39 the same crafted save, same code, answers 200 (checked with curl; nothing was done to the system) |
 
-**11 minutes from the error to the fix live, no human in the loop.** The agent's whole fix ([diff](https://github.com/alexisdacquay/immune-citadel-v4/commit/80a9a1c)):
+**10 minutes from the first 500 (23:46:28) to the fix live on dev (23:56:33), no human in the loop.** The agent's whole fix ([diff](https://github.com/alexisdacquay/immune-citadel-v4/pull/158/files)):
 
 ```diff
 # server/index.js (the fix)
--        log.debug({ owed: save.owe ? save.owe.filter(Boolean).length : 0 }, 'cards owed');
-+        log.debug({ owed: Array.isArray(save.owe) ? save.owe.filter(Boolean).length : 0 }, 'cards owed');
+-        log.debug({ difficulty: save.diff, skills: save.diff ? Object.keys(save.mem).length : 0 }, 'immune skills');
++        log.debug({ difficulty: save.diff, skills: save.diff && save.mem && typeof save.mem === 'object' ? Object.keys(save.mem).length : 0 }, 'immune skills');
 # server/test.js (the regression test)
-+  assert.equal((await put(code, { save: { owe: 'not an array' } })).status, 200, 'non-array owe is not a server error');
++  assert.equal((await put(code, { save: { diff: 1 } })).status, 200, 'a save with diff but no mem is stored, not a 500');
 ```
 
-The fix removes the 500. Rejecting a non-list `owe` outright was a separate issue, [#51](https://github.com/alexisdacquay/immune-citadel-v4/issues/51), since fixed by [#61](https://github.com/alexisdacquay/immune-citadel-v4/pull/61).
+The QA checks the agent wrote on #158, as the QA agent answered them ([its comment](https://github.com/alexisdacquay/immune-citadel-v4/pull/158#issuecomment-6839347584)):
 
-| 1. The alert opens an issue | 2. The agent reports on it | 3. Its fix, merged by the bot |
+| QA check (the agent's words) | Old code | New code |
 |---|---|---|
-| ![Issue #131, opened by the sentry bot, "automatically created by Sentry via Save API error"](screenshots/proof/oncall-1-issue-by-sentry.jpg) | ![The on-call agent's comments on #131: awake, then fix proposed in #132](screenshots/proof/oncall-2-agent-comments.jpg) | ![PR #132, merged by github-actions[bot] into dev](screenshots/proof/oncall-3-fix-pr-merged.jpg) |
+| `[changes] server/index.js`: Does a PUT whose save has a truthy diff but missing mem return 200 instead of 500? | NO | YES |
+| `[changes] server/test.js`: Does the test suite include a regression test for a save with diff but no mem returning 200? | NO | YES |
+| `[stays] server/index.js`: Does the server still return 400 for a save whose owe is not an array? | not asked | YES |
 
-GitHub labels the push of the second commit, [1b2dc9b](https://github.com/alexisdacquay/immune-citadel-v4/commit/1b2dc9b), "alexisdacquay" (screenshot 2) because the agent pushes with the repository's deploy key: a push with GitHub's own token starts no CI.
+**Two defects found by this drill's earlier attempts ([#142](https://github.com/alexisdacquay/immune-citadel-v4/issues/142)), fixed before this run:**
+- Sentry grouped save API errors by their stack, so the first attempt's new error was filed under the 2026-11-08 Sentry issue and opened no incident; [#147](https://github.com/alexisdacquay/immune-citadel-v4/pull/147) ([#146](https://github.com/alexisdacquay/immune-citadel-v4/issues/146)) gives each error type and message its own Sentry issue.
+- The agent's correct fix in the next attempt could not merge, because one of its own QA checks asked whether code was "unchanged", which the QA agent's stage 1 cannot answer from the new code alone; [#151](https://github.com/alexisdacquay/immune-citadel-v4/pull/151) ([#150](https://github.com/alexisdacquay/immune-citadel-v4/issues/150)) makes the agent write only checks stage 1 can answer.
+
+**Notes on the run.**
+- Both commits of #158 are authored by `immune-citadel on-call agent`. GitHub labels the push of the second, [7eabd2e](https://github.com/alexisdacquay/immune-citadel-v4/commit/7eabd2e), "alexisdacquay" because the agent pushes with the repository's deploy key: a push with GitHub's own token starts no CI.
+- The run GitHub started for #158's `opened` event, [43331827655](https://github.com/alexisdacquay/immune-citadel-v4/actions/runs/43331827655), shows `failure` with no job started; it is not a required check and did not hold the merge.
+- The merge was made with GitHub's own token, so `dev` started no push run for `35bafd4`; Render deployed it, and the next merge into `dev` runs CI on it. The fix reaches production with the next promotion.
+
+**First drill (original repository, 2026-11-08):** a different planted fault, fixed live on dev 11 minutes after the error ([screenshot](screenshots/proof/oncall-2-agent-comments.jpg)).
 
 How it works and its safeguards: [OPERATIONS, On-call agent](OPERATIONS.md#on-call-agent).
