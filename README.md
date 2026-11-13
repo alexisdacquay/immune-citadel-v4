@@ -179,7 +179,7 @@ Immune Citadel is a project for the [DataTalksClub AI Dev Tools Zoomcamp](https:
 | 9 | CI/CD | 3 / 3 | [Proof](docs/PROOF.md#9-cicd) |
 | 10 | Observability | 2 / 2 | [Proof](docs/PROOF.md#10-observability) |
 | 11 | Alerting on User Impact | 1 / 1 | [Proof](docs/PROOF.md#11-alerting-on-user-impact) |
-| 12 | On-Call Agent | 2 / 2 | [Proof](docs/PROOF.md#12-on-call-agent) |
+| 12 | On-Call Agent | 2 / 2 | [Proof](docs/PROOF.md#12-on-call-agent): the 2026-11-12 drill, where Sentry opened [#157](https://github.com/alexisdacquay/immune-citadel-v4/issues/157) and the agent's fix [#158](https://github.com/alexisdacquay/immune-citadel-v4/pull/158) was live on dev 10 minutes after the first 500 |
 
 **Claimed: 24 of 24 points.**
 
