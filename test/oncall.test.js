@@ -1,6 +1,6 @@
 // The on-call agent's own logic (tools/oncall.js), without Sentry, GitHub or a model.
 const test = require('node:test'), assert = require('node:assert'), fs = require('node:fs'), os = require('node:os'), path = require('node:path');
-const { sentryRef, incident, localFile, sourceContext, applyEdits, qaChecks, fallbackCheck } = require('../tools/oncall.js');
+const { sentryRef, incident, localFile, sourceContext, applyEdits, failure, qaChecks, fallbackCheck } = require('../tools/oncall.js');
 
 test('the Sentry issue is read from the GitHub issue Sentry opened', () => {
   assert.deepEqual(sentryRef('Sentry Issue: [IMMUNE-CITADEL-API-2](https://myown-76.sentry.io/organizations/myown-76/issues/7012345678/?referrer=github_integration)'), { id: '7012345678' });
@@ -36,7 +36,7 @@ test('frames map to repository files, on Docker, on Render and in the browser', 
     assert.equal(localFile(f), null, f);
   const ctx = sourceContext({ exceptions: [{ frames: [{ file: '/app/index.js', line: 89 }] }] });
   assert.deepEqual(ctx.files, ['server/index.js', 'server/test.js'], 'a server error also gets the test file a fix must extend');
-  assert.match(ctx.text, /### server\/index\.js\n {4}1\| /);
+  assert.match(ctx.text, /### server\/index\.js\n {4}1\|\/\/ Cloud saves/, 'the line follows the "|" with no space, so a quote of it keeps its own indentation');
 });
 
 test('edits are refused unless exact, small and inside the files shown', () => {
@@ -54,6 +54,42 @@ test('edits are refused unless exact, small and inside the files shown', () => {
   assert.throws(() => applyEdits([], shown, dir), /no edits/);
   applyEdits([{ file: 'server/index.js', find: 'a\n', replace: 'a $& $1\n' }], shown, dir);
   assert.equal(fs.readFileSync(path.join(dir, 'server/index.js'), 'utf8'), 'a $& $1\nb\nb\n', 'the replacement is literal text');
+});
+
+test('a find text quoted one space too deep applies at the file\'s own indentation; any other miss names the closest line (#164)', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'oncall-')); fs.mkdirSync(path.join(dir, 'server'));
+  const line = "  assert.deepEqual((await (await fetch(`${base}/api/save/${code}`)).json()).save, { owe: ['fever'] }, 'and never reaches the store');";
+  const added = "  assert.equal((await put(code, { save: { rch: 1 } })).status, 200, 'a save with rch but no hc is kept');";
+  const file = `test('save API', async () => {\n${line}\n  assert.equal(1, 1);\n});\n`, deeper = s => s.replace(/^/gm, ' ');
+  fs.writeFileSync(path.join(dir, 'server/test.js'), file);
+  // a model that keeps the space after the "|" quotes each line with 3 spaces for the file's 2, in find and replace alike
+  applyEdits([{ file: 'server/test.js', find: deeper(line), replace: deeper(`${line}\n${added}`) }], ['server/test.js'], dir);
+  assert.equal(fs.readFileSync(path.join(dir, 'server/test.js'), 'utf8'), file.replace(line, `${line}\n${added}`));
+  fs.writeFileSync(path.join(dir, 'server/test.js'), file);
+  assert.throws(() => applyEdits([{ file: 'server/test.js', find: deeper(line.replace('never', 'not')), replace: 'x' }], ['server/test.js'], dir),
+    e => e.message.includes('occurs 0 times') && e.message.includes(`the closest line is 2: ${JSON.stringify(line)}`), 'a miss the shift cannot fix names the line to copy');
+  assert.throws(() => applyEdits([{ file: 'server/test.js', find: `${line}\n});`, replace: 'x' }], ['server/test.js'], dir), /not one after the other/);
+  fs.writeFileSync(path.join(dir, 'server/test.js'), ' a\n a\n');
+  assert.throws(() => applyEdits([{ file: 'server/test.js', find: '  a', replace: 'b' }], ['server/test.js'], dir), /occurs 0 times/, 'the shift applies only when it gives exactly one match');
+});
+
+test('after red tests the model gets the failing tests, even 15,000 characters before the end of the output (#164)', () => {
+  const name = n => `passing test ${n}: ${'a long name, as the real tests have, '.repeat(4)}`;
+  const ok = n => `# Subtest: ${name(n)}\nok ${n} - ${name(n)}\n  ---\n  duration_ms: 1.5\n  type: 'test'\n  ...`;
+  const notOk = ['# Subtest: save API', 'not ok 11 - save API', '  ---', '  duration_ms: 49.79', "  type: 'test'", "  location: '/w/server/test.js:7:1'", "  failureType: 'testCodeFailure'",
+    "  error: 'and never reaches the store'", "  code: 'ERR_ASSERTION'", '  expected:', '    owe:', "      0: 'fever'", '  actual:', '    rch: true', "  operator: 'deepEqual'",
+    '  stack: |-', '    TestContext.<anonymous> (/w/server/test.js:33:10)', '  ...'].join('\n');
+  const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+  const out = ['Command failed: docker run --rm --network none -v /w:/w:ro -w /w node:22 npm run test:unit', 'TAP version 13', ...range(1, 10).map(ok), notOk, ...range(12, 71).map(ok),
+    '1..71', '# tests 71', '# suites 0', '# pass 70', '# fail 1', '# cancelled 0', '# skipped 0', '# todo 0', '# duration_ms 2677.6'].join('\n');
+  assert.ok(out.length > 18000 && out.length - out.indexOf('not ok') > 15000 && !out.slice(-4000).includes('not ok'), 'a tail of the output holds only passing tests');
+  const f = failure(out);
+  assert.equal(f, `${notOk.split('\n').slice(1).join('\n')}\n# tests 71\n# pass 70\n# fail 1\n# cancelled 0`, 'every not ok block with its diagnostics, then the counts');
+  const nested = 'TAP version 13\n# Subtest: parent\n    # Subtest: child\n    not ok 1 - child\n      ---\n      error: \'boom\'\n      ...\n    1..1\nnot ok 1 - parent\n  ---\n  error: \'1 subtest failed\'\n  ...\n# fail 1';
+  assert.equal(failure(nested), "    not ok 1 - child\n      ---\n      error: 'boom'\n      ...\nnot ok 1 - parent\n  ---\n  error: '1 subtest failed'\n  ...\n# fail 1", 'a failing subtest keeps its own indentation');
+  const many = failure(range(1, 200).map(n => `not ok ${n} - ${name(n)}`).concat('# fail 200').join('\n'));
+  assert.ok(many.length <= 6000 && many.startsWith('not ok 1 - ') && many.endsWith('\n# fail 200'), 'capped, failures first, the counts kept');
+  assert.equal(failure('edit refused: the text to replace occurs 0 times in server/test.js'), 'edit refused: the text to replace occurs 0 times in server/test.js', 'no not ok: the tail');
 });
 
 test('QA checks are kept only when stage 1 can answer them', () => {
