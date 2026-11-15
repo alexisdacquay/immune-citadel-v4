@@ -1,6 +1,6 @@
 // Fast checks for tools/qa.js: which issues a pull request names, that anything but a clear PASS fails, and how stage 1 reads and judges checks.
 const test = require('node:test'), assert = require('node:assert');
-const { issueNumbers, readVerdict, parseChecks, unreadable, judge, majority, ask, vote, report, reviewPrompt } = require('../tools/qa.js');
+const { issueNumbers, readVerdict, parseChecks, unreadable, judge, majority, ask, vote, report, reviewPrompt, postOrEdit } = require('../tools/qa.js');
 
 test('issues come from the branch, title, body and commits, without the pull request itself', () => {
   assert.deepEqual(issueNumbers({ branch: 'issue/22-hud', title: 'Fix (#23)', body: 'See #22 and #7', commits: ['x (#61)', 'y #40'], self: 61 }), [7, 22, 23, 40]);
@@ -104,4 +104,15 @@ test('stage 2 names the changed files left out of its diff, in the prompt and in
   const md = report(readVerdict('{"verdict":"PASS"}'), [], 'QA review', { model: 'google/gemini-3.5-flash', left });
   assert.match(md, /left out of the diff \(generated, not reviewed\): docs\/diagrams\/observability\.svg, package-lock\.json/);
   assert.match(md, /model google\/gemini-3\.5-flash_$/);
+});
+
+test('each run edits the bot\'s one comment of its kind, found on any page, and posts only when there is none', async () => {
+  const calls = [], pages = { 1: [...Array(100)].map((_, i) => ({ id: i, user: { type: 'User' }, body: i ? 'hi' : '<!-- qa-checks -->\nquoted by a person' })),
+    2: [{ id: 200, user: { type: 'Bot' }, body: '<!-- qa-review -->\nold' }, { id: 201, user: { type: 'Bot' }, body: '<!-- qa-checks -->\nold' }] };
+  const gh = async (path, opts = {}) => { calls.push([opts.method || 'GET', path, opts.body && JSON.parse(opts.body).body]); return opts.method ? {} : pages[path.match(/&page=(\d+)/)[1]] || []; };
+  await postOrEdit(gh, 7, '## QA checks: PASS', '<!-- qa-checks -->');
+  assert.deepEqual(calls.at(-1), ['PATCH', '/issues/comments/201', '<!-- qa-checks -->\n## QA checks: PASS']);
+  calls.length = 0; pages[2] = [];
+  await postOrEdit(gh, 7, '## QA review (advisory, does not block): PASS', '<!-- qa-review -->');
+  assert.deepEqual(calls.at(-1), ['POST', '/issues/7/comments', '<!-- qa-review -->\n## QA review (advisory, does not block): PASS']);
 });

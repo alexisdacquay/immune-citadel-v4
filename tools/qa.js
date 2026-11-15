@@ -163,14 +163,25 @@ async function review(env, gh) {
 const reviewPrompt = (n, pr, specs, diff, left) => `## Pull request #${n}: ${pr.title}\n${pr.body || ''}\n\n## Acceptance criteria\n${specs.join('\n\n') || '(no issue named: use the pull request description as the specification)'}\n\n## Diff\n${diff}`
   + (left.length ? `\n\n## Changed files left out of the diff\nGenerated files (lockfiles, diagram SVG exports): changed in this pull request, not missing.\n${left.map(f => `- ${f}`).join('\n')}` : '');
 
+// One comment of each kind per pull request, edited on every later run: each new comment emails everyone on the pull request, an edit does not.
+// The hidden marker on its first line finds it; only a bot's comment counts, so a person's comment that starts the same way is never overwritten.
+async function postOrEdit(gh, pr, md, marker) {
+  const body = JSON.stringify({ body: `${marker}\n${md}` });
+  for (let page = 1; ; page++) {
+    const cs = await gh(`/issues/${pr}/comments?per_page=100&page=${page}`), old = cs.find(c => c.user?.type === 'Bot' && c.body?.startsWith(marker));
+    if (old) return gh(`/issues/comments/${old.id}`, { method: 'PATCH', body });
+    if (cs.length < 100) return gh(`/issues/${pr}/comments`, { method: 'POST', body });
+  }
+}
+
 async function main() {
   const env = process.env, api = env.GITHUB_API_URL || 'https://api.github.com', repo = env.GITHUB_REPOSITORY;
   const gh = async (path, opts = {}) => { const r = await fetch(`${api}/repos/${repo}${path}`, { ...opts, headers: { authorization: `Bearer ${env.GITHUB_TOKEN}`, accept: 'application/vnd.github+json', ...(opts.headers || {}) } }); if (!r.ok) throw new Error(`GitHub ${path}: HTTP ${r.status}`); return r.json(); };
   const { md, pass } = await (env.QA_MODE === 'review' ? review : checks)(env, gh);
   if (env.GITHUB_STEP_SUMMARY) fs.appendFileSync(env.GITHUB_STEP_SUMMARY, md + '\n');
-  await gh(`/issues/${env.PR}/comments`, { method: 'POST', body: JSON.stringify({ body: md }) });
+  await postOrEdit(gh, env.PR, md, env.QA_MODE === 'review' ? '<!-- qa-review -->' : '<!-- qa-checks -->');
   console.log(md); process.exitCode = pass || env.QA_MODE === 'review' ? 0 : 1; // stage 2 never blocks
 }
 
 if (require.main === module) main().catch(e => { console.error('QA could not run:', e.message); process.exitCode = process.env.QA_MODE === 'review' ? 0 : 1; });
-module.exports = { issueNumbers, readVerdict, parseChecks, unreadable, judge, ask, vote, checks, majority, report, reviewPrompt };
+module.exports = { issueNumbers, readVerdict, parseChecks, unreadable, judge, ask, vote, checks, majority, report, reviewPrompt, postOrEdit };

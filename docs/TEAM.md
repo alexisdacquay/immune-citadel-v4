@@ -28,7 +28,7 @@ Immune Citadel v4 is built by AI agents and one human owner, Alexis Dacquay. Thi
 | **How the model is asked** | low reasoning effort, up to 64,000 tokens, each question 3 times: the answer given at least twice counts, otherwise UNSURE; a failed call is retried | once, up to 12 minutes |
 | **When DeepSeek fails** | after its retries, the same request once on a backup model from another provider (`google/gemini-3.5-flash` through the Kilo gateway); the comment names the models that answered. Both failing: the question is UNSURE with both errors, so the check fails | the same request once on the backup; the comment names the model |
 | **When** | beside `test` and `game`, so it adds no wait | after `test` and `game` pass |
-| **Result** | a **QA checks: PASS/FAIL** comment: one row per question, with the old and new answers and the line of code that decided | a **QA review (advisory, does not block)** comment: criteria, evidence, defects |
+| **Result** | a **QA checks: PASS/FAIL** comment: one row per question, with the old and new answers and the line of code that decided; one per pull request, edited on each run (a new comment emails everyone on it, an edit does not) | a **QA review (advisory, does not block)** comment: criteria, evidence, defects; one per pull request, edited on each run |
 | **Blocks the merge?** | yes: it is a required check on `dev` | no; before a promotion, every finding is fixed or answered |
 
 A stage 1 check passes only when:
